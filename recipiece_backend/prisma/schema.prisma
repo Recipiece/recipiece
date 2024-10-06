@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  @@map("users")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  email String @unique
+
+  recipes Recipe[]
+  credentials UserCredentials?
+}
+
+model UserCredentials {
+  @@map("user_credentials")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  password_hash String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int @unique
+
+}
+
+model Recipe {
+  @@map("recipes")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  name String
+  description String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+
+  ingredients RecipeIngredient[]
+  steps RecipeStep[]
+}
+
+model RecipeIngredient {
+  @@map("recipe_ingredients")
+
+  id Int @id @default(autoincrement())
+  name String
+  unit String?
+  amount String?
+
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipe_id Int
+}
+
+model RecipeStep {
+  @@map("recipe_steps")
+
+  id Int @id @default(autoincrement())
+  content String
+
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipe_id Int
+}
