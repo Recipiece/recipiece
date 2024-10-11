@@ -43,6 +43,7 @@ model Recipe {
   created_at DateTime @default(now())
   name String
   description String
+  private Boolean @default(false)
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int

@@ -4,10 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "jest",
-    "prisma-dev": "dotenv -e .env.dev prisma migrate dev --name"
+    "start": "dotenvx run --env-file=.env.dev -- nodemon src/index.ts",
+    "test": "jest --forceExit --runInBand",
+    "prisma-dev": "dotenv -e .env.dev prisma migrate dev --name",
+    "prisma-test": "dotenv -e .env.test prisma migrate dev --name",
+    "seed": "dotenvx run --env-file=.env.dev -- node seed/index.mjs"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.17.0",
     "@types/body-parser": "^1.19.5",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",

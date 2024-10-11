@@ -5,14 +5,8 @@ import { StatusCodes } from "http-status-codes";
 import { verifyToken } from "../util/token";
 import { prisma, Redis } from "../database";
 
-export const tokenAuthMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const [responseCode, response] = await runTokenAuth(
-    req.headers.authorization
-  );
+export const tokenAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const [responseCode, response] = await runTokenAuth(req.headers.authorization);
   if (responseCode !== StatusCodes.OK) {
     res.status(responseCode).send(response);
   } else {
@@ -49,7 +43,7 @@ const runTokenAuth = async (token?: string): ApiResponse<User> => {
 
   const decodedToken = verifyToken(tokenSanitized);
   if (!decodedToken) {
-    console.log("token could not be verified");
+    console.log(`token ${decodedToken} could not be verified`);
     return [
       StatusCodes.UNAUTHORIZED,
       {
@@ -60,9 +54,7 @@ const runTokenAuth = async (token?: string): ApiResponse<User> => {
 
   const usernameFromToken = (decodedToken as { readonly user: string }).user;
   if (!usernameFromToken) {
-    console.log(
-      `could not determine username from token payload: ${decodedToken}`
-    );
+    console.log(`could not determine username from token payload: ${decodedToken}`);
     return [
       StatusCodes.UNAUTHORIZED,
       {

@@ -5,17 +5,10 @@ import { prisma } from "../database";
 import { ApiResponse, ErrorResponse } from "../types";
 import { verifyPassword } from "../util/password";
 
-export const basicAuthMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const basicAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const username = req.body.username;
   const providedPassword = req.body.password;
-  const [responseCode, response] = await runBasicAuth(
-    username,
-    providedPassword
-  );
+  const [responseCode, response] = await runBasicAuth(username, providedPassword);
 
   if (responseCode !== StatusCodes.OK) {
     res.status(responseCode).send(response);
@@ -26,10 +19,7 @@ export const basicAuthMiddleware = async (
   }
 };
 
-const runBasicAuth = async (
-  username?: string,
-  password?: string
-): ApiResponse<User> => {
+const runBasicAuth = async (username?: string, password?: string): ApiResponse<User> => {
   if (!username || !password) {
     return [
       StatusCodes.BAD_REQUEST,
@@ -71,14 +61,9 @@ const runBasicAuth = async (
     ];
   }
 
-  const isPasswordValid = await verifyPassword(
-    password,
-    credentials.password_hash
-  );
+  const isPasswordValid = await verifyPassword(password, credentials.password_hash);
   if (!isPasswordValid) {
-    console.log(
-      `password provided for ${username} does not match stored password hash`
-    );
+    console.log(`password provided for ${username} does not match stored password hash`);
     return [
       StatusCodes.NOT_FOUND,
       {
