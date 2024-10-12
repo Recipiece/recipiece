@@ -50,6 +50,8 @@ model Recipe {
 
   ingredients RecipeIngredient[]
   steps RecipeStep[]
+
+  @@unique([user_id, name])
 }
 
 model RecipeIngredient {
@@ -59,6 +61,7 @@ model RecipeIngredient {
   name String
   unit String?
   amount String?
+  order Int
 
   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe_id Int
@@ -69,6 +72,7 @@ model RecipeStep {
 
   id Int @id @default(autoincrement())
   content String
+  order Int
 
   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe_id Int

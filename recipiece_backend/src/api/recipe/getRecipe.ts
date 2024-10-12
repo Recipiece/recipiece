@@ -14,6 +14,18 @@ const runGetRecipe = async (user: User, recipeId: number): ApiResponse<Recipe> =
     where: {
       id: recipeId,
     },
+    include: {
+      steps: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+      ingredients: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
   });
 
   if (!recipe) {
@@ -26,6 +38,7 @@ const runGetRecipe = async (user: User, recipeId: number): ApiResponse<Recipe> =
   }
 
   if (recipe.private && recipe.user_id !== user.id) {
+    console.log(`user ${user.id} attempted to access private recipe ${recipe.id} owned by user ${recipe.user_id}`);
     return [
       StatusCodes.NOT_FOUND,
       {

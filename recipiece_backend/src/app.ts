@@ -15,7 +15,7 @@ app.use(morgan(":method :url :status - :response-time ms"));
 
 
 ROUTES.forEach((route) => {
-  console.log(`configuring routing for ${route.path}`);
+  // console.log(`configuring routing for ${route.path}`);
   switch (route.authentication) {
     case "token":
       app.use(route.path, tokenAuthMiddleware);
@@ -24,7 +24,7 @@ ROUTES.forEach((route) => {
       app.use(route.path, basicAuthMiddleware);
       break;
     case "none":
-      console.warn(`  no auth specified for ${route.path}!`);
+      // console.warn(`  no auth specified for ${route.path}!`);
       break;
   }
 
@@ -43,7 +43,7 @@ ROUTES.forEach((route) => {
       break;
     case "DELETE":
       // @ts-ignore
-      app.put(route.path, route.function);
+      app.delete(route.path, route.function);
       break;
   }
 });

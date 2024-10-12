@@ -128,6 +128,6 @@ describe("List Recipes", () => {
     results.forEach((recipe, idx) => {
       const nameParts = recipe.name.split(" ");
       expect(+nameParts[2]).toEqual(5 + idx);
-    })
+    });
   });
 });

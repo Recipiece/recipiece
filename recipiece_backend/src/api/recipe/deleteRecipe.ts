@@ -26,10 +26,11 @@ const runDeleteRecipe = async (user: User, recipeId: number): ApiResponse<{ read
   }
 
   if (recipe.user_id !== user.id) {
+    console.log(`user ${user.id} attempted to delete a recipe belonging to ${recipe.user_id}`);
     return [
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.NOT_FOUND,
       {
-        message: "Cannot delete a recipe you do not own",
+        message: `Recipe ${recipeId} not found`,
       },
     ];
   }

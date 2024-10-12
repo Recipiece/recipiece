@@ -9,6 +9,7 @@ export type ApiMethod =
 
 export interface ErrorResponse {
   readonly message: string;
+  readonly errors?: any[];
 }
 
 export type ApiResponse<T> = Promise<[number, T | ErrorResponse]>;

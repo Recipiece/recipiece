@@ -22,10 +22,12 @@ describe("Create Recipes", () => {
       description: "A cool recipe",
       steps: [{
         content: "hello world",
+        order: 0,
       }],
       ingredients: [{
         name: "asdfqwer",
         unit: "1",
+        order: 0,
       }],
     }
 
