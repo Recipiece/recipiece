@@ -14,20 +14,30 @@ export const listRecipes = async (req: AuthenticatedRequest, res: Response) => {
   res.status(statusCode).send(response);
 };
 
-const runListRecipes = async (user: User, page: number, pageSize: number, userId: number, search?: string): ApiResponse<Recipe[]> => {
+const runListRecipes = async (
+  user: User,
+  page: number,
+  pageSize: number,
+  userId: number,
+  search?: string
+): ApiResponse<{
+  readonly data: Recipe[];
+  readonly page: number;
+  readonly hasNextPage: boolean;
+}> => {
   let where: Prisma.RecipeWhereInput = {
     user_id: userId,
   };
 
-  if(userId && userId !== user.id) {
+  if (userId && userId !== user.id) {
     where.private = false;
   }
 
-  if(search) {
+  if (search) {
     where.name = {
       contains: search,
       mode: "insensitive",
-    }
+    };
   }
 
   const offset = page * pageSize;
@@ -39,11 +49,21 @@ const runListRecipes = async (user: User, page: number, pageSize: number, userId
       ingredients: true,
     },
     skip: offset,
-    take: pageSize,
+    take: pageSize + 1,
     orderBy: {
-      created_at: "asc",
-    }
+      created_at: "desc",
+    },
   });
 
-  return [StatusCodes.OK, recipes];
+  const hasNextPage = recipes.length > pageSize;
+  const resultsData = recipes.splice(0, pageSize);
+
+  return [
+    StatusCodes.OK,
+    {
+      data: resultsData,
+      hasNextPage: hasNextPage,
+      page: page,
+    },
+  ];
 };

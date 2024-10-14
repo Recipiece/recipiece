@@ -1,7 +1,7 @@
 import { FC, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useLoginUserMutation } from "../api";
+import { useLoginUserMutation } from "../../api";
 import {
   Button,
   Checkbox,
@@ -13,8 +13,8 @@ import {
   FormMessage,
   Input,
   useToast,
-} from "../component";
-import { UnauthenticatedLayout } from "../component/recipiece";
+} from "../../component";
+import { UnauthenticatedLayout } from "../../component/recipiece";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";

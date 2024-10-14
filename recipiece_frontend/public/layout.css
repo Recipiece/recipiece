@@ -3,7 +3,7 @@ html, body, #root {
   min-height: 100%;
   width: 100%;
   height: 100%;
-  background-color: #F8EDED;
+  /* background-color: #F8EDED; */
 }
 
 .handlee-regular {

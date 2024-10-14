@@ -1,22 +1,18 @@
-import { Request, Response } from "express";
-import { ApiResponse } from "../../types";
 import { User } from "@prisma/client";
-import { prisma } from "../../database";
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { prisma } from "../../database";
+import { ApiResponse } from "../../types";
+import { UserValidationTokenTypes } from "../../util/constant";
+import { sendAccountVerificationEmail } from "../../util/email";
 import { hashPassword } from "../../util/password";
 
 export const createUser = async (req: Request, res: Response) => {
-  const [responseCode, response] = await runCreateUser(
-    req.body.username,
-    req.body.password
-  );
+  const [responseCode, response] = await runCreateUser(req.body.username, req.body.password);
   res.status(responseCode).send(response);
 };
 
-export const runCreateUser = async (
-  username?: string,
-  password?: string
-): ApiResponse<User> => {
+export const runCreateUser = async (username?: string, password?: string): ApiResponse<User> => {
   if (!username || !password) {
     return [
       StatusCodes.BAD_REQUEST,
@@ -49,6 +45,15 @@ export const runCreateUser = async (
           password_hash: hashedPassword!,
         },
       });
+      const userAccountToken = await tx.userValidationToken.create({
+        data: {
+          user_id: user.id,
+          purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
+        },
+      });
+
+      await sendAccountVerificationEmail(user, userAccountToken);
+
       return user;
     });
 

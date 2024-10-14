@@ -1,4 +1,4 @@
-import { DashboardPage, LoginPage, RegisterPage } from "./page";
+import { DashboardPage, LoginPage, RegisterPage, RecipeViewPage } from "./page";
 
 export const unauthenticatedRoutes = [
   {
@@ -15,6 +15,10 @@ export const authenticatedRoutes = [
   {
     path: "/dashboard",
     Component: DashboardPage,
+  },
+  {
+    path: "/recipe/view/:id",
+    component: RecipeViewPage,
   },
 ];
 

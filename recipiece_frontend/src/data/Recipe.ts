@@ -18,3 +18,8 @@ export interface Recipe {
   readonly ingredients: RecipeIngredient[];
   readonly steps: RecipeStep[];
 }
+
+export interface ListRecipeFilters {
+  readonly page: number;
+  readonly search?: string;
+}

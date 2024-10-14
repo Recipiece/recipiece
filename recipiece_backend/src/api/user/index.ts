@@ -3,6 +3,7 @@ import { createUser } from "./createUser";
 import { getUserByToken } from "./getUserByToken";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
+import { validateUser } from "./validateUser";
 
 export const LOGIN_ROUTES: Route[] = [
   {
@@ -24,9 +25,15 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "none",
   },
   {
-    path: "/user/self/get",
+    path: "/user/self",
     method: "GET",
     function: getUserByToken,
     authentication: "token",
   },
+  {
+    path: "/user/validate",
+    method: "POST",
+    function: validateUser,
+    authentication: "none",
+  }
 ];

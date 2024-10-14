@@ -19,9 +19,11 @@ model User {
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
   email String @unique
+  validated Boolean @default(false)
 
   recipes Recipe[]
   credentials UserCredentials?
+  validation_tokens UserValidationToken[]
 }
 
 model UserCredentials {
@@ -33,7 +35,17 @@ model UserCredentials {
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int @unique
+}
 
+model UserValidationToken {
+  @@map("user_validation_tokens")
+
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  purpose String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
 }
 
 model Recipe {

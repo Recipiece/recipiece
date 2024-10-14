@@ -36,6 +36,31 @@ export const useLoginUserMutation = (args?: MutationArgs<void>) => {
   });
 };
 
+export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
+  const { post } = usePost();
+  const { setAuthToken } = useContext(AuthContext);
+
+  const mutation = async () => {
+    return await post<never, never>({
+      path: "/user/logout",
+      body: {} as never,
+      withAuth: true,
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      setAuthToken(undefined);
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      setAuthToken(undefined);
+      args?.onFailure?.(err);
+    },
+  });
+}
+
 export const useCreateUserMutation = (args?: MutationArgs<void>) => {
   
 }

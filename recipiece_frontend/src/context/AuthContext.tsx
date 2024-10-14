@@ -11,7 +11,7 @@ import { authenticatedPaths, unauthenticatedPaths } from "../routes";
 
 export const AuthContext = createContext<{
   readonly authToken?: string;
-  readonly setAuthToken: (val: string) => void;
+  readonly setAuthToken: (val: string | undefined) => void;
 }>({
   authToken: undefined,
   setAuthToken: () => {},
@@ -20,8 +20,12 @@ export const AuthContext = createContext<{
 export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const authToken = localStorage.getItem(StorageKeys.TOKEN);
 
-  const setAuthToken = useCallback((value: string) => {
-    localStorage.setItem(StorageKeys.TOKEN, value);
+  const setAuthToken = useCallback((value: string | undefined) => {
+    if(value) {
+      localStorage.setItem(StorageKeys.TOKEN, value);
+    } else {
+      localStorage.removeItem(StorageKeys.TOKEN);
+    }
   }, []);
 
   const location = useLocation();

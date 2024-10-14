@@ -13,7 +13,7 @@ echo "Starting frontend..."
 yarn --cwd ../recipiece_frontend start > ../recipiece_logs/frontend.log &
 frontend_pid=$!
 
-yarn --cwd ../recipiece_frontend tailwindcss -i ./src/style/globals.css -o ./public/main.css --watch > ../recipiece_logs/frontend.log &
+yarn --cwd ../recipiece_frontend tw-watch > ../recipiece_logs/frontend.log &
 tailwind_pid=$!
 
 trap 'kill $api_pid' EXIT
