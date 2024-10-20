@@ -822,6 +822,18 @@ body {
   height: 1px;
 }
 
+.h-\[48px\] {
+  height: 48px;
+}
+
+.h-\[128px\] {
+  height: 128px;
+}
+
+.h-\[100px\] {
+  height: 100px;
+}
+
 .max-h-32 {
   max-height: 8rem;
 }
@@ -868,6 +880,18 @@ body {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[48px\] {
+  width: 48px;
+}
+
+.w-\[128px\] {
+  width: 128px;
+}
+
+.w-\[100px\] {
+  width: 100px;
 }
 
 .min-w-\[12rem\] {
@@ -1126,6 +1150,14 @@ body {
   fill: currentColor;
 }
 
+.fill-primary {
+  fill: var(--primary);
+}
+
+.stroke-primary {
+  stroke: var(--primary);
+}
+
 .p-0 {
   padding: 0px;
 }
@@ -1140,10 +1172,6 @@ body {
 
 .p-6 {
   padding: 1.5rem;
-}
-
-.p-2 {
-  padding: 0.5rem;
 }
 
 .px-2 {

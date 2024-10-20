@@ -1,23 +1,13 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useLoginUserMutation } from "../../api";
-import {
-  Button,
-  Checkbox,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  useToast,
-} from "../../component";
+import { Button, Checkbox, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, useToast } from "../../component";
 import { UnauthenticatedLayout } from "../../component/recipiece";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 const LoginFormSchema = z.object({
   username: z.string().email("Enter an email address"),
@@ -30,6 +20,11 @@ type LoginForm = z.infer<typeof LoginFormSchema>;
 export const LoginPage: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.clear();
+  }, []);
 
   const onLoginSuccess = useCallback(() => {
     navigate("/dashboard");
@@ -108,9 +103,7 @@ export const LoginPage: FC = () => {
                   <FormControl>
                     <Checkbox name="rememberMe" />
                   </FormControl>
-                  <FormLabel className="inline mt-0 ml-4">
-                    Remember Me
-                  </FormLabel>
+                  <FormLabel className="inline mt-0 ml-4">Remember Me</FormLabel>
                 </FormItem>
               );
             }}

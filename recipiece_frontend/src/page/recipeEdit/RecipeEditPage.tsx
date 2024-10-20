@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useUpdateRecipeMutation } from "../../api";
-import { Button, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, LoadingGroup, Textarea } from "../../component";
+import { Button, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, LoadingGroup, NotFound, Textarea } from "../../component";
 import { IngredientsForm } from "./IngredientsForm";
 import { StepsForm } from "./StepsForm";
 import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
@@ -31,6 +31,7 @@ type RecipeForm = z.infer<typeof RecipeFormSchema>;
 export const RecipeEditPage: FC = () => {
   const { id: idFromParams } = useParams();
   const navigate = useNavigate();
+  const [isRecipeGetError, setIsRecipeGetError] = useState(false);
 
   const isCreatingNewRecipe = useMemo(() => {
     return idFromParams === "new";
@@ -43,26 +44,25 @@ export const RecipeEditPage: FC = () => {
   const {
     data: recipe,
     isLoading: isLoadingRecipe,
-    isError: isRecipeGetError,
+    isError: isRecipeGetErrorFromRequest,
   } = useGetRecipeByIdQuery(recipeId as number, {
     disabled: isCreatingNewRecipe,
   });
 
-  const {
-    data: currentUser,
-    isLoading: isLoadingCurrentUser,
-  } = useGetSelfQuery();
+  const { data: currentUser, isLoading: isLoadingCurrentUser } = useGetSelfQuery();
 
   /**
    * Don't allow someone who does not own a recipe to edit it
    */
   useEffect(() => {
-    if(currentUser && recipe) {
-      if(currentUser.id !== recipe.user_id) {
-        navigate("/");
+    if (currentUser && recipe) {
+      if (currentUser.id !== recipe.user_id) {
+        setIsRecipeGetError(true);
       }
+    } else if (isRecipeGetErrorFromRequest) {
+      setIsRecipeGetError(true);
     }
-  }, [currentUser, recipe]);
+  }, [currentUser, recipe, isRecipeGetErrorFromRequest]);
 
   const { mutateAsync: createRecipe } = useCreateRecipeMutation();
   const { mutateAsync: updateRecipe } = useUpdateRecipeMutation();
@@ -101,12 +101,6 @@ export const RecipeEditPage: FC = () => {
     }
     return isLoadingRecipe || isLoadingCurrentUser;
   }, [isLoadingRecipe, isCreatingNewRecipe, isLoadingCurrentUser]);
-
-  useEffect(() => {
-    if (isRecipeGetError) {
-      navigate("/");
-    }
-  }, [isRecipeGetError]);
 
   const defaultFormValues = useMemo((): RecipeForm => {
     if (recipe) {
@@ -147,10 +141,10 @@ export const RecipeEditPage: FC = () => {
             render={({ field }) => {
               return (
                 <FormItem className="mb-2">
-                  <FormLabel>Recipe Name</FormLabel>
+                  {(isLoading || !isRecipeGetError) && <FormLabel>Recipe Name</FormLabel>}
                   <FormControl>
                     <LoadingGroup isLoading={isLoading} className="w-full h-10">
-                      <Input type="text" placeholder="Recipe Name" {...field} />
+                      {recipe && <Input type="text" placeholder="Recipe Name" {...field} />}
                     </LoadingGroup>
                   </FormControl>
                   <FormMessage />
@@ -164,12 +158,10 @@ export const RecipeEditPage: FC = () => {
             render={({ field }) => {
               return (
                 <FormItem className="mb-2">
-                  <FormLabel>Description</FormLabel>
+                  {(isLoading || !isRecipeGetError) && <FormLabel>Description</FormLabel>}
                   <LoadingGroup isLoading={isLoading} className="w-full h-[138px]">
-                    <FormControl>
-                      <Textarea placeholder="A description of your recipe" rows={5} {...field} />
-                    </FormControl>
-                    <FormDescription>{recipeDescription?.length || 0} / 1000</FormDescription>
+                    <FormControl>{recipe && <Textarea placeholder="A description of your recipe" rows={5} {...field} />}</FormControl>
+                    {(isLoading || !isRecipeGetError) && <FormDescription>{recipeDescription?.length || 0} / 1000</FormDescription>}
                   </LoadingGroup>
                   <FormMessage />
                 </FormItem>
@@ -177,20 +169,26 @@ export const RecipeEditPage: FC = () => {
             }}
           />
 
-          <div className="grid gap-4 grid-cols-1">
-            <IngredientsForm isLoading={isLoading} />
-            <hr />
-            <StepsForm isLoading={isLoading} />
-          </div>
+          {(isCreatingNewRecipe || !!recipe) && (
+            <div className="grid gap-4 grid-cols-1">
+              <IngredientsForm isLoading={isLoading} />
+              <hr />
+              <StepsForm isLoading={isLoading} />
+            </div>
+          )}
 
-          <div className="flex flex-row justify-end mt-2">
-            <Button onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
-              Cancel
-            </Button>
-            <Button type="submit">Save</Button>
-          </div>
+          {(isCreatingNewRecipe || !!recipe) && (
+            <div className="flex flex-row justify-end mt-2">
+              <Button onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
+                Cancel
+              </Button>
+              <Button type="submit">Save</Button>
+            </div>
+          )}
         </form>
       </Form>
+
+      {isRecipeGetError && <NotFound backNav="/" />}
     </div>
   );
 };

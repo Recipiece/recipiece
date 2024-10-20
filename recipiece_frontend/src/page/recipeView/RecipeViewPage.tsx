@@ -1,8 +1,7 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, LoadingGroup } from "../../component";
-import { AxiosError } from "axios";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, LoadingGroup, NotFound } from "../../component";
 
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
@@ -16,15 +15,6 @@ export const RecipeViewPage: FC = () => {
   });
 
   const { data: currentUser, isLoading: isLoadingCurrentUser } = useGetSelfQuery();
-
-  /**
-   * Don't allow someone who doesn't own a recipe to access a private recipe
-   */
-  useEffect(() => {
-    if (recipeError) {
-      console.log((recipeError as AxiosError).status);
-    }
-  }, [recipeError]);
 
   const isLoading = useMemo(() => {
     return isLoadingCurrentUser || isLoadingRecipe;
@@ -119,6 +109,9 @@ export const RecipeViewPage: FC = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+        )}
+        {recipeError && (
+          <NotFound backNav="/" />
         )}
       </div>
     </div>
