@@ -30,5 +30,18 @@ export const seedUsers = async () => {
         password_hash: await hashPassword("password"),
       },
     });
+
+    const otherUser = await tx.user.create({
+      data: {
+        email: "other@recipiece.org",
+        validated: true,
+      },
+    });
+    await tx.userCredentials.create({
+      data: {
+        user_id: otherUser.id,
+        password_hash: await hashPassword("password"),
+      },
+    });
   });
 };

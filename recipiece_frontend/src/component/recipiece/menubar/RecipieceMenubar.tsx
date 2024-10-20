@@ -22,18 +22,29 @@ export const RecipieceMenubar: FC = () => {
   });
 
   return (
-    <Menubar className="rounded-none border-0 p-6 h-12 bg-primary text-white">
+    <Menubar className="rounded-none border-0 p-4 h-12 bg-primary text-white">
       <RecipieceHeader className="text-center w-full md:w-auto md:mr-auto" />
-      <span className="invisible w-0 sm:w-auto sm:visible">
+      <span className="hidden w-0 sm:w-auto sm:block">
         <MenubarMenu>
-          <MenubarTrigger>Create</MenubarTrigger>
+          <MenubarTrigger onClick={() => navigate("/")}>Home</MenubarTrigger>
         </MenubarMenu>
       </span>
 
-      <span className="invisible w-0 sm:w-auto sm:visible">
+      <span className="hidden w-0 sm:w-auto sm:block">
+        <MenubarMenu>
+          <MenubarTrigger onClick={() => navigate("/recipe/edit/new")}>
+            Create
+          </MenubarTrigger>
+        </MenubarMenu>
+      </span>
+
+      <span className="hidden w-0 sm:w-auto sm:block">
         <MenubarMenu>
           <MenubarTrigger>Account</MenubarTrigger>
           <MenubarContent>
+            <MenubarItem onClick={() => navigate("/account")}>
+              My Account
+            </MenubarItem>
             <MenubarItem onClick={() => logout()}>Sign Out</MenubarItem>
           </MenubarContent>
         </MenubarMenu>

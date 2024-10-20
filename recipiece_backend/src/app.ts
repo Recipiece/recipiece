@@ -7,12 +7,15 @@ import { basicAuthMiddleware, tokenAuthMiddleware } from "./middleware";
 
 const app: Express = express();
 
-app.use(cors({
-  
-}));
+app.use(cors({}));
 app.use(bodyParser.json());
 app.use(morgan(":method :url :status - :response-time ms"));
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  setTimeout(() => {
+    next();
+  }, 2000);
+});
 
 ROUTES.forEach((route) => {
   // console.log(`configuring routing for ${route.path}`);

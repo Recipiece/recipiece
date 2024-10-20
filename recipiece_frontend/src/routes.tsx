@@ -1,24 +1,32 @@
-import { DashboardPage, LoginPage, RegisterPage, RecipeViewPage } from "./page";
+import { AccountViewPage, DashboardPage, LoginPage, RecipeEditPage, RecipeViewPage, RegisterPage } from "./page";
 
 export const unauthenticatedRoutes = [
   {
     path: "/login",
-    Component: LoginPage,
+    element: LoginPage,
   },
   {
     path: "/register",
-    Component: RegisterPage,
+    element: RegisterPage,
   },
 ];
 
 export const authenticatedRoutes = [
   {
     path: "/dashboard",
-    Component: DashboardPage,
+    element: DashboardPage,
   },
   {
     path: "/recipe/view/:id",
-    component: RecipeViewPage,
+    element: RecipeViewPage,
+  },
+  {
+    path: "/recipe/edit/:id",
+    element: RecipeEditPage,
+  },
+  {
+    path: "/account",
+    element: AccountViewPage,
   },
 ];
 

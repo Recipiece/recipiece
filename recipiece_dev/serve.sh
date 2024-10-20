@@ -13,11 +13,11 @@ echo "Starting frontend..."
 yarn --cwd ../recipiece_frontend start > ../recipiece_logs/frontend.log &
 frontend_pid=$!
 
-yarn --cwd ../recipiece_frontend tw-watch > ../recipiece_logs/frontend.log &
-tailwind_pid=$!
+# yarn --cwd ../recipiece_frontend tw-watch > ../recipiece_logs/frontend.log &
+# tailwind_pid=$!
 
 trap 'kill $api_pid' EXIT
-trap 'kill $tailwind_pid' EXIT
+# trap 'kill $tailwind_pid' EXIT
 trap 'kill $frontend_pid' EXIT
 trap 'kill $docker_logs_pid' EXIT
 trap 'docker-compose -f ../recipiece_infrastructure/dev/docker-compose.yaml down' EXIT

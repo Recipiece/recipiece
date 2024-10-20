@@ -8,6 +8,18 @@ export const seedRecipes = async () => {
     },
   });
 
+  await seedRecipesForUser(user);
+
+  const otherUser = await prisma.user.findUnique({
+    where: {
+      email: "other@recipiece.org",
+    },
+  });
+
+  await seedRecipesForUser(otherUser);
+};
+
+const seedRecipesForUser = async (user) => {
   const jabber = new Jabber.default();
   const ingJabber = new Jabber.default(["cup", "gram", "milligram", "milliliter", "pound", "ounce", "kilogram"], 1);
 
