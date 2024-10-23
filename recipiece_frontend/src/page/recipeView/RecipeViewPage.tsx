@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, LoadingGroup, NotFound } from "../../component";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, Grid, LoadingGroup, NotFound } from "../../component";
 
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
@@ -75,16 +75,18 @@ export const RecipeViewPage: FC = () => {
               <AccordionContent>
                 <Card>
                   <CardContent>
-                    {(recipe?.ingredients || []).map((ing) => {
-                      return (
-                        <div key={ing.id} className="h-8">
-                          <Checkbox onClick={() => onIngredientChecked(ing.id)} className="mr-2" checked={checkedOffIngredients.includes(ing.id)} />
-                          <p onClick={() => onIngredientChecked(ing.id)} className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}>
-                            {ing.name}
-                          </p>
-                        </div>
-                      );
-                    })}
+                    <Grid className="sm:grid-cols-3">
+                      {(recipe?.ingredients || []).map((ing) => {
+                        return (
+                          <div key={ing.id} className="h-8">
+                            <Checkbox onClick={() => onIngredientChecked(ing.id)} className="mr-2" checked={checkedOffIngredients.includes(ing.id)} />
+                            <p onClick={() => onIngredientChecked(ing.id)} className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}>
+                              {ing.name}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </Grid>
                   </CardContent>
                 </Card>
               </AccordionContent>
@@ -110,9 +112,7 @@ export const RecipeViewPage: FC = () => {
             </AccordionItem>
           </Accordion>
         )}
-        {recipeError && (
-          <NotFound backNav="/" />
-        )}
+        {recipeError && <NotFound backNav="/" />}
       </div>
     </div>
   );

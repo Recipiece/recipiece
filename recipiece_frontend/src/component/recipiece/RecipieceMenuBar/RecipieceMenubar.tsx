@@ -6,7 +6,7 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "../../shadcn";
-import { RecipieceHeader } from "../typography";
+import { RecipieceHeader } from "../Typography";
 import { useLogoutUserMutation } from "../../../api";
 import { useNavigate } from "react-router-dom";
 

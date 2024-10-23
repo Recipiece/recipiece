@@ -1,11 +1,11 @@
-import { FC, useMemo } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../shadcn";
 import { ReactComponent as Oven } from "./Oven.svg";
 import { ReactComponent as QuestionMark } from "./QuestionMark.svg";
 
 export interface NotFoundProps {
-  readonly message?: string;
+  readonly message?: ReactNode;
   readonly backNav?: string;
 }
 

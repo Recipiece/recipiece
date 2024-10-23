@@ -1,13 +1,7 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useListRecipesQuery } from "../../api";
-import {
-  Input,
-  Label,
-  LoadingSpinner,
-  Pager,
-  RecipeCard
-} from "../../component";
+import { Grid, Input, Label, LoadingSpinner, NotFound, Pager, RecipeCard, Stack } from "../../component";
 import { ListRecipeFilters, Recipe } from "../../data";
 
 export const DashboardPage: FC = () => {
@@ -27,11 +21,9 @@ export const DashboardPage: FC = () => {
     return f;
   }, [page, debouncedSearchTerm]);
 
-  const { data: recipeData, isLoading: isLoadingRecipes } = useListRecipesQuery(
-    {
-      ...filters,
-    }
-  );
+  const { data: recipeData, isLoading: isLoadingRecipes } = useListRecipesQuery({
+    ...filters,
+  });
 
   const recipes = useMemo(() => {
     return recipeData?.data || [];
@@ -57,47 +49,35 @@ export const DashboardPage: FC = () => {
     [navigate]
   );
 
+  const showPager = !isLoadingRecipes && recipes.length > 0;
+
+  const showRecipes = !isLoadingRecipes && recipes.length > 0;
+
+  const showNotFound = !isLoadingRecipes && recipes.length === 0;
+
   return (
-    <div className="p-1 md:p-4">
-      <div className="flex flex-col flex-wrap md:flex-row">
-        <div className="grow flex flex-col md:flex-row items-center">
-          <h1 className="text-2xl block text-center md:text-start md:mr-4">
-            Your Recipes
-          </h1>
-          <Label className="grow w-full sm:w-auto">
-            Search
-            <Input onChange={(event) => setSearchTerm(event.target.value)} />
-          </Label>
-        </div>
-        {!isLoadingRecipes && recipes.length > 0 && (
-          <Pager
-            className="mt-4 mb-4"
-            page={page}
-            hasNextPage={recipeData?.hasNextPage || false}
-            onPage={setPage}
-          />
-        )}
-      </div>
-      {isLoadingRecipes && (
-        <div className="flex flex-row items-center justify-center">
-          <LoadingSpinner />
-        </div>
+    <Stack>
+      <h1 className="text-2xl block text-center md:text-start md:mr-4">Your Recipes</h1>
+      <Label className="grow w-full sm:w-auto">
+        Search
+        <Input onChange={(event) => setSearchTerm(event.target.value)} />
+      </Label>
+      {showPager && <Pager className="mt-4 mb-4" page={page} hasNextPage={recipeData?.hasNextPage || false} onPage={setPage} />}
+      {isLoadingRecipes && <LoadingSpinner />}
+      {showNotFound && (
+        <NotFound message={!!debouncedSearchTerm ? `No recipes found with a name matching "${debouncedSearchTerm}".` : "You don't have any recipes. Time to get cookin'!"} />
       )}
-      {!isLoadingRecipes && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-4">
+      {showRecipes && (
+        <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {(recipes || []).map((r) => {
-            return <RecipeCard onView={onViewRecipe} key={r.id} recipe={r} />;
+            return (
+              <div className="auto-rows-fr" key={r.id}>
+                <RecipeCard onView={onViewRecipe} recipe={r} />
+              </div>
+            );
           })}
-        </div>
+        </Grid>
       )}
-      {!isLoadingRecipes && recipes.length > 0 && (
-        <Pager
-          className="mt-4 mb-4"
-          page={page}
-          hasNextPage={recipeData?.hasNextPage || false}
-          onPage={setPage}
-        />
-      )}
-    </div>
+    </Stack>
   );
 };

@@ -1,4 +1,4 @@
-import { AccountViewPage, DashboardPage, LoginPage, RecipeEditPage, RecipeViewPage, RegisterPage } from "./page";
+import { AccountViewPage, CreateAccountPage, DashboardPage, ForgotPasswordPage, LoginPage, RecipeEditPage, RecipeViewPage, RegisterPage, VerifyAccountPage } from "./page";
 
 export const unauthenticatedRoutes = [
   {
@@ -8,6 +8,18 @@ export const unauthenticatedRoutes = [
   {
     path: "/register",
     element: RegisterPage,
+  },
+  {
+    path: "/create-account",
+    element: CreateAccountPage,
+  },
+  // {
+  //   path: "/verify-account",
+  //   element: VerifyAccountPage,
+  // },
+  {
+    path: "/forgot-password",
+    element: ForgotPasswordPage,
   },
 ];
 

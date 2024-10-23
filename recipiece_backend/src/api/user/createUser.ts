@@ -45,14 +45,14 @@ export const runCreateUser = async (username?: string, password?: string): ApiRe
           password_hash: hashedPassword!,
         },
       });
-      const userAccountToken = await tx.userValidationToken.create({
-        data: {
-          user_id: user.id,
-          purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
-        },
-      });
+      // const userAccountToken = await tx.userValidationToken.create({
+      //   data: {
+      //     user_id: user.id,
+      //     purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
+      //   },
+      // });
 
-      await sendAccountVerificationEmail(user, userAccountToken);
+      // await sendAccountVerificationEmail(user, userAccountToken);
 
       return user;
     });

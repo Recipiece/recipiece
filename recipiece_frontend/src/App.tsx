@@ -1,12 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FC } from "react";
-import {
-  createBrowserRouter,
-  Route,
-  RouterProvider,
-  Routes,
-} from "react-router-dom";
-import { AuthenticatedLayout, Toaster } from "./component";
+import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
+import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
 import { AuthContextProvider } from "./context";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
 
@@ -25,28 +20,39 @@ export const AppRoutes: FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
-        <Routes>
-          {unauthenticatedRoutes.map((r) => {
-            return <Route key={r.path} path={r.path} element={<r.element />} />;
-          })}
-          {authenticatedRoutes.map((r) => {
-            return (
-              <Route
-                key={r.path}
-                path={r.path}
-                element={
-                  <AuthenticatedLayout>
-                    <r.element />
-                  </AuthenticatedLayout>
-                }
-              />
-            );
-          })}
-          {/* {allRoutes.map((r) => (
-            <Route key={r.path} path={r.path} element={<r.element />} />
-          ))} */}
-        </Routes>
-        <Toaster />
+        <TooltipProvider>
+          <ToastProvider>
+            <Routes>
+              {unauthenticatedRoutes.map((r) => {
+                return (
+                  <Route
+                    key={r.path}
+                    path={r.path}
+                    element={
+                      <UnauthenticatedLayout>
+                        <r.element />
+                      </UnauthenticatedLayout>
+                    }
+                  />
+                );
+              })}
+              {authenticatedRoutes.map((r) => {
+                return (
+                  <Route
+                    key={r.path}
+                    path={r.path}
+                    element={
+                      <AuthenticatedLayout>
+                        <r.element />
+                      </AuthenticatedLayout>
+                    }
+                  />
+                );
+              })}
+            </Routes>
+            <Toaster />
+          </ToastProvider>
+        </TooltipProvider>
       </AuthContextProvider>
     </QueryClientProvider>
   );

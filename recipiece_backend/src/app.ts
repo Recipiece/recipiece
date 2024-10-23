@@ -14,7 +14,7 @@ app.use(morgan(":method :url :status - :response-time ms"));
 app.use((req: Request, res: Response, next: NextFunction) => {
   setTimeout(() => {
     next();
-  }, 2000);
+  }, 1000);
 });
 
 ROUTES.forEach((route) => {

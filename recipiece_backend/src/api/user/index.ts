@@ -1,6 +1,7 @@
 import { Route } from "../../types";
 import { createUser } from "./createUser";
 import { getUserByToken } from "./getUserByToken";
+import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
 import { validateUser } from "./validateUser";
@@ -31,9 +32,15 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "token",
   },
   {
-    path: "/user/validate",
+    path: "/user/verify-email",
     method: "POST",
     function: validateUser,
-    authentication: "none",
-  }
+    authentication: "token",
+  },
+  {
+    path: "/user/request-token/verify-email",
+    method: "POST",
+    function: issueEmailVerificationToken,
+    authentication: "token",
+  },
 ];

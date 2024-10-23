@@ -1,7 +1,9 @@
 import { DateTime } from "luxon";
 import { FC, useMemo } from "react";
 import { useGetSelfQuery } from "../../api";
-import { LoadingGroup } from "../../component";
+import { LoadingGroup, Stack } from "../../component";
+import { AccountManagementSection } from "./AccountManagementSection";
+import { VerifyAccountSection } from "./VerifyAccountSection";
 
 export const AccountViewPage: FC = () => {
   const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();
@@ -14,13 +16,16 @@ export const AccountViewPage: FC = () => {
   }, [account]);
 
   return (
-    <div className="p-4 grid gap-4">
+    <Stack>
       <LoadingGroup isLoading={isLoadingAccount} className="w-full h-10">
         <h1 className="text-2xl">Welcome Back, {account?.email}</h1>
       </LoadingGroup>
       <LoadingGroup isLoading={isLoadingAccount}>
-        <p>You joined Recipiece on {joinDate}</p>.
+        <p className="text-sm">You joined Recipiece on {joinDate}.</p>
       </LoadingGroup>
-    </div>
+      <hr />
+      <VerifyAccountSection />
+      <AccountManagementSection />
+    </Stack>
   );
 };
