@@ -4,6 +4,7 @@ import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
+import { requestExportData } from "./requestExportData";
 import { validateUser } from "./validateUser";
 
 export const LOGIN_ROUTES: Route[] = [
@@ -41,6 +42,12 @@ export const LOGIN_ROUTES: Route[] = [
     path: "/user/request-token/verify-email",
     method: "POST",
     function: issueEmailVerificationToken,
+    authentication: "token",
+  },
+  {
+    path: "/user/data/export",
+    method: "POST",
+    function: requestExportData,
     authentication: "token",
   },
 ];

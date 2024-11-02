@@ -56,8 +56,6 @@ const runCreateRecipe = async (user: User, body: any): ApiResponse<RecipeSchema>
     });
     return [StatusCodes.OK, recipe];
   } catch (err) {
-    console.error(err);
-
     if ((err as { code: string })?.code === "P2002") {
       return [
         StatusCodes.CONFLICT,
@@ -66,6 +64,7 @@ const runCreateRecipe = async (user: User, body: any): ApiResponse<RecipeSchema>
         },
       ];
     } else {
+      console.error(err);
       return [
         StatusCodes.INTERNAL_SERVER_ERROR,
         {

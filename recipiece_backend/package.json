@@ -16,7 +16,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jabber": "^1.2.4",
-    "@types/jest": "^29.5.13",
+    "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/luxon": "^3.4.2",
     "@types/morgan": "^1.9.9",

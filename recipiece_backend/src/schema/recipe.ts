@@ -7,14 +7,14 @@ export const YRecipeIngredientSchema = object({
   unit: string().notRequired(),
   amount: string().notRequired(),
   order: number().required(),
-});
+}).strict().noUnknown();
 
 export const YRecipeStepSchema = object({
   id: number().required(),
   recipe_id: number().required(),
   order: number().required(),
   content: string().required(),
-});
+}).strict().noUnknown();
 
 export const YRecipeSchema = object({
   id: number().required(),
@@ -24,7 +24,7 @@ export const YRecipeSchema = object({
   private: boolean().notRequired().default(false),
   ingredients: array().of(YRecipeIngredientSchema).notRequired(),
   steps: array().of(YRecipeStepSchema).notRequired(),
-});
+}).strict().noUnknown();
 
 export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
 
@@ -57,7 +57,7 @@ export const YCreateRecipeSchema = object({
       })
     )
     .notRequired(),
-});
+}).strict().noUnknown();
 
 export interface CreateRecipeSchema extends InferType<typeof YCreateRecipeSchema> {}
 
@@ -87,6 +87,6 @@ export const YUpdateRecipeSchema = object({
       })
     )
     .notRequired(),
-});
+}).strict().noUnknown();
 
 export interface UpdateRecipeSchema extends InferType<typeof YUpdateRecipeSchema> {}

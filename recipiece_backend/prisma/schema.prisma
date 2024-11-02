@@ -22,6 +22,7 @@ model User {
   validated Boolean @default(false)
 
   recipes Recipe[]
+  cookbooks CookBook[]
   credentials UserCredentials?
   validation_tokens UserValidationToken[]
 }
@@ -54,7 +55,7 @@ model Recipe {
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
   name String
-  description String
+  description String?
   private Boolean @default(false)
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -62,6 +63,7 @@ model Recipe {
 
   ingredients RecipeIngredient[]
   steps RecipeStep[]
+  recipe_cookbook_attachments RecipeCookBookAttachment[]
 
   @@unique([user_id, name])
 }
@@ -88,4 +90,32 @@ model RecipeStep {
 
   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe_id Int
+}
+
+model CookBook {
+  @@map("cookbooks")
+
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+
+  name String
+  description String?
+  private Boolean @default(false)
+  created_at DateTime @default(now())
+
+  recipe_cookbook_attachments RecipeCookBookAttachment[]
+  @@unique([user_id, name])
+}
+
+model RecipeCookBookAttachment {
+  @@map("recipe_cookbook_attachments")
+
+  recipe_id Int
+  cookbook_id Int
+  
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cookbook CookBook @relation(fields: [cookbook_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id(name: "id", [recipe_id, cookbook_id])
 }

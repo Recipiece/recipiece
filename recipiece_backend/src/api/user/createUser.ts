@@ -3,8 +3,6 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
 import { ApiResponse } from "../../types";
-import { UserValidationTokenTypes } from "../../util/constant";
-import { sendAccountVerificationEmail } from "../../util/email";
 import { hashPassword } from "../../util/password";
 
 export const createUser = async (req: Request, res: Response) => {
@@ -45,14 +43,6 @@ export const runCreateUser = async (username?: string, password?: string): ApiRe
           password_hash: hashedPassword!,
         },
       });
-      // const userAccountToken = await tx.userValidationToken.create({
-      //   data: {
-      //     user_id: user.id,
-      //     purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
-      //   },
-      // });
-
-      // await sendAccountVerificationEmail(user, userAccountToken);
 
       return user;
     });

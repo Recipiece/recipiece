@@ -1,11 +1,11 @@
-import { Recipe, User } from "@prisma/client";
-import { createUserAndToken } from "../../fixture";
+import { CookBook, User } from "@prisma/client";
+import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import app from "../../../src/app";
 import { prisma } from "../../../src/database";
-import { StatusCodes } from "http-status-codes";
+import { createUserAndToken } from "../../fixture";
 
-describe("List Recipes", () => {
+describe("List Cookbooks", () => {
   let user: User;
   let bearerToken: string;
 
@@ -15,11 +15,11 @@ describe("List Recipes", () => {
     bearerToken = userAndToken[1];
   });
 
-  it("should list the recipes for the user associated with a token", async () => {
+  it("should list the cookbooks for the user associated with a token", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await prisma.cookBook.create({
         data: {
-          name: `Test recipe ${i}`,
+          name: `Test cookbook ${i}`,
           description: "Test",
           user_id: user.id,
           private: i % 2 === 0,
@@ -27,22 +27,19 @@ describe("List Recipes", () => {
       });
     }
 
-    const response = await request(app)
-      .get("/recipe/list")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(app).get("/cookbook/list").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as Recipe[];
+    const results = response.body.data as CookBook[];
     expect(results.length).toEqual(10);
   });
 
-  it("should not list private recipes for another user", async () => {
+  it("should not list private cookbooks for another user", async () => {
     const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await prisma.cookBook.create({
         data: {
-          name: `Test recipe ${i}`,
+          name: `Test cookbook ${i}`,
           description: "Test",
           user_id: otherUser.id,
           private: i % 2 === 0,
@@ -51,7 +48,7 @@ describe("List Recipes", () => {
     }
 
     const response = await request(app)
-      .get("/recipe/list")
+      .get("/cookbook/list")
       .query({
         userId: otherUser.id,
       })
@@ -59,19 +56,19 @@ describe("List Recipes", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as Recipe[];
+    const results = response.body.data as CookBook[];
     expect(results.length).toEqual(5);
 
-    results.forEach((recipe) => {
-      expect(recipe.private).toBeFalsy();
+    results.forEach((cookbook) => {
+      expect(cookbook.private).toBeFalsy();
     });
   });
 
   it("should allow name filtering", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await prisma.cookBook.create({
         data: {
-          name: `Test recipe ${i}`,
+          name: `Test cookbook ${i}`,
           description: "Test",
           user_id: user.id,
           private: i % 2 === 0,
@@ -79,7 +76,7 @@ describe("List Recipes", () => {
       });
     }
 
-    await prisma.recipe.create({
+    await prisma.cookBook.create({
       data: {
         name: "NAME NAME NAME",
         description: "Test",
@@ -88,7 +85,7 @@ describe("List Recipes", () => {
     });
 
     const response = await request(app)
-      .get("/recipe/list")
+      .get("/cookbook/list")
       .query({
         search: "name",
       })
@@ -96,16 +93,16 @@ describe("List Recipes", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as Recipe[];
+    const results = response.body.data as CookBook[];
     expect(results.length).toEqual(1);
     expect(results[0].name).toEqual("NAME NAME NAME");
   });
 
   it("should page", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await prisma.cookBook.create({
         data: {
-          name: `Test recipe ${i}`,
+          name: `Test cookbook ${i}`,
           description: "Test",
           user_id: user.id,
           private: i % 2 === 0,
@@ -114,7 +111,7 @@ describe("List Recipes", () => {
     }
 
     const response = await request(app)
-      .get("/recipe/list")
+      .get("/cookbook/list")
       .query({
         page: 1,
         pageSize: 5,
@@ -123,7 +120,7 @@ describe("List Recipes", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as Recipe[];
+    const results = response.body.data as CookBook[];
     expect(results.length).toEqual(5);
   });
 });

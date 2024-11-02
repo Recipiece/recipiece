@@ -168,4 +168,88 @@ describe("Update Recipes", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
+
+  it("should remove any recipe cookbook attachments in cookbooks the user does not own when making the recipe private", async () => {
+    const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
+
+    const usersCookbook = await prisma.cookBook.create({
+      data: {
+        name: "users cookbook",
+        user_id: user.id,
+      }
+    });
+
+    const otherUsersCookbook = await prisma.cookBook.create({
+      data: {
+        name: "other users cookbook",
+        user_id: otherUser.id,
+      }
+    });
+
+    const usersRecipe = await prisma.recipe.create({
+      data: {
+        name: "My Cool Recipe",
+        description: "A recipe",
+        user_id: user.id,
+        private: false,
+        ingredients: {
+          createMany: {
+            data: [
+              {
+                name: "old ingredient 01",
+                order: 0,
+              },
+              {
+                name: "old ingredient 02",
+                order: 1,
+              },
+            ],
+          },
+        },
+        steps: {
+          createMany: {
+            data: [
+              {
+                content: "asdfqwer",
+                order: 0,
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    await prisma.recipeCookBookAttachment.createMany({
+      data: [
+        {
+          recipe_id: usersRecipe.id,
+          cookbook_id: usersCookbook.id,
+        },
+        {
+          recipe_id: usersRecipe.id,
+          cookbook_id: otherUsersCookbook.id,
+        }
+      ]
+    });
+
+    const response = await request(app)
+      .put("/recipe")
+      .send({
+        id: usersRecipe.id,
+        private: true,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toEqual(StatusCodes.OK);
+
+    const attachmentsForUser = await prisma.recipeCookBookAttachment.findMany({
+      where: {
+        recipe_id: usersRecipe.id,
+      }
+    });
+
+    expect(attachmentsForUser.length).toEqual(1);
+    expect(attachmentsForUser[0].cookbook_id).toEqual(usersCookbook.id);
+  });
 });
