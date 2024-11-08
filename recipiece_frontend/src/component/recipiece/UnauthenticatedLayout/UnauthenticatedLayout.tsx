@@ -1,16 +1,19 @@
-import { FC, PropsWithChildren } from "react";
+import { FC } from "react";
+import { Outlet } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "../../shadcn";
 import { Header } from "../Typography";
 
-export const UnauthenticatedLayout: FC<PropsWithChildren> = ({ children }) => {
+export const UnauthenticatedLayout: FC = () => {
   return (
-    <div className="flex flex-row h-full">
+    <div className="flex flex-row h-full w-full">
       <div className="w-full sm:w-2/3 m-auto">
         <Card>
           <CardHeader className="bg-primary text-white mb-4">
             <Header className="handlee-regular text-center">Recipiece</Header>
           </CardHeader>
-          <CardContent>{children}</CardContent>
+          <CardContent>
+            <Outlet />
+          </CardContent>
         </Card>
       </div>
     </div>

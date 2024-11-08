@@ -17,6 +17,7 @@ export interface RecipeIngredient {
 export interface Recipe {
   readonly id: number;
   readonly name: string;
+  readonly created_at: string;
   readonly user_id: number;
   readonly description: string;
   readonly ingredients: RecipeIngredient[];
@@ -26,5 +27,12 @@ export interface Recipe {
 
 export interface ListRecipeFilters {
   readonly page: number;
+  readonly cookbookId?: number;
   readonly search?: string;
+}
+
+export interface ListRecipesResponse {
+  readonly data: Recipe[];
+  readonly page: number;
+  readonly hasNextPage: boolean;
 }

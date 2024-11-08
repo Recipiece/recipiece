@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FC } from "react";
 import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
 import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
-import { AuthContextProvider } from "./context";
+import { AuthContextProvider, CookbookContextProvider } from "./context";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
 
 const queryClient = new QueryClient({
@@ -22,34 +22,20 @@ export const AppRoutes: FC = () => {
       <AuthContextProvider>
         <TooltipProvider>
           <ToastProvider>
-            <Routes>
-              {unauthenticatedRoutes.map((r) => {
-                return (
-                  <Route
-                    key={r.path}
-                    path={r.path}
-                    element={
-                      <UnauthenticatedLayout>
-                        <r.element />
-                      </UnauthenticatedLayout>
-                    }
-                  />
-                );
-              })}
-              {authenticatedRoutes.map((r) => {
-                return (
-                  <Route
-                    key={r.path}
-                    path={r.path}
-                    element={
-                      <AuthenticatedLayout>
-                        <r.element />
-                      </AuthenticatedLayout>
-                    }
-                  />
-                );
-              })}
-            </Routes>
+            <CookbookContextProvider>
+              <Routes>
+                <Route element={<UnauthenticatedLayout />}>
+                  {unauthenticatedRoutes.map((r) => {
+                    return <Route key={r.path} path={r.path} element={<r.element />} />;
+                  })}
+                </Route>
+                <Route element={<AuthenticatedLayout />}>
+                  {authenticatedRoutes.map((r) => {
+                    return <Route key={r.path} path={r.path} element={<r.element />} />;
+                  })}
+                </Route>
+              </Routes>
+            </CookbookContextProvider>
             <Toaster />
           </ToastProvider>
         </TooltipProvider>

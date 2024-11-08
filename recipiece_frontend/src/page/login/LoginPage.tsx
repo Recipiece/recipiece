@@ -6,11 +6,11 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useLoginUserMutation } from "../../api";
-import { Button, Form, FormCheckbox, FormInput, Stack, useToast } from "../../component";
+import { Button, Form, FormCheckbox, FormInput, Stack, SubmitButton, useToast } from "../../component";
 
 const LoginFormSchema = z.object({
-  username: z.string().email("Enter an email address"),
-  password: z.string(),
+  username: z.string().email("Enter your email address."),
+  password: z.string().min(1, "Enter your password."),
   rememberMe: z.boolean().optional().default(false),
 });
 
@@ -66,7 +66,7 @@ export const LoginPage: FC = () => {
           <FormInput name="username" type="text" label="Username" />
           <FormInput name="password" type="password" label="Password" />
           <FormCheckbox name="rememberMe" label="Remember Me"/>
-          <Button type="submit">Login</Button>
+          <SubmitButton type="submit">Login</SubmitButton>
           <Button onClick={() => navigate("/create-account")} variant="link">
             Register Now
           </Button>

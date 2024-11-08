@@ -33,6 +33,12 @@ export interface PutRequest<T> {
   readonly withAuth?: boolean;
 }
 
+export interface DeleteRequest {
+  readonly path: string;
+  readonly id: number;
+  readonly withAuth?: boolean;
+}
+
 export const usePut = (args?: HookArgs) => {
   const { authToken, setAuthToken } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -45,7 +51,7 @@ export const usePut = (args?: HookArgs) => {
     }
   }, [args]);
 
-  const put = async <RequestBodyType, ResponseBodyType>(putRequest: PutRequest<RequestBodyType>) => {
+  const putter = async <RequestBodyType, ResponseBodyType>(putRequest: PutRequest<RequestBodyType>) => {
     const headers = new AxiosHeaders();
     headers.set("Content-Type", "application/json");
     if (putRequest.withAuth) {
@@ -76,7 +82,7 @@ export const usePut = (args?: HookArgs) => {
     }
   };
 
-  return { put };
+  return { putter };
 };
 
 export const usePost = (args?: HookArgs) => {
@@ -91,7 +97,7 @@ export const usePost = (args?: HookArgs) => {
     }
   }, [args]);
 
-  const post = async <RequestBodyType, ResponseBodyType>(postRequest: PostRequest<RequestBodyType>) => {
+  const poster = async <RequestBodyType, ResponseBodyType>(postRequest: PostRequest<RequestBodyType>) => {
     const headers = new AxiosHeaders();
     headers.set("Content-Type", "application/json");
     if (postRequest.withAuth) {
@@ -122,7 +128,7 @@ export const usePost = (args?: HookArgs) => {
     }
   };
 
-  return { post };
+  return { poster };
 };
 
 export interface GetRequest<T> {
@@ -143,7 +149,7 @@ export const useGet = (args?: HookArgs) => {
     }
   }, [args]);
 
-  const get = async <QueryParamType, ResponseBodyType>(getRequest: GetRequest<QueryParamType>) => {
+  const getter = async <QueryParamType, ResponseBodyType>(getRequest: GetRequest<QueryParamType>) => {
     const headers = new AxiosHeaders();
     headers.set("Content-Type", "application/json");
     if (getRequest.withAuth) {
@@ -179,5 +185,51 @@ export const useGet = (args?: HookArgs) => {
     }
   };
 
-  return { get };
+  return { getter };
+};
+
+export const useDelete = (args?: HookArgs) => {
+  const { authToken, setAuthToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const autoLogoutStatusCodes = useMemo(() => {
+    if (args?.autoLogoutOnCodes) {
+      return args.autoLogoutOnCodes;
+    } else {
+      return [401];
+    }
+  }, [args]);
+
+  const deleter = async (deleteRequest: DeleteRequest) => {
+    const headers = new AxiosHeaders();
+    headers.set("Content-Type", "application/json");
+    if (deleteRequest.withAuth) {
+      headers.set("Authorization", `Bearer ${authToken}`);
+    }
+
+    try {
+      const response = await axios.delete(`${getUrl()}${deleteRequest.path}/${deleteRequest.id}`, {
+        headers: headers,
+      });
+
+      if (autoLogoutStatusCodes.includes(response.status)) {
+        setAuthToken(undefined);
+        navigate("/login");
+        return Promise.reject();
+      } else {
+        return response as AxiosResponse<{}>;
+      }
+    } catch (error) {
+      const statusCode = (error as AxiosError)?.status;
+
+      if (statusCode && autoLogoutStatusCodes.includes(statusCode)) {
+        setAuthToken(undefined);
+        navigate("/login");
+      }
+
+      throw error;
+    }
+  };
+
+  return { deleter };
 };

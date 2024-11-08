@@ -24,7 +24,7 @@ describe("Add Recipe to Cookbook", () => {
       }
     });
 
-    const cookbook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
@@ -42,7 +42,7 @@ describe("Add Recipe to Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.CREATED);
     
-    const attachments = await prisma.recipeCookBookAttachment.findMany({
+    const attachments = await prisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,
@@ -62,7 +62,7 @@ describe("Add Recipe to Cookbook", () => {
       }
     });
 
-    const cookbook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
@@ -80,7 +80,7 @@ describe("Add Recipe to Cookbook", () => {
 
       expect(response.statusCode).toEqual(StatusCodes.CREATED);
     
-      const attachments = await prisma.recipeCookBookAttachment.findMany({
+      const attachments = await prisma.recipeCookbookAttachment.findMany({
         where: {
           recipe_id: otherRecipe.id,
           cookbook_id: cookbook.id,
@@ -100,7 +100,7 @@ describe("Add Recipe to Cookbook", () => {
       }
     });
 
-    const cookbook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
@@ -118,7 +118,7 @@ describe("Add Recipe to Cookbook", () => {
 
       expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
     
-      const attachments = await prisma.recipeCookBookAttachment.findMany({
+      const attachments = await prisma.recipeCookbookAttachment.findMany({
         where: {
           recipe_id: otherRecipe.id,
           cookbook_id: cookbook.id,
@@ -136,14 +136,14 @@ describe("Add Recipe to Cookbook", () => {
       }
     });
 
-    const cookbook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
       }
     });
 
-    await prisma.recipeCookBookAttachment.create({
+    await prisma.recipeCookbookAttachment.create({
       data: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,

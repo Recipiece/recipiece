@@ -1,17 +1,5 @@
-import bodyParser from "body-parser";
-import cors from "cors";
-import { config } from "dotenv";
-import express, { Express, NextFunction, Request, Response } from "express";
-import morgan from "morgan";
-import { ROUTES } from "./api";
-import { prisma } from "./database";
-import { basicAuthMiddleware, tokenAuthMiddleware } from "./middleware";
 import app from "./app";
-
-// TODO -- figure out prod?
-config({
-  path: "../.env.dev",
-});
+import { prisma } from "./database";
 
 const server = app.listen(+process.env.APP_PORT!, () => {
   console.log(`listening for connections on ${process.env.APP_PORT}`);

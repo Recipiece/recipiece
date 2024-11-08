@@ -5,7 +5,9 @@ export class Redis {
 
   public static async getInstance(): Promise<RedisClientType<any, any, any>> {
     if (!Redis.redis) {
-      Redis.redis = await createClient()
+      Redis.redis = await createClient({
+        url: process.env.REDIS_URL!,
+      })
         .on("error", (err) => console.log("Redis Client Error", err))
         .connect();
     }

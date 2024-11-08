@@ -1,4 +1,4 @@
-import { CookBook, User } from "@prisma/client";
+import { Cookbook, User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import app from "../../../src/app";
@@ -17,7 +17,7 @@ describe("List Cookbooks", () => {
 
   it("should list the cookbooks for the user associated with a token", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.cookBook.create({
+      await prisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -30,14 +30,14 @@ describe("List Cookbooks", () => {
     const response = await request(app).get("/cookbook/list").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as CookBook[];
+    const results = response.body.data as Cookbook[];
     expect(results.length).toEqual(10);
   });
 
   it("should not list private cookbooks for another user", async () => {
     const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
     for (let i = 0; i < 10; i++) {
-      await prisma.cookBook.create({
+      await prisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -56,7 +56,7 @@ describe("List Cookbooks", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as CookBook[];
+    const results = response.body.data as Cookbook[];
     expect(results.length).toEqual(5);
 
     results.forEach((cookbook) => {
@@ -66,7 +66,7 @@ describe("List Cookbooks", () => {
 
   it("should allow name filtering", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.cookBook.create({
+      await prisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -76,7 +76,7 @@ describe("List Cookbooks", () => {
       });
     }
 
-    await prisma.cookBook.create({
+    await prisma.cookbook.create({
       data: {
         name: "NAME NAME NAME",
         description: "Test",
@@ -93,14 +93,14 @@ describe("List Cookbooks", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as CookBook[];
+    const results = response.body.data as Cookbook[];
     expect(results.length).toEqual(1);
     expect(results[0].name).toEqual("NAME NAME NAME");
   });
 
   it("should page", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.cookBook.create({
+      await prisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -120,7 +120,7 @@ describe("List Cookbooks", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as CookBook[];
+    const results = response.body.data as Cookbook[];
     expect(results.length).toEqual(5);
   });
 });

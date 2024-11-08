@@ -1,6 +1,6 @@
 import { boolean, InferType, number, object, string } from "yup";
 
-export const YCookBookSchema = object({
+export const YCookbookSchema = object({
   id: number().required(),
   user_id: number().required(),
   name: string().required(),
@@ -8,50 +8,50 @@ export const YCookBookSchema = object({
   private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
-export interface CookBookSchema extends InferType<typeof YCookBookSchema> {}
+export interface CookbookSchema extends InferType<typeof YCookbookSchema> {}
 
 
 /**
  * Create cookbook schema
  */
-export const YCreateCookBookSchema = object({
+export const YCreateCookbookSchema = object({
   name: string().required(),
   description: string().notRequired(),
   private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
-export interface CreateCookBookSchema extends InferType<typeof YCreateCookBookSchema> {}
+export interface CreateCookbookSchema extends InferType<typeof YCreateCookbookSchema> {}
 
 /**
  * Update cookbook schema
  */
-export const YUpdateCookBookSchema = object({
+export const YUpdateCookbookSchema = object({
   id: number().required(),
   name: string().notRequired(),
   description: string().notRequired(),
   private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
-export interface UpdateCookBookSchema extends InferType<typeof YUpdateCookBookSchema> {}
+export interface UpdateCookbookSchema extends InferType<typeof YUpdateCookbookSchema> {}
 
 
 /**
  * Attach recipe to cookbook schema
  */
-export const YAddRecipeToCookBookSchema = object({
+export const YAddRecipeToCookbookSchema = object({
   cookbook_id: number().required(),
   recipe_id: number().required(),
 }).strict().noUnknown();
 
-export interface AddRecipeToCookBookSchema extends InferType<typeof YAddRecipeToCookBookSchema> {}
+export interface AddRecipeToCookbookSchema extends InferType<typeof YAddRecipeToCookbookSchema> {}
 
 
 /**
  * Attach recipe to cookbook schema
  */
-export const YRemoveRecipeFromCookBookSchema = object({
+export const YRemoveRecipeFromCookbookSchema = object({
   cookbook_id: number().required(),
   recipe_id: number().required(),
 }).strict().noUnknown();
 
-export interface RemoveRecipeFromCookBookSchema extends InferType<typeof YRemoveRecipeFromCookBookSchema> {}
+export interface RemoveRecipeFromCookbookSchema extends InferType<typeof YRemoveRecipeFromCookbookSchema> {}

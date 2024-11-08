@@ -13,6 +13,7 @@ export interface FormCheckboxProps extends CheckboxProps {
 
 export const FormCheckbox: FC<FormCheckboxProps> = ({ isLoading, name, className, label, instructions, ...restInputProps }) => {
   const form = useFormContext();
+  const { isSubmitting } = form.formState;
 
   const fullClassName = useMemo(() => {
     return cn(className ?? "", "flex flex-row");
@@ -22,6 +23,7 @@ export const FormCheckbox: FC<FormCheckboxProps> = ({ isLoading, name, className
     <FormField
       control={form.control}
       name={name}
+      disabled={isSubmitting}
       render={({ field }) => {
         return (
           <FormItem className={fullClassName}>

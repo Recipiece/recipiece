@@ -14,9 +14,10 @@ export interface PagerProps {
   readonly onPage: (newPage: number) => void;
   readonly hasNextPage: boolean;
   readonly className?: string;
+  readonly shortForm?: boolean;
 }
 
-export const Pager: FC<PagerProps> = ({ page, onPage, hasNextPage, className }) => {
+export const Pager: FC<PagerProps> = ({ page, onPage, hasNextPage, className, shortForm }) => {
   const displayPage = useMemo(() => {
     return page + 1;
   }, [page]);
@@ -33,7 +34,7 @@ export const Pager: FC<PagerProps> = ({ page, onPage, hasNextPage, className }) 
         )}
         {page > 0 && (
           <PaginationItem>
-            <PaginationPrevious onClick={() => onPage(page - 1)} />
+            <PaginationPrevious shortForm={shortForm} onClick={() => onPage(page - 1)} />
           </PaginationItem>
         )}
         <PaginationItem>
@@ -41,7 +42,7 @@ export const Pager: FC<PagerProps> = ({ page, onPage, hasNextPage, className }) 
         </PaginationItem>
         {hasNextPage && (
           <PaginationItem>
-            <PaginationNext onClick={() => onPage(page + 1)} />
+            <PaginationNext shortForm={shortForm} onClick={() => onPage(page + 1)} />
           </PaginationItem>
         )}
       </PaginationContent>

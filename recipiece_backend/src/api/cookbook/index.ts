@@ -1,10 +1,10 @@
 import { Route } from "../../types";
-import { addRecipeToCookBook } from "./addRecipeToCookbook";
-import { createCookBook } from "./createCookbook";
-import { deleteCookBook } from "./deleteCookbook";
-import { getCookBook } from "./getCookbook";
-import { listCookBooks } from "./listCookbooks";
-import { removeRecipeFromCookBook } from "./removeRecipeFromCookbook";
+import { addRecipeToCookbook } from "./addRecipeToCookbook";
+import { createCookbook } from "./createCookbook";
+import { deleteCookbook } from "./deleteCookbook";
+import { getCookbook } from "./getCookbook";
+import { listCookbooks } from "./listCookbooks";
+import { removeRecipeFromCookbook } from "./removeRecipeFromCookbook";
 import { updateCookbook } from "./updateCookbook";
 
 export const COOKBOOK_ROUTES: Route[] = [
@@ -12,37 +12,37 @@ export const COOKBOOK_ROUTES: Route[] = [
     path: "/cookbook",
     authentication: "token",
     method: "POST",
-    function: createCookBook,
+    function: createCookbook,
   },
   {
     path: "/cookbook/recipe/add",
     authentication: "token",
     method: "POST",
-    function: addRecipeToCookBook,
+    function: addRecipeToCookbook,
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "token",
     method: "DELETE",
-    function: deleteCookBook,
+    function: deleteCookbook,
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "token",
     method: "GET",
-    function: getCookBook,
+    function: getCookbook,
   },
   {
     path: "/cookbook/list",
     authentication: "token",
     method: "GET",
-    function: listCookBooks,
+    function: listCookbooks,
   },
   {
     path: "/cookbook/recipe/remove",
     authentication: "token",
     method: "POST",
-    function: removeRecipeFromCookBook,
+    function: removeRecipeFromCookbook,
   },
   {
     path: "/cookbook",

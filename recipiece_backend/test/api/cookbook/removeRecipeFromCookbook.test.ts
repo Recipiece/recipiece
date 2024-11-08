@@ -24,14 +24,14 @@ describe("Remove Recipe from Cookbook", () => {
       },
     });
 
-    const cookbook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
       },
     });
 
-    await prisma.recipeCookBookAttachment.create({
+    await prisma.recipeCookbookAttachment.create({
       data: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,
@@ -49,7 +49,7 @@ describe("Remove Recipe from Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
-    const attachments = await prisma.recipeCookBookAttachment.findMany({
+    const attachments = await prisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,
@@ -61,7 +61,7 @@ describe("Remove Recipe from Cookbook", () => {
 
   it("should not allow another user to remove recipes from a users cookbook", async () => {
     const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
-    const otherCookbook = await prisma.cookBook.create({
+    const otherCookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "other user cookbook",
@@ -75,7 +75,7 @@ describe("Remove Recipe from Cookbook", () => {
       },
     });
 
-    await prisma.recipeCookBookAttachment.create({
+    await prisma.recipeCookbookAttachment.create({
       data: {
         recipe_id: otherRecipe.id,
         cookbook_id: otherCookbook.id,
@@ -93,7 +93,7 @@ describe("Remove Recipe from Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
-    const attachments = await prisma.recipeCookBookAttachment.findMany({
+    const attachments = await prisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: otherRecipe.id,
         cookbook_id: otherCookbook.id,

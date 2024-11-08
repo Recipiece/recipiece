@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListRecipeFilters, Recipe } from "../data";
-import { MutationArgs, QueryArgs, useGet, usePost, usePut } from "./request";
+import { ListRecipeFilters, ListRecipesResponse, Recipe } from "../data";
+import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "./Request";
 
 export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
-  const { get } = useGet();
+  const { getter } = useGet();
 
   const query = async () => {
-    const recipe = await get<never, Recipe>({
+    const recipe = await getter<never, Recipe>({
       path: `/recipe/${recipeId}`,
       withAuth: true,
     });
@@ -23,20 +23,23 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
 
 export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs) => {
   const queryClient = useQueryClient();
-  const { get } = useGet();
+  const { getter } = useGet();
 
   const queryKey = ["recipeList", filters.page];
-  if (filters.search) {
-    queryKey.push(filters.search);
-  }
-
   let path = `/recipe/list?page=${filters.page}`;
+
   if (filters.search) {
+    queryKey.push(`search:${filters.search}`);
     path += `&search=${filters.search}`;
   }
 
+  if (filters.cookbookId) {
+    queryKey.push(`cookbookId:${filters.cookbookId}`);
+    path += `&cookbookId=${filters.cookbookId}`;
+  }
+
   const query = async () => {
-    const recipe = await get<never, { readonly data: Recipe[]; readonly page: number; readonly hasNextPage: boolean }>({
+    const recipe = await getter<never, ListRecipesResponse>({
       path: path,
       withAuth: true,
     });
@@ -62,10 +65,10 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
 
 export const useCreateRecipeMutation = (args?: MutationArgs<Recipe>) => {
   const queryClient = useQueryClient();
-  const { post } = usePost();
+  const { poster } = usePost();
 
   const mutation = async (data: Partial<Recipe>) => {
-    return await post<Partial<Recipe>, Recipe>({
+    return await poster<Partial<Recipe>, Recipe>({
       path: "/recipe",
       body: data,
       withAuth: true,
@@ -90,10 +93,10 @@ export const useCreateRecipeMutation = (args?: MutationArgs<Recipe>) => {
 
 export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe>) => {
   const queryClient = useQueryClient();
-  const { put } = usePut();
+  const { putter } = usePut();
 
   const mutation = async (data: Partial<Recipe>) => {
-    return await put<Partial<Recipe>, Recipe>({
+    return await putter<Partial<Recipe>, Recipe>({
       path: `/recipe`,
       body: data,
       withAuth: true,
@@ -109,6 +112,36 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe>) => {
       });
       queryClient.setQueryData(["recipe", data.data.id], data.data);
       args?.onSuccess?.(data.data);
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};
+
+export const useDeleteRecipeMutation = (args?: MutationArgs<void>) => {
+  const queryClient = useQueryClient();
+  const { deleter } = useDelete();
+
+  const mutation = async (recipeId: number) => {
+    return await deleter({
+      path: "/recipe",
+      id: recipeId,
+      withAuth: true,
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (_, recipeId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["recipeList"],
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["recipe", recipeId],
+      });
+      args?.onSuccess?.();
     },
     onError: (err) => {
       args?.onFailure?.(err);

@@ -9,8 +9,9 @@ export const listRecipes = async (req: AuthenticatedRequest, res: Response) => {
   const pageSize = Math.max(5, Math.min(+(req.query?.pageSize ?? 20), 50));
   const userId = +(req.query?.userId ?? req.user.id);
   const search = req.query?.search;
+  const cookbookId = req.query?.cookbookId;
 
-  const [statusCode, response] = await runListRecipes(req.user, page, pageSize, userId, search as string);
+  const [statusCode, response] = await runListRecipes(req.user, page, pageSize, userId, search as string, cookbookId as unknown as number);
   res.status(statusCode).send(response);
 };
 
@@ -19,7 +20,8 @@ const runListRecipes = async (
   page: number,
   pageSize: number,
   userId: number,
-  search?: string
+  search?: string,
+  cookbookId?: number
 ): ApiResponse<{
   readonly data: Recipe[];
   readonly page: number;
@@ -37,6 +39,14 @@ const runListRecipes = async (
     where.name = {
       contains: search,
       mode: "insensitive",
+    };
+  }
+
+  if (cookbookId) {
+    where.recipe_cookbook_attachments = {
+      some: {
+        cookbook_id: +cookbookId,
+      },
     };
   }
 

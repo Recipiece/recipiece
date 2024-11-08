@@ -6,7 +6,7 @@ import app from "../../../src/app";
 import { createUserAndToken } from "../../fixture";
 import { prisma } from "../../../src/database";
 
-describe("Create CookBooks", () => {
+describe("Create Cookbooks", () => {
   let user: User;
   let bearerToken: string;
 
@@ -18,7 +18,7 @@ describe("Create CookBooks", () => {
 
   it("should allow a cookbook to be created", async () => {
     const expectedBody = {
-      name: "My Test CookBook",
+      name: "My Test Cookbook",
       description: "The best recipes ever",
       private: false,
     }
@@ -39,7 +39,7 @@ describe("Create CookBooks", () => {
   });
 
   it("should not allow a cookbook with the same name to be created for a user", async () => {
-    const existingCookBook = await prisma.cookBook.create({
+    const existingCookbook = await prisma.cookbook.create({
       data: {
         name: "test",
         user_id: user.id,
@@ -49,7 +49,7 @@ describe("Create CookBooks", () => {
     const response = await request(app)
       .post("/cookbook")
       .send({
-        name: existingCookBook.name,
+        name: existingCookbook.name,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);

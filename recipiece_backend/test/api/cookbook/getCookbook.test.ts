@@ -17,7 +17,7 @@ describe("Get Cookbooks", () => {
   });
 
   it("should get a cookbook", async () => {
-    const cookBook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: user.id,
         name: "test cookbook",
@@ -25,17 +25,17 @@ describe("Get Cookbooks", () => {
     });
 
     const response = await request(app)
-      .get(`/cookbook/${cookBook.id}`)
+      .get(`/cookbook/${cookbook.id}`)
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    expect(response.body.id).toEqual(cookBook.id);
+    expect(response.body.id).toEqual(cookbook.id);
   });
 
   it("should not get a cookbook that is private that you do not own", async () => {
     const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
-    const cookBook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",
@@ -44,7 +44,7 @@ describe("Get Cookbooks", () => {
     });
 
     const response = await request(app)
-      .get(`/cookbook/${cookBook.id}`)
+      .get(`/cookbook/${cookbook.id}`)
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
@@ -53,7 +53,7 @@ describe("Get Cookbooks", () => {
 
   it("should get a public cookbook that you do not own", async () => {
     const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
-    const cookBook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",
@@ -62,12 +62,12 @@ describe("Get Cookbooks", () => {
     });
 
     const response = await request(app)
-      .get(`/cookbook/${cookBook.id}`)
+      .get(`/cookbook/${cookbook.id}`)
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    expect(response.body.id).toEqual(cookBook.id);
+    expect(response.body.id).toEqual(cookbook.id);
   });
 
   it("should not get a cookbook that does not exist", async () => {

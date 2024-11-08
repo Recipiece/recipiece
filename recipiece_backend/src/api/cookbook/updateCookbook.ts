@@ -1,8 +1,8 @@
-import { Prisma, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookBookSchema, UpdateCookBookSchema, UpdateRecipeSchema, YUpdateCookBookSchema, YUpdateRecipeSchema } from "../../schema";
+import { CookbookSchema, UpdateCookbookSchema, YUpdateCookbookSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateCookbook = async (req: AuthenticatedRequest, res: Response) => {
@@ -10,10 +10,10 @@ export const updateCookbook = async (req: AuthenticatedRequest, res: Response) =
   res.status(statusCode).send(response);
 };
 
-const runUpdateCookbook = async (user: User, body: any): ApiResponse<CookBookSchema> => {
-  let cookbookBody: UpdateCookBookSchema;
+const runUpdateCookbook = async (user: User, body: any): ApiResponse<CookbookSchema> => {
+  let cookbookBody: UpdateCookbookSchema;
   try {
-    cookbookBody = await YUpdateCookBookSchema.validate(body);
+    cookbookBody = await YUpdateCookbookSchema.validate(body);
   } catch (error) {
     console.error(error);
     return [
@@ -25,7 +25,7 @@ const runUpdateCookbook = async (user: User, body: any): ApiResponse<CookBookSch
     ];
   }
 
-  const cookbook = await prisma.cookBook.findUnique({
+  const cookbook = await prisma.cookbook.findUnique({
     where: {
       id: cookbookBody.id,
     },
@@ -53,7 +53,7 @@ const runUpdateCookbook = async (user: User, body: any): ApiResponse<CookBookSch
   try {
     const { id, ...restData } = cookbookBody;
 
-    const updatedCookbook = await prisma.cookBook.update({
+    const updatedCookbook = await prisma.cookbook.update({
       // @ts-ignore
       data: {
         ...restData,

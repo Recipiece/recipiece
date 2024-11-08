@@ -68,7 +68,7 @@ const runUpdateRecipe = async (user: User, body: any): ApiResponse<RecipeSchema>
        * the recipe owner doesn't own
        */
       if (!isCurrentlyPrivate && willBePrivate) {
-        await tx.recipeCookBookAttachment.deleteMany({
+        await tx.recipeCookbookAttachment.deleteMany({
           where: {
             recipe_id: recipe.id,
             cookbook: {

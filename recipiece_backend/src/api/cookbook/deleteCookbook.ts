@@ -4,13 +4,13 @@ import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const deleteCookBook = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runDeleteCookBook(req.user, +req.params.id);
+export const deleteCookbook = async (req: AuthenticatedRequest, res: Response) => {
+  const [statusCode, response] = await runDeleteCookbook(req.user, +req.params.id);
   res.status(statusCode).send(response);
 };
 
-const runDeleteCookBook = async (user: User, cookbookId: number): ApiResponse<{}> => {
-  const cookbook = await prisma.cookBook.findFirst({
+const runDeleteCookbook = async (user: User, cookbookId: number): ApiResponse<{}> => {
+  const cookbook = await prisma.cookbook.findFirst({
     where: {
       user_id: user.id,
       id: cookbookId,
@@ -27,7 +27,7 @@ const runDeleteCookBook = async (user: User, cookbookId: number): ApiResponse<{}
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.cookBook.delete({
+    await tx.cookbook.delete({
       where: {
         id: cookbookId,
       },

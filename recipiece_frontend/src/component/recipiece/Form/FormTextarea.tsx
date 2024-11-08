@@ -12,6 +12,7 @@ export interface FormTextareaProps extends TextareaProps {
 
 export const FormTextarea: FC<FormTextareaProps> = ({ name, instructions, label, className, ...restProps }) => {
   const form = useFormContext();
+  const { isSubmitting } = form.formState;
 
   const fullClassName = useMemo(() => {
     return cn(className ?? "");
@@ -21,6 +22,7 @@ export const FormTextarea: FC<FormTextareaProps> = ({ name, instructions, label,
     <FormField
       control={form.control}
       name={name}
+      disabled={isSubmitting}
       render={({ field }) => {
         return (
           <FormItem className={fullClassName}>

@@ -172,14 +172,14 @@ describe("Update Recipes", () => {
   it("should remove any recipe cookbook attachments in cookbooks the user does not own when making the recipe private", async () => {
     const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
 
-    const usersCookbook = await prisma.cookBook.create({
+    const usersCookbook = await prisma.cookbook.create({
       data: {
         name: "users cookbook",
         user_id: user.id,
       }
     });
 
-    const otherUsersCookbook = await prisma.cookBook.create({
+    const otherUsersCookbook = await prisma.cookbook.create({
       data: {
         name: "other users cookbook",
         user_id: otherUser.id,
@@ -219,7 +219,7 @@ describe("Update Recipes", () => {
       },
     });
 
-    await prisma.recipeCookBookAttachment.createMany({
+    await prisma.recipeCookbookAttachment.createMany({
       data: [
         {
           recipe_id: usersRecipe.id,
@@ -243,7 +243,7 @@ describe("Update Recipes", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
-    const attachmentsForUser = await prisma.recipeCookBookAttachment.findMany({
+    const attachmentsForUser = await prisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: usersRecipe.id,
       }

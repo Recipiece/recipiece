@@ -2,31 +2,31 @@ import { Prisma, User } from "@prisma/client";
 import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookBookSchema } from "../../schema";
+import { CookbookSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listCookBooks = async (req: AuthenticatedRequest, res: Response) => {
+export const listCookbooks = async (req: AuthenticatedRequest, res: Response) => {
   const page = +(req.query?.page ?? 0);
   const pageSize = Math.max(5, Math.min(+(req.query?.pageSize ?? 20), 50));
   const userId = +(req.query?.userId ?? req.user.id);
   const search = req.query?.search;
 
-  const [statusCode, response] = await runListCookBooks(req.user, page, pageSize, userId, search as string);
+  const [statusCode, response] = await runListCookbooks(req.user, page, pageSize, userId, search as string);
   res.status(statusCode).send(response);
 };
 
-const runListCookBooks = async (
+const runListCookbooks = async (
   user: User,
   page: number,
   pageSize: number,
   userId: number,
   search?: string
 ): ApiResponse<{
-  readonly data: CookBookSchema[];
+  readonly data: CookbookSchema[];
   readonly page: number;
   readonly hasNextPage: boolean;
 }> => {
-  let where: Prisma.CookBookWhereInput = {
+  let where: Prisma.CookbookWhereInput = {
     user_id: userId,
   };
 
@@ -43,7 +43,7 @@ const runListCookBooks = async (
 
   const offset = page * pageSize;
 
-  const cookbooks = await prisma.cookBook.findMany({
+  const cookbooks = await prisma.cookbook.findMany({
     where: where,
     skip: offset,
     take: pageSize + 1,

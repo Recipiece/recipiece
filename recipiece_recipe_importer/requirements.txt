@@ -1,0 +1,4 @@
+recipe-scrapers==15.2.1
+fastapi
+requests
+pydantic

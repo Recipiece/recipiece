@@ -2,18 +2,18 @@ import { Prisma, User } from "@prisma/client";
 import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookBookSchema, CreateCookBookSchema, YCreateCookBookSchema } from "../../schema";
+import { CookbookSchema, CreateCookbookSchema, YCreateCookbookSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const createCookBook = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runCreateCookBook(req.user, req.body);
+export const createCookbook = async (req: AuthenticatedRequest, res: Response) => {
+  const [statusCode, response] = await runCreateCookbook(req.user, req.body);
   res.status(statusCode).send(response);
 };
 
-const runCreateCookBook = async (user: User, body: any): ApiResponse<CookBookSchema> => {
-  let cookBookBody: CreateCookBookSchema;
+const runCreateCookbook = async (user: User, body: any): ApiResponse<CookbookSchema> => {
+  let cookbookBody: CreateCookbookSchema;
   try {
-    cookBookBody = await YCreateCookBookSchema.validate(body);
+    cookbookBody = await YCreateCookbookSchema.validate(body);
   } catch (error) {
     return [
       StatusCodes.BAD_REQUEST,
@@ -25,9 +25,9 @@ const runCreateCookBook = async (user: User, body: any): ApiResponse<CookBookSch
   }
 
   try {
-    const createInput: Prisma.CookBookCreateInput = {
-      name: cookBookBody.name,
-      description: cookBookBody.description,
+    const createInput: Prisma.CookbookCreateInput = {
+      name: cookbookBody.name,
+      description: cookbookBody.description,
       user: {
         connect: {
           id: user.id,
@@ -35,12 +35,12 @@ const runCreateCookBook = async (user: User, body: any): ApiResponse<CookBookSch
       },
     };
 
-    const cookBook = await prisma.cookBook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         ...createInput,
       },
     });
-    return [StatusCodes.OK, cookBook];
+    return [StatusCodes.OK, cookbook];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {
       return [

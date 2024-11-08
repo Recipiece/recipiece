@@ -1,29 +1,35 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useListRecipesQuery } from "../../api";
 import { Grid, Input, Label, LoadingSpinner, NotFound, Pager, RecipeCard, Stack } from "../../component";
+import { CookbookContext } from "../../context";
 import { ListRecipeFilters, Recipe } from "../../data";
 
 export const DashboardPage: FC = () => {
   const [page, setPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const { recipeData, isLoading, currentCookbook, setFilters } = useContext(CookbookContext);
 
   const navigate = useNavigate();
 
-  const filters = useMemo(() => {
+  useEffect(() => {
     let f: ListRecipeFilters = {
       page: page,
     };
     if (debouncedSearchTerm) {
       f = { ...f, search: debouncedSearchTerm };
     }
-    return f;
+    setFilters(f);
   }, [page, debouncedSearchTerm]);
 
-  const { data: recipeData, isLoading: isLoadingRecipes } = useListRecipesQuery({
-    ...filters,
-  });
+  /**
+   * If you change the cookbook, clear the search and set the page back to 0
+   */
+  useEffect(() => {
+    setSearchTerm("");
+    setDebouncedSearchTerm("");
+    setPage(0);
+  }, [currentCookbook]);
 
   const recipes = useMemo(() => {
     return recipeData?.data || [];
@@ -49,24 +55,42 @@ export const DashboardPage: FC = () => {
     [navigate]
   );
 
-  const showPager = !isLoadingRecipes && recipes.length > 0;
+  const showPager = !isLoading && recipes.length > 0;
 
-  const showRecipes = !isLoadingRecipes && recipes.length > 0;
+  const showRecipes = !isLoading && recipes.length > 0;
 
-  const showNotFound = !isLoadingRecipes && recipes.length === 0;
+  const showNotFound = !isLoading && recipes.length === 0;
+
+  const notFoundMessage = useMemo(() => {
+    if (currentCookbook) {
+      if (debouncedSearchTerm) {
+        return "There's no recipes matching that search term in this cookbook.";
+      } else {
+        return "There's no recipes in this cookbook. You can add them from the home page!";
+      }
+    } else {
+      if (debouncedSearchTerm) {
+        return "None of your recipes match that search term.";
+      } else {
+        return "You don't have any recipes yet!";
+      }
+    }
+  }, [currentCookbook, debouncedSearchTerm]);
 
   return (
     <Stack>
-      <h1 className="text-2xl block text-center md:text-start md:mr-4">Your Recipes</h1>
+      <h1 className="text-2xl block text-center md:text-start md:mr-4">
+        {currentCookbook && <>{currentCookbook.name}</>}
+        {!currentCookbook && <>Your Recipes</>}
+      </h1>
+      {currentCookbook?.description && <p className="text-lg">{currentCookbook.description}</p>}
       <Label className="grow w-full sm:w-auto">
         Search
-        <Input onChange={(event) => setSearchTerm(event.target.value)} />
+        <Input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
       </Label>
       {showPager && <Pager className="mt-4 mb-4" page={page} hasNextPage={recipeData?.hasNextPage || false} onPage={setPage} />}
-      {isLoadingRecipes && <LoadingSpinner />}
-      {showNotFound && (
-        <NotFound message={!!debouncedSearchTerm ? `No recipes found with a name matching "${debouncedSearchTerm}".` : "You don't have any recipes. Time to get cookin'!"} />
-      )}
+      {isLoading && <LoadingSpinner />}
+      {showNotFound && <NotFound message={notFoundMessage} />}
       {showRecipes && (
         <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {(recipes || []).map((r) => {

@@ -1,5 +1,4 @@
 .DS_Store
-recipiece_logs
 local-recipiece-data
 
 .vscode
@@ -7,3 +6,6 @@ coverage
 node_modules
 .env
 dist
+
+.venv
+__pycache__

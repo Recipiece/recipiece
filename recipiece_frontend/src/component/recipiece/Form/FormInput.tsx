@@ -13,6 +13,7 @@ export interface FormInputProps extends InputProps {
 
 export const FormInput: FC<FormInputProps> = ({ isLoading, name, className, label, instructions, ...restInputProps }) => {
   const form = useFormContext();
+  const { isSubmitting } = form.formState;
 
   const fullClassName = useMemo(() => {
     return cn(className ?? "");
@@ -22,6 +23,7 @@ export const FormInput: FC<FormInputProps> = ({ isLoading, name, className, labe
     <FormField
       control={form.control}
       name={name}
+      disabled={isSubmitting}
       render={({ field }) => {
         return (
           <FormItem className={fullClassName}>

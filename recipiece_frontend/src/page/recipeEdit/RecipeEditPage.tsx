@@ -144,7 +144,7 @@ export const RecipeEditPage: FC = () => {
                   {(isLoading || !isRecipeGetError) && <FormLabel>Recipe Name</FormLabel>}
                   <FormControl>
                     <LoadingGroup isLoading={isLoading} className="w-full h-10">
-                      {recipe && <Input type="text" placeholder="Recipe Name" {...field} />}
+                      {<Input type="text" placeholder="Recipe Name" {...field} />}
                     </LoadingGroup>
                   </FormControl>
                   <FormMessage />
@@ -160,7 +160,7 @@ export const RecipeEditPage: FC = () => {
                 <FormItem className="mb-2">
                   {(isLoading || !isRecipeGetError) && <FormLabel>Description</FormLabel>}
                   <LoadingGroup isLoading={isLoading} className="w-full h-[138px]">
-                    <FormControl>{recipe && <Textarea placeholder="A description of your recipe" rows={5} {...field} />}</FormControl>
+                    <FormControl>{<Textarea placeholder="A description of your recipe" rows={5} {...field} />}</FormControl>
                     {(isLoading || !isRecipeGetError) && <FormDescription>{recipeDescription?.length || 0} / 1000</FormDescription>}
                   </LoadingGroup>
                   <FormMessage />

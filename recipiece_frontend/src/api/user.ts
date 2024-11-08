@@ -1,15 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MutationArgs, QueryArgs, useGet, usePost } from "./request";
+import { MutationArgs, QueryArgs, useGet, usePost } from "./Request";
 import { useContext } from "react";
 import { AuthContext } from "../context";
 import { UserAccount } from "../data";
 
 export const useGetSelfQuery = (args?: QueryArgs) => {
-  const { get } = useGet();
+  const { getter } = useGet();
   const { authToken } = useContext(AuthContext);
 
   const query = async (): Promise<UserAccount> => {
-    const data = await get({
+    const data = await getter({
       path: "/user/self",
       withAuth: true,
     });
@@ -27,11 +27,11 @@ export const useGetSelfQuery = (args?: QueryArgs) => {
 };
 
 export const useLoginUserMutation = (args?: MutationArgs<void>) => {
-  const { post } = usePost();
+  const { poster } = usePost();
   const { setAuthToken } = useContext(AuthContext);
 
   const mutation = async (data: { readonly username: string; readonly password: string }) => {
-    return await post<
+    return await poster<
       {
         readonly username: string;
         readonly password: string;
@@ -57,11 +57,11 @@ export const useLoginUserMutation = (args?: MutationArgs<void>) => {
 };
 
 export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
-  const { post } = usePost();
+  const { poster } = usePost();
   const { setAuthToken } = useContext(AuthContext);
 
   const mutation = async () => {
-    return await post<never, never>({
+    return await poster<never, never>({
       path: "/user/logout",
       body: {} as never,
       withAuth: true,
@@ -82,10 +82,10 @@ export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
 };
 
 export const useCreateUserMutation = (args?: MutationArgs<void>) => {
-  const { post } = usePost();
+  const { poster } = usePost();
 
   const mutation = async (args: { readonly username: string; readonly password: string }) => {
-    return await post<typeof args, never>({
+    return await poster<typeof args, never>({
       path: "/user/create",
       body: args,
       withAuth: false,
@@ -104,12 +104,12 @@ export const useCreateUserMutation = (args?: MutationArgs<void>) => {
 };
 
 export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
-  const { post } = usePost();
+  const { poster } = usePost();
   const queryClient = useQueryClient();
   const { authToken } = useContext(AuthContext);
 
   const mutation = async (args: { readonly token: string }) => {
-    return await post<typeof args, never>({
+    return await poster<typeof args, never>({
       path: "/user/verify-email",
       body: args,
       withAuth: true,
@@ -131,10 +131,10 @@ export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
 };
 
 export const useRequestVerifyAccountMutation = (args?: MutationArgs<void>) => {
-  const { post } = usePost();
+  const { poster } = usePost();
 
   const mutation = async () => {
-    return await post<never, never>({
+    return await poster<never, never>({
       path: "/user/request-token/verify-email",
       body: {} as never,
       withAuth: true,
