@@ -1,20 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useUpdateRecipeMutation } from "../../api";
-import { Button, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, LoadingGroup, NotFound, Textarea } from "../../component";
+import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
+import { Button, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, LoadingGroup, NotFound, Textarea, useToast } from "../../component";
 import { IngredientsForm } from "./IngredientsForm";
 import { StepsForm } from "./StepsForm";
 import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
+import { ParseRecipeFromURLDialog, ParseRecipeFromURLForm } from "../../dialog";
 
 const RecipeFormSchema = z.object({
   name: z.string().min(3).max(100),
   description: z.string().min(3).max(1000),
   steps: z.array(
     z.object({
-      content: z.string().min(3).max(500),
+      content: z.string().min(3),
     })
   ),
   ingredients: z.array(
@@ -31,7 +32,24 @@ type RecipeForm = z.infer<typeof RecipeFormSchema>;
 export const RecipeEditPage: FC = () => {
   const { id: idFromParams } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { toast } = useToast();
+
   const [isRecipeGetError, setIsRecipeGetError] = useState(false);
+  const [isParseFromUrlModalOpen, setIsParseFromUrlModalOpen] = useState(false);
+
+  /**
+   * If we're hitting this page with a search param of source=url, open the url dialog
+   */
+  useEffect(() => {
+    if(searchParams.get("source") === "url") {
+      setIsParseFromUrlModalOpen(true);
+      setSearchParams((prev) => {
+        prev.delete("source");
+        return prev;
+      })
+    }
+  }, [searchParams]);
 
   const isCreatingNewRecipe = useMemo(() => {
     return idFromParams === "new";
@@ -66,6 +84,7 @@ export const RecipeEditPage: FC = () => {
 
   const { mutateAsync: createRecipe } = useCreateRecipeMutation();
   const { mutateAsync: updateRecipe } = useUpdateRecipeMutation();
+  const { mutateAsync: parseRecipe } = useParseRecipeFromURLMutation();
 
   const onSubmit = async (formData: RecipeForm) => {
     const sanitizedFormData: Partial<Recipe> = {
@@ -87,12 +106,20 @@ export const RecipeEditPage: FC = () => {
     };
 
     try {
+      let response: Recipe;
       if (isCreatingNewRecipe) {
-        await createRecipe(sanitizedFormData);
+        response = (await createRecipe(sanitizedFormData)).data;
       } else {
-        await updateRecipe(sanitizedFormData);
+        response = (await updateRecipe(sanitizedFormData)).data;
       }
-    } catch (err) {}
+      navigate(`/recipe/view/${response.id}`);
+    } catch (err) {
+      toast({
+        title: "Unable to Save Recipe",
+        description: "This recipe could not be saved. Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
 
   const isLoading = useMemo(() => {
@@ -131,8 +158,28 @@ export const RecipeEditPage: FC = () => {
 
   const recipeDescription = form.watch("description");
 
+  const onParseRecipeDialogSubmit = async (data: ParseRecipeFromURLForm) => {
+    try {
+      const response = await parseRecipe(data.url);
+      form.reset({ ...response.data });
+      setIsParseFromUrlModalOpen(false);
+      toast({
+        title: "Recipe Parsed",
+        description: "This recipe was successfully imported.",
+      });
+    } catch {
+      setIsParseFromUrlModalOpen(false);
+      toast({
+        title: "Recipe Parsing Failed",
+        description: "This recipe could not be imported.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="p-4">
+      <ParseRecipeFromURLDialog isOpen={isParseFromUrlModalOpen} setIsOpen={setIsParseFromUrlModalOpen} onSubmit={onParseRecipeDialogSubmit} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField

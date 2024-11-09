@@ -1,7 +1,8 @@
 import { FC, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, Grid, LoadingGroup, NotFound } from "../../component";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, Grid, Label, LoadingGroup, NotFound } from "../../component";
+import { formatIngredientAmount } from "../../util";
 
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
@@ -74,15 +75,19 @@ export const RecipeViewPage: FC = () => {
               <AccordionTrigger>Ingredients</AccordionTrigger>
               <AccordionContent>
                 <Card>
-                  <CardContent>
+                  <CardContent className="p-4">
                     <Grid className="sm:grid-cols-3">
                       {(recipe?.ingredients || []).map((ing) => {
                         return (
-                          <div key={ing.id} className="h-8">
-                            <Checkbox onClick={() => onIngredientChecked(ing.id)} className="mr-2" checked={checkedOffIngredients.includes(ing.id)} />
-                            <p onClick={() => onIngredientChecked(ing.id)} className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}>
-                              {ing.name}
-                            </p>
+                          <div key={ing.id} className="flex flex-col" onClick={() => onIngredientChecked(ing.id)}>
+                            <div className="inline-flex items-center">
+                              <Checkbox className="mr-2" checked={checkedOffIngredients.includes(ing.id)} />
+                              <span className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}>{ing.name}</span>
+                            </div>
+                            <div className={`ml-6 inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}>
+                              {!!ing.amount && <>{formatIngredientAmount(ing.amount)} </>}
+                              {!!ing.unit && <>{ing.unit}</>}
+                            </div>
                           </div>
                         );
                       })}
@@ -95,10 +100,10 @@ export const RecipeViewPage: FC = () => {
               <AccordionTrigger>Steps</AccordionTrigger>
               <AccordionContent>
                 <Card>
-                  <CardContent>
+                  <CardContent className="p-4">
                     {(recipe?.steps || []).map((step) => {
                       return (
-                        <div key={step.id} className="mb-4">
+                        <div key={step.id} className="mb-4 flex items-top">
                           <Checkbox checked={checkedOffSteps.includes(step.id)} onClick={() => onStepChecked(step.id)} className="mr-2" />
                           <p onClick={() => onStepChecked(step.id)} className={`inline cursor-pointer ${checkedOffSteps.includes(step.id) ? "line-through" : ""}`}>
                             {step.content}

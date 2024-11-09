@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from .model.recipe import ParseRecipeRequest, ParseRecipeResponse
-from recipe_scrapers import scrape_html
-import requests
+from .api.recipe import parse_recipe_from_url
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 app = FastAPI()
 
@@ -12,6 +15,4 @@ def hello_world():
 @app.post("/recipe/parse")
 def root(request: ParseRecipeRequest) -> ParseRecipeResponse:
     url = request.source_url
-    html = requests.get(url, headers={"User-Agent": f"Recipiece"}).content
-    scraper = scrape_html(html, org_url=url)
-    return scraper.to_json()
+    return parse_recipe_from_url(url)

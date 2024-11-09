@@ -17,6 +17,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }, 1000);
 });
 
+
 ROUTES.forEach((route) => {
   // console.log(`configuring routing for ${route.path}`);
   switch (route.authentication) {
@@ -27,7 +28,7 @@ ROUTES.forEach((route) => {
       app.use(route.path, basicAuthMiddleware);
       break;
     case "none":
-      // console.warn(`  no auth specified for ${route.path}!`);
+      console.warn(`  no auth specified for ${route.path}!`);
       break;
   }
 

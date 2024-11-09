@@ -148,3 +148,27 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<void>) => {
     },
   });
 };
+
+export const useParseRecipeFromURLMutation = (args?: MutationArgs<void>) => {
+  const { poster } = usePost();
+
+  const mutation = async (url: string) => {
+    return await poster<{readonly source_url: string}, Recipe>({
+      path: "/recipe/parse/url",
+      body: {
+        source_url: url,
+      },
+      withAuth: true,
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};

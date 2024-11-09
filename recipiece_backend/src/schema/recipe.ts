@@ -61,6 +61,24 @@ export const YCreateRecipeSchema = object({
 
 export interface CreateRecipeSchema extends InferType<typeof YCreateRecipeSchema> {}
 
+export const YCreateRecipeFromURLSchema = object({
+  source_url: string().required(),
+}).strict().noUnknown();
+
+export interface CreateRecipeFromURLSchema extends InferType<typeof YCreateRecipeFromURLSchema> {}
+
+export interface ParsedFromURLRecipe {
+  readonly author?: string;
+  readonly description?: string;
+  readonly parsed_ingredients?: {
+    readonly name: string;
+    readonly amount?: string;
+    readonly unit?: string;
+  }[];
+  readonly title?: string;
+  readonly instructions_list?: string[];
+}
+
 /**
  * Update recipe schema
  */

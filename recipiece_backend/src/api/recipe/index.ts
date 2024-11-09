@@ -3,6 +3,7 @@ import { createRecipe } from "./createRecipe";
 import { deleteRecipe } from "./deleteRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
+import { parseRecipeFromUrl } from "./parseFromUrl";
 import { updateRecipe } from "./updateRecipe";
 
 export const RECIPE_ROUTES: Route[] = [
@@ -17,6 +18,12 @@ export const RECIPE_ROUTES: Route[] = [
     authentication: "token",
     method: "PUT",
     function: updateRecipe,
+  },
+  {
+    path: "/recipe/parse/url",
+    authentication: "token",
+    method: "POST",
+    function: parseRecipeFromUrl,
   },
   {
     path: "/recipe/list",

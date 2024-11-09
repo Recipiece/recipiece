@@ -9,11 +9,19 @@ class ParseRecipeIngredientGroup(BaseModel):
     ingredients: List[str] = []
     purpose: Optional[str] = None
 
+
+class ParsedIngredient(BaseModel):
+    name: Optional[str]
+    amount: Optional[str]
+    unit: Optional[str]
+
+
 class ParseRecipeResponse(BaseModel):
     author: Optional[str] = None
     description: Optional[str] = None
     ingredient_groups: List[ParseRecipeIngredientGroup] = []
     ingredients: Optional[List[str]] = []
+    parsed_ingredients: Optional[List[ParsedIngredient]] = []
     instructions_list: Optional[List[str]] = []
     title: Optional[str] = None
     total_time: Optional[Union[str, int]] = None

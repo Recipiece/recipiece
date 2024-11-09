@@ -24,12 +24,15 @@ export const RecipieceMenubar: FC = () => {
 
   const { setCurrentCookbook } = useContext(CookbookContext);
 
-  const onSelectCookbook = useCallback((cookbook?: Cookbook) => {
-    if (location.pathname !== "/dashboard") {
-      navigate("/dashboard");
-    }
-    setCurrentCookbook(cookbook);
-  }, [location]);
+  const onSelectCookbook = useCallback(
+    (cookbook?: Cookbook) => {
+      if (location.pathname !== "/dashboard") {
+        navigate("/dashboard");
+      }
+      setCurrentCookbook(cookbook);
+    },
+    [location]
+  );
 
   const onGoHome = useCallback(() => {
     setCurrentCookbook(undefined);
@@ -41,16 +44,16 @@ export const RecipieceMenubar: FC = () => {
   });
 
   return (
-    <CreateCookbookDialog>
-      <Menubar className="rounded-none border-0 p-4 h-12 bg-primary text-white">
-        <RecipieceHeader className="text-center w-full md:w-auto md:mr-auto" />
-        <span className="hidden w-0 sm:w-auto sm:block">
-          <MenubarMenu>
-            <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
-          </MenubarMenu>
-        </span>
+    <Menubar className="rounded-none border-0 p-4 h-12 bg-primary text-white">
+      <RecipieceHeader className="text-center w-full md:w-auto md:mr-auto" />
+      <span className="hidden w-0 sm:w-auto sm:block">
+        <MenubarMenu>
+          <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
+        </MenubarMenu>
+      </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+      <span className="hidden w-0 sm:w-auto sm:block">
+        <CreateCookbookDialog>
           <MenubarMenu>
             <MenubarTrigger>Cookbooks</MenubarTrigger>
             <MenubarContent>
@@ -70,27 +73,28 @@ export const RecipieceMenubar: FC = () => {
               </LoadingGroup>
             </MenubarContent>
           </MenubarMenu>
-        </span>
+        </CreateCookbookDialog>
+      </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
-          <MenubarMenu>
-            <MenubarTrigger>Create</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem onClick={() => navigate("/recipe/edit/new")}>New Recipe</MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-        </span>
+      <span className="hidden w-0 sm:w-auto sm:block">
+        <MenubarMenu>
+          <MenubarTrigger>Create</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem onClick={() => navigate("/recipe/edit/new?source=url")}>Recipe From URL</MenubarItem>
+            <MenubarItem onClick={() => navigate("/recipe/edit/new")}>New Recipe</MenubarItem>
+          </MenubarContent>
+        </MenubarMenu>
+      </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
-          <MenubarMenu>
-            <MenubarTrigger>Account</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem onClick={() => navigate("/account")}>My Account</MenubarItem>
-              <MenubarItem onClick={() => logout()}>Sign Out</MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-        </span>
-      </Menubar>
-    </CreateCookbookDialog>
+      <span className="hidden w-0 sm:w-auto sm:block">
+        <MenubarMenu>
+          <MenubarTrigger>Account</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem onClick={() => navigate("/account")}>My Account</MenubarItem>
+            <MenubarItem onClick={() => logout()}>Sign Out</MenubarItem>
+          </MenubarContent>
+        </MenubarMenu>
+      </span>
+    </Menubar>
   );
 };

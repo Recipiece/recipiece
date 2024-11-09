@@ -5285,6 +5285,16 @@ fraction.js@^4.3.7:
   resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.3.7.tgz#06ca0085157e42fda7f9e726e79fefc4068840f7"
   integrity sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==
 
+fraction.js@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-5.1.1.tgz#5d190636d0af2bb681805bace128822bebf3d3f1"
+  integrity sha512-1ZU8WTKq/emjynSmw+in31WLl9ll1c6kV1quuuQDXse1V+Eke5Fxy9VMLFR+reGOQGaW2Od87NJalvtJiTCDUA==
+
+fractions@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/fractions/-/fractions-1.0.2.tgz#f2973014fed279cad57f832e129849982e287ffd"
+  integrity sha512-9BdJf/I1GEwAIEVsTIlcQwO6gMQuF17AVXYsfEIMi5z7lMALeM+NxJEfx0jvi3dc0+M0us0CjJkF6h1PH3Ge6g==
+
 fresh@0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
