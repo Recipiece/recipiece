@@ -1,15 +1,12 @@
-import { Recipe, User } from "@prisma/client";
-import { Response } from "express";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { prisma } from "../../database";
+import { Recipe } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
+import { prisma } from "../../database";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getRecipe = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runGetRecipe(req.user, +req.params.id);
-  res.status(statusCode).send(response);
-};
+export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<Recipe> => {
+  const recipeId = +req.params.id;
+  const user = req.user;
 
-const runGetRecipe = async (user: User, recipeId: number): ApiResponse<Recipe> => {
   const recipe = await prisma.recipe.findUnique({
     where: {
       id: recipeId,

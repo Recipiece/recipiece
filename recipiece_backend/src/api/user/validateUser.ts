@@ -1,39 +1,22 @@
-import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ValidateUserSchema, YValidateUserSchema } from "../../schema";
-import { ApiResponse } from "../../types";
-import { UserValidationTokenTypes } from "../../util/constant";
 import { DateTime } from "luxon";
+import { prisma } from "../../database";
+import { ValidateUserRequestSchema, ValidateUserResponseSchema } from "../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { UserValidationTokenTypes } from "../../util/constant";
 
-export const validateUser = async (req: Request, res: Response) => {
-  const [responseCode, response] = await runValidateUser(req.body);
-  res.status(responseCode).send(response);
-};
-
-export const runValidateUser = async (body: any): ApiResponse<{ validated: boolean }> => {
-  let validateSchema: ValidateUserSchema;
-  try {
-    validateSchema = await YValidateUserSchema.validate(body);
-  } catch (error) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to create a recipe",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const validateUser = async (request: AuthenticatedRequest<ValidateUserRequestSchema>): ApiResponse<ValidateUserResponseSchema> => {
+  const { token } = request.body;
 
   const accountToken = await prisma.userValidationToken.findUnique({
     where: {
-      id: validateSchema.token,
+      id: token,
       purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
     },
   });
 
   if (!accountToken) {
-    console.log(`no token found for ${validateSchema.token}`);
+    console.log(`no token found for ${token}`);
     return [
       StatusCodes.NOT_FOUND,
       {
@@ -48,10 +31,10 @@ export const runValidateUser = async (body: any): ApiResponse<{ validated: boole
   });
 
   if (now > tokenExpiry) {
-    console.log(`${validateSchema.token} was expired!`);
+    console.log(`${token} was expired!`);
     await prisma.userValidationToken.delete({
       where: {
-        id: validateSchema.token,
+        id: token,
       },
     });
 

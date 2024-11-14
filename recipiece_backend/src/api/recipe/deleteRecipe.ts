@@ -1,15 +1,11 @@
-import { User } from "@prisma/client";
-import { Response } from "express";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { prisma } from "../../database";
 import { StatusCodes } from "http-status-codes";
+import { prisma } from "../../database";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const deleteRecipe = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runDeleteRecipe(req.user, +req.params.id);
-  res.status(statusCode).send(response);
-};
+export const deleteRecipe = async (req: AuthenticatedRequest): ApiResponse<{ readonly deleted: boolean }> => {
+  const recipeId = +req.params.id;
+  const user = req.user;
 
-const runDeleteRecipe = async (user: User, recipeId: number): ApiResponse<{ readonly deleted: boolean }> => {
   const recipe = await prisma.recipe.findUnique({
     where: {
       id: recipeId,

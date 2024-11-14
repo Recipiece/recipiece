@@ -1,10 +1,7 @@
-import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../../types";
 import { StatusCodes } from "http-status-codes";
+import { UserSchema } from "../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getUserByToken = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  res.status(StatusCodes.OK).send(req.user);
+export const getUserByToken = async (req: AuthenticatedRequest): ApiResponse<UserSchema> => {
+  return [StatusCodes.OK, req.user];
 };

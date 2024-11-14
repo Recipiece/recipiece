@@ -1,32 +1,23 @@
-import { Prisma, Recipe, User } from "@prisma/client";
-import { Response } from "express";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { prisma } from "../../database";
+import { Prisma, Recipe } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
+import { prisma } from "../../database";
+import { ListRecipesQuerySchema } from "../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listRecipes = async (req: AuthenticatedRequest, res: Response) => {
-  const page = +(req.query?.page ?? 0);
-  const pageSize = Math.max(5, Math.min(+(req.query?.pageSize ?? 20), 50));
-  const userId = +(req.query?.userId ?? req.user.id);
-  const search = req.query?.search;
-  const cookbookId = req.query?.cookbookId;
-
-  const [statusCode, response] = await runListRecipes(req.user, page, pageSize, userId, search as string, cookbookId as unknown as number);
-  res.status(statusCode).send(response);
-};
-
-const runListRecipes = async (
-  user: User,
-  page: number,
-  pageSize: number,
-  userId: number,
-  search?: string,
-  cookbookId?: number
-): ApiResponse<{
+export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuerySchema>): ApiResponse<{
   readonly data: Recipe[];
   readonly page: number;
   readonly hasNextPage: boolean;
 }> => {
+  const query = req.query;
+  const user = req.user;
+
+  const userId = query.user_id ?? user.id;
+  const pageSize = query.page_size;
+  const page = query.page_number;
+  const search = query.search;
+  const cookbookId = query.cookbook_id;
+
   let where: Prisma.RecipeWhereInput = {
     user_id: userId,
   };

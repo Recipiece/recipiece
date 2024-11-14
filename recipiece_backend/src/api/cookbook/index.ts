@@ -1,3 +1,4 @@
+import { YAddRecipeToCookbookRequestSchema, YCookbookSchema, YCreateCookbookRequestSchema, YRemoveRecipeFromCookbookRequestSchema, YUpdateCookbookRequestSchema } from "../../schema";
 import { Route } from "../../types";
 import { addRecipeToCookbook } from "./addRecipeToCookbook";
 import { createCookbook } from "./createCookbook";
@@ -13,12 +14,15 @@ export const COOKBOOK_ROUTES: Route[] = [
     authentication: "token",
     method: "POST",
     function: createCookbook,
+    requestSchema: YCreateCookbookRequestSchema,
+    responseSchema: YCookbookSchema,
   },
   {
     path: "/cookbook/recipe/add",
     authentication: "token",
     method: "POST",
     function: addRecipeToCookbook,
+    requestSchema: YAddRecipeToCookbookRequestSchema,
   },
   {
     path: "/cookbook/:id(\\d+)",
@@ -43,11 +47,14 @@ export const COOKBOOK_ROUTES: Route[] = [
     authentication: "token",
     method: "POST",
     function: removeRecipeFromCookbook,
+    requestSchema: YRemoveRecipeFromCookbookRequestSchema,
   },
   {
     path: "/cookbook",
     authentication: "token",
     method: "PUT",
     function: updateCookbook,
+    requestSchema: YUpdateCookbookRequestSchema,
+    responseSchema: YCookbookSchema,
   },
 ];

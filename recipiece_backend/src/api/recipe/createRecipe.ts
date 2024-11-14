@@ -1,28 +1,12 @@
-import { Prisma, Recipe, User } from "@prisma/client";
-import { Response } from "express";
+import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CreateRecipeSchema, RecipeSchema, YCreateRecipeSchema } from "../../schema";
+import { CreateRecipeRequestSchema, RecipeSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const createRecipe = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runCreateRecipe(req.user, req.body);
-  res.status(statusCode).send(response);
-};
-
-const runCreateRecipe = async (user: User, body: any): ApiResponse<RecipeSchema> => {
-  let recipeBody: CreateRecipeSchema;
-  try {
-    recipeBody = await YCreateRecipeSchema.validate(body);
-  } catch (error) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to create a recipe",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequestSchema>): ApiResponse<RecipeSchema> => {
+  const recipeBody = req.body;
+  const user = req.user;
 
   try {
     const createInput: Prisma.RecipeCreateInput = {

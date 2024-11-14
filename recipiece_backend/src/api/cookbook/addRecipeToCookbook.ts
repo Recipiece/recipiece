@@ -1,28 +1,11 @@
-import { User } from "@prisma/client";
-import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { AddRecipeToCookbookSchema, YAddRecipeToCookbookSchema } from "../../schema";
+import { AddRecipeToCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const addRecipeToCookbook = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runAddRecipeToCookbook(req.user, req.body);
-  res.status(statusCode).send(response);
-};
-
-const runAddRecipeToCookbook = async (user: User, body: any): ApiResponse<{}> => {
-  let attachBody: AddRecipeToCookbookSchema;
-  try {
-    attachBody = await YAddRecipeToCookbookSchema.validate(body);
-  } catch (error) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to add a recipe to a cookbook",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>): ApiResponse<{}> => {
+  const attachBody = req.body;
+  const user = req.user;
 
   const cookbook = await prisma.cookbook.findFirst({
     where: {

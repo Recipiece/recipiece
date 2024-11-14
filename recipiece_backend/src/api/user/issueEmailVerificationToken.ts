@@ -1,5 +1,3 @@
-import { User } from "@prisma/client";
-import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { prisma } from "../../database";
@@ -7,12 +5,9 @@ import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";
 import { sendAccountVerificationEmail } from "../../util/email";
 
-export const issueEmailVerificationToken = async (req: AuthenticatedRequest, res: Response) => {
-  const [responseCode, response] = await runIssueEmailVerificationToken(req.user);
-  res.status(responseCode).send(response);
-};
+export const issueEmailVerificationToken = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+  const user = request.user;
 
-export const runIssueEmailVerificationToken = async (user: User): ApiResponse<{}> => {
   const accountToken = await prisma.userValidationToken.findFirst({
     where: {
       user_id: user.id,

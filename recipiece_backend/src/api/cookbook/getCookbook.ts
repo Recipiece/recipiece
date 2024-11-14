@@ -1,16 +1,12 @@
-import { User } from "@prisma/client";
-import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { CookbookSchema } from "../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getCookbook = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runGetCookbook(req.user, +req.params.id);
-  res.status(statusCode).send(response);
-};
+export const getCookbook = async (req: AuthenticatedRequest): ApiResponse<CookbookSchema> => {
+  const user = req.user;
+  const cookbookId = +req.params.id;
 
-const runGetCookbook = async (user: User, cookbookId: number): ApiResponse<CookbookSchema> => {
   const cookbook = await prisma.cookbook.findFirst({
     where: {
       id: cookbookId,

@@ -147,3 +147,20 @@ model ShoppingListItem {
 
   shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id])
 }
+
+
+model KnownIngredient {
+  @@map("known_ingredients")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  ingredient_name String @unique
+  // base weight
+  grams Float
+  // base volume
+  us_cups Float
+  // for unknown
+  unitless_amount Float?
+  preferred_measure String?
+}

@@ -1,33 +1,12 @@
-import { Prisma, Recipe, RecipeIngredient, RecipeStep, User } from "@prisma/client";
-import { Response } from "express";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { prisma } from "../../database";
+import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
-import { RecipeSchema, UpdateRecipeSchema, YUpdateRecipeSchema } from "../../schema";
+import { prisma } from "../../database";
+import { RecipeSchema, UpdateRecipeRequestSchema } from "../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-type UpdateRecipeBody = Omit<Recipe, "created_at" | "user_id"> & {
-  readonly ingredients: Omit<RecipeIngredient, "id">[];
-  readonly steps: Omit<RecipeStep, "id">[];
-};
-
-export const updateRecipe = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runUpdateRecipe(req.user, req.body as UpdateRecipeBody);
-  res.status(statusCode).send(response);
-};
-
-const runUpdateRecipe = async (user: User, body: any): ApiResponse<RecipeSchema> => {
-  let recipeBody: UpdateRecipeSchema;
-  try {
-    recipeBody = await YUpdateRecipeSchema.validate(body);
-  } catch (error) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to update a recipe",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequestSchema>): ApiResponse<RecipeSchema> => {
+  const recipeBody = req.body;
+  const user = req.user;
 
   const recipe = await prisma.recipe.findUnique({
     where: {

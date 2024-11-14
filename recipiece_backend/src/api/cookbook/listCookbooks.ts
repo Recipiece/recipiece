@@ -1,31 +1,23 @@
-import { Prisma, User } from "@prisma/client";
-import { Response } from "express";
+import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookbookSchema } from "../../schema";
+import { CookbookSchema, ListCookbooksQuerySchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listCookbooks = async (req: AuthenticatedRequest, res: Response) => {
-  const page = +(req.query?.page ?? 0);
-  const pageSize = Math.max(5, Math.min(+(req.query?.pageSize ?? 20), 50));
-  const userId = +(req.query?.userId ?? req.user.id);
-  const search = req.query?.search;
-
-  const [statusCode, response] = await runListCookbooks(req.user, page, pageSize, userId, search as string);
-  res.status(statusCode).send(response);
-};
-
-const runListCookbooks = async (
-  user: User,
-  page: number,
-  pageSize: number,
-  userId: number,
-  search?: string
+export const listCookbooks = async (
+  req: AuthenticatedRequest<any, ListCookbooksQuerySchema>
 ): ApiResponse<{
   readonly data: CookbookSchema[];
   readonly page: number;
   readonly hasNextPage: boolean;
 }> => {
+  const user = req.user;
+
+  const page = req.query.page_number;
+  const pageSize = req.query.page_size;
+  const userId = req.query.user_id ?? user.id;
+  const search = req.query.search;
+
   let where: Prisma.CookbookWhereInput = {
     user_id: userId,
   };

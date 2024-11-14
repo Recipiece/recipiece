@@ -1,24 +1,13 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
+import { CreateUserRequestSchema } from "../../schema";
 import { ApiResponse } from "../../types";
 import { hashPassword } from "../../util/password";
 
-export const createUser = async (req: Request, res: Response) => {
-  const [responseCode, response] = await runCreateUser(req.body.username, req.body.password);
-  res.status(responseCode).send(response);
-};
-
-export const runCreateUser = async (username?: string, password?: string): ApiResponse<User> => {
-  if (!username || !password) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Missing username or password",
-      },
-    ];
-  }
+export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<User> => {
+  const { username, password } = request.body;
 
   try {
     const hashedPassword = await hashPassword(password);

@@ -2,27 +2,12 @@ import { Prisma, User } from "@prisma/client";
 import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookbookSchema, CreateCookbookSchema, YCreateCookbookSchema } from "../../schema";
+import { CookbookSchema, CreateCookbookRequestSchema, YCreateCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const createCookbook = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runCreateCookbook(req.user, req.body);
-  res.status(statusCode).send(response);
-};
-
-const runCreateCookbook = async (user: User, body: any): ApiResponse<CookbookSchema> => {
-  let cookbookBody: CreateCookbookSchema;
-  try {
-    cookbookBody = await YCreateCookbookSchema.validate(body);
-  } catch (error) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to create a cookbook",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const createCookbook = async (req: AuthenticatedRequest<CreateCookbookRequestSchema>): ApiResponse<CookbookSchema> => {
+  const cookbookBody = req.body;
+  const user = req.user;
 
   try {
     const createInput: Prisma.CookbookCreateInput = {

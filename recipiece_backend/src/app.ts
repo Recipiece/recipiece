@@ -1,9 +1,9 @@
 import bodyParser from "body-parser";
 import cors from "cors";
-import express, { Express, NextFunction, Request, Response } from "express";
+import express, { Express, NextFunction, Request, RequestHandler, Response } from "express";
 import morgan from "morgan";
 import { ROUTES } from "./api";
-import { basicAuthMiddleware, tokenAuthMiddleware } from "./middleware";
+import { basicAuthMiddleware, tokenAuthMiddleware, validateRequestBodySchema, validateRequestParamsSchema, validateResponseSchema } from "./middleware";
 
 const app: Express = express();
 
@@ -17,37 +17,58 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }, 1000);
 });
 
-
 ROUTES.forEach((route) => {
-  // console.log(`configuring routing for ${route.path}`);
+  const routeHandlers: RequestHandler[] = [];
+
+  // set up authentication first
+  console.log(`configuring routing for ${route.path}`);
   switch (route.authentication) {
     case "token":
-      app.use(route.path, tokenAuthMiddleware);
+      routeHandlers.push(tokenAuthMiddleware);
       break;
     case "basic":
-      app.use(route.path, basicAuthMiddleware);
+      routeHandlers.push(basicAuthMiddleware);
       break;
     case "none":
       console.warn(`  no auth specified for ${route.path}!`);
       break;
   }
 
+  if (route.requestSchema) {
+    switch (route.method) {
+      case "POST":
+      case "PUT":
+        routeHandlers.push(validateRequestBodySchema(route.requestSchema));
+        break;
+      case "GET":
+      case "DELETE":
+        routeHandlers.push(validateRequestParamsSchema(route.requestSchema));
+        break;
+    }
+  }
+
+  routeHandlers.push(async (req, res) => {
+    // @ts-ignore
+    const [statusCode, responseBody] = await route.function(req);
+    res.status(statusCode).send(responseBody);
+  });
+
+  if (route.responseSchema) {
+    routeHandlers.push(validateResponseSchema(route.responseSchema));
+  }
+
   switch (route.method) {
     case "POST":
-      // @ts-ignore
-      app.post(route.path, route.function);
+      app.post(route.path, ...routeHandlers);
       break;
     case "GET":
-      // @ts-ignore
-      app.get(route.path, route.function);
+      app.get(route.path, ...routeHandlers);
       break;
     case "PUT":
-      // @ts-ignore
-      app.put(route.path, route.function);
+      app.put(route.path, ...routeHandlers);
       break;
     case "DELETE":
-      // @ts-ignore
-      app.delete(route.path, route.function);
+      app.delete(route.path, ...routeHandlers);
       break;
   }
 });

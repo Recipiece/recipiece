@@ -1,28 +1,11 @@
-import { User } from "@prisma/client";
-import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { RemoveRecipeFromCookbookSchema, YRemoveRecipeFromCookbookSchema } from "../../schema";
+import { RemoveRecipeFromCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const removeRecipeFromCookbook = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runRemoveRecipeFromCookbook(req.user, req.body);
-  res.status(statusCode).send(response);
-};
-
-const runRemoveRecipeFromCookbook = async (user: User, body: any): ApiResponse<{}> => {
-  let removeBody: RemoveRecipeFromCookbookSchema;
-  try {
-    removeBody = await YRemoveRecipeFromCookbookSchema.validate(body);
-  } catch (error) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to remove a recipe from a cookbook",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>): ApiResponse<{}> => {
+  const removeBody = req.body;
+  const user = req.user;
 
   const cookbook = await prisma.cookbook.findFirst({
     where: {

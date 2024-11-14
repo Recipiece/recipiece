@@ -1,11 +1,12 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { Request, Response, ParamsDictionary } from "express";
+import { ObjectSchema } from "yup";
 
-export type AuthenticatedRequest = Request & { readonly user: User };
+export type AuthenticatedRequest<BodyType = any, QueryType = any> = Request<any, any, BodyType, QueryType> & { readonly user: User };
 
-export type ApiMethod =
-  | ((req: Request, res: Response) => void | Promise<void>)
-  | ((req: AuthenticatedRequest, res: Response) => void | Promise<void>);
+export type ApiMethod<BodyType = any, QueryType = any, ResponseType = any> =
+  | ((req: Request<any, any, BodyType, QueryType>) => ResponseType | Promise<ResponseType>)
+  | ((req: AuthenticatedRequest<BodyType, QueryType>) => ResponseType | Promise<ResponseType>);
 
 export interface ErrorResponse {
   readonly message: string;
@@ -19,4 +20,6 @@ export interface Route {
   readonly function: ApiMethod;
   readonly path: string;
   readonly authentication: "token" | "basic" | "none";
+  readonly requestSchema?: ObjectSchema;
+  readonly responseSchema?: ObjectSchema;
 }

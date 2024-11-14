@@ -1,18 +1,10 @@
-import { Response } from "express";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import jwt from "jsonwebtoken";
 import { StatusCodes } from "http-status-codes";
+import jwt from "jsonwebtoken";
 import { Redis } from "../../database";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const logoutUser = async (req: AuthenticatedRequest, res: Response) => {
-  // we've made it through token auth, so the token must be there
-  const [responseCode, response] = await runLogoutUser(
-    req.headers.authorization!
-  );
-  res.status(responseCode).send(response);
-};
-
-const runLogoutUser = async (token: string): ApiResponse<{}> => {
+export const logoutUser = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+  const token = request.headers.authorization!
   const tokenSanitized = token.replace("Bearer", "").trim();
 
   try {

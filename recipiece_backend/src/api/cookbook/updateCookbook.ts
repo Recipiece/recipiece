@@ -1,29 +1,11 @@
-import { User } from "@prisma/client";
-import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookbookSchema, UpdateCookbookSchema, YUpdateCookbookSchema } from "../../schema";
+import { CookbookSchema, UpdateCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateCookbook = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runUpdateCookbook(req.user, req.body);
-  res.status(statusCode).send(response);
-};
-
-const runUpdateCookbook = async (user: User, body: any): ApiResponse<CookbookSchema> => {
-  let cookbookBody: UpdateCookbookSchema;
-  try {
-    cookbookBody = await YUpdateCookbookSchema.validate(body);
-  } catch (error) {
-    console.error(error);
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to update a cookbook",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const updateCookbook = async (req: AuthenticatedRequest<UpdateCookbookRequestSchema>): ApiResponse<CookbookSchema> => {
+  const cookbookBody = req.body;
+  const user = req.user;
 
   const cookbook = await prisma.cookbook.findUnique({
     where: {

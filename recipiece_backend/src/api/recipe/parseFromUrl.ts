@@ -1,27 +1,9 @@
-import { User } from "@prisma/client";
-import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { CreateRecipeFromURLSchema, ParsedFromURLRecipe, RecipeIngredientSchema, RecipeSchema, YCreateRecipeFromURLSchema } from "../../schema";
+import { ParseRecipeFromURLRequestSchema, ParsedFromURLRecipe, RecipeSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const parseRecipeFromUrl = async (req: AuthenticatedRequest, res: Response) => {
-  const [statusCode, response] = await runParseRecipeFromUrl(req.user, req.body);
-  res.status(statusCode).send(response);
-};
-
-const runParseRecipeFromUrl = async (user: User, body: any): ApiResponse<RecipeSchema> => {
-  let recipeBody: CreateRecipeFromURLSchema;
-  try {
-    recipeBody = await YCreateRecipeFromURLSchema.validate(body);
-  } catch (error) {
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Invalid request to create a recipe",
-        errors: (error as { errors: any[] })?.errors || [],
-      },
-    ];
-  }
+export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>): ApiResponse<RecipeSchema> => {
+  const recipeBody = req.body;
 
   try {
     const url = `${process.env.APP_RECIPE_PARSER_SERVICE_URL!}/recipe/parse`;

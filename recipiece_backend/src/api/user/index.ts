@@ -1,10 +1,10 @@
+import { YCreateUserRequestSchema, YCreateUserResponseSchema, YLoginResponseSchema, YUserSchema, YValidateUserRequestSchema, YValidateUserResponseSchema } from "../../schema";
 import { Route } from "../../types";
 import { createUser } from "./createUser";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
-import { requestExportData } from "./requestExportData";
 import { validateUser } from "./validateUser";
 
 export const LOGIN_ROUTES: Route[] = [
@@ -13,6 +13,7 @@ export const LOGIN_ROUTES: Route[] = [
     method: "POST",
     function: loginUser,
     authentication: "basic",
+    responseSchema: YLoginResponseSchema,
   },
   {
     path: "/user/logout",
@@ -25,18 +26,23 @@ export const LOGIN_ROUTES: Route[] = [
     method: "POST",
     function: createUser,
     authentication: "none",
+    requestSchema: YCreateUserRequestSchema,
+    responseSchema: YCreateUserResponseSchema,
   },
   {
     path: "/user/self",
     method: "GET",
     function: getUserByToken,
     authentication: "token",
+    responseSchema: YUserSchema,
   },
   {
     path: "/user/verify-email",
     method: "POST",
     function: validateUser,
     authentication: "token",
+    requestSchema: YValidateUserRequestSchema,
+    responseSchema: YValidateUserResponseSchema,
   },
   {
     path: "/user/request-token/verify-email",
@@ -44,10 +50,10 @@ export const LOGIN_ROUTES: Route[] = [
     function: issueEmailVerificationToken,
     authentication: "token",
   },
-  {
-    path: "/user/data/export",
-    method: "POST",
-    function: requestExportData,
-    authentication: "token",
-  },
+  // {
+  //   path: "/user/data/export",
+  //   method: "POST",
+  //   function: requestExportData,
+  //   authentication: "token",
+  // },
 ];

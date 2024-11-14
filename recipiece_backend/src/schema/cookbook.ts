@@ -1,4 +1,5 @@
 import { boolean, InferType, number, object, string } from "yup";
+import { YListQuerySchema } from "./list";
 
 export const YCookbookSchema = object({
   id: number().required(),
@@ -14,44 +15,54 @@ export interface CookbookSchema extends InferType<typeof YCookbookSchema> {}
 /**
  * Create cookbook schema
  */
-export const YCreateCookbookSchema = object({
+export const YCreateCookbookRequestSchema = object({
   name: string().required(),
   description: string().notRequired(),
   private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
-export interface CreateCookbookSchema extends InferType<typeof YCreateCookbookSchema> {}
+export interface CreateCookbookRequestSchema extends InferType<typeof YCreateCookbookRequestSchema> {}
 
 /**
  * Update cookbook schema
  */
-export const YUpdateCookbookSchema = object({
+export const YUpdateCookbookRequestSchema = object({
   id: number().required(),
   name: string().notRequired(),
   description: string().notRequired(),
   private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
-export interface UpdateCookbookSchema extends InferType<typeof YUpdateCookbookSchema> {}
+export interface UpdateCookbookRequestSchema extends InferType<typeof YUpdateCookbookRequestSchema> {}
 
 
 /**
  * Attach recipe to cookbook schema
  */
-export const YAddRecipeToCookbookSchema = object({
+export const YAddRecipeToCookbookRequestSchema = object({
   cookbook_id: number().required(),
   recipe_id: number().required(),
 }).strict().noUnknown();
 
-export interface AddRecipeToCookbookSchema extends InferType<typeof YAddRecipeToCookbookSchema> {}
+export interface AddRecipeToCookbookRequestSchema extends InferType<typeof YAddRecipeToCookbookRequestSchema> {}
 
 
 /**
  * Attach recipe to cookbook schema
  */
-export const YRemoveRecipeFromCookbookSchema = object({
+export const YRemoveRecipeFromCookbookRequestSchema = object({
   cookbook_id: number().required(),
   recipe_id: number().required(),
 }).strict().noUnknown();
 
-export interface RemoveRecipeFromCookbookSchema extends InferType<typeof YRemoveRecipeFromCookbookSchema> {}
+export interface RemoveRecipeFromCookbookRequestSchema extends InferType<typeof YRemoveRecipeFromCookbookRequestSchema> {}
+
+/**
+ * List cookbooks schema
+ */
+export const YListCookbooksQuerySchema = YListQuerySchema.shape({
+  user_id: number().notRequired(),
+}).strict().noUnknown();
+
+export interface ListCookbooksQuerySchema extends InferType<typeof YListCookbooksQuerySchema> {}
+
