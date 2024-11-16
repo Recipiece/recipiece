@@ -1,5 +1,5 @@
 import { boolean, InferType, number, object, string } from "yup";
-import { YListQuerySchema } from "./list";
+import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YCookbookSchema = object({
   id: number().required(),
@@ -65,4 +65,8 @@ export const YListCookbooksQuerySchema = YListQuerySchema.shape({
 }).strict().noUnknown();
 
 export interface ListCookbooksQuerySchema extends InferType<typeof YListCookbooksQuerySchema> {}
+
+export const YListCookbooksResponseSchema = generateYListQuerySchema(YCookbookSchema);
+
+export interface ListCookbooksResponseSchema extends InferType<typeof YListCookbooksResponseSchema> {}
 

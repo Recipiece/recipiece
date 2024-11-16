@@ -27,7 +27,13 @@ describe("List Cookbooks", () => {
       });
     }
 
-    const response = await request(app).get("/cookbook/list").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(app)
+      .get("/cookbook/list")
+      .query({
+        page_number: 0,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const results = response.body.data as Cookbook[];
@@ -50,7 +56,8 @@ describe("List Cookbooks", () => {
     const response = await request(app)
       .get("/cookbook/list")
       .query({
-        userId: otherUser.id,
+        user_id: otherUser.id,
+        page_number: 0,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -88,6 +95,7 @@ describe("List Cookbooks", () => {
       .get("/cookbook/list")
       .query({
         search: "name",
+        page_number: 0,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -113,8 +121,8 @@ describe("List Cookbooks", () => {
     const response = await request(app)
       .get("/cookbook/list")
       .query({
-        page: 1,
-        pageSize: 5,
+        page_number: 1,
+        page_size: 5,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);

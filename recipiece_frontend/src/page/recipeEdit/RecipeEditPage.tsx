@@ -4,11 +4,12 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
-import { Button, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, LoadingGroup, NotFound, Textarea, useToast } from "../../component";
+import { Button, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, LoadingGroup, NotFound, SubmitButton, Textarea, useToast } from "../../component";
+import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
+import { ParseRecipeFromURLForm } from "../../dialog";
+import { useParseRecipeFromURLDialog } from "../../hooks";
 import { IngredientsForm } from "./IngredientsForm";
 import { StepsForm } from "./StepsForm";
-import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
-import { ParseRecipeFromURLDialog, ParseRecipeFromURLForm } from "../../dialog";
 
 const RecipeFormSchema = z.object({
   name: z.string().min(3).max(100),
@@ -36,20 +37,6 @@ export const RecipeEditPage: FC = () => {
   const { toast } = useToast();
 
   const [isRecipeGetError, setIsRecipeGetError] = useState(false);
-  const [isParseFromUrlModalOpen, setIsParseFromUrlModalOpen] = useState(false);
-
-  /**
-   * If we're hitting this page with a search param of source=url, open the url dialog
-   */
-  useEffect(() => {
-    if(searchParams.get("source") === "url") {
-      setIsParseFromUrlModalOpen(true);
-      setSearchParams((prev) => {
-        prev.delete("source");
-        return prev;
-      })
-    }
-  }, [searchParams]);
 
   const isCreatingNewRecipe = useMemo(() => {
     return idFromParams === "new";
@@ -162,13 +149,13 @@ export const RecipeEditPage: FC = () => {
     try {
       const response = await parseRecipe(data.url);
       form.reset({ ...response.data });
-      setIsParseFromUrlModalOpen(false);
+      setIsDialogOpen(false);
       toast({
         title: "Recipe Parsed",
         description: "This recipe was successfully imported.",
       });
     } catch {
-      setIsParseFromUrlModalOpen(false);
+      setIsDialogOpen(false);
       toast({
         title: "Recipe Parsing Failed",
         description: "This recipe could not be imported.",
@@ -177,9 +164,26 @@ export const RecipeEditPage: FC = () => {
     }
   };
 
+  const { setIsDialogOpen } = useParseRecipeFromURLDialog({
+    onClose: () => setIsDialogOpen(false),
+    onSubmit: onParseRecipeDialogSubmit,
+  });
+
+  /**
+   * If we're hitting this page with a search param of source=url, open the url dialog
+   */
+  useEffect(() => {
+    if (searchParams.get("source") === "url") {
+      setIsDialogOpen(true);
+      setSearchParams((prev) => {
+        prev.delete("source");
+        return prev;
+      });
+    }
+  }, [searchParams]);
+
   return (
     <div className="p-4">
-      <ParseRecipeFromURLDialog isOpen={isParseFromUrlModalOpen} setIsOpen={setIsParseFromUrlModalOpen} onSubmit={onParseRecipeDialogSubmit} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
@@ -226,10 +230,10 @@ export const RecipeEditPage: FC = () => {
 
           {(isCreatingNewRecipe || !!recipe) && (
             <div className="flex flex-row justify-end mt-2">
-              <Button onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
+              <Button disabled={form?.formState?.isSubmitting} onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
                 Cancel
               </Button>
-              <Button type="submit">Save</Button>
+              <SubmitButton>Save</SubmitButton>
             </div>
           )}
         </form>

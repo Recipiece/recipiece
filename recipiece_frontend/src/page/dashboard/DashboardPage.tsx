@@ -1,52 +1,122 @@
-import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Grid, Input, Label, LoadingSpinner, NotFound, Pager, RecipeCard, Stack } from "../../component";
-import { CookbookContext } from "../../context";
+import { Search } from "lucide-react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAttachRecipeToCookbookMutation, useDeleteRecipeMutation, useGetCookbookByIdQuery, useListRecipesQuery, useRemoveRecipeFromCookbookMutation } from "../../api";
+import { Button, Dialog, Grid, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
 import { ListRecipeFilters, Recipe } from "../../data";
+import { DeleteRecipeDialog, SearchRecipesDialog } from "../../dialog";
+import { useSearchRecipesDialog } from "../../hooks";
 
 export const DashboardPage: FC = () => {
-  const [page, setPage] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const { recipeData, isLoading, currentCookbook, setFilters } = useContext(CookbookContext);
+  const { cookbookId } = useParams();
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    let f: ListRecipeFilters = {
-      page: page,
-    };
-    if (debouncedSearchTerm) {
-      f = { ...f, search: debouncedSearchTerm };
+  const defaultFilters: ListRecipeFilters = useMemo(() => {
+    if (cookbookId) {
+      return {
+        page_number: 0,
+        cookbook_id: +cookbookId,
+        search: "",
+      };
+    } else {
+      return {
+        page_number: 0,
+        search: "",
+      };
     }
-    setFilters(f);
-  }, [page, debouncedSearchTerm]);
+  }, [cookbookId]);
 
-  /**
-   * If you change the cookbook, clear the search and set the page back to 0
-   */
-  useEffect(() => {
-    setSearchTerm("");
-    setDebouncedSearchTerm("");
-    setPage(0);
-  }, [currentCookbook]);
+  const [filters, setFilters] = useState<ListRecipeFilters>({ ...defaultFilters });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentDialog, setCurrentDialog] = useState<"addRecipeToCookbook" | "deleteRecipe" | "removeRecipeFromCookbook" | "editCookbook" | undefined>(undefined);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentlyConsideredRecipe, setCurrentlyConsideredRecipe] = useState<Recipe | undefined>(undefined);
 
-  const recipes = useMemo(() => {
-    return recipeData?.data || [];
-  }, [recipeData]);
+  const { toast } = useToast();
 
   /**
    * Handle debouncing the search term
    */
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
+      setFilters((prev) => {
+        return {
+          ...prev,
+          search: searchTerm,
+          page_number: 0,
+        };
+      });
     }, 500);
 
     return () => {
       clearTimeout(handler);
     };
   }, [searchTerm]);
+
+  /**
+   * Handle changing to a cookbook view
+   */
+  useEffect(() => {
+    setFilters({ ...defaultFilters });
+  }, [cookbookId, defaultFilters]);
+
+  const onPageChange = useCallback((newPage: number) => {
+    setFilters((prev) => {
+      return {
+        ...prev,
+        page_number: newPage,
+      };
+    });
+  }, []);
+
+  const navigate = useNavigate();
+
+  const { data: recipeData, isLoading: isLoadingRecipes, isFetching: isFetchingRecipes } = useListRecipesQuery(filters);
+  const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { disabled: !cookbookId });
+  const { mutateAsync: deleteRecipe, isPending: isDeletingRecipe } = useDeleteRecipeMutation({
+    onFailure: () => {
+      toast({
+        title: "Cannot delete recipe",
+        description: "There was an issue trying to delete your recipe. Try again later.",
+        variant: "destructive",
+      });
+    },
+  });
+  const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation({
+    onSuccess: () => {
+      toast({
+        title: "Recipe Added to Cookbook",
+        description: "The recipe was added to your cookbook.",
+      });
+      setIsSearchRecipesOpen(false);
+    },
+    onFailure: () => {
+      toast({
+        title: "Cannot add recipe to cookbook",
+        description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
+        variant: "destructive",
+      });
+      setIsSearchRecipesOpen(false);
+    },
+  });
+  const { mutateAsync: removeRecipeFromCookbook } = useRemoveRecipeFromCookbookMutation({
+    onFailure: () => {
+      toast({
+        title: "Cannot remove recipe from cookbook",
+        description: "There was an issue trying to remove your recipe from this cookbook. Try again later.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Recipe removed",
+        description: "The recipe was removed from the cookbook.",
+      });
+    },
+  });
+
+  const recipes = useMemo(() => {
+    return recipeData?.data || [];
+  }, [recipeData]);
 
   const onViewRecipe = useCallback(
     (recipe: Recipe) => {
@@ -55,53 +125,111 @@ export const DashboardPage: FC = () => {
     [navigate]
   );
 
-  const showPager = !isLoading && recipes.length > 0;
+  const onEditRecipe = useCallback((recipe: Recipe) => {
+    navigate(`/recipe/edit/${recipe.id}`);
+  }, []);
 
-  const showRecipes = !isLoading && recipes.length > 0;
-
-  const showNotFound = !isLoading && recipes.length === 0;
-
-  const notFoundMessage = useMemo(() => {
-    if (currentCookbook) {
-      if (debouncedSearchTerm) {
-        return "There's no recipes matching that search term in this cookbook.";
+  const onDeleteRecipe = useCallback(
+    async (recipe: Recipe) => {
+      if (cookbookId) {
+        await removeRecipeFromCookbook({
+          recipe_id: recipe.id,
+          cookbook_id: +cookbookId,
+        });
       } else {
-        return "There's no recipes in this cookbook. You can add them from the home page!";
+        setCurrentlyConsideredRecipe(recipe);
+        setCurrentDialog("deleteRecipe");
+        setIsDialogOpen(true);
       }
-    } else {
-      if (debouncedSearchTerm) {
-        return "None of your recipes match that search term.";
-      } else {
-        return "You don't have any recipes yet!";
-      }
-    }
-  }, [currentCookbook, debouncedSearchTerm]);
+    },
+    [cookbookId]
+  );
+
+  const onConfirmDeleteRecipe = useCallback(async (recipe: Recipe) => {
+    await deleteRecipe(recipe.id);
+    setIsDialogOpen(false);
+    setCurrentlyConsideredRecipe(undefined);
+    setCurrentDialog(undefined);
+    toast({
+      title: "Recipe successfully deleted",
+      description: `The recipe ${recipe.name} was deleted.`,
+      variant: "default",
+    });
+  }, []);
+
+  const onCancelDeleteRecipe = useCallback(() => {
+    setIsDialogOpen(false);
+    setCurrentlyConsideredRecipe(undefined);
+    setCurrentDialog(undefined);
+  }, []);
+
+  const onFindRecipe = useCallback(() => {
+    setIsSearchRecipesOpen(true);
+  }, []);
+
+  const onSubmitFindRecipe = useCallback(
+    async (recipe: Recipe) => {
+      await addRecipeToCookbook({ recipe_id: recipe.id, cookbook_id: +cookbookId! });
+    },
+    [cookbookId]
+  );
+
+  const { setIsDialogOpen: setIsSearchRecipesOpen } = useSearchRecipesDialog({
+    onClose: () => setIsSearchRecipesOpen(false),
+    onSubmit: onSubmitFindRecipe,
+    cookbookId: +cookbookId!,
+  });
 
   return (
     <Stack>
-      <h1 className="text-2xl block text-center md:text-start md:mr-4">
-        {currentCookbook && <>{currentCookbook.name}</>}
-        {!currentCookbook && <>Your Recipes</>}
-      </h1>
-      {currentCookbook?.description && <p className="text-lg">{currentCookbook.description}</p>}
+      {!cookbookId && <h1 className="text-xl">All Your Recipes</h1>}
+      {cookbookId && (
+        <LoadingGroup className="h-8 w-[250px]" isLoading={isLoadingCookbook}>
+          <Shelf>
+            <h1 className="text-xl">{cookbook?.name}</h1>
+            <ShelfSpacer />
+            <Button onClick={onFindRecipe} variant="outline">
+              <Search size={20} className="mr-1" /> Find a recipe
+            </Button>
+          </Shelf>
+        </LoadingGroup>
+      )}
+      {!cookbookId && <p>See all of your recipes in one place.</p>}
+      {cookbookId && (
+        <LoadingGroup isLoading={isLoadingCookbook} className="h-4">
+          <p>{cookbook?.description}</p>
+        </LoadingGroup>
+      )}
       <Label className="grow w-full sm:w-auto">
         Search
-        <Input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
+        <Input disabled={isLoadingRecipes || isFetchingRecipes} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
       </Label>
-      {showPager && <Pager className="mt-4 mb-4" page={page} hasNextPage={recipeData?.hasNextPage || false} onPage={setPage} />}
-      {isLoading && <LoadingSpinner />}
-      {showNotFound && <NotFound message={notFoundMessage} />}
-      {showRecipes && (
-        <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {(recipes || []).map((r) => {
-            return (
-              <div className="auto-rows-fr" key={r.id}>
-                <RecipeCard onView={onViewRecipe} recipe={r} />
-              </div>
-            );
-          })}
-        </Grid>
-      )}
+      <LoadingGroup variant="spinner" isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}>
+        <Stack>
+          {!isLoadingRecipes && recipes.length === 0 && (
+            <>
+              <NotFound message="No recipes to be had, time to get cooking!" />
+              {cookbookId && (
+                <div className="text-center">
+                  <Button onClick={onFindRecipe} variant="outline">
+                    <Search size={20} className="mr-1" /> Find a recipe
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+          <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {(recipes || []).map((recipe) => {
+              return (
+                <div className="auto-rows-fr" key={recipe.id}>
+                  <RecipeCard onView={onViewRecipe} onEdit={onEditRecipe} onDelete={onDeleteRecipe} recipe={recipe} />
+                </div>
+              );
+            })}
+          </Grid>
+          {recipes.length > 0 && <Pager page={filters.page_number} onPage={onPageChange} hasNextPage={!!recipeData?.has_next_page} />}
+        </Stack>
+      </LoadingGroup>
     </Stack>
   );
 };

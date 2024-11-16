@@ -1,20 +1,14 @@
 import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookbookSchema, ListCookbooksQuerySchema } from "../../schema";
+import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listCookbooks = async (
-  req: AuthenticatedRequest<any, ListCookbooksQuerySchema>
-): ApiResponse<{
-  readonly data: CookbookSchema[];
-  readonly page: number;
-  readonly hasNextPage: boolean;
-}> => {
+export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooksQuerySchema>): ApiResponse<ListCookbooksResponseSchema> => {
   const user = req.user;
 
   const page = req.query.page_number;
-  const pageSize = req.query.page_size;
+  const pageSize = req.query.page_size || 10;
   const userId = req.query.user_id ?? user.id;
   const search = req.query.search;
 
@@ -51,7 +45,7 @@ export const listCookbooks = async (
     StatusCodes.OK,
     {
       data: resultsData,
-      hasNextPage: hasNextPage,
+      has_next_page: hasNextPage,
       page: page,
     },
   ];

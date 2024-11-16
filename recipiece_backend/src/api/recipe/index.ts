@@ -1,4 +1,11 @@
-import { YCreateRecipeRequestSchema, YListRecipesQuerySchema, YParseRecipeFromURLRequestSchema, YRecipeSchema, YUpdateRecipeRequestSchema } from "../../schema";
+import {
+  YCreateRecipeRequestSchema,
+  YListCookbooksResponseSchema,
+  YListRecipesQuerySchema,
+  YParseRecipeFromURLRequestSchema,
+  YRecipeSchema,
+  YUpdateRecipeRequestSchema,
+} from "../../schema";
 import { Route } from "../../types";
 import { createRecipe } from "./createRecipe";
 import { deleteRecipe } from "./deleteRecipe";
@@ -38,6 +45,7 @@ export const RECIPE_ROUTES: Route[] = [
     method: "GET",
     function: listRecipes,
     requestSchema: YListRecipesQuerySchema,
+    responseSchema: YListCookbooksResponseSchema,
   },
   {
     path: "/recipe/:id(\\d+)",

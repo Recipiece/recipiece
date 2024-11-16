@@ -1,22 +1,19 @@
-import { Prisma, Recipe } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { ListRecipesQuerySchema } from "../../schema";
+import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuerySchema>): ApiResponse<{
-  readonly data: Recipe[];
-  readonly page: number;
-  readonly hasNextPage: boolean;
-}> => {
+export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuerySchema>): ApiResponse<ListRecipesResponseSchema> => {
   const query = req.query;
   const user = req.user;
 
   const userId = query.user_id ?? user.id;
-  const pageSize = query.page_size;
+  const pageSize = query.page_size || 30;
   const page = query.page_number;
   const search = query.search;
   const cookbookId = query.cookbook_id;
+  const excludeCookbookId = query.exclude_cookbook_id;
 
   let where: Prisma.RecipeWhereInput = {
     user_id: userId,
@@ -37,6 +34,12 @@ export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuer
     where.recipe_cookbook_attachments = {
       some: {
         cookbook_id: +cookbookId,
+      },
+    };
+  } else if (excludeCookbookId) {
+    where.recipe_cookbook_attachments = {
+      none: {
+        cookbook_id: +excludeCookbookId,
       },
     };
   }
@@ -63,7 +66,7 @@ export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuer
     StatusCodes.OK,
     {
       data: resultsData,
-      hasNextPage: hasNextPage,
+      has_next_page: hasNextPage,
       page: page,
     },
   ];

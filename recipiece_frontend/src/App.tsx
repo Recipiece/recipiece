@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FC } from "react";
 import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
 import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
-import { AuthContextProvider, CookbookContextProvider } from "./context";
+import { AuthContextProvider, DialogContextProvider } from "./context";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
 
 const queryClient = new QueryClient({
@@ -22,7 +22,7 @@ export const AppRoutes: FC = () => {
       <AuthContextProvider>
         <TooltipProvider>
           <ToastProvider>
-            <CookbookContextProvider>
+            <DialogContextProvider>
               <Routes>
                 <Route element={<UnauthenticatedLayout />}>
                   {unauthenticatedRoutes.map((r) => {
@@ -35,7 +35,7 @@ export const AppRoutes: FC = () => {
                   })}
                 </Route>
               </Routes>
-            </CookbookContextProvider>
+            </DialogContextProvider>
             <Toaster />
           </ToastProvider>
         </TooltipProvider>

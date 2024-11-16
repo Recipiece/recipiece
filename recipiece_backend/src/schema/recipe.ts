@@ -1,5 +1,5 @@
-import { array, boolean, date, InferType, number, object, string } from "yup";
-import { YListQuerySchema } from "./list";
+import { array, boolean, date, InferType, number, object, string, ValidationError } from "yup";
+import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YRecipeIngredientSchema = object({
   id: number().required(),
@@ -132,8 +132,13 @@ export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecip
 export const YListRecipesQuerySchema = YListQuerySchema.shape({
   user_id: number().notRequired(),
   cookbook_id: number().notRequired(),
+  exclude_cookbook_id: number().notRequired(),
 })
   .strict()
   .noUnknown();
 
 export interface ListRecipesQuerySchema extends InferType<typeof YListRecipesQuerySchema> {}
+
+export const YListRecipesResponseSchema = generateYListQuerySchema(YRecipeSchema);
+
+export interface ListRecipesResponseSchema extends InferType<typeof YListRecipesResponseSchema> {}

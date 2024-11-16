@@ -30,7 +30,7 @@ export const useListCookbooksQuery = (filters: ListCookbookFilters, args?: Query
     queryKey.push(filters.search);
   }
 
-  let path = `/cookbook/list?page=${filters.page}`;
+  let path = `/cookbook/list?page_number=${filters.page}`;
   if (filters.search) {
     path += `&search=${filters.search}`;
   }
@@ -160,13 +160,38 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void>) => 
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
-      
-      // queryClient.invalidateQueries({
-      //   queryKey: ["cookbookList"],
-      //   refetchType: "all",
-      // });
-      // queryClient.setQueryData(["cookbook", data.data.id], data.data);
+    onSuccess: (data, params) => {
+      queryClient.invalidateQueries({
+        queryKey: ["recipeList", {cookbookId: params.cookbook_id}],
+        refetchType: "all",
+      });
+      args?.onSuccess?.(data.data);
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+}
+
+export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<void>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (data: {readonly recipe_id: number, readonly cookbook_id: number}) => {
+    return await poster<typeof data, void>({
+      path: "/cookbook/recipe/remove",
+      body: data,
+      withAuth: true,
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, params) => {
+      queryClient.invalidateQueries({
+        queryKey: ["recipeList", {cookbookId: params.cookbook_id}],
+        refetchType: "all",
+      });
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {

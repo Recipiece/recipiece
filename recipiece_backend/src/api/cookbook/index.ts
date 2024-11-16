@@ -1,4 +1,4 @@
-import { YAddRecipeToCookbookRequestSchema, YCookbookSchema, YCreateCookbookRequestSchema, YRemoveRecipeFromCookbookRequestSchema, YUpdateCookbookRequestSchema } from "../../schema";
+import { YAddRecipeToCookbookRequestSchema, YCookbookSchema, YCreateCookbookRequestSchema, YListCookbooksQuerySchema, YListCookbooksResponseSchema, YRemoveRecipeFromCookbookRequestSchema, YUpdateCookbookRequestSchema } from "../../schema";
 import { Route } from "../../types";
 import { addRecipeToCookbook } from "./addRecipeToCookbook";
 import { createCookbook } from "./createCookbook";
@@ -41,6 +41,8 @@ export const COOKBOOK_ROUTES: Route[] = [
     authentication: "token",
     method: "GET",
     function: listCookbooks,
+    requestSchema: YListCookbooksQuerySchema,
+    responseSchema: YListCookbooksResponseSchema,
   },
   {
     path: "/cookbook/recipe/remove",

@@ -25,6 +25,10 @@ export const authenticatedRoutes = [
     element: DashboardPage,
   },
   {
+    path: "/cookbook/:cookbookId",
+    element: DashboardPage,
+  },
+  {
     path: "/recipe/view/:id",
     element: RecipeViewPage,
   },

@@ -1,17 +1,17 @@
-import { FC, useCallback, useContext, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useListCookbooksQuery, useLogoutUserMutation } from "../../../api";
-import { CreateCookbookDialog } from "../../../dialog";
-import { DialogTrigger, Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator } from "../../shadcn";
-import { RecipieceHeader } from "../Typography";
-import { LoadingGroup } from "../LoadingGroup";
-import { CookbookContext } from "../../../context";
+import { FC, useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCreateCookbookMutation, useListCookbooksQuery, useLogoutUserMutation } from "../../../api";
 import { Cookbook } from "../../../data";
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator, useToast } from "../../shadcn";
+import { LoadingGroup } from "../LoadingGroup";
 import { Pager } from "../Pager";
+import { RecipieceHeader } from "../Typography";
+import { useCreateCookbookDialog } from "../../../hooks";
+import { CreateCookbookForm } from "../../../dialog";
 
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { toast } = useToast();
   const [cookbooksPage, setCookbooksPage] = useState(0);
   const { mutateAsync: logout } = useLogoutUserMutation({
     onSuccess: () => {
@@ -22,25 +22,43 @@ export const RecipieceMenubar: FC = () => {
     },
   });
 
-  const { setCurrentCookbook } = useContext(CookbookContext);
-
-  const onSelectCookbook = useCallback(
-    (cookbook?: Cookbook) => {
-      if (location.pathname !== "/dashboard") {
-        navigate("/dashboard");
-      }
-      setCurrentCookbook(cookbook);
-    },
-    [location]
-  );
+  const onSelectCookbook = useCallback((cookbook: Cookbook) => {
+    navigate(`/cookbook/${cookbook?.id}`);
+  }, []);
 
   const onGoHome = useCallback(() => {
-    setCurrentCookbook(undefined);
     navigate("/dashboard");
   }, []);
 
   const { data: cookbooks, isLoading: isLoadingCookbooks } = useListCookbooksQuery({
     page: cookbooksPage,
+  });
+
+  const { mutateAsync: createCookbook } = useCreateCookbookMutation({
+    onSuccess: () => {
+      setIsDialogOpen(false);
+      toast({
+        title: "Cookbook Created",
+        description: "Your cookbook has been successfully created!",
+      });
+    },
+    onFailure: () => {
+      setIsDialogOpen(false);
+      toast({
+        title: "Could not Create Cookbook",
+        description: "This cookbook couldn't be created. Try again later.",
+        variant: "destructive",
+      });
+    },
+  })
+
+  const onCreateCookbook = async (cookbookData: CreateCookbookForm) => {
+    await createCookbook({...cookbookData});
+  };
+
+  const { setIsDialogOpen } = useCreateCookbookDialog({
+    onClose: () => setIsDialogOpen(false),
+    onSubmit: onCreateCookbook,
   });
 
   return (
@@ -53,27 +71,23 @@ export const RecipieceMenubar: FC = () => {
       </span>
 
       <span className="hidden w-0 sm:w-auto sm:block">
-        <CreateCookbookDialog>
-          <MenubarMenu>
-            <MenubarTrigger>Cookbooks</MenubarTrigger>
-            <MenubarContent>
-              <DialogTrigger asChild>
-                <MenubarItem>New Cookbook</MenubarItem>
-              </DialogTrigger>
-              <LoadingGroup isLoading={isLoadingCookbooks} className="w-full h-10">
-                {cookbooks?.data && <Separator />}
-                {(cookbooks?.data || []).map((cookbook) => {
-                  return (
-                    <MenubarItem onClick={() => onSelectCookbook(cookbook)} key={cookbook.id}>
-                      {cookbook.name}
-                    </MenubarItem>
-                  );
-                })}
-                {cookbooks?.data && <Pager shortForm={true} page={cookbooksPage} onPage={setCookbooksPage} hasNextPage={cookbooks?.hasNextPage} />}
-              </LoadingGroup>
-            </MenubarContent>
-          </MenubarMenu>
-        </CreateCookbookDialog>
+        <MenubarMenu>
+          <MenubarTrigger>Cookbooks</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem onClick={() => setIsDialogOpen(true)}>New Cookbook</MenubarItem>
+            <LoadingGroup isLoading={isLoadingCookbooks} className="w-full h-10">
+              {cookbooks?.data && <Separator />}
+              {(cookbooks?.data || []).map((cookbook) => {
+                return (
+                  <MenubarItem onClick={() => onSelectCookbook(cookbook)} key={cookbook.id}>
+                    {cookbook.name}
+                  </MenubarItem>
+                );
+              })}
+              {cookbooks?.data && <Pager shortForm={true} page={cookbooksPage} onPage={setCookbooksPage} hasNextPage={cookbooks?.hasNextPage} />}
+            </LoadingGroup>
+          </MenubarContent>
+        </MenubarMenu>
       </span>
 
       <span className="hidden w-0 sm:w-auto sm:block">

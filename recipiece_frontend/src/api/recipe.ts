@@ -21,26 +21,56 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
   });
 };
 
-export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs) => {
-  const queryClient = useQueryClient();
+export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs) => {
+  const queryKey = ["recipeCookbookSearch", search, cookbook_id];
+  const path = `/recipe/list?page_number=0&search=${search}&page_size=5&exclude_cookbook_id=${cookbook_id}`;
   const { getter } = useGet();
-
-  const queryKey = ["recipeList", filters.page];
-  let path = `/recipe/list?page=${filters.page}`;
-
-  if (filters.search) {
-    queryKey.push(`search:${filters.search}`);
-    path += `&search=${filters.search}`;
-  }
-
-  if (filters.cookbookId) {
-    queryKey.push(`cookbookId:${filters.cookbookId}`);
-    path += `&cookbookId=${filters.cookbookId}`;
-  }
 
   const query = async () => {
     const recipe = await getter<never, ListRecipesResponse>({
       path: path,
+      withAuth: true,
+    });
+    return recipe;
+  };
+
+  return useQuery({
+    queryKey: queryKey,
+    queryFn: async () => {
+      try {
+        const results = await query();
+        return results.data;
+      } catch (err) {
+        throw err;
+      }
+    },
+    enabled: args?.disabled !== true,
+  });
+};
+
+export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs) => {
+  const queryClient = useQueryClient();
+  const { getter } = useGet();
+
+  const queryKey: any[] = ["recipeList"];
+  const searchParams = new URLSearchParams();
+  searchParams.append("page_number", filters.page_number.toString());
+
+  if (filters.cookbook_id) {
+    queryKey.push({ cookbookId: filters.cookbook_id });
+    searchParams.append("cookbook_id", filters.cookbook_id.toString());
+  }
+
+  queryKey.push({ pageNumber: filters.page_number });
+
+  if (filters.search) {
+    queryKey.push({ search: filters.search });
+    searchParams.append("search", filters.search);
+  }
+
+  const query = async () => {
+    const recipe = await getter<never, ListRecipesResponse>({
+      path: `/recipe/list?${searchParams.toString()}`,
       withAuth: true,
     });
     return recipe;
@@ -153,7 +183,7 @@ export const useParseRecipeFromURLMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
 
   const mutation = async (url: string) => {
-    return await poster<{readonly source_url: string}, Recipe>({
+    return await poster<{ readonly source_url: string }, Recipe>({
       path: "/recipe/parse/url",
       body: {
         source_url: url,

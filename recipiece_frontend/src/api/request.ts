@@ -15,6 +15,7 @@ export interface MutationArgs<T> {
 
 export interface QueryArgs {
   readonly disabled?: boolean;
+  readonly xQueryKey?: string[];
 }
 
 export interface HookArgs {

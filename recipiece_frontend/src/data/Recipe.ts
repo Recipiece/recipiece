@@ -26,13 +26,13 @@ export interface Recipe {
 }
 
 export interface ListRecipeFilters {
-  readonly page: number;
-  readonly cookbookId?: number;
+  readonly page_number: number;
+  readonly cookbook_id?: number;
   readonly search?: string;
 }
 
 export interface ListRecipesResponse {
   readonly data: Recipe[];
   readonly page: number;
-  readonly hasNextPage: boolean;
+  readonly has_next_page: boolean;
 }

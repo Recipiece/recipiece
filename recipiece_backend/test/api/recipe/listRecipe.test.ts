@@ -29,6 +29,9 @@ describe("List Recipes", () => {
 
     const response = await request(app)
       .get("/recipe/list")
+      .query({
+        page_number: 0,
+      })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
@@ -53,7 +56,8 @@ describe("List Recipes", () => {
     const response = await request(app)
       .get("/recipe/list")
       .query({
-        userId: otherUser.id,
+        user_id: otherUser.id,
+        page_number: 0,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -91,6 +95,7 @@ describe("List Recipes", () => {
       .get("/recipe/list")
       .query({
         search: "name",
+        page_number: 0,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -116,8 +121,8 @@ describe("List Recipes", () => {
     const response = await request(app)
       .get("/recipe/list")
       .query({
-        page: 1,
-        pageSize: 5,
+        page_number: 1,
+        page_size: 5,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);

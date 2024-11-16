@@ -3,7 +3,7 @@ import cors from "cors";
 import express, { Express, NextFunction, Request, RequestHandler, Response } from "express";
 import morgan from "morgan";
 import { ROUTES } from "./api";
-import { basicAuthMiddleware, tokenAuthMiddleware, validateRequestBodySchema, validateRequestParamsSchema, validateResponseSchema } from "./middleware";
+import { basicAuthMiddleware, tokenAuthMiddleware, validateRequestBodySchema, validateRequestQuerySchema, validateResponseSchema } from "./middleware";
 
 const app: Express = express();
 
@@ -42,7 +42,7 @@ ROUTES.forEach((route) => {
         break;
       case "GET":
       case "DELETE":
-        routeHandlers.push(validateRequestParamsSchema(route.requestSchema));
+        routeHandlers.push(validateRequestQuerySchema(route.requestSchema));
         break;
     }
   }

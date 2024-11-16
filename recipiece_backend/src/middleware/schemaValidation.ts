@@ -5,7 +5,9 @@ import { AnyObject, Maybe, ObjectSchema } from "yup";
 export const validateRequestBodySchema = (schema: ObjectSchema<Maybe<AnyObject>, unknown>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const castBody = schema.cast(req.body);
       await schema.validate(req.body);
+      req.body = castBody;
       next();
     } catch (error) {
       console.error(error);
@@ -30,10 +32,13 @@ export const validateResponseSchema = (schema: ObjectSchema<Maybe<AnyObject>, un
   };
 };
 
-export const validateRequestParamsSchema = (schema: ObjectSchema<Maybe<AnyObject>, unknown>) => {
+export const validateRequestQuerySchema = (schema: ObjectSchema<Maybe<AnyObject>, unknown>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await schema.validate(req.params);
+      const castQuery = schema.cast(req.query)
+      await schema.validate(castQuery);
+      // @ts-ignore
+      req.query = castQuery;
       next();
     } catch (error) {
       console.error(error);
