@@ -65,11 +65,14 @@ export const SearchRecipesDialog: FC<SearchRecipesDialogProps> = ({ onClose, onS
         <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="w-6 h-6">
           {(recipeData?.data || []).map((recipe) => {
             return (
-              <Button disabled={isDisabled} key={recipe.id} variant="ghost" onClick={() => onRecipeSelected(recipe)}>
+              <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>
                 {recipe.name}
               </Button>
             );
           })}
+          {!!recipeData && recipeData.data.length === 0 && (
+            <p className="text-sm">No recipes found, try searching for something else.</p>
+          )}
         </LoadingGroup>
       </Stack>
       <DialogFooter>

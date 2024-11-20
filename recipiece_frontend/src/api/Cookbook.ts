@@ -25,12 +25,12 @@ export const useListCookbooksQuery = (filters: ListCookbookFilters, args?: Query
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
-  const queryKey = ["cookbookList", filters.page];
+  const queryKey = ["cookbookList", filters.page_number];
   if (filters.search) {
     queryKey.push(filters.search);
   }
 
-  let path = `/cookbook/list?page_number=${filters.page}`;
+  let path = `/cookbook/list?page_number=${filters.page_number}`;
   if (filters.search) {
     path += `&search=${filters.search}`;
   }

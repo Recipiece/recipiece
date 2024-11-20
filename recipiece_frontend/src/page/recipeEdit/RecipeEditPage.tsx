@@ -1,15 +1,30 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
-import { Button, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, LoadingGroup, NotFound, SubmitButton, Textarea, useToast } from "../../component";
+import {
+  Button,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+  LoadingGroup,
+  NotFound,
+  SubmitButton,
+  Textarea,
+  useToast,
+} from "../../component";
 import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
 import { ParseRecipeFromURLForm } from "../../dialog";
-import { useParseRecipeFromURLDialog } from "../../hooks";
 import { IngredientsForm } from "./IngredientsForm";
 import { StepsForm } from "./StepsForm";
+import { DialogContext } from "../../context";
 
 const RecipeFormSchema = z.object({
   name: z.string().min(3).max(100),
@@ -31,6 +46,7 @@ const RecipeFormSchema = z.object({
 type RecipeForm = z.infer<typeof RecipeFormSchema>;
 
 export const RecipeEditPage: FC = () => {
+  const { pushDialog, popDialog } = useContext(DialogContext);
   const { id: idFromParams } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -149,13 +165,13 @@ export const RecipeEditPage: FC = () => {
     try {
       const response = await parseRecipe(data.url);
       form.reset({ ...response.data });
-      setIsDialogOpen(false);
+      popDialog("parseRecipeFromURL");
       toast({
         title: "Recipe Parsed",
         description: "This recipe was successfully imported.",
       });
     } catch {
-      setIsDialogOpen(false);
+      popDialog("parseRecipeFromURL");
       toast({
         title: "Recipe Parsing Failed",
         description: "This recipe could not be imported.",
@@ -164,17 +180,15 @@ export const RecipeEditPage: FC = () => {
     }
   };
 
-  const { setIsDialogOpen } = useParseRecipeFromURLDialog({
-    onClose: () => setIsDialogOpen(false),
-    onSubmit: onParseRecipeDialogSubmit,
-  });
-
   /**
    * If we're hitting this page with a search param of source=url, open the url dialog
    */
   useEffect(() => {
     if (searchParams.get("source") === "url") {
-      setIsDialogOpen(true);
+      pushDialog("parseRecipeFromURL", {
+        onSubmit: onParseRecipeDialogSubmit,
+        onClose: () => popDialog("parseRecipeFromURL"),
+      });
       setSearchParams((prev) => {
         prev.delete("source");
         return prev;

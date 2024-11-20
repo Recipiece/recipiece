@@ -1,15 +1,25 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, useState } from "react";
 import { Button, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../component";
 import { Recipe } from "../../data";
+import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface DeleteRecipeDialogProps extends PropsWithChildren {
-  readonly setIsOpen: (value: boolean) => void;
-  readonly onSubmit: (recipe: Recipe) => Promise<void>;
+export interface DeleteRecipeDialogProps extends BaseDialogProps<Recipe> {
   readonly recipe: Recipe;
-  readonly disabled?: boolean;
 }
 
-export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, setIsOpen, onSubmit, disabled }) => {
+export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, onClose, onSubmit }) => {
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const onDeleteRecipe = async () => {
+    setIsDisabled(true);
+    try {
+      await Promise.resolve(onSubmit?.(recipe));
+    } catch {
+    } finally {
+      setIsDisabled(false);
+    }
+  };
+
   return (
     <DialogContent>
       <DialogHeader>
@@ -19,12 +29,12 @@ export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, setIsO
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
-        <div className="flex flex-row justify-end gap-2">
-          <Button disabled={disabled} onClick={() => setIsOpen(false)}>Cancel</Button>
-          <Button disabled={disabled} variant="destructive" onClick={() => onSubmit(recipe)}>
-            Delete Recipe
-          </Button>
-        </div>
+        <Button variant="outline" disabled={isDisabled} onClick={() => onClose?.()}>
+          Cancel
+        </Button>
+        <Button disabled={isDisabled} variant="destructive" onClick={onDeleteRecipe}>
+          Delete Recipe
+        </Button>
       </DialogFooter>
     </DialogContent>
   );

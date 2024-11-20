@@ -7,3 +7,4 @@ export * from "./RecipeEdit";
 export * from "./RecipeView";
 export * from "./Register";
 export * from "./VerifyAccount";
+export * from "./ShoppingListView";

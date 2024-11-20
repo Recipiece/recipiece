@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from "express";
-import { ApiResponse } from "../types";
 import { User } from "@prisma/client";
+import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { verifyToken } from "../util/token";
 import { prisma, Redis } from "../database";
+import { ApiResponse, WebsocketTokenPayload } from "../types";
+import { verifyToken } from "../util/token";
 
 export const tokenAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const [responseCode, response] = await runTokenAuth(req.headers.authorization);
@@ -13,6 +13,26 @@ export const tokenAuthMiddleware = async (req: Request, res: Response, next: Nex
     // @ts-ignore
     req.user = response;
     next();
+  }
+};
+
+export const wsTokenAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const wsToken = req.query.token;
+
+  if(!wsToken) {
+    res.status(StatusCodes.UNAUTHORIZED).send({message: "Not authorized"});
+  } else {
+    const redis = await Redis.getInstance();
+    const wsTokenPayload = (await redis.HGETALL(`ws:${wsToken}`) as unknown as WebsocketTokenPayload);
+    if(!wsTokenPayload || wsTokenPayload.purpose !== req.baseUrl) {
+      res.status(StatusCodes.UNAUTHORIZED).send({message: "Not authorized"});
+    } else {
+      // @ts-ignore
+      req.ws_token = wsToken;
+      // @ts-ignore
+      req.ws_token_payload = wsTokenPayload;
+      next();
+    }
   }
 };
 

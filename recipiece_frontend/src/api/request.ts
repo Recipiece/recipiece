@@ -8,6 +8,10 @@ export const getUrl = (): string => {
   return "http://localhost:8080";
 };
 
+export const getWebsocketUrl = (): string => {
+  return "ws://localhost:8080";
+};
+
 export interface MutationArgs<T> {
   readonly onSuccess?: (data: T) => void;
   readonly onFailure?: (err?: Error) => void;

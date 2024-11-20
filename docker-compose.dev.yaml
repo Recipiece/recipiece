@@ -23,7 +23,7 @@ services:
     volumes:
       - ./local-recipiece-data:/var/lib/postgresql/data
   recipiece_redis:
-    image: redis
+    image: redis/redis-stack
     restart: always
     ports:
       - "6379:6379"

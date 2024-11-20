@@ -1,4 +1,4 @@
-import { AccountViewPage, CreateAccountPage, DashboardPage, ForgotPasswordPage, LoginPage, RecipeEditPage, RecipeViewPage, RegisterPage } from "./page";
+import { AccountViewPage, CreateAccountPage, DashboardPage, ForgotPasswordPage, LoginPage, RecipeEditPage, RecipeViewPage, RegisterPage, ShoppingListViewPage } from "./page";
 
 export const unauthenticatedRoutes = [
   {
@@ -40,6 +40,10 @@ export const authenticatedRoutes = [
     path: "/account",
     element: AccountViewPage,
   },
+  {
+    path: "/shopping-list/:shoppingListId",
+    element: ShoppingListViewPage,
+  }
 ];
 
 export const unauthenticatedPaths = unauthenticatedRoutes.map((r) => r.path);

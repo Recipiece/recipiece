@@ -8,6 +8,6 @@ export interface Cookbook {
 }
 
 export interface ListCookbookFilters {
-  readonly page: number;
+  readonly page_number: number;
   readonly search?: string;
 }

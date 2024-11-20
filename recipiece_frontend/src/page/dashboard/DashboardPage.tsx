@@ -1,14 +1,14 @@
-import { Search } from "lucide-react";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useDeleteRecipeMutation, useGetCookbookByIdQuery, useListRecipesQuery, useRemoveRecipeFromCookbookMutation } from "../../api";
-import { Button, Dialog, Grid, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
+import { Button, Grid, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
+import { DialogContext } from "../../context";
 import { ListRecipeFilters, Recipe } from "../../data";
-import { DeleteRecipeDialog, SearchRecipesDialog } from "../../dialog";
-import { useSearchRecipesDialog } from "../../hooks";
 
 export const DashboardPage: FC = () => {
   const { cookbookId } = useParams();
+  const { pushDialog, popDialog } = useContext(DialogContext);
 
   const defaultFilters: ListRecipeFilters = useMemo(() => {
     if (cookbookId) {
@@ -27,9 +27,6 @@ export const DashboardPage: FC = () => {
 
   const [filters, setFilters] = useState<ListRecipeFilters>({ ...defaultFilters });
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentDialog, setCurrentDialog] = useState<"addRecipeToCookbook" | "deleteRecipe" | "removeRecipeFromCookbook" | "editCookbook" | undefined>(undefined);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentlyConsideredRecipe, setCurrentlyConsideredRecipe] = useState<Recipe | undefined>(undefined);
 
   const { toast } = useToast();
 
@@ -72,13 +69,22 @@ export const DashboardPage: FC = () => {
 
   const { data: recipeData, isLoading: isLoadingRecipes, isFetching: isFetchingRecipes } = useListRecipesQuery(filters);
   const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { disabled: !cookbookId });
-  const { mutateAsync: deleteRecipe, isPending: isDeletingRecipe } = useDeleteRecipeMutation({
+  const { mutateAsync: deleteRecipe } = useDeleteRecipeMutation({
+    onSuccess: () => {
+      toast({
+        title: "Recipe successfully deleted",
+        // description: `The recipe ${recipe.name} was deleted.`,
+        variant: "default",
+      });
+      popDialog("deleteRecipe");
+    },
     onFailure: () => {
       toast({
         title: "Cannot delete recipe",
         description: "There was an issue trying to delete your recipe. Try again later.",
         variant: "destructive",
       });
+      popDialog("deleteRecipe");
     },
   });
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation({
@@ -87,7 +93,7 @@ export const DashboardPage: FC = () => {
         title: "Recipe Added to Cookbook",
         description: "The recipe was added to your cookbook.",
       });
-      setIsSearchRecipesOpen(false);
+      popDialog("searchRecipes");
     },
     onFailure: () => {
       toast({
@@ -95,7 +101,7 @@ export const DashboardPage: FC = () => {
         description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
         variant: "destructive",
       });
-      setIsSearchRecipesOpen(false);
+      popDialog("searchRecipes");
     },
   });
   const { mutateAsync: removeRecipeFromCookbook } = useRemoveRecipeFromCookbookMutation({
@@ -131,15 +137,18 @@ export const DashboardPage: FC = () => {
 
   const onDeleteRecipe = useCallback(
     async (recipe: Recipe) => {
+      console.log(cookbookId)
       if (cookbookId) {
         await removeRecipeFromCookbook({
           recipe_id: recipe.id,
           cookbook_id: +cookbookId,
         });
       } else {
-        setCurrentlyConsideredRecipe(recipe);
-        setCurrentDialog("deleteRecipe");
-        setIsDialogOpen(true);
+        pushDialog("deleteRecipe", {
+          onSubmit: onConfirmDeleteRecipe,
+          onClose: () => popDialog("deleteRecipe"),
+          recipe: recipe,
+        });
       }
     },
     [cookbookId]
@@ -147,25 +156,15 @@ export const DashboardPage: FC = () => {
 
   const onConfirmDeleteRecipe = useCallback(async (recipe: Recipe) => {
     await deleteRecipe(recipe.id);
-    setIsDialogOpen(false);
-    setCurrentlyConsideredRecipe(undefined);
-    setCurrentDialog(undefined);
-    toast({
-      title: "Recipe successfully deleted",
-      description: `The recipe ${recipe.name} was deleted.`,
-      variant: "default",
+  }, []);
+
+  const onFindRecipe = () => {
+    pushDialog("searchRecipes", {
+      cookbookId: +cookbookId!,
+      onSubmit: onSubmitFindRecipe,
+      onClose: () => popDialog("searchRecipes"),
     });
-  }, []);
-
-  const onCancelDeleteRecipe = useCallback(() => {
-    setIsDialogOpen(false);
-    setCurrentlyConsideredRecipe(undefined);
-    setCurrentDialog(undefined);
-  }, []);
-
-  const onFindRecipe = useCallback(() => {
-    setIsSearchRecipesOpen(true);
-  }, []);
+  };
 
   const onSubmitFindRecipe = useCallback(
     async (recipe: Recipe) => {
@@ -173,12 +172,6 @@ export const DashboardPage: FC = () => {
     },
     [cookbookId]
   );
-
-  const { setIsDialogOpen: setIsSearchRecipesOpen } = useSearchRecipesDialog({
-    onClose: () => setIsSearchRecipesOpen(false),
-    onSubmit: onSubmitFindRecipe,
-    cookbookId: +cookbookId!,
-  });
 
   return (
     <Stack>
@@ -189,7 +182,7 @@ export const DashboardPage: FC = () => {
             <h1 className="text-xl">{cookbook?.name}</h1>
             <ShelfSpacer />
             <Button onClick={onFindRecipe} variant="outline">
-              <Search size={20} className="mr-1" /> Find a recipe
+              <Plus size={20} className="mr-1" /> Add a recipe
             </Button>
           </Shelf>
         </LoadingGroup>
@@ -212,7 +205,7 @@ export const DashboardPage: FC = () => {
               {cookbookId && (
                 <div className="text-center">
                   <Button onClick={onFindRecipe} variant="outline">
-                    <Search size={20} className="mr-1" /> Find a recipe
+                    <Plus size={20} className="mr-1" /> Add a recipe
                   </Button>
                 </div>
               )}

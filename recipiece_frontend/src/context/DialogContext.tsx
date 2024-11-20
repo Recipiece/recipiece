@@ -1,56 +1,74 @@
-import { Dispatch, FC, PropsWithChildren, createContext, useEffect, useMemo, useState } from "react";
-import { Dialogs } from "../dialog";
+import { ComponentProps, FC, FunctionComponent, PropsWithChildren, createContext, useCallback, useMemo, useState } from "react";
 import { Dialog } from "../component";
+import { Dialogs } from "../dialog";
 
 export const DialogContext = createContext<{
-  readonly isDialogOpen: boolean;
-  readonly setIsDialogOpen: Dispatch<boolean>;
-  readonly setCurrentDialogProps: Dispatch<any>;
-  readonly setCurrentDialogId: Dispatch<keyof typeof Dialogs | undefined>;
-  readonly currentDialogProps: any;
-  readonly currentDialogId: keyof typeof Dialogs | undefined;
+  readonly pushDialog: (dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]>) => void;
+  readonly popDialog: (dialogId?: keyof typeof Dialogs) => void;
 }>({
-  isDialogOpen: false,
-  setIsDialogOpen: ((_) => {}) as Dispatch<boolean>,
-  setCurrentDialogProps: ((_) => {}) as Dispatch<any>,
-  setCurrentDialogId: ((_) => {}) as Dispatch<keyof typeof Dialogs | undefined>,
-  currentDialogProps: undefined,
-  currentDialogId: undefined,
+  popDialog: () => {},
+  pushDialog: (_, __) => {},
 });
 
 export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentDialogId, setCurrentDialogId] = useState<keyof typeof Dialogs | undefined>(undefined);
-  // @ts-ignore
-  const [currentDialogProps, setCurrentDialogProps] = useState<ComponentProps<(typeof Dialogs)[typeof currentDialogId]["component"]>>(undefined);
+  const [dialogStack, setDialogStack] = useState<
+    {
+      readonly dialogId: keyof typeof Dialogs;
+      readonly component: FunctionComponent;
+      readonly props: any;
+    }[]
+  >([]);
 
-  useEffect(() => {
-    if (!isDialogOpen) {
-      setCurrentDialogId(undefined);
-      setCurrentDialogProps(undefined);
-    }
-  }, [isDialogOpen]);
+  const pushDialog = useCallback((dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]>) => {
+    // @ts-ignore
+    setDialogStack((prev) => {
+      return [
+        {
+          dialogId: dialogId,
+          component: Dialogs[dialogId].component,
+          props: props,
+        },
+        ...prev,
+      ];
+    });
+  }, []);
 
-  const DialogComponent = useMemo(() => {
-    if(currentDialogId) {
-      return Dialogs[currentDialogId].component;
+  const popDialog = useCallback((dialogId?: keyof typeof Dialogs) => {
+    if (dialogId) {
+      setDialogStack((prev) => {
+        return [...prev.filter((d) => d.dialogId !== dialogId)];
+      });
+    } else {
+      setDialogStack((prev) => {
+        const [_, ...rest] = prev;
+        return [...rest];
+      });
     }
-  }, [currentDialogId]);
+  }, []);
+
+  const onOpenChange = (value: boolean) => {
+    if (!value) {
+      popDialog();
+    }
+  };
+
+  const dialog = useMemo(() => {
+    if (dialogStack.length > 0) {
+      const { props, component: Component } = dialogStack[dialogStack.length - 1];
+      return <Component {...props} />;
+    }
+  }, [dialogStack]);
 
   return (
     <DialogContext.Provider
       value={{
-        isDialogOpen,
-        setIsDialogOpen,
-        setCurrentDialogProps,
-        setCurrentDialogId,
-        currentDialogProps,
-        currentDialogId,
+        pushDialog,
+        popDialog,
       }}
     >
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={dialogStack.length > 0} onOpenChange={onOpenChange}>
         {children}
-        {DialogComponent && <DialogComponent {...(currentDialogProps) || {}} />}
+        {dialogStack.length > 0 && dialog}
       </Dialog>
     </DialogContext.Provider>
   );

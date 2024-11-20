@@ -1,4 +1,5 @@
 import { boolean, date, InferType, number, object, string } from "yup";
+import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YShoppingListSchema = object({
   id: number().required(),
@@ -11,9 +12,10 @@ export const YShoppingListSchema = object({
 
 export const YShoppingListItemSchema = object({
   id: number().required(),
-  shopping_list_id: string().required(),
+  shopping_list_id: number().required(),
   completed: boolean().required(),
   order: number().required(),
+  content: string().required(),
 })
   .strict()
   .noUnknown();
@@ -25,3 +27,48 @@ export interface ShoppingListItemSchema extends InferType<typeof YShoppingListIt
 /**
  * Create shopping list
  */
+export const YCreateShoppingListSchema = object({
+  name: string().required(),
+})
+  .strict()
+  .noUnknown();
+
+export interface CreateShoppingListSchema extends InferType<typeof YCreateShoppingListSchema> {}
+
+/**
+ * Update shopping list
+ */
+export const YUpdateShoppingListSchema = object({
+  id: number().required(),
+  name: string().notRequired(),
+})
+  .strict()
+  .noUnknown();
+
+export interface UpdateShoppingListSchema extends InferType<typeof YUpdateShoppingListSchema> {}
+
+/**
+ * List shopping lists schema
+ */
+export const YListShoppingListsQuerySchema = YListQuerySchema.shape({
+  user_id: number().notRequired(),
+})
+  .strict()
+  .noUnknown();
+
+export interface ListShoppingListsQuerySchema extends InferType<typeof YListShoppingListsQuerySchema> {}
+
+export const YListShoppingListsResponseSchema = generateYListQuerySchema(YShoppingListSchema);
+
+export interface ListShoppingListsResponseSchema extends InferType<typeof YListShoppingListsResponseSchema> {}
+
+
+/**
+ * Modify Shopping List
+ */
+export const YModifyShoppingListMessage = object({
+  action: string().oneOf(["current_items", "mark_item_complete", "add_item"]),
+  item: YShoppingListItemSchema.partial().notRequired().default(undefined),
+}).strict().noUnknown();
+
+export interface ModifyShoppingListMessage extends InferType<typeof YModifyShoppingListMessage> {}

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -17,6 +17,7 @@ import {
   SubmitButton,
 } from "../../component";
 import { BaseDialogProps } from "../BaseDialogProps";
+import { DialogContext } from "../../context";
 
 const CreateCookbookFormSchema = z.object({
   name: z.string().max(50).min(1, "A name is required"),
@@ -26,7 +27,9 @@ const CreateCookbookFormSchema = z.object({
 
 export type CreateCookbookForm = z.infer<typeof CreateCookbookFormSchema>;
 
-export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ onClose, onSubmit }) => {
+export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ onSubmit }) => {
+  const { popDialog } = useContext(DialogContext);
+
   const form = useForm<CreateCookbookForm>({
     resolver: zodResolver(CreateCookbookFormSchema),
     defaultValues: {
@@ -62,7 +65,7 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
           </Stack>
 
           <DialogFooter className="mt-4">
-            <Button disabled={isSubmitting} type="button" variant="outline" onClick={onClose}>
+            <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => popDialog("createCookbook")}>
               Cancel
             </Button>
             <SubmitButton>Create Cookbook</SubmitButton>

@@ -1,18 +1,20 @@
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCreateCookbookMutation, useListCookbooksQuery, useLogoutUserMutation } from "../../../api";
-import { Cookbook } from "../../../data";
+import { useCreateCookbookMutation, useCreateShoppingListMutation, useListCookbooksQuery, useListShoppingListsQuery, useLogoutUserMutation } from "../../../api";
+import { DialogContext } from "../../../context";
+import { CreateCookbookForm, CreateShoppingListForm } from "../../../dialog";
 import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator, useToast } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { Pager } from "../Pager";
 import { RecipieceHeader } from "../Typography";
-import { useCreateCookbookDialog } from "../../../hooks";
-import { CreateCookbookForm } from "../../../dialog";
 
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { pushDialog, popDialog } = useContext(DialogContext);
   const [cookbooksPage, setCookbooksPage] = useState(0);
+  const [shoppingListsPage, setShoppingListsPage] = useState(0);
+
   const { mutateAsync: logout } = useLogoutUserMutation({
     onSuccess: () => {
       navigate("/login");
@@ -22,44 +24,73 @@ export const RecipieceMenubar: FC = () => {
     },
   });
 
-  const onSelectCookbook = useCallback((cookbook: Cookbook) => {
-    navigate(`/cookbook/${cookbook?.id}`);
-  }, []);
-
   const onGoHome = useCallback(() => {
     navigate("/dashboard");
   }, []);
 
+  const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery({
+    page_number: shoppingListsPage,
+  });
+
   const { data: cookbooks, isLoading: isLoadingCookbooks } = useListCookbooksQuery({
-    page: cookbooksPage,
+    page_number: cookbooksPage,
   });
 
   const { mutateAsync: createCookbook } = useCreateCookbookMutation({
     onSuccess: () => {
-      setIsDialogOpen(false);
+      popDialog("createCookbook");
       toast({
         title: "Cookbook Created",
         description: "Your cookbook has been successfully created!",
       });
     },
     onFailure: () => {
-      setIsDialogOpen(false);
+      popDialog("createCookbook");
       toast({
         title: "Could not Create Cookbook",
         description: "This cookbook couldn't be created. Try again later.",
         variant: "destructive",
       });
     },
-  })
+  });
+
+  const { mutateAsync: createShoppingList } = useCreateShoppingListMutation({
+    onSuccess: (data) => {
+      toast({
+        title: "Shopping List Created",
+        description: "Your shopping list has been successfully created!",
+      });
+      navigate(`/shopping-list/${data.id}`);
+    },
+    onFailure: () => {
+      toast({
+        title: "Could not Create Shopping List",
+        description: "This shopping list couldn't be created. Try again later.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const onCreateCookbook = async (cookbookData: CreateCookbookForm) => {
-    await createCookbook({...cookbookData});
+    await createCookbook({ ...cookbookData });
   };
 
-  const { setIsDialogOpen } = useCreateCookbookDialog({
-    onClose: () => setIsDialogOpen(false),
-    onSubmit: onCreateCookbook,
-  });
+  const onCreateShoppingList = async (shoppingListData: CreateShoppingListForm) => {
+    await createShoppingList({ ...shoppingListData });
+  };
+
+  const onStartCreateCookbook = () => {
+    pushDialog("createCookbook", {
+      onSubmit: onCreateCookbook,
+      onClose: () => popDialog("createCookbook"),
+    });
+  };
+
+  const onStartCreateShoppingList = () => {
+    pushDialog("createShoppingList", {
+      onSubmit: onCreateShoppingList,
+    });
+  };
 
   return (
     <Menubar className="rounded-none border-0 p-4 h-12 bg-primary text-white">
@@ -72,14 +103,24 @@ export const RecipieceMenubar: FC = () => {
 
       <span className="hidden w-0 sm:w-auto sm:block">
         <MenubarMenu>
+          <MenubarTrigger>Create</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem onClick={() => navigate("/recipe/edit/new?source=url")}>Recipe From URL</MenubarItem>
+            <MenubarItem onClick={() => navigate("/recipe/edit/new")}>Recipe From Scratch</MenubarItem>
+          </MenubarContent>
+        </MenubarMenu>
+      </span>
+
+      <span className="hidden w-0 sm:w-auto sm:block">
+        <MenubarMenu>
           <MenubarTrigger>Cookbooks</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => setIsDialogOpen(true)}>New Cookbook</MenubarItem>
+            <MenubarItem onClick={onStartCreateCookbook}>New Cookbook</MenubarItem>
             <LoadingGroup isLoading={isLoadingCookbooks} className="w-full h-10">
               {cookbooks?.data && <Separator />}
               {(cookbooks?.data || []).map((cookbook) => {
                 return (
-                  <MenubarItem onClick={() => onSelectCookbook(cookbook)} key={cookbook.id}>
+                  <MenubarItem onClick={() => navigate(`/cookbook/${cookbook.id}`)} key={cookbook.id}>
                     {cookbook.name}
                   </MenubarItem>
                 );
@@ -92,10 +133,20 @@ export const RecipieceMenubar: FC = () => {
 
       <span className="hidden w-0 sm:w-auto sm:block">
         <MenubarMenu>
-          <MenubarTrigger>Create</MenubarTrigger>
+          <MenubarTrigger>Shopping Lists</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => navigate("/recipe/edit/new?source=url")}>Recipe From URL</MenubarItem>
-            <MenubarItem onClick={() => navigate("/recipe/edit/new")}>New Recipe</MenubarItem>
+            <MenubarItem onClick={onStartCreateShoppingList}>New Shopping List</MenubarItem>
+            <LoadingGroup isLoading={isLoadingShoppingLists} className="w-full h-10">
+              {shoppingLists?.data && <Separator />}
+              {(shoppingLists?.data || []).map((shoppingList) => {
+                return (
+                  <MenubarItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}>
+                    {shoppingList.name}
+                  </MenubarItem>
+                );
+              })}
+              {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />}
+            </LoadingGroup>
           </MenubarContent>
         </MenubarMenu>
       </span>

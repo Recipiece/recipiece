@@ -20,10 +20,6 @@ export const issueEmailVerificationToken = async (request: AuthenticatedRequest)
     const now = DateTime.utc();
     const tokenCreatedAt = DateTime.fromJSDate(accountToken.created_at).toUTC();
 
-    console.log(now);
-    console.log(tokenCreatedAt);
-    console.log(now.diff(tokenCreatedAt).milliseconds)
-
     const diffMs = now.diff(tokenCreatedAt).milliseconds;
 
     if (diffMs < 5 * 60 * 1000) {
