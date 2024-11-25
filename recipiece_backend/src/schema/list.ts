@@ -1,8 +1,9 @@
-import { AnyObject, array, boolean, InferType, ISchema, Maybe, number, object, ObjectSchema, string } from "yup";
+import { array, boolean, InferType, ISchema, number, object, string } from "yup";
+import { DEFAULT_PAGE_SIZE } from "../util/constant";
 
 export const YListQuerySchema = object({
   page_number: number().required(),
-  page_size: number().min(1).max(50).default(10).notRequired(),
+  page_size: number().min(1).max(DEFAULT_PAGE_SIZE).default(DEFAULT_PAGE_SIZE).notRequired(),
   search: string().notRequired(),
 })
   .strict()

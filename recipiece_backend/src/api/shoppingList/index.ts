@@ -1,5 +1,6 @@
-import { YAuthenticatedWebsocketRequestSchema, YCreateShoppingListSchema, YListShoppingListsQuerySchema, YListShoppingListsResponseSchema, YModifyShoppingListMessage, YShoppingListSchema, YUpdateShoppingListSchema } from "../../schema";
+import { YAppendShoppingListItemsRequestSchema, YAppendShoppingListItemsResponseSchema, YCreateShoppingListSchema, YListShoppingListsQuerySchema, YListShoppingListsResponseSchema, YModifyShoppingListMessage, YModifyShoppingListResponse, YShoppingListSchema, YUpdateShoppingListSchema } from "../../schema";
 import { Route, WebsocketRoute } from "../../types";
+import { appendShoppingListItems } from "./appendShoppingListItems";
 import { createShoppingList } from "./createShoppingList";
 import { deleteShoppingList } from "./deleteShoppingList";
 import { getShoppingList } from "./getShoppingList";
@@ -51,6 +52,14 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     method: "GET",
     function: requestShoppingListSession,
   },
+  {
+    path: "/shopping-list/append-items",
+    authentication: "token",
+    method: "POST",
+    function: appendShoppingListItems,
+    requestSchema: YAppendShoppingListItemsRequestSchema,
+    responseSchema: YAppendShoppingListItemsResponseSchema,
+  }
 ];
 
 export const SHOPPING_LIST_WEBSOCKET_ROUTES: WebsocketRoute[] = [
@@ -59,5 +68,6 @@ export const SHOPPING_LIST_WEBSOCKET_ROUTES: WebsocketRoute[] = [
     authentication: "token",
     function: modifyShoppingListItems,
     requestSchema: YModifyShoppingListMessage,
+    responseSchema: YModifyShoppingListResponse,
   }
 ]

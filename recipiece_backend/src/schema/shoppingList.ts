@@ -1,4 +1,4 @@
-import { boolean, date, InferType, number, object, string } from "yup";
+import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YShoppingListSchema = object({
@@ -62,13 +62,43 @@ export const YListShoppingListsResponseSchema = generateYListQuerySchema(YShoppi
 
 export interface ListShoppingListsResponseSchema extends InferType<typeof YListShoppingListsResponseSchema> {}
 
-
 /**
  * Modify Shopping List
  */
 export const YModifyShoppingListMessage = object({
-  action: string().oneOf(["current_items", "mark_item_complete", "add_item", "delete_item", "set_item_complete", "mark_item_incomplete", "set_item_order", "set_item_content"]),
+  action: string().oneOf([
+    "current_items",
+    "mark_item_complete",
+    "add_item",
+    "delete_item",
+    "set_item_complete",
+    "mark_item_incomplete",
+    "set_item_order",
+    "set_item_content",
+  ]),
   item: YShoppingListItemSchema.partial().notRequired().default(undefined),
-}).strict().noUnknown();
+})
+  .strict()
+  .noUnknown();
 
 export interface ModifyShoppingListMessage extends InferType<typeof YModifyShoppingListMessage> {}
+
+export const YModifyShoppingListResponse = array(YShoppingListItemSchema).strict().required();
+
+export interface ModifyShoppingListResponse extends InferType<typeof YModifyShoppingListResponse> {}
+
+/**
+ * Append Shopping List Items
+ */
+export const YAppendShoppingListItemsRequestSchema = object({
+  shopping_list_id: number().required(),
+  items: array(YShoppingListItemSchema.omit(["id", "order", "completed", "shopping_list_id"])).required(),
+})
+  .strict()
+  .noUnknown();
+
+export interface AppendShoppingListItemsRequestSchema extends InferType<typeof YAppendShoppingListItemsRequestSchema> {}
+
+export const YAppendShoppingListItemsResponseSchema = array(YShoppingListItemSchema).strict().required();
+
+export interface AppendShoppingListItemsResponseSchema extends InferType<typeof YAppendShoppingListItemsResponseSchema> {}

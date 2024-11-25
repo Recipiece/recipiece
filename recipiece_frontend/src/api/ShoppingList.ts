@@ -308,3 +308,34 @@ export const useDeleteShoppingListMutation = (args?: MutationArgs<void>) => {
     },
   });
 };
+
+export const useAppendShoppingListItemsMutation = (args?: MutationArgs<ShoppingListItem[]>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (data: { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItem>[] }) => {
+    return await poster<typeof data, ShoppingListItem[]>({
+      path: "/shopping-list/append-items",
+      body: data,
+      withAuth: true,
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: ["shoppingListList"],
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["shoppingList", vars.shopping_list_id],
+        refetchType: "all",
+      });
+      args?.onSuccess?.(data.data);
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};

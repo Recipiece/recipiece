@@ -1,5 +1,5 @@
 import { prisma } from "./prisma.mjs";
-import Jabber from "jabber";
+import { faker } from "@faker-js/faker";
 
 export const seedShoppingLists = async () => {
   const user = await prisma.user.findUnique({
@@ -8,27 +8,32 @@ export const seedShoppingLists = async () => {
     },
   });
   await seedShoppingListsForUser(user);
+
+  const otherUser = await prisma.user.findUnique({
+    where: {
+      email: "other@recipiece.org",
+    },
+  });
+
+  await seedShoppingListsForUser(otherUser);
 };
 
 const seedShoppingListsForUser = async (user) => {
-  const jabber = new Jabber.default();
-
   for (let i = 0; i < 10; i++) {
     const numItems = Math.floor(Math.random() * 50);
+    const ingredients = faker.helpers.uniqueArray(faker.food.ingredient, numItems);
     const itemsArrayBase = [...new Array(numItems)].map((_, idx) => {
       return {
-        content:
-          jabber.createWord(Math.floor(Math.random() * 20)) + " " + jabber.createWord(Math.floor(Math.random() * 20)),
+        content: ingredients[idx],
         completed: idx < numItems / 2,
-        order: idx < numItems / 2 ? idx : idx % (numItems / 2),
+        order: idx < numItems / 2 ? idx + 1 : (idx % (numItems / 2)) + 1,
       };
     });
 
     await prisma.shoppingList.create({
       data: {
         user_id: user.id,
-        name:
-          jabber.createWord(Math.floor(Math.random() * 20)) + " " + jabber.createWord(Math.floor(Math.random() * 20)),
+        name: faker.word.words({count: {min: 1, max: 5}}),
         shopping_list_items: {
           createMany: {
             data: [...itemsArrayBase],

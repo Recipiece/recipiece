@@ -3,13 +3,14 @@ import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
 export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuerySchema>): ApiResponse<ListRecipesResponseSchema> => {
   const query = req.query;
   const user = req.user;
 
   const userId = query.user_id ?? user.id;
-  const pageSize = query.page_size || 30;
+  const pageSize = query.page_size || DEFAULT_PAGE_SIZE;
   const page = query.page_number;
   const search = query.search;
   const cookbookId = query.cookbook_id;

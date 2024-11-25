@@ -3,13 +3,14 @@ import { AuthenticatedRequest } from "../../types";
 import { ListShoppingListsQuerySchema } from "../../schema";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../database";
+import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
 export const listShoppingLists = async (request: AuthenticatedRequest<any, ListShoppingListsQuerySchema>) => {
   const query = request.query;
   const user = request.user;
 
   const userId = query.user_id ?? user.id;
-  const pageSize = query.page_size || 30;
+  const pageSize = query.page_size || DEFAULT_PAGE_SIZE;
   const page = query.page_number;
   const search = query.search;
 

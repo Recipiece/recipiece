@@ -12,8 +12,8 @@ export const getWebsocketUrl = (): string => {
   return "ws://localhost:8080";
 };
 
-export interface MutationArgs<T> {
-  readonly onSuccess?: (data: T) => void;
+export interface MutationArgs<SuccessType> {
+  readonly onSuccess?: (data: SuccessType) => void;
   readonly onFailure?: (err?: Error) => void;
 }
 

@@ -1,3 +1,5 @@
+export const DEFAULT_PAGE_SIZE = 100;
+
 export class UserValidationTokenTypes {
   public static readonly ACCOUNT_VERIFICATION = {
     purpose: "account_verification",

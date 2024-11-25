@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useAttachRecipeToCookbookMutation, useDeleteRecipeMutation, useGetCookbookByIdQuery, useListRecipesQuery, useRemoveRecipeFromCookbookMutation } from "../../api";
+import { useParams } from "react-router-dom";
+import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
 import { Button, Grid, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ListRecipeFilters, Recipe } from "../../data";
@@ -65,28 +65,8 @@ export const DashboardPage: FC = () => {
     });
   }, []);
 
-  const navigate = useNavigate();
-
   const { data: recipeData, isLoading: isLoadingRecipes, isFetching: isFetchingRecipes } = useListRecipesQuery(filters);
   const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { disabled: !cookbookId });
-  const { mutateAsync: deleteRecipe } = useDeleteRecipeMutation({
-    onSuccess: () => {
-      toast({
-        title: "Recipe successfully deleted",
-        // description: `The recipe ${recipe.name} was deleted.`,
-        variant: "default",
-      });
-      popDialog("deleteRecipe");
-    },
-    onFailure: () => {
-      toast({
-        title: "Cannot delete recipe",
-        description: "There was an issue trying to delete your recipe. Try again later.",
-        variant: "destructive",
-      });
-      popDialog("deleteRecipe");
-    },
-  });
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation({
     onSuccess: () => {
       toast({
@@ -104,59 +84,10 @@ export const DashboardPage: FC = () => {
       popDialog("searchRecipes");
     },
   });
-  const { mutateAsync: removeRecipeFromCookbook } = useRemoveRecipeFromCookbookMutation({
-    onFailure: () => {
-      toast({
-        title: "Cannot remove recipe from cookbook",
-        description: "There was an issue trying to remove your recipe from this cookbook. Try again later.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Recipe removed",
-        description: "The recipe was removed from the cookbook.",
-      });
-    },
-  });
 
   const recipes = useMemo(() => {
     return recipeData?.data || [];
   }, [recipeData]);
-
-  const onViewRecipe = useCallback(
-    (recipe: Recipe) => {
-      navigate(`/recipe/view/${recipe.id}`);
-    },
-    [navigate]
-  );
-
-  const onEditRecipe = useCallback((recipe: Recipe) => {
-    navigate(`/recipe/edit/${recipe.id}`);
-  }, []);
-
-  const onDeleteRecipe = useCallback(
-    async (recipe: Recipe) => {
-      console.log(cookbookId)
-      if (cookbookId) {
-        await removeRecipeFromCookbook({
-          recipe_id: recipe.id,
-          cookbook_id: +cookbookId,
-        });
-      } else {
-        pushDialog("deleteRecipe", {
-          onSubmit: onConfirmDeleteRecipe,
-          onClose: () => popDialog("deleteRecipe"),
-          recipe: recipe,
-        });
-      }
-    },
-    [cookbookId]
-  );
-
-  const onConfirmDeleteRecipe = useCallback(async (recipe: Recipe) => {
-    await deleteRecipe(recipe.id);
-  }, []);
 
   const onFindRecipe = () => {
     pushDialog("searchRecipes", {
@@ -215,7 +146,7 @@ export const DashboardPage: FC = () => {
             {(recipes || []).map((recipe) => {
               return (
                 <div className="auto-rows-fr" key={recipe.id}>
-                  <RecipeCard onView={onViewRecipe} onEdit={onEditRecipe} onDelete={onDeleteRecipe} recipe={recipe} />
+                  <RecipeCard recipe={recipe} cookbookId={cookbookId ? +cookbookId : undefined} />
                 </div>
               );
             })}

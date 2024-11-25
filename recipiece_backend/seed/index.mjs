@@ -2,6 +2,7 @@ import { seedRecipes } from "./recipe.seed.mjs";
 import { seedUsers } from "./user.seed.mjs";
 import { seedShoppingLists } from "./shoppingList.seed.mjs";
 import { prisma } from "./prisma.mjs";
+import { seedCookbooks } from "./cookbook.seed.mjs";
 
 const main = async () => {
   console.log("deleting existing user: dev@recipiece.org");
@@ -30,6 +31,8 @@ const main = async () => {
   await seedUsers();
   console.log("seeding recipes");
   await seedRecipes();
+  console.log("seeding cookbooks");
+  await seedCookbooks();
   console.log("seeding shopping lists");
   await seedShoppingLists();
 };
