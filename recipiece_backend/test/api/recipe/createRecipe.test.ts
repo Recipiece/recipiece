@@ -1,17 +1,13 @@
 import { User } from "@prisma/client";
-// @ts-ignore
-import { createUserAndToken } from "../../fixture";
-import request from "supertest";
-import app from "../../../src/app";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../src/database";
+import request from "supertest";
 
 describe("Create Recipes", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await createUserAndToken();
+    const userAndToken = await fixtures.createUserAndToken();
     user = userAndToken[0];
     bearerToken = userAndToken[1];
   });
@@ -31,7 +27,7 @@ describe("Create Recipes", () => {
       }],
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .post("/recipe")
       .send(expectedBody)
       .set("Content-Type", "application/json")
@@ -62,7 +58,7 @@ describe("Create Recipes", () => {
       }
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .post("/recipe")
       .send({
         name: existingRecipe.name,

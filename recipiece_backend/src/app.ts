@@ -25,11 +25,14 @@ app.use(cors({}));
 app.use(bodyParser.json());
 app.use(morgan(":method :url :status - :response-time ms"));
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  setTimeout(() => {
-    next();
-  }, 1000);
-});
+if (process.env.APP_ENVIRONMENT === "dev") {
+  // slow things down locally, cause they're too fast
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    setTimeout(() => {
+      next();
+    }, 1000);
+  });
+}
 
 ROUTES.forEach((route) => {
   const routeHandlers: any[] = [];

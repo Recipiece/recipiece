@@ -1,16 +1,13 @@
 import { Recipe, User } from "@prisma/client";
-import { createUserAndToken } from "../../fixture";
-import request from "supertest";
-import app from "../../../src/app";
-import { prisma } from "../../../src/database";
 import { StatusCodes } from "http-status-codes";
+import request from "supertest";
 
 describe("List Recipes", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await createUserAndToken();
+    const userAndToken = await fixtures.createUserAndToken();
     user = userAndToken[0];
     bearerToken = userAndToken[1];
   });
@@ -27,7 +24,7 @@ describe("List Recipes", () => {
       });
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/recipe/list")
       .query({
         page_number: 0,
@@ -41,7 +38,7 @@ describe("List Recipes", () => {
   });
 
   it("should not list private recipes for another user", async () => {
-    const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
     for (let i = 0; i < 10; i++) {
       await prisma.recipe.create({
         data: {
@@ -53,7 +50,7 @@ describe("List Recipes", () => {
       });
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/recipe/list")
       .query({
         user_id: otherUser.id,
@@ -91,7 +88,7 @@ describe("List Recipes", () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/recipe/list")
       .query({
         search: "name",
@@ -118,7 +115,7 @@ describe("List Recipes", () => {
       });
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/recipe/list")
       .query({
         page_number: 1,

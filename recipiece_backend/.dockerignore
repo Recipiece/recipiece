@@ -3,7 +3,6 @@ node_modules
 dist
 seed
 .env.dev
-.env.test
 .gitignore
 .prettierrc
 yarn.lock

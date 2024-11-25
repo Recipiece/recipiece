@@ -4,6 +4,8 @@ import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router
 import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
 import { AuthContextProvider, DialogContextProvider } from "./context";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,20 +24,22 @@ export const AppRoutes: FC = () => {
       <AuthContextProvider>
         <TooltipProvider>
           <ToastProvider>
-            <DialogContextProvider>
-              <Routes>
-                <Route element={<UnauthenticatedLayout />}>
-                  {unauthenticatedRoutes.map((r) => {
-                    return <Route key={r.path} path={r.path} element={<r.element />} />;
-                  })}
-                </Route>
-                <Route element={<AuthenticatedLayout />}>
-                  {authenticatedRoutes.map((r) => {
-                    return <Route key={r.path} path={r.path} element={<r.element />} />;
-                  })}
-                </Route>
-              </Routes>
-            </DialogContextProvider>
+            <DndProvider backend={HTML5Backend}>
+              <DialogContextProvider>
+                <Routes>
+                  <Route element={<UnauthenticatedLayout />}>
+                    {unauthenticatedRoutes.map((r) => {
+                      return <Route key={r.path} path={r.path} element={<r.element />} />;
+                    })}
+                  </Route>
+                  <Route element={<AuthenticatedLayout />}>
+                    {authenticatedRoutes.map((r) => {
+                      return <Route key={r.path} path={r.path} element={<r.element />} />;
+                    })}
+                  </Route>
+                </Routes>
+              </DialogContextProvider>
+            </DndProvider>
             <Toaster />
           </ToastProvider>
         </TooltipProvider>

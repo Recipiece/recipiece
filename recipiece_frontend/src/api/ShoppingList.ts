@@ -1,45 +1,101 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ListShoppingListFilters, ListShoppingListResponse, ShoppingList, ShoppingListItem } from "../data";
 import { getWebsocketUrl, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "./Request";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
-export const useShoppingListItemsSubscription = (wsToken: string | undefined) => {
-  const [isLoading, setIsLoading] = useState(true);
+export const useShoppingListItemsSubscription = (shoppingListId: number) => {
+  const { data: wsSession, isLoading: isLoadingWsSession, isFetching: isFetchingWsSession } = useRequestShoppingListSessionQuery(+shoppingListId!);
+
+  const [isWebsocketLoading, setIsWebsocketLoading] = useState(true);
   const [isError, setIsError] = useState<WebSocketEventMap["error"] | undefined>(undefined);
   const [shoppingListItems, setShoppingListItems] = useState<ShoppingListItem[]>([]);
 
-  const { sendMessage, readyState } = useWebSocket(`${getWebsocketUrl()}/shopping-list/modify`, {
-    queryParams: {
-      token: wsToken!,
-    },
-    onError: (event) => {
-      setIsError(event);
-      setIsLoading(false);
-    },
-    onMessage: (event) => {
-      setShoppingListItems(JSON.parse(event.data) as ShoppingListItem[]);
-    }
-  }, !!wsToken);
+  const isLoading = useMemo(() => {
+    return isWebsocketLoading || isLoadingWsSession;
+  }, [isWebsocketLoading, isLoadingWsSession]);
 
-  const addItem = useCallback((item: Partial<ShoppingListItem>) => {
-    sendMessage(JSON.stringify({
-      action: "add_item",
-      item: {...item},
-    }))
-  }, [sendMessage]);
+  const { sendMessage, readyState } = useWebSocket(
+    `${getWebsocketUrl()}/shopping-list/modify`,
+    {
+      queryParams: {
+        token: wsSession?.token!,
+      },
+      onError: (event) => {
+        setIsError(event);
+        setIsWebsocketLoading(false);
+      },
+      onMessage: (event) => {
+        setShoppingListItems(JSON.parse(event.data) as ShoppingListItem[]);
+      },
+    },
+    !!wsSession?.token && !isFetchingWsSession && !isLoadingWsSession
+  );
 
-  const markItemComplete = useCallback((item: Partial<ShoppingListItem>) => {
-    sendMessage(JSON.stringify({
-      action: "mark_item_complete",
-      item: {...item},
-    }))
-  }, [sendMessage]);
+  const addItem = useCallback(
+    (item: Partial<ShoppingListItem>) => {
+      sendMessage(
+        JSON.stringify({
+          action: "add_item",
+          item: { ...item },
+        })
+      );
+    },
+    [sendMessage]
+  );
+
+  const markItemComplete = useCallback(
+    (item: Partial<ShoppingListItem>) => {
+      sendMessage(
+        JSON.stringify({
+          action: "mark_item_complete",
+          item: { ...item },
+        })
+      );
+    },
+    [sendMessage]
+  );
+
+  const markItemIncomplete = useCallback(
+    (item: Partial<ShoppingListItem>) => {
+      sendMessage(
+        JSON.stringify({
+          action: "mark_item_incomplete",
+          item: { ...item },
+        })
+      );
+    },
+    [sendMessage]
+  );
+
+  const deleteItem = useCallback(
+    (item: Partial<ShoppingListItem>) => {
+      sendMessage(
+        JSON.stringify({
+          action: "delete_item",
+          item: { ...item },
+        })
+      );
+    },
+    [sendMessage]
+  );
+
+  const setItemOrder = useCallback(
+    (item: Partial<ShoppingListItem>) => {
+      sendMessage(
+        JSON.stringify({
+          action: "set_item_order",
+          item: { ...item },
+        })
+      );
+    },
+    [sendMessage]
+  );
 
   useEffect(() => {
-    if(readyState === ReadyState.OPEN) {
+    if (readyState === ReadyState.OPEN) {
       sendMessage(JSON.stringify({ action: "current_items" }));
-      setIsLoading(false);
+      setIsWebsocketLoading(false);
     }
   }, [readyState, sendMessage]);
 
@@ -49,6 +105,9 @@ export const useShoppingListItemsSubscription = (wsToken: string | undefined) =>
     isError,
     addItem,
     markItemComplete,
+    markItemIncomplete,
+    deleteItem,
+    setItemOrder,
   };
 };
 
@@ -67,8 +126,9 @@ export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryA
     queryKey: ["shoppingList", "session", listId],
     queryFn: query,
     enabled: args?.disabled !== true,
-    retry: 0,
-    staleTime: Infinity,
+    // retry: 0,
+    // staleTime: 1000,
+    refetchOnMount: "always",
     refetchOnReconnect: "always",
     refetchOnWindowFocus: "always",
   });

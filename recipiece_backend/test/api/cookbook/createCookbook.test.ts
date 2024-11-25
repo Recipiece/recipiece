@@ -2,16 +2,13 @@ import { User } from "@prisma/client";
 // @ts-ignore
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import app from "../../../src/app";
-import { createUserAndToken } from "../../fixture";
-import { prisma } from "../../../src/database";
 
 describe("Create Cookbooks", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await createUserAndToken();
+    const userAndToken = await fixtures.createUserAndToken();
     user = userAndToken[0];
     bearerToken = userAndToken[1];
   });
@@ -23,7 +20,7 @@ describe("Create Cookbooks", () => {
       private: false,
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .post("/cookbook")
       .send(expectedBody)
       .set("Content-Type", "application/json")
@@ -46,7 +43,7 @@ describe("Create Cookbooks", () => {
       }
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .post("/cookbook")
       .send({
         name: existingCookbook.name,
@@ -58,7 +55,7 @@ describe("Create Cookbooks", () => {
   });
 
   it("should not allow a bad body to be passed in", async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post("/cookbook")
       .send({
         name: "YEET",

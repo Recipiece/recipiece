@@ -1,7 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import app from "../../../src/app";
-import { prisma } from "../../../src/database";
 import { hashPassword } from "../../../src/util/password";
 
 describe("loginUser", () => {
@@ -23,7 +21,7 @@ describe("loginUser", () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .post("/user/login")
       .send({
         username: username,
@@ -53,7 +51,7 @@ describe("loginUser", () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .post("/user/login")
       .send({
         username: username,
@@ -65,7 +63,7 @@ describe("loginUser", () => {
   });
 
   it("should not allow a login when the user does not exist", async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post("/user/login")
       .send({
         username: "nonsenseUser@recipiece.org",

@@ -1,10 +1,6 @@
 import { User } from "@prisma/client";
-// @ts-ignore
-import { createUserAndToken } from "../../fixture";
-import request from "supertest";
-import app from "../../../src/app";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../src/database";
+import request from "supertest";
 import { RecipeSchema } from "../../../src/schema";
 
 describe("Update Recipes", () => {
@@ -12,7 +8,7 @@ describe("Update Recipes", () => {
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await createUserAndToken();
+    const userAndToken = await fixtures.createUserAndToken();
     user = userAndToken[0];
     bearerToken = userAndToken[1];
   });
@@ -50,7 +46,7 @@ describe("Update Recipes", () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .put("/recipe")
       .send({
         id: existingRecipe.id,
@@ -114,7 +110,7 @@ describe("Update Recipes", () => {
   });
 
   it(`should ${StatusCodes.NOT_FOUND} when a recipe is not found`, async () => {
-    const response = await request(app)
+    const response = await request(server)
       .put("/recipe")
       .send({
         id: 1,
@@ -125,7 +121,7 @@ describe("Update Recipes", () => {
   });
 
   it(`should ${StatusCodes.NOT_FOUND} when trying to update a recipe you don't own`, async () => {
-    const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
 
     const existingRecipe = await prisma.recipe.create({
       data: {
@@ -159,7 +155,7 @@ describe("Update Recipes", () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .put("/recipe")
       .send({
         id: existingRecipe.id,
@@ -170,7 +166,7 @@ describe("Update Recipes", () => {
   });
 
   it("should remove any recipe cookbook attachments in cookbooks the user does not own when making the recipe private", async () => {
-    const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
 
     const usersCookbook = await prisma.cookbook.create({
       data: {
@@ -232,7 +228,7 @@ describe("Update Recipes", () => {
       ]
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .put("/recipe")
       .send({
         id: usersRecipe.id,

@@ -146,7 +146,7 @@ model ShoppingListItem {
   order Int
   content String
 
-  shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id])
+  shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 

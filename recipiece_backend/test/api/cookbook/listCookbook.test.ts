@@ -1,16 +1,13 @@
 import { Cookbook, User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import app from "../../../src/app";
-import { prisma } from "../../../src/database";
-import { createUserAndToken } from "../../fixture";
 
 describe("List Cookbooks", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await createUserAndToken();
+    const userAndToken = await fixtures.createUserAndToken();
     user = userAndToken[0];
     bearerToken = userAndToken[1];
   });
@@ -27,7 +24,7 @@ describe("List Cookbooks", () => {
       });
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/cookbook/list")
       .query({
         page_number: 0,
@@ -41,7 +38,7 @@ describe("List Cookbooks", () => {
   });
 
   it("should not list private cookbooks for another user", async () => {
-    const [otherUser] = await createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
     for (let i = 0; i < 10; i++) {
       await prisma.cookbook.create({
         data: {
@@ -53,7 +50,7 @@ describe("List Cookbooks", () => {
       });
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/cookbook/list")
       .query({
         user_id: otherUser.id,
@@ -91,7 +88,7 @@ describe("List Cookbooks", () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/cookbook/list")
       .query({
         search: "name",
@@ -118,7 +115,7 @@ describe("List Cookbooks", () => {
       });
     }
 
-    const response = await request(app)
+    const response = await request(server)
       .get("/cookbook/list")
       .query({
         page_number: 1,

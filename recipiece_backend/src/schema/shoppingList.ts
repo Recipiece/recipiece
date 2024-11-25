@@ -67,7 +67,7 @@ export interface ListShoppingListsResponseSchema extends InferType<typeof YListS
  * Modify Shopping List
  */
 export const YModifyShoppingListMessage = object({
-  action: string().oneOf(["current_items", "mark_item_complete", "add_item"]),
+  action: string().oneOf(["current_items", "mark_item_complete", "add_item", "delete_item", "set_item_complete", "mark_item_incomplete", "set_item_order", "set_item_content"]),
   item: YShoppingListItemSchema.partial().notRequired().default(undefined),
 }).strict().noUnknown();
 
