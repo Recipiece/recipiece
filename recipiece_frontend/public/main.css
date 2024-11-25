@@ -1053,6 +1053,14 @@ body {
   width: 100%;
 }
 
+.w-\[120px\] {
+  width: 120px;
+}
+
+.w-\[200px\] {
+  width: 200px;
+}
+
 .min-w-0 {
   min-width: 0px;
 }
@@ -1067,6 +1075,14 @@ body {
 
 .min-w-\[8rem\] {
   min-width: 8rem;
+}
+
+.min-w-\[250px\] {
+  min-width: 250px;
+}
+
+.min-w-\[200px\] {
+  min-width: 200px;
 }
 
 .max-w-\[--skeleton-width\] {
@@ -1358,6 +1374,10 @@ body {
 
 .border-t-\[1px\] {
   border-top-width: 1px;
+}
+
+.border-t-2 {
+  border-top-width: 2px;
 }
 
 .border-destructive {

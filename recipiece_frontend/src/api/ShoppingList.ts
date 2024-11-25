@@ -8,12 +8,13 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
   const { data: wsSession, isLoading: isLoadingWsSession, isFetching: isFetchingWsSession } = useRequestShoppingListSessionQuery(+shoppingListId!);
 
   const [isWebsocketLoading, setIsWebsocketLoading] = useState(true);
+  const [isPerformingAction, setIsPerformingAction] = useState(false);
   const [isError, setIsError] = useState<WebSocketEventMap["error"] | undefined>(undefined);
   const [shoppingListItems, setShoppingListItems] = useState<ShoppingListItem[]>([]);
 
   const isLoading = useMemo(() => {
-    return isWebsocketLoading || isLoadingWsSession;
-  }, [isWebsocketLoading, isLoadingWsSession]);
+    return isWebsocketLoading || isLoadingWsSession || isFetchingWsSession;
+  }, [isWebsocketLoading, isLoadingWsSession, isFetchingWsSession]);
 
   const { sendMessage, readyState } = useWebSocket(
     `${getWebsocketUrl()}/shopping-list/modify`,
@@ -23,17 +24,40 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
       },
       onError: (event) => {
         setIsError(event);
+        setIsPerformingAction(false);
         setIsWebsocketLoading(false);
       },
       onMessage: (event) => {
         setShoppingListItems(JSON.parse(event.data) as ShoppingListItem[]);
+        setIsPerformingAction(false);
+      },
+      onOpen: () => {
+        setIsWebsocketLoading(false);
+      },
+      onClose: () => {
+        setShoppingListItems([]);
+        setIsWebsocketLoading(true);
       },
     },
     !!wsSession?.token && !isFetchingWsSession && !isLoadingWsSession
   );
 
+  const setItemContent = useCallback(
+    (item: Partial<ShoppingListItem>) => {
+      setIsPerformingAction(true);
+      sendMessage(
+        JSON.stringify({
+          action: "set_item_content",
+          item: { ...item },
+        })
+      );
+    },
+    [sendMessage]
+  );
+
   const addItem = useCallback(
     (item: Partial<ShoppingListItem>) => {
+      setIsPerformingAction(true);
       sendMessage(
         JSON.stringify({
           action: "add_item",
@@ -46,6 +70,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
 
   const markItemComplete = useCallback(
     (item: Partial<ShoppingListItem>) => {
+      setIsPerformingAction(true);
       sendMessage(
         JSON.stringify({
           action: "mark_item_complete",
@@ -58,6 +83,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
 
   const markItemIncomplete = useCallback(
     (item: Partial<ShoppingListItem>) => {
+      setIsPerformingAction(true);
       sendMessage(
         JSON.stringify({
           action: "mark_item_incomplete",
@@ -70,6 +96,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
 
   const deleteItem = useCallback(
     (item: Partial<ShoppingListItem>) => {
+      setIsPerformingAction(true);
       sendMessage(
         JSON.stringify({
           action: "delete_item",
@@ -82,6 +109,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
 
   const setItemOrder = useCallback(
     (item: Partial<ShoppingListItem>) => {
+      setIsPerformingAction(true);
       sendMessage(
         JSON.stringify({
           action: "set_item_order",
@@ -102,12 +130,14 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
   return {
     shoppingListItems,
     isLoading,
+    isPerformingAction,
     isError,
     addItem,
     markItemComplete,
     markItemIncomplete,
     deleteItem,
     setItemOrder,
+    setItemContent,
   };
 };
 
@@ -126,8 +156,7 @@ export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryA
     queryKey: ["shoppingList", "session", listId],
     queryFn: query,
     enabled: args?.disabled !== true,
-    // retry: 0,
-    // staleTime: 1000,
+    staleTime: 1000,
     refetchOnMount: "always",
     refetchOnReconnect: "always",
     refetchOnWindowFocus: "always",

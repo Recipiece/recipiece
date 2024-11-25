@@ -28,15 +28,10 @@ export const SHOPPING_LIST_ITEM_INPUT_CLASSES = [
 ];
 
 export const ShoppingListItemInput: FC<InputProps> = ({ className, ...restProps }) => {
-  return (
-    <Input
-      className={cn(...SHOPPING_LIST_ITEM_INPUT_CLASSES, className)}
-      {...restProps}
-    />
-  );
+  return <Input className={cn(...SHOPPING_LIST_ITEM_INPUT_CLASSES, className)} {...restProps} />;
 };
 
-export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputProps> = ({ shoppingListItem, onCheck, isDraggable, onItemDropped, ...restProps }) => {
+export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputProps> = ({ shoppingListItem, onCheck, isDraggable, onItemDropped, disabled, ...restProps }) => {
   const [{ isDragging }, dragRef, draggingRef] = useDrag(() => {
     return {
       type: "shopping_list_item",
@@ -58,15 +53,15 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
       collect: (monitor) => {
         return {
           isOver: monitor.isOver(),
-        }
-      }
+        };
+      },
     };
   }, [shoppingListItem]);
 
   const wrapperClassName = useMemo(() => {
     const baseClassName = "inline-flex flex-row items-center gap-2 flex-grow";
-    if(isOver) {
-      return cn(baseClassName, "border-t-primary border-t-solid border-t-[1px]");
+    if (isOver) {
+      return cn(baseClassName, "border-t-primary border-t-solid border-t-2");
     } else {
       return cn(baseClassName);
     }
@@ -80,8 +75,8 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
     // @ts-ignore
     <div className={wrapperClassName} ref={isDraggable ? mergeRefs(dragRef, dropRef) : null}>
       {isDraggable && <Grip />}
-      <Checkbox checked={shoppingListItem.completed} onClick={() => onCheck(shoppingListItem)} />
-      <ShoppingListItemInput {...restProps} />
+      <Checkbox disabled={disabled} checked={shoppingListItem.completed} onClick={() => onCheck(shoppingListItem)} />
+      <ShoppingListItemInput disabled={disabled} {...restProps} />
     </div>
   );
 
