@@ -34,6 +34,10 @@ if (process.env.APP_ENVIRONMENT === "dev") {
   });
 }
 
+app.get("/", (_, res) => {
+  res.status(StatusCodes.OK).send({version: process.env.APP_VERSION});
+});
+
 ROUTES.forEach((route) => {
   const routeHandlers: any[] = [];
 

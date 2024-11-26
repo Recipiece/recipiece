@@ -4,7 +4,7 @@ local-recipiece-data
 .vscode
 coverage
 node_modules
-.env
+.env.keys
 dist
 
 .venv
