@@ -1,11 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
 import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
 import { AuthContextProvider, DialogContextProvider } from "./context";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { useLayout } from "./hooks";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,12 +21,18 @@ const queryClient = new QueryClient({
 });
 
 export const AppRoutes: FC = () => {
+  const { isMobile } = useLayout();
+
+  const dndBackend = useMemo(() => {
+    return isMobile ? TouchBackend : HTML5Backend;
+  }, [isMobile]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <TooltipProvider>
           <ToastProvider>
-            <DndProvider backend={HTML5Backend}>
+            <DndProvider backend={dndBackend}>
               <DialogContextProvider>
                 <Routes>
                   <Route element={<UnauthenticatedLayout />}>

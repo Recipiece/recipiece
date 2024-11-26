@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 
 export const getUrl = (): string => {
   // @TODO -- change this later
-  return "http://localhost:8080";
+  return "http://192.168.1.148:8080";
 };
 
 export const getWebsocketUrl = (): string => {
-  return "ws://localhost:8080";
+  return "ws://192.168.1.148:8080";
 };
 
 export interface MutationArgs<SuccessType> {

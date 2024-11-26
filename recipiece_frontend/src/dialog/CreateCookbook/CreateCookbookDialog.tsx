@@ -2,22 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Button,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Form,
-  FormCheckbox,
-  FormInput,
-  FormTextarea,
-  Stack,
-  SubmitButton,
-} from "../../component";
-import { BaseDialogProps } from "../BaseDialogProps";
+import { Button, Form, FormCheckbox, FormInput, FormTextarea, Stack, SubmitButton } from "../../component";
 import { DialogContext } from "../../context";
+import { BaseDialogProps } from "../BaseDialogProps";
+import { useResponsiveDialogComponents } from "../../hooks";
 
 const CreateCookbookFormSchema = z.object({
   name: z.string().max(50).min(1, "A name is required"),
@@ -28,6 +16,7 @@ const CreateCookbookFormSchema = z.object({
 export type CreateCookbookForm = z.infer<typeof CreateCookbookFormSchema>;
 
 export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ onSubmit }) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
   const { popDialog } = useContext(DialogContext);
 
   const form = useForm<CreateCookbookForm>({
@@ -50,13 +39,13 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
   };
 
   return (
-    <DialogContent className="max-w-[360px] sm:max-w-[450px]">
+    <ResponsiveContent className="p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onCreateCookbook)}>
-          <DialogHeader className="mb-4">
-            <DialogTitle>Create Cookbook</DialogTitle>
-            <DialogDescription>Create a new cookbook to store your recipes in.</DialogDescription>
-          </DialogHeader>
+          <ResponsiveHeader className="mb-4">
+            <ResponsiveTitle>Create Cookbook</ResponsiveTitle>
+            <ResponsiveDescription>Create a new cookbook to store your recipes in.</ResponsiveDescription>
+          </ResponsiveHeader>
 
           <Stack>
             <FormInput placeholder="What do you want to call your cookbook?" name="name" type="text" label="Name" />
@@ -64,14 +53,14 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
             <FormCheckbox name="private" label="Private" />
           </Stack>
 
-          <DialogFooter className="mt-4">
+          <ResponsiveFooter className="mt-4 flex-col-reverse">
             <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => popDialog("createCookbook")}>
               Cancel
             </Button>
             <SubmitButton>Create Cookbook</SubmitButton>
-          </DialogFooter>
+          </ResponsiveFooter>
         </form>
       </Form>
-    </DialogContent>
+    </ResponsiveContent>
   );
 };

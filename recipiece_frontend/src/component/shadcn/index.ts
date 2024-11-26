@@ -5,6 +5,7 @@ export * from "./Card";
 export * from "./Checkbox";
 export * from "./Command";
 export * from "./Dialog";
+export * from "./Drawer";
 export * from "./DropdownMenu";
 export * from "./Form";
 export * from "./Input";

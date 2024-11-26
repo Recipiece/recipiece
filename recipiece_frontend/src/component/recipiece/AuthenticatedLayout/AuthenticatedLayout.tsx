@@ -7,8 +7,9 @@ export const AuthenticatedLayout: FC = () => {
   return (
     <div>
       <RecipieceMenubar />
-      <div className="h-full w-full p-2 sm:p-4 mb-12 sm:mb-0">
+      <div className="w-full h-full p-2 sm:p-4 mb-12 sm:mb-0">
         <Outlet />
+        <div className="h-14 sm:h-0" />
       </div>
       <RecipieceFooter />
     </div>

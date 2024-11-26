@@ -3,6 +3,7 @@ import { prisma } from "../../database";
 import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { collapseOrders, MAX_NUM_ITEMS } from "./util";
+import { broadcastMessageViaEntityId } from "../../middleware";
 
 export const appendShoppingListItems = async (
   request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>
@@ -12,6 +13,7 @@ export const appendShoppingListItems = async (
   const shoppingList = await prisma.shoppingList.findFirst({
     where: {
       id: shoppingListId,
+      user_id: request.user.id,
     },
   });
 
@@ -38,5 +40,9 @@ export const appendShoppingListItems = async (
   });
 
   const collapsed = await collapseOrders(shoppingListId);
+
+  // broadcast the message to any listening
+  await broadcastMessageViaEntityId("modifyShoppingListSession", shoppingList.id, collapsed);
+
   return [StatusCodes.OK, collapsed];
 };

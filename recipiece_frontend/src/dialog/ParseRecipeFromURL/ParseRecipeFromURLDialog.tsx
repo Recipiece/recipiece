@@ -2,7 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Form, FormInput, Stack, SubmitButton } from "../../component";
+import { Button, Form, FormInput, Stack, SubmitButton } from "../../component";
+import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 const ParseRecipeFromURLFormSchema = z.object({
@@ -12,6 +13,8 @@ const ParseRecipeFromURLFormSchema = z.object({
 export type ParseRecipeFromURLForm = z.infer<typeof ParseRecipeFromURLFormSchema>;
 
 export const ParseRecipeFromURLDialog: FC<BaseDialogProps<ParseRecipeFromURLForm>> = ({ onClose, onSubmit }) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+
   const form = useForm<ParseRecipeFromURLForm>({
     resolver: zodResolver(ParseRecipeFromURLFormSchema),
     defaultValues: {
@@ -26,26 +29,24 @@ export const ParseRecipeFromURLDialog: FC<BaseDialogProps<ParseRecipeFromURLForm
   const { isSubmitting } = form.formState;
 
   return (
-    <DialogContent className="max-w-[360px] sm:max-w-[450px]">
+    <ResponsiveContent className="p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onParseRecipe)}>
-          <DialogHeader className="mb-4">
-            <DialogTitle>Create a Recipe from a URL</DialogTitle>
-            <DialogDescription>Create a recipe from a URL. Be sure to double check the results!</DialogDescription>
-          </DialogHeader>
+          <ResponsiveHeader className="mb-4">
+            <ResponsiveTitle>Create a Recipe from a URL</ResponsiveTitle>
+            <ResponsiveDescription>Create a recipe from a URL. Be sure to double check the results!</ResponsiveDescription>
+          </ResponsiveHeader>
 
-          <Stack>
-            <FormInput placeholder="URL" name="url" type="text" label="URL" />
-          </Stack>
+          <FormInput placeholder="URL" name="url" type="text" label="URL" />
 
-          <DialogFooter className="mt-4">
+          <ResponsiveFooter className="mt-4 flex-col-reverse">
             <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => onClose?.()}>
               Cancel
             </Button>
             <SubmitButton>Create Recipe</SubmitButton>
-          </DialogFooter>
+          </ResponsiveFooter>
         </form>
       </Form>
-    </DialogContent>
+    </ResponsiveContent>
   );
 };

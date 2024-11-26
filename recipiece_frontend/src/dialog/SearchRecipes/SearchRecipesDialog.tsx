@@ -3,12 +3,14 @@ import { useListRecipesToAddToCookbook } from "../../api";
 import { Button, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
 import { ListRecipeFilters, Recipe } from "../../data";
 import { BaseDialogProps } from "../BaseDialogProps";
+import { useResponsiveDialogComponents } from "../../hooks";
 
 export interface SearchRecipesDialogProps extends BaseDialogProps<Recipe> {
   readonly cookbookId: number;
 }
 
 export const SearchRecipesDialog: FC<SearchRecipesDialogProps> = ({ onClose, onSubmit, cookbookId }) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -55,11 +57,11 @@ export const SearchRecipesDialog: FC<SearchRecipesDialogProps> = ({ onClose, onS
   );
 
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Find a recipe</DialogTitle>
-        <DialogDescription>Search for a recipe to add to your cookbook.</DialogDescription>
-      </DialogHeader>
+    <ResponsiveContent className="p-6">
+      <ResponsiveHeader>
+        <ResponsiveTitle>Find a recipe</ResponsiveTitle>
+        <ResponsiveDescription>Search for a recipe to add to your cookbook.</ResponsiveDescription>
+      </ResponsiveHeader>
       <Stack>
         <Input type="text" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
         <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="w-6 h-6">
@@ -70,19 +72,17 @@ export const SearchRecipesDialog: FC<SearchRecipesDialogProps> = ({ onClose, onS
               </Button>
             );
           })}
-          {!!recipeData && recipeData.data.length === 0 && (
-            <p className="text-sm">No recipes found, try searching for something else.</p>
-          )}
+          {!!recipeData && recipeData.data.length === 0 && <p className="text-sm">No recipes found, try searching for something else.</p>}
         </LoadingGroup>
       </Stack>
-      <DialogFooter>
+      <ResponsiveFooter>
         <Shelf>
           <ShelfSpacer />
           <Button disabled={isDisabled} variant="outline" onClick={() => onClose?.()}>
             Cancel
           </Button>
         </Shelf>
-      </DialogFooter>
-    </DialogContent>
+      </ResponsiveFooter>
+    </ResponsiveContent>
   );
 };

@@ -137,8 +137,8 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
           <Shelf>
             <CardTitle>{recipe.name}</CardTitle>
             <ShelfSpacer />
-            <DropdownMenuTrigger asChild>
-              <Button className="p-1 h-6" variant="ghost">
+            <DropdownMenuTrigger asChild className="invisible md:visible">
+              <Button variant="ghost">
                 <MoreVertical size={14} />
               </Button>
             </DropdownMenuTrigger>

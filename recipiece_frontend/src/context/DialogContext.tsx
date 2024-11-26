@@ -1,6 +1,7 @@
 import { ComponentProps, FC, FunctionComponent, PropsWithChildren, createContext, useCallback, useMemo, useState } from "react";
-import { Dialog } from "../component";
+import { Dialog, Drawer } from "../component";
 import { Dialogs } from "../dialog";
+import { useLayout } from "../hooks";
 
 export const DialogContext = createContext<{
   readonly pushDialog: (dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]>) => void;
@@ -11,6 +12,8 @@ export const DialogContext = createContext<{
 });
 
 export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { isMobile } = useLayout();
+
   const [dialogStack, setDialogStack] = useState<
     {
       readonly dialogId: keyof typeof Dialogs;
@@ -66,10 +69,19 @@ export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
         popDialog,
       }}
     >
-      <Dialog open={dialogStack.length > 0} onOpenChange={onOpenChange}>
-        {children}
-        {dialogStack.length > 0 && dialog}
-      </Dialog>
+      {!isMobile && (
+        <Dialog open={dialogStack.length > 0} onOpenChange={onOpenChange}>
+          {children}
+          {dialogStack.length > 0 && dialog}
+        </Dialog>
+      )}
+      {isMobile && (
+        // On mobile views, we use the drawer for all "dialogs"
+        <Drawer open={dialogStack.length > 0} onOpenChange={onOpenChange}>
+          {children}
+          {dialogStack.length > 0 && dialog}
+        </Drawer>
+      )}
     </DialogContext.Provider>
   );
 };

@@ -1,6 +1,7 @@
 import { FC, useState } from "react";
-import { Button, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../component";
+import { Button } from "../../component";
 import { Recipe } from "../../data";
+import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface DeleteRecipeDialogProps extends BaseDialogProps<Recipe> {
@@ -9,6 +10,7 @@ export interface DeleteRecipeDialogProps extends BaseDialogProps<Recipe> {
 
 export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, onClose, onSubmit }) => {
   const [isDisabled, setIsDisabled] = useState(false);
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
 
   const onDeleteRecipe = async () => {
     setIsDisabled(true);
@@ -21,21 +23,21 @@ export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, onClos
   };
 
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete {recipe.name}?</DialogTitle>
-        <DialogDescription>
+    <ResponsiveContent className="p-6">
+      <ResponsiveHeader>
+        <ResponsiveTitle>Delete {recipe.name}?</ResponsiveTitle>
+        <ResponsiveDescription>
           Click the Delete Recipe button below to permanently delete <i>{recipe.name}</i>. This action is permanent and cannot be undone!
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
+        </ResponsiveDescription>
+      </ResponsiveHeader>
+      <ResponsiveFooter className="flex-col-reverse">
         <Button variant="outline" disabled={isDisabled} onClick={() => onClose?.()}>
           Cancel
         </Button>
         <Button disabled={isDisabled} variant="destructive" onClick={onDeleteRecipe}>
           Delete Recipe
         </Button>
-      </DialogFooter>
-    </DialogContent>
+      </ResponsiveFooter>
+    </ResponsiveContent>
   );
 };

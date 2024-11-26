@@ -8,7 +8,7 @@ import { ValidationError } from "yup";
 import { ROUTES, WEBSOCKET_ROUTES } from "./api";
 import {
   basicAuthMiddleware,
-  broadcastMessage,
+  broadcastMessageViaWebsocketToken,
   closeConnection,
   storeWebsocket,
   tokenAuthMiddleware,
@@ -168,7 +168,7 @@ WEBSOCKET_ROUTES.forEach((route) => {
         }
       }
 
-      await broadcastMessage(websocketToken, broadcastData);
+      await broadcastMessageViaWebsocketToken(websocketToken, broadcastData);
     });
 
     ws.on("close", async () => {

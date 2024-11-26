@@ -20,7 +20,25 @@ export const closeConnection = async (wsToken: string) => {
   OPEN_CONNECTIONS_MAP.delete(wsToken);
 }
 
-export const broadcastMessage = async (wsToken: string, message: any) => {
+export const broadcastMessageViaEntityId = async (entityType: string, entityId: number, message: any) => {
+  const redis = await Redis.getInstance();
+  const broadcastIds = await redis.SMEMBERS(`${entityType}:${entityId}`);
+
+  const promises = broadcastIds.map(async (broadcastId) => {
+    const storedWebsocket = OPEN_CONNECTIONS_MAP.get(broadcastId);
+    if (storedWebsocket) {
+      return new Promise<void>((resolve) => {
+        storedWebsocket.send(JSON.stringify(message));
+        resolve();
+      });
+    } else {
+      console.warn(`broadcastId ${broadcastId} has no corresponding websocket, clearing its session from cache`);
+      return await redis.SREM(`${entityType}:${entityId}`, broadcastId);
+    }
+  });
+}
+
+export const broadcastMessageViaWebsocketToken = async (wsToken: string, message: any) => {
   const redis = await Redis.getInstance();
   const values = (await redis.HGETALL(`ws:${wsToken}`) as unknown as WebsocketTokenPayload);
   const { entity_id, entity_type } = values;

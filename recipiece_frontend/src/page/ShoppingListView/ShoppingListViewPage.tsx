@@ -29,7 +29,6 @@ export const ShoppingListViewPage: FC = () => {
   useEffect(() => {
     setIncompleteItems(shoppingListItems.filter((item) => !item.completed));
   }, [shoppingListItems]);
-  // const [updatingContentItem, setUpdatingContentItem] = useState<ShoppingListItem | undefined>(undefined);
 
   const onChangeItem = useCallback((event: React.ChangeEvent<HTMLInputElement>, item: ShoppingListItem) => {
     setUpdatingIncompleteItem({ ...item, content: event.target.value });
@@ -47,6 +46,9 @@ export const ShoppingListViewPage: FC = () => {
     });
   }, []);
 
+  /**
+   * Handle the debounced item update when you're making a change
+   */
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (updatingIncompleteItem && updatingIncompleteItem.content.trim().length > 1) {
@@ -120,7 +122,7 @@ export const ShoppingListViewPage: FC = () => {
     return shoppingListItems
       .filter((item) => item.completed)
       .filter((item) => {
-        return item.content.toLowerCase().includes(newestShoppingListItem) && item.content.toLowerCase() !== newestShoppingListItem.toLowerCase();
+        return item.content.toLowerCase().includes(newestShoppingListItem.toLowerCase()) && item.content.toLowerCase() !== newestShoppingListItem.toLowerCase();
       });
   }, [shoppingListItems, newestShoppingListItem]);
 
@@ -145,75 +147,80 @@ export const ShoppingListViewPage: FC = () => {
           </Shelf>
         </LoadingGroup>
         <LoadingGroup variant="spinner" isLoading={isLoadingShoppingList || isLoadingShoppingListItems || isLoadingShoppingListItems} className="w-9 h-9">
-          <div>
-            {incompleteItems.map((item) => {
-              return (
-                <div className="inline-flex flex-row gap-2 w-full" key={item.id}>
-                  <CheckableShoppingListItemInput
-                    className="flex-grow"
-                    isDraggable
-                    shoppingListItem={item}
+          <div className="p-2">
+            <Stack>
+              <div className="grid grid-cols-1 gap-4">
+                {incompleteItems.map((item) => {
+                  return (
+                    <div className="inline-flex flex-row gap-2 w-full" key={item.id}>
+                      <CheckableShoppingListItemInput
+                        id={item.id.toString()}
+                        className="flex-grow"
+                        isDraggable
+                        shoppingListItem={item}
+                        disabled={isPerformingAction}
+                        value={item.content}
+                        onCheck={markItemComplete}
+                        onChange={(event) => onChangeItem(event, item)}
+                        onItemDropped={onShoppingListItemDropped}
+                      />
+                      {/* <Button onClick={() => onDeleteItem(item)} variant="ghost">
+                        <Trash size={12} className="text-destructive" />
+                      </Button> */}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex-col">
+                <div className="w-full inline-flex flex-row gap-4">
+                  <ShoppingListItemInput
                     disabled={isPerformingAction}
-                    value={item.content}
-                    onCheck={markItemComplete}
-                    onChange={(event) => onChangeItem(event, item)}
-                    onItemDropped={onShoppingListItemDropped}
+                    className="flex-grow"
+                    placeholder="Add an item..."
+                    value={newestShoppingListItem}
+                    onChange={onNewestItemTextChange}
+                    onKeyDown={onNewItemKeyDown}
+                    onBlur={() => setIsAutoCompleteOpen(false)}
+                    onFocus={() => setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)}
                   />
-                  <Button onClick={() => onDeleteItem(item)} variant="ghost">
-                    <Trash size={12} className="text-destructive" />
+                  <Button variant="outline" onClick={onAddItem}>
+                    Add Item
                   </Button>
                 </div>
-              );
-            })}
-          </div>
-          <div className="flex-col">
-            <div className="w-full inline-flex flex-row gap-2">
-              <ShoppingListItemInput
-                disabled={isPerformingAction}
-                className="flex-grow"
-                placeholder="Add an item..."
-                value={newestShoppingListItem}
-                onChange={onNewestItemTextChange}
-                onKeyDown={onNewItemKeyDown}
-                onBlur={() => setIsAutoCompleteOpen(false)}
-                onFocus={() => setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)}
-              />
-              <Button variant="outline" onClick={onAddItem}>
-                Add Item
-              </Button>
-            </div>
-            <div className="ml-4 h-0 w-0">
-              <PopoverTrigger className="h-0 w-0" />
-              <PopoverContent
-                alignOffset={-16}
-                align="start"
-                className="p-1 min-w-[200px]"
-                side="bottom"
-                sideOffset={-14}
-                onOpenAutoFocus={(event) => event.preventDefault()}
-                onCloseAutoFocus={(event) => event.preventDefault()}
-                avoidCollisions={false}
-              >
-                <div className="grid grid-cols-1">
-                  {autocompleteSuggestions.map((item) => {
-                    return (
-                      <Button className="justify-start p-1 h-auto" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
-                        {item.content}
-                      </Button>
-                    );
-                  })}
+                <div className="ml-4 h-0 w-0">
+                  <PopoverTrigger className="h-0 w-0" />
+                  <PopoverContent
+                    alignOffset={-16}
+                    align="start"
+                    className="p-1 min-w-[200px]"
+                    side="bottom"
+                    sideOffset={-14}
+                    onOpenAutoFocus={(event) => event.preventDefault()}
+                    onCloseAutoFocus={(event) => event.preventDefault()}
+                    avoidCollisions={false}
+                  >
+                    <div className="grid grid-cols-1">
+                      {autocompleteSuggestions.map((item) => {
+                        return (
+                          <Button className="justify-start p-1 h-auto" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
+                            {item.content}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </PopoverContent>
                 </div>
-              </PopoverContent>
-            </div>
+              </div>
+
+              <hr />
+
+              {completeShoppingListItems.map((item) => {
+                return (
+                  <CheckableShoppingListItemInput disabled={isPerformingAction} key={item.id} shoppingListItem={item} onCheck={markItemIncomplete} value={item.content} readOnly />
+                );
+              })}
+            </Stack>
           </div>
-
-          <hr />
-
-          {completeShoppingListItems.map((item) => {
-            return (
-              <CheckableShoppingListItemInput disabled={isPerformingAction} key={item.id} shoppingListItem={item} onCheck={markItemIncomplete} value={item.content} readOnly />
-            );
-          })}
         </LoadingGroup>
       </Stack>
     </Popover>

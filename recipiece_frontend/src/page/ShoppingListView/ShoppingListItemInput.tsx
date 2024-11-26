@@ -5,6 +5,7 @@ import { Checkbox, Input, InputProps } from "../../component";
 import { ShoppingListItem } from "../../data";
 import { cn } from "../../util";
 import mergeRefs from "merge-refs";
+import { useLayout } from "../../hooks";
 
 export interface CheckableShoppingListItemInputProps extends InputProps {
   readonly onCheck: (item: ShoppingListItem) => void;
@@ -32,6 +33,8 @@ export const ShoppingListItemInput: FC<InputProps> = ({ className, ...restProps 
 };
 
 export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputProps> = ({ shoppingListItem, onCheck, isDraggable, onItemDropped, disabled, ...restProps }) => {
+  const { isMobile } = useLayout();
+
   const [{ isDragging }, dragRef, draggingRef] = useDrag(() => {
     return {
       type: "shopping_list_item",
@@ -59,7 +62,7 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
   }, [shoppingListItem]);
 
   const wrapperClassName = useMemo(() => {
-    const baseClassName = "inline-flex flex-row items-center gap-2 flex-grow";
+    const baseClassName = "inline-flex flex-row items-center gap-4 flex-grow";
     if (isOver) {
       return cn(baseClassName, "border-t-primary border-t-solid border-t-2");
     } else {
@@ -71,10 +74,28 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
     return <div className="h-6 w-full" ref={draggingRef} />;
   }, [draggingRef]);
 
+  const outerRef = useMemo(() => {
+    if(isDraggable) {
+      if(isMobile) {
+        return dropRef;
+      } else {
+        return mergeRefs(dragRef, dropRef);
+      }
+    }
+    return null;
+  }, [isDraggable, isMobile, dragRef, dropRef]);
+
+  const innerRef = useMemo(() => {
+    if(isDraggable && isMobile) {
+      return dragRef;
+    }
+    return null;
+  }, [isDraggable, isMobile, dragRef]);
+
   const nonDraggingView = (
     // @ts-ignore
-    <div className={wrapperClassName} ref={isDraggable ? mergeRefs(dragRef, dropRef) : null}>
-      {isDraggable && <Grip />}
+    <div className={wrapperClassName} ref={outerRef}>
+      {isDraggable && <Grip ref={innerRef} />}
       <Checkbox disabled={disabled} checked={shoppingListItem.completed} onClick={() => onCheck(shoppingListItem)} />
       <ShoppingListItemInput disabled={disabled} {...restProps} />
     </div>
