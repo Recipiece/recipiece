@@ -18,7 +18,7 @@ describe("Get Recipes", () => {
   });
 
   it("should allow a user to get a recipe", async () => {
-    const existingRecipe = await prisma.recipe.create({
+    const existingRecipe = await testPrisma.recipe.create({
       data: {
         name: "Test Recipe",
         description: "asdfqwer",
@@ -36,7 +36,7 @@ describe("Get Recipes", () => {
   });
 
   it("should allow a user to get their private recipe", async () => {
-    const existingRecipe = await prisma.recipe.create({
+    const existingRecipe = await testPrisma.recipe.create({
       data: {
         name: "Test Recipe",
         description: "asdfqwer",
@@ -56,7 +56,7 @@ describe("Get Recipes", () => {
 
   it(`should ${StatusCodes.NOT_FOUND} when the recipe is private and does not belong to the requesting user`, async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const existingRecipe = await prisma.recipe.create({
+    const existingRecipe = await testPrisma.recipe.create({
       data: {
         name: "Test Recipe",
         description: "asdfqwer",

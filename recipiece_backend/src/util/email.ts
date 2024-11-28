@@ -1,5 +1,4 @@
 import { User, UserValidationToken } from "@prisma/client";
-import { readFileSync } from "fs";
 import { createTransport, SendMailOptions } from "nodemailer";
 
 export const sendEmail = async (options: SendMailOptions) => {
@@ -80,7 +79,66 @@ This token will expire in one hour.
   await sendEmail({
     from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
     to: user.email,
-    subject: "Recipiece Account Verification",
+    subject: "Recipiece - Account Verification",
+    text: textEmail,
+    html: htmlEmail,
+  });
+};
+
+export const sendForgotPasswordEmail = async (user: User, token: UserValidationToken) => {
+  const textEmail = `
+A request to reset your password was just made for this email address.
+If this was not performed by you, you may ignore this request.
+
+If you would like to reset your password, navigate to the link below and follow the instructions.
+https://recipiece.org/reset-password/?token=${token.id}
+This token will expire in one hour.
+`;
+
+  const htmlEmail = `
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+        <style>
+            html, body {
+                padding: 16px;
+                margin: 0;
+            }
+            .header {
+                color: white;
+                background-color: #B43F3F;
+                width: 100%;
+                font-family: "Handlee", cursive;
+                font-weight: 400;
+                font-style: normal;
+                text-align: center;
+            }
+
+            .content {
+                font-family: sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Recipiece</h1>
+        </div>
+        <div class="content">
+            A request to reset your password was just made for this email address.
+            If this was not performed by you, you may ignore this request.
+            <br />
+            If you would like to reset your password, navigate to the link below and follow the instructions.
+            <a href="https://recipiece.org/reset-password/?token=${token.id}">Reset Password</a>
+            This token will expire in one hour.
+        </div>
+    </body>
+</html>
+  `;
+
+  await sendEmail({
+    from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
+    to: user.email,
+    subject: "Recipiece - Reset Password",
     text: textEmail,
     html: htmlEmail,
   });

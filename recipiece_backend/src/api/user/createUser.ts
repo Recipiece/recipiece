@@ -1,9 +1,11 @@
 import { User } from "@prisma/client";
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
+import { DateTime } from "luxon";
 import { prisma } from "../../database";
 import { CreateUserRequestSchema } from "../../schema";
 import { ApiResponse } from "../../types";
+import { VERSION_ACCESS_LEVELS } from "../../util/constant";
 import { hashPassword } from "../../util/password";
 
 export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<User> => {
@@ -24,12 +26,17 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
       const user = await tx.user.create({
         data: {
           email: username,
-        },
-      });
-      await tx.userCredentials.create({
-        data: {
-          user_id: user.id,
-          password_hash: hashedPassword!,
+          credentials: {
+            create: {
+              password_hash: hashedPassword!,
+            },
+          },
+          user_access_records: {
+            create: {
+              access_levels: VERSION_ACCESS_LEVELS[process.env.APP_VERSION!] ?? ["free"],
+              start_date: DateTime.utc().toJSDate(),
+            },
+          },
         },
       });
 

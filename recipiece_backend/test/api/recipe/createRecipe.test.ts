@@ -50,7 +50,7 @@ describe("Create Recipes", () => {
   });
 
   it("should not allow a recipe with a duplicate name to be created for a given user", async () => {
-    const existingRecipe = await prisma.recipe.create({
+    const existingRecipe = await testPrisma.recipe.create({
       data: {
         name: "Test Recipe",
         description: "asdfqwer",

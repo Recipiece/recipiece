@@ -28,10 +28,14 @@ export const FormCheckbox: FC<FormCheckboxProps> = ({ isLoading, name, className
         return (
           <FormItem className={fullClassName}>
             <FormControl>
-              <Checkbox {...restInputProps} {...field} />
+              <Checkbox checked={field.value} onCheckedChange={field.onChange} {...restInputProps} {...field} />
             </FormControl>
             {/* Something is overriding the usual mt-0 class that i'd use here, so set the style directly */}
-            {label && <FormLabel className="inline ml-2" style={{marginTop: "0"}}>{label}</FormLabel>}
+            {label && (
+              <FormLabel className="inline ml-2" style={{ marginTop: "0" }}>
+                {label}
+              </FormLabel>
+            )}
             <FormMessage />
             {instructions && <FormDescription>{instructions}</FormDescription>}
           </FormItem>

@@ -12,7 +12,7 @@ import { updateShoppingList } from "./updateShoppingList";
 export const SHOPPING_LIST_ROUTES: Route[] = [
   {
     path: "/shopping-list",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: createShoppingList,
     requestSchema: YCreateShoppingListSchema,
@@ -20,7 +20,7 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
   },
   {
     path: "/shopping-list",
-    authentication: "token",
+    authentication: "access_token",
     method: "PUT",
     function: updateShoppingList,
     requestSchema: YUpdateShoppingListSchema,
@@ -28,7 +28,7 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
   },
   {
     path: "/shopping-list/list",
-    authentication: "token",
+    authentication: "access_token",
     method: "GET",
     function: listShoppingLists,
     requestSchema: YListShoppingListsQuerySchema,
@@ -36,25 +36,25 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
   },
   {
     path: "/shopping-list/:id(\\d+)",
-    authentication: "token",
+    authentication: "access_token",
     method: "GET",
     function: getShoppingList,
   },
   {
     path: "/shopping-list/:id(\\d+)",
-    authentication: "token",
+    authentication: "access_token",
     method: "DELETE",
     function: deleteShoppingList,
   },
   {
     path: "/shopping-list/:id(\\d+)/session",
-    authentication: "token",
+    authentication: "access_token",
     method: "GET",
     function: requestShoppingListSession,
   },
   {
     path: "/shopping-list/append-items",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: appendShoppingListItems,
     requestSchema: YAppendShoppingListItemsRequestSchema,

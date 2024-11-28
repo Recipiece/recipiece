@@ -1,10 +1,23 @@
-import { YCreateUserRequestSchema, YCreateUserResponseSchema, YLoginResponseSchema, YUserSchema, YValidateUserRequestSchema, YValidateUserResponseSchema } from "../../schema";
+import {
+  YCreateUserRequestSchema,
+  YCreateUserResponseSchema,
+  YIssueForgotPasswordTokenRequestSchema,
+  YLoginResponseSchema,
+  YRefreshTokenResponseSchema,
+  YResetPasswordRequestSchema,
+  YUserSchema,
+  YValidateUserRequestSchema,
+  YValidateUserResponseSchema
+} from "../../schema";
 import { Route } from "../../types";
 import { createUser } from "./createUser";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
+import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
+import { refreshToken } from "./refreshToken";
+import { resetPassword } from "./resetPassword";
 import { validateUser } from "./validateUser";
 
 export const LOGIN_ROUTES: Route[] = [
@@ -19,7 +32,7 @@ export const LOGIN_ROUTES: Route[] = [
     path: "/user/logout",
     method: "POST",
     function: logoutUser,
-    authentication: "token",
+    authentication: "access_token",
   },
   {
     path: "/user/create",
@@ -33,14 +46,14 @@ export const LOGIN_ROUTES: Route[] = [
     path: "/user/self",
     method: "GET",
     function: getUserByToken,
-    authentication: "token",
+    authentication: "access_token",
     responseSchema: YUserSchema,
   },
   {
     path: "/user/verify-email",
     method: "POST",
     function: validateUser,
-    authentication: "token",
+    authentication: "access_token",
     requestSchema: YValidateUserRequestSchema,
     responseSchema: YValidateUserResponseSchema,
   },
@@ -48,12 +61,27 @@ export const LOGIN_ROUTES: Route[] = [
     path: "/user/request-token/verify-email",
     method: "POST",
     function: issueEmailVerificationToken,
-    authentication: "token",
+    authentication: "access_token",
   },
-  // {
-  //   path: "/user/data/export",
-  //   method: "POST",
-  //   function: requestExportData,
-  //   authentication: "token",
-  // },
+  {
+    path: "/user/request-token/forgot-password",
+    method: "POST",
+    function: issueForgotPasswordToken,
+    authentication: "none",
+    requestSchema: YIssueForgotPasswordTokenRequestSchema,
+  },
+  {
+    path: "/user/reset-password",
+    method: "POST",
+    function: resetPassword,
+    authentication: "none",
+    requestSchema: YResetPasswordRequestSchema,
+  },
+  {
+    path: "/user/refresh-token",
+    method: "POST",
+    function: refreshToken,
+    authentication: "refresh_token",
+    responseSchema: YRefreshTokenResponseSchema,
+  },
 ];

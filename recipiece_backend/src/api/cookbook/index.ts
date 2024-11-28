@@ -11,7 +11,7 @@ import { updateCookbook } from "./updateCookbook";
 export const COOKBOOK_ROUTES: Route[] = [
   {
     path: "/cookbook",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: createCookbook,
     requestSchema: YCreateCookbookRequestSchema,
@@ -19,26 +19,26 @@ export const COOKBOOK_ROUTES: Route[] = [
   },
   {
     path: "/cookbook/recipe/add",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: addRecipeToCookbook,
     requestSchema: YAddRecipeToCookbookRequestSchema,
   },
   {
     path: "/cookbook/:id(\\d+)",
-    authentication: "token",
+    authentication: "access_token",
     method: "DELETE",
     function: deleteCookbook,
   },
   {
     path: "/cookbook/:id(\\d+)",
-    authentication: "token",
+    authentication: "access_token",
     method: "GET",
     function: getCookbook,
   },
   {
     path: "/cookbook/list",
-    authentication: "token",
+    authentication: "access_token",
     method: "GET",
     function: listCookbooks,
     requestSchema: YListCookbooksQuerySchema,
@@ -46,14 +46,14 @@ export const COOKBOOK_ROUTES: Route[] = [
   },
   {
     path: "/cookbook/recipe/remove",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: removeRecipeFromCookbook,
     requestSchema: YRemoveRecipeFromCookbookRequestSchema,
   },
   {
     path: "/cookbook",
-    authentication: "token",
+    authentication: "access_token",
     method: "PUT",
     function: updateCookbook,
     requestSchema: YUpdateCookbookRequestSchema,

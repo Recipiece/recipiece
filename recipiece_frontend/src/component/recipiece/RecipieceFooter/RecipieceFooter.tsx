@@ -52,26 +52,26 @@ export const RecipieceFooter: FC = () => {
   }, [pushDialog, popDialog]);
 
   return (
-    <footer className="visible sm:invisible w-full fixed bottom-0 left-0 h-14 bg-primary text-white">
+    <footer className="visible sm:invisible w-full fixed bottom-0 left-0 h-16 bg-primary text-white">
       <div className="h-full flex flex-row justify-center items-center">
-        <Button onClick={() => navigate("/account")} variant="link" className="text-white grow">
-          <CircleUserRound />
+        <Button onClick={() => navigate("/")} variant="link" className="text-white grow">
+          <Home />
         </Button>
 
         <Button className="text-white grow" onClick={onCookbooksPressed}>
           <Book />
         </Button>
 
-        <Button onClick={() => navigate("/")} variant="link" className="text-white grow">
-          <Home />
+        <Button onClick={onCreatePressed} variant="link" className="text-white grow">
+          <CirclePlus />
         </Button>
 
         <Button onClick={onShoppingListsPressed} className="text-white grow">
           <ShoppingBasket />
         </Button>
 
-        <Button onClick={onCreatePressed} variant="link" className="text-white grow">
-          <CirclePlus />
+        <Button onClick={() => navigate("/account")} variant="link" className="text-white grow">
+          <CircleUserRound />
         </Button>
       </div>
     </footer>

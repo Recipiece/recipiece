@@ -93,7 +93,7 @@ export const RecipieceMenubar: FC = () => {
   };
 
   return (
-    <Menubar className="rounded-none border-0 p-4 h-12 bg-primary text-white">
+    <Menubar className="invisible sm:visible rounded-none border-0 p-0 sm:p-4 h-0 sm:h-16 bg-primary text-white">
       <RecipieceHeader className="text-center w-full md:w-auto md:mr-auto" />
       <span className="hidden w-0 sm:w-auto sm:block">
         <MenubarMenu>

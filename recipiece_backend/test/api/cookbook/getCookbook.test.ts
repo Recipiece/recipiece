@@ -14,7 +14,7 @@ describe("Get Cookbooks", () => {
   });
 
   it("should get a cookbook", async () => {
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: user.id,
         name: "test cookbook",
@@ -32,7 +32,7 @@ describe("Get Cookbooks", () => {
 
   it("should not get a cookbook that is private that you do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",
@@ -50,7 +50,7 @@ describe("Get Cookbooks", () => {
 
   it("should get a public cookbook that you do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",

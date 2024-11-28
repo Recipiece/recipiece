@@ -14,7 +14,7 @@ describe("Delete Cookbooks", () => {
   });
 
   it("should delete a cookbook", async () => {
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: user.id,
         name: "test cookbook",
@@ -28,7 +28,7 @@ describe("Delete Cookbooks", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     
-    const deletedCookbook = await prisma.cookbook.findFirst({
+    const deletedCookbook = await testPrisma.cookbook.findFirst({
       where: {
         id: cookbook.id,
       }
@@ -38,7 +38,7 @@ describe("Delete Cookbooks", () => {
 
   it("should not delete a cookbook the user does not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",
@@ -52,7 +52,7 @@ describe("Delete Cookbooks", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   
-    const deletedCookbook = await prisma.cookbook.findFirst({
+    const deletedCookbook = await testPrisma.cookbook.findFirst({
       where: {
         id: cookbook.id,
       }

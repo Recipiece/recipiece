@@ -36,7 +36,7 @@ describe("Create Cookbooks", () => {
   });
 
   it("should not allow a cookbook with the same name to be created for a user", async () => {
-    const existingCookbook = await prisma.cookbook.create({
+    const existingCookbook = await testPrisma.cookbook.create({
       data: {
         name: "test",
         user_id: user.id,

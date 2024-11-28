@@ -17,7 +17,7 @@ import { updateRecipe } from "./updateRecipe";
 export const RECIPE_ROUTES: Route[] = [
   {
     path: "/recipe",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: createRecipe,
     requestSchema: YCreateRecipeRequestSchema,
@@ -25,7 +25,7 @@ export const RECIPE_ROUTES: Route[] = [
   },
   {
     path: "/recipe",
-    authentication: "token",
+    authentication: "access_token",
     method: "PUT",
     function: updateRecipe,
     requestSchema: YUpdateRecipeRequestSchema,
@@ -33,7 +33,7 @@ export const RECIPE_ROUTES: Route[] = [
   },
   {
     path: "/recipe/parse/url",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: parseRecipeFromUrl,
     requestSchema: YParseRecipeFromURLRequestSchema,
@@ -41,7 +41,7 @@ export const RECIPE_ROUTES: Route[] = [
   },
   {
     path: "/recipe/list",
-    authentication: "token",
+    authentication: "access_token",
     method: "GET",
     function: listRecipes,
     requestSchema: YListRecipesQuerySchema,
@@ -49,14 +49,14 @@ export const RECIPE_ROUTES: Route[] = [
   },
   {
     path: "/recipe/:id(\\d+)",
-    authentication: "token",
+    authentication: "access_token",
     method: "GET",
     function: getRecipe,
     responseSchema: YRecipeSchema,
   },
   {
     path: "/recipe/:id(\\d+)",
-    authentication: "token",
+    authentication: "access_token",
     method: "DELETE",
     function: deleteRecipe,
   },

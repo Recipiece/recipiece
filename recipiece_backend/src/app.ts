@@ -11,11 +11,12 @@ import {
   broadcastMessageViaWebsocketToken,
   closeConnection,
   storeWebsocket,
-  tokenAuthMiddleware,
+  accessTokenAuthMiddleware,
   validateRequestBodySchema,
   validateRequestQuerySchema,
   validateResponseSchema,
   wsTokenAuthMiddleware,
+  refreshTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
 
@@ -44,8 +45,11 @@ ROUTES.forEach((route) => {
   // set up authentication first
   console.log(`configuring routing for ${route.path}`);
   switch (route.authentication) {
-    case "token":
-      routeHandlers.push(tokenAuthMiddleware);
+    case "access_token":
+      routeHandlers.push(accessTokenAuthMiddleware);
+      break;
+    case "refresh_token":
+      routeHandlers.push(refreshTokenAuthMiddleware);
       break;
     case "basic":
       routeHandlers.push(basicAuthMiddleware);

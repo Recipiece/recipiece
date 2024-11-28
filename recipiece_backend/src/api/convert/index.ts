@@ -4,7 +4,7 @@ import { convertIngredient } from "./convertIngredient";
 export const CONVERT_ROUTES: Route[] = [
   {
     path: "/convert/ingredient",
-    authentication: "token",
+    authentication: "access_token",
     method: "POST",
     function: convertIngredient,
   },

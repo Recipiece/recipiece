@@ -13,21 +13,21 @@ describe("Remove Recipe from Cookbook", () => {
   });
 
   it("should allow a recipe to be removed from a cookbook", async () => {
-    const recipe = await prisma.recipe.create({
+    const recipe = await testPrisma.recipe.create({
       data: {
         name: "test recipe",
         user_id: user.id,
       },
     });
 
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await testPrisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
       },
     });
 
-    await prisma.recipeCookbookAttachment.create({
+    await testPrisma.recipeCookbookAttachment.create({
       data: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,
@@ -45,7 +45,7 @@ describe("Remove Recipe from Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
-    const attachments = await prisma.recipeCookbookAttachment.findMany({
+    const attachments = await testPrisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,
@@ -57,21 +57,21 @@ describe("Remove Recipe from Cookbook", () => {
 
   it("should not allow another user to remove recipes from a users cookbook", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const otherCookbook = await prisma.cookbook.create({
+    const otherCookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "other user cookbook",
       },
     });
 
-    const otherRecipe = await prisma.recipe.create({
+    const otherRecipe = await testPrisma.recipe.create({
       data: {
         user_id: otherUser.id,
         name: "other user cookbook",
       },
     });
 
-    await prisma.recipeCookbookAttachment.create({
+    await testPrisma.recipeCookbookAttachment.create({
       data: {
         recipe_id: otherRecipe.id,
         cookbook_id: otherCookbook.id,
@@ -89,7 +89,7 @@ describe("Remove Recipe from Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
-    const attachments = await prisma.recipeCookbookAttachment.findMany({
+    const attachments = await testPrisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: otherRecipe.id,
         cookbook_id: otherCookbook.id,

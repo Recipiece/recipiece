@@ -13,7 +13,7 @@ describe("Delete Recipes", () => {
   });
 
   it("should allow a user to delete their recipe", async () => {
-    const recipe = await prisma.recipe.create({
+    const recipe = await testPrisma.recipe.create({
       data: {
         name: "asdfqwer",
         description: "asdfqwer",
@@ -28,7 +28,7 @@ describe("Delete Recipes", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
-    const deletedRecipe = await prisma.recipe.findUnique({
+    const deletedRecipe = await testPrisma.recipe.findUnique({
       where: {
         id: recipe.id,
       },
@@ -38,7 +38,7 @@ describe("Delete Recipes", () => {
 
   it("should not allow a user to delete a recipe they do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const recipe = await prisma.recipe.create({
+    const recipe = await testPrisma.recipe.create({
       data: {
         name: "asdfqwer",
         description: "asdfqwer",
@@ -53,7 +53,7 @@ describe("Delete Recipes", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
-    const deletedRecipe = await prisma.recipe.findUnique({
+    const deletedRecipe = await testPrisma.recipe.findUnique({
       where: {
         id: recipe.id,
       },

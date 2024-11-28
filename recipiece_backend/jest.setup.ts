@@ -8,24 +8,26 @@
  * the actual api calls that are being made.
  */
 
-import "@quramy/jest-prisma-node";
 import { User } from "@prisma/client";
+import "@quramy/jest-prisma-node";
 import { randomUUID } from "crypto";
+import { DateTime } from "luxon";
 import app from "./src/app";
+import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
 
 declare global {
-  var prisma: typeof jestPrisma.client;
+  var testPrisma: typeof jestPrisma.client;
   var server: ReturnType<typeof app.listen>;
   var fixtures: {
-    createUserAndToken: (email?: string) => Promise<[User, string]>;
+    createUserAndToken: (email?: string) => Promise<[User, string, string]>;
   };
 }
 
 // setup fixtures
 globalThis.fixtures = {
-  createUserAndToken: async (absoluteEmail?: string): Promise<[User, string]> => {
+  createUserAndToken: async (absoluteEmail?: string, accessLevels = ["alpha"]): Promise<[User, string, string]> => {
     function stringGen(len: number) {
       var text = "";
       var charset = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -41,31 +43,55 @@ globalThis.fixtures = {
     const password = "test1234!";
     const hashedPassword = await hashPassword(password);
 
+    // create a user
     const user = await jestPrisma.client.user.create({
       data: {
         email: email,
+        credentials: {
+          create: {
+            password_hash: hashedPassword!,
+          },
+        },
+        user_access_records: {
+          create: {
+            access_levels: accessLevels,
+            start_date: DateTime.utc().toJSDate(),
+          },
+        },
       },
     });
-    await jestPrisma.client.userCredentials.create({
+
+    // create a session and a token
+    const session = await jestPrisma.client.userSession.create({
       data: {
         user_id: user.id,
-        password_hash: hashedPassword!,
+        scope: UserSessions.REFRESH_TOKEN_SCOPE,
       },
     });
-
-    const payload = {
-      id: randomUUID(),
-      user: user.email,
+  
+    const accessTokenPayload = {
+      session: session.id,
+      id: randomUUID().toString(),
+      user: user.id,
+      scope: UserSessions.ACCESS_TOKEN_SCOPE,
+    };
+  
+    const refreshTokenPayload = {
+      session: session.id,
+      id: session.id,
+      user: user.id,
+      scope: UserSessions.REFRESH_TOKEN_SCOPE,
     };
 
-    const bearerToken = generateToken(payload, "24h");
+    const bearerToken = generateToken(accessTokenPayload, UserSessions.ACCESS_TOKEN_EXP_JWT);
+    const refreshToken = generateToken(refreshTokenPayload, UserSessions.REFRESH_TOKEN_EXP_JWT);
 
-    return [user, bearerToken];
+    return [user, bearerToken, refreshToken];
   },
 };
 
 // setup the jest prisma client and mock
-globalThis.prisma = jestPrisma.client;
+globalThis.testPrisma = jestPrisma.client;
 
 jest.mock("./src/database/prisma", () => {
   return {

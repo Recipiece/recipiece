@@ -8,7 +8,7 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
   const query = async () => {
     const recipe = await getter<never, Recipe>({
       path: `/recipe/${recipeId}`,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return recipe.data;
   };
@@ -29,7 +29,7 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   const query = async () => {
     const recipe = await getter<never, ListRecipesResponse>({
       path: path,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return recipe;
   };
@@ -71,7 +71,7 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   const query = async () => {
     const recipe = await getter<never, ListRecipesResponse>({
       path: `/recipe/list?${searchParams.toString()}`,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return recipe;
   };
@@ -101,7 +101,7 @@ export const useCreateRecipeMutation = (args?: MutationArgs<Recipe>) => {
     return await poster<Partial<Recipe>, Recipe>({
       path: "/recipe",
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -129,7 +129,7 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe>) => {
     return await putter<Partial<Recipe>, Recipe>({
       path: `/recipe`,
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -157,7 +157,7 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<void>) => {
     return await deleter({
       path: "/recipe",
       id: recipeId,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -188,7 +188,7 @@ export const useParseRecipeFromURLMutation = (args?: MutationArgs<void>) => {
       body: {
         source_url: url,
       },
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 

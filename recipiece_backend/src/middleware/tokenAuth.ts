@@ -1,17 +1,34 @@
-import { User } from "@prisma/client";
+import { User, UserSession } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { DateTime } from "luxon";
 import { prisma, Redis } from "../database";
-import { ApiResponse, WebsocketTokenPayload } from "../types";
+import { ApiResponse, TokenPayload, WebsocketTokenPayload } from "../types";
+import { UserSessions } from "../util/constant";
 import { verifyToken } from "../util/token";
 
-export const tokenAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const refreshTokenAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const [responseCode, response] = await runTokenAuth(req.headers.authorization, UserSessions.REFRESH_TOKEN_SCOPE);
+  if (responseCode !== StatusCodes.OK) {
+    res.status(responseCode).send(response);
+  } else {
+    // @ts-ignore
+    req.user = response.user;
+    // @ts-ignore
+    req.user_session = response.session;
+    next();
+  }
+};
+
+export const accessTokenAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const [responseCode, response] = await runTokenAuth(req.headers.authorization);
   if (responseCode !== StatusCodes.OK) {
     res.status(responseCode).send(response);
   } else {
     // @ts-ignore
-    req.user = response;
+    req.user = response.user;
+    // @ts-ignore
+    req.user_session = response.session;
     next();
   }
 };
@@ -19,13 +36,13 @@ export const tokenAuthMiddleware = async (req: Request, res: Response, next: Nex
 export const wsTokenAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const wsToken = req.query.token;
 
-  if(!wsToken) {
-    res.status(StatusCodes.UNAUTHORIZED).send({message: "Not authorized"});
+  if (!wsToken) {
+    res.status(StatusCodes.UNAUTHORIZED).send({ message: "Not authorized" });
   } else {
     const redis = await Redis.getInstance();
-    const wsTokenPayload = (await redis.HGETALL(`ws:${wsToken}`) as unknown as WebsocketTokenPayload);
-    if(!wsTokenPayload || wsTokenPayload.purpose !== req.baseUrl) {
-      res.status(StatusCodes.UNAUTHORIZED).send({message: "Not authorized"});
+    const wsTokenPayload = (await redis.HGETALL(`ws:${wsToken}`)) as unknown as WebsocketTokenPayload;
+    if (!wsTokenPayload || wsTokenPayload.purpose !== req.baseUrl) {
+      res.status(StatusCodes.UNAUTHORIZED).send({ message: "Not authorized" });
     } else {
       // @ts-ignore
       req.ws_token = wsToken;
@@ -36,7 +53,21 @@ export const wsTokenAuthMiddleware = async (req: Request, res: Response, next: N
   }
 };
 
-const runTokenAuth = async (token?: string): ApiResponse<User> => {
+/**
+ * Attempts to verify the provided token.
+ *
+ * This will check that the token
+ * 1. is actually a valid token issued by our system
+ * 2. that it belongs to a session
+ * 3. that it is not expired
+ * 4. that the underlying session is not expired
+ *
+ * If it passes all that, we will return back the user for the token.
+ *
+ * @param token the token to check
+ * @returns the user and the corresponding session
+ */
+const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_TOKEN_SCOPE): ApiResponse<{readonly user: User, readonly session: UserSession}> => {
   if (!token) {
     console.log("no token provided");
     return [
@@ -49,18 +80,6 @@ const runTokenAuth = async (token?: string): ApiResponse<User> => {
 
   const tokenSanitized = token.replace("Bearer", "").trim();
 
-  const redis = await Redis.getInstance();
-  const isBlacklisted = await redis.get(tokenSanitized);
-  if (isBlacklisted) {
-    console.log("token was forcibly blacklisted");
-    return [
-      StatusCodes.UNAUTHORIZED,
-      {
-        message: "Not authorized",
-      },
-    ];
-  }
-
   const decodedToken = verifyToken(tokenSanitized);
   if (!decodedToken) {
     console.log(`token ${decodedToken} could not be verified`);
@@ -72,9 +91,10 @@ const runTokenAuth = async (token?: string): ApiResponse<User> => {
     ];
   }
 
-  const usernameFromToken = (decodedToken as { readonly user: string }).user;
-  if (!usernameFromToken) {
-    console.log(`could not determine username from token payload: ${decodedToken}`);
+  const { user: userId, session: sessionId, scope } = decodedToken as TokenPayload;
+
+  if (scope !== expectedScope) {
+    console.log(`token has incorrect scope, expected ${expectedScope} but got ${scope}`);
     return [
       StatusCodes.UNAUTHORIZED,
       {
@@ -83,14 +103,18 @@ const runTokenAuth = async (token?: string): ApiResponse<User> => {
     ];
   }
 
-  const user = await prisma.user.findFirst({
+  const session = await prisma.userSession.findFirst({
     where: {
-      email: usernameFromToken,
+      user_id: userId,
+      id: sessionId,
+    },
+    include: {
+      user: true,
     },
   });
 
-  if (!user) {
-    console.log(`could not find user with username ${usernameFromToken}`);
+  if (!session) {
+    console.log(`could not find a session for user ${userId} with id ${sessionId}`);
     return [
       StatusCodes.UNAUTHORIZED,
       {
@@ -99,5 +123,24 @@ const runTokenAuth = async (token?: string): ApiResponse<User> => {
     ];
   }
 
-  return [StatusCodes.OK, user];
+  // check if the session is expired. If it is, kill the session and 401 the user
+  const sessionExpiresAt = DateTime.fromJSDate(session.created_at).plus(UserSessions.REFRESH_TOKEN_EXP_LUXON);
+  if (sessionExpiresAt.diffNow().toMillis() < 0) {
+    console.log(`${sessionId} is expired, killing session`);
+
+    await prisma.userSession.delete({
+      where: {
+        id: sessionId,
+      },
+    });
+
+    return [
+      StatusCodes.UNAUTHORIZED,
+      {
+        message: "Not authorized",
+      },
+    ];
+  }
+
+  return [StatusCodes.OK, {user: session.user, session: session}];
 };

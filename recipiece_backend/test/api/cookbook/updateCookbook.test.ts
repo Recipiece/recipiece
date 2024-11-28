@@ -13,7 +13,7 @@ describe("Update Cookbooks", () => {
   });
 
   it("should update a cookbook", async () => {
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: user.id,
         name: "Test cookbook",
@@ -36,7 +36,7 @@ describe("Update Cookbooks", () => {
 
   it("should not allow you to update a cookbook you do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const otherCookbook = await prisma.cookbook.create({
+    const otherCookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "other user cookbook",
@@ -55,7 +55,7 @@ describe("Update Cookbooks", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
-    const updatedCookbook = await prisma.cookbook.findUnique({ where: { id: otherCookbook.id } });
+    const updatedCookbook = await testPrisma.cookbook.findUnique({ where: { id: otherCookbook.id } });
     expect(updatedCookbook?.description).toEqual(otherCookbook.description);
   });
 

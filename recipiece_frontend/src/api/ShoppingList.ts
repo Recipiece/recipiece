@@ -147,7 +147,7 @@ export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryA
   const query = async () => {
     const response = await getter<never, { readonly token: string }>({
       path: `/shopping-list/${listId}/session`,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return response.data;
   };
@@ -169,7 +169,7 @@ export const useGetShoppingListByIdQuery = (listId: number, args?: QueryArgs) =>
   const query = async () => {
     const shoppingList = await getter<never, ShoppingList>({
       path: `/shopping-list/${listId}`,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return shoppingList.data;
   };
@@ -201,7 +201,7 @@ export const useListShoppingListsQuery = (filters: ListShoppingListFilters, args
   const query = async () => {
     const shoppingLists = await getter<never, ListShoppingListResponse>({
       path: `/shopping-list/list?${searchParams.toString()}`,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return shoppingLists;
   };
@@ -231,7 +231,7 @@ export const useCreateShoppingListMutation = (args?: MutationArgs<ShoppingList>)
     return await poster<Partial<ShoppingList>, ShoppingList>({
       path: "/shopping-list",
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -259,7 +259,7 @@ export const useUpdateShoppingListMutation = (args?: MutationArgs<ShoppingList>)
     return await putter<Partial<ShoppingList>, ShoppingList>({
       path: `/shopping-list`,
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -287,7 +287,7 @@ export const useDeleteShoppingListMutation = (args?: MutationArgs<void>) => {
     return await deleter({
       path: "/shopping-list",
       id: shoppingListId,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -317,7 +317,7 @@ export const useAppendShoppingListItemsMutation = (args?: MutationArgs<ShoppingL
     return await poster<typeof data, ShoppingListItem[]>({
       path: "/shopping-list/append-items",
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 

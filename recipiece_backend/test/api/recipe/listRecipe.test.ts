@@ -14,7 +14,7 @@ describe("List Recipes", () => {
 
   it("should list the recipes for the user associated with a token", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await testPrisma.recipe.create({
         data: {
           name: `Test recipe ${i}`,
           description: "Test",
@@ -40,7 +40,7 @@ describe("List Recipes", () => {
   it("should not list private recipes for another user", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await testPrisma.recipe.create({
         data: {
           name: `Test recipe ${i}`,
           description: "Test",
@@ -70,7 +70,7 @@ describe("List Recipes", () => {
 
   it("should allow name filtering", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await testPrisma.recipe.create({
         data: {
           name: `Test recipe ${i}`,
           description: "Test",
@@ -80,7 +80,7 @@ describe("List Recipes", () => {
       });
     }
 
-    await prisma.recipe.create({
+    await testPrisma.recipe.create({
       data: {
         name: "NAME NAME NAME",
         description: "Test",
@@ -105,7 +105,7 @@ describe("List Recipes", () => {
 
   it("should page", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
+      await testPrisma.recipe.create({
         data: {
           name: `Test recipe ${i}`,
           description: "Test",

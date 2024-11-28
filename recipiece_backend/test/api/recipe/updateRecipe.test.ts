@@ -14,7 +14,7 @@ describe("Update Recipes", () => {
   });
 
   it("should update a recipe", async () => {
-    const existingRecipe = await prisma.recipe.create({
+    const existingRecipe = await testPrisma.recipe.create({
       data: {
         name: "My Cool Recipe",
         description: "A recipe",
@@ -92,7 +92,7 @@ describe("Update Recipes", () => {
     expect(step.content).toEqual("yeet");
     expect(step.order).toEqual(0);
 
-    const allIngredients = await prisma.recipeIngredient.findMany({
+    const allIngredients = await testPrisma.recipeIngredient.findMany({
       where: {
         recipe_id: existingRecipe.id,
       },
@@ -100,7 +100,7 @@ describe("Update Recipes", () => {
     expect(allIngredients.length).toEqual(1);
     expect(allIngredients[0].id).toEqual(ing.id);
 
-    const allSteps = await prisma.recipeStep.findMany({
+    const allSteps = await testPrisma.recipeStep.findMany({
       where: {
         recipe_id: existingRecipe.id,
       },
@@ -123,7 +123,7 @@ describe("Update Recipes", () => {
   it(`should ${StatusCodes.NOT_FOUND} when trying to update a recipe you don't own`, async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
 
-    const existingRecipe = await prisma.recipe.create({
+    const existingRecipe = await testPrisma.recipe.create({
       data: {
         name: "My Cool Recipe",
         description: "A recipe",
@@ -168,21 +168,21 @@ describe("Update Recipes", () => {
   it("should remove any recipe cookbook attachments in cookbooks the user does not own when making the recipe private", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
 
-    const usersCookbook = await prisma.cookbook.create({
+    const usersCookbook = await testPrisma.cookbook.create({
       data: {
         name: "users cookbook",
         user_id: user.id,
       }
     });
 
-    const otherUsersCookbook = await prisma.cookbook.create({
+    const otherUsersCookbook = await testPrisma.cookbook.create({
       data: {
         name: "other users cookbook",
         user_id: otherUser.id,
       }
     });
 
-    const usersRecipe = await prisma.recipe.create({
+    const usersRecipe = await testPrisma.recipe.create({
       data: {
         name: "My Cool Recipe",
         description: "A recipe",
@@ -215,7 +215,7 @@ describe("Update Recipes", () => {
       },
     });
 
-    await prisma.recipeCookbookAttachment.createMany({
+    await testPrisma.recipeCookbookAttachment.createMany({
       data: [
         {
           recipe_id: usersRecipe.id,
@@ -239,7 +239,7 @@ describe("Update Recipes", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
-    const attachmentsForUser = await prisma.recipeCookbookAttachment.findMany({
+    const attachmentsForUser = await testPrisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: usersRecipe.id,
       }

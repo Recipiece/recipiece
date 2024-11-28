@@ -57,9 +57,44 @@ export interface ValidateUserResponseSchema extends InferType<typeof YValidateUs
  * Login
  */
 export const YLoginResponseSchema = object({
-  token: string().required(),
+  access_token: string().required(),
+  refresh_token: string().required(),
 })
   .strict()
   .noUnknown();
 
 export interface LoginResponseSchema extends InferType<typeof YLoginResponseSchema> {}
+
+/**
+ * Issue forgot password token
+ */
+export const YIssueForgotPasswordTokenRequestSchema = object({
+  username: string().required(),
+})
+  .strict()
+  .noUnknown();
+
+export interface IssueForgotPasswordTokenRequestSchema
+  extends InferType<typeof YIssueForgotPasswordTokenRequestSchema> {}
+
+/**
+ * Reset password
+ */
+export const YResetPasswordRequestSchema = object({
+  password: string().required(),
+  token: string().required(),
+})
+  .strict()
+  .noUnknown();
+
+export interface ResetPasswordRequestSchema extends InferType<typeof YResetPasswordRequestSchema> {}
+
+/**
+ * Refresh Token
+ */
+export const YRefreshTokenResponseSchema = object({
+  access_token: string().required(),
+  refresh_token: string().required(),
+}).strict().noUnknown();
+
+export interface RefreshTokenResponseSchema extends InferType<typeof YRefreshTokenResponseSchema> {}

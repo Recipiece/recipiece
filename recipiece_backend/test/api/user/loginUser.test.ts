@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { LoginResponseSchema } from "../../../src/schema";
 import { hashPassword } from "../../../src/util/password";
 
 describe("loginUser", () => {
@@ -8,13 +9,13 @@ describe("loginUser", () => {
     const username = "user@recipiece.org";
     const hashedPassword = await hashPassword(password);
 
-    const user = await prisma.user.create({
+    const user = await testPrisma.user.create({
       data: {
         email: username,
       },
     });
 
-    await prisma.userCredentials.create({
+    await testPrisma.userCredentials.create({
       data: {
         password_hash: hashedPassword!,
         user_id: user.id,
@@ -30,7 +31,10 @@ describe("loginUser", () => {
       .set("Content-Type", "application/json");
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
-    expect((response.body as { readonly token: string }).token).toBeTruthy();
+    const responseBody = response.body as LoginResponseSchema;
+
+    expect(responseBody.access_token).toBeTruthy();
+    expect(responseBody.refresh_token).toBeTruthy();
   });
 
   it("should not allow a login when the password does not match", async () => {
@@ -38,13 +42,13 @@ describe("loginUser", () => {
     const username = "user@recipiece.org";
     const hashedPassword = await hashPassword(password);
 
-    const user = await prisma.user.create({
+    const user = await testPrisma.user.create({
       data: {
         email: username,
       },
     });
 
-    await prisma.userCredentials.create({
+    await testPrisma.userCredentials.create({
       data: {
         password_hash: hashedPassword!,
         user_id: user.id,

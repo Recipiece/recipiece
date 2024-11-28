@@ -8,7 +8,7 @@ export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs) =>
   const query = async () => {
     const recipe = await getter<never, Recipe>({
       path: `/cookbook/${cookbookId}`,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return recipe.data;
   };
@@ -38,7 +38,7 @@ export const useListCookbooksQuery = (filters: ListCookbookFilters, args?: Query
   const query = async () => {
     const cookbooks = await getter<never, { readonly data: Cookbook[]; readonly page: number; readonly hasNextPage: boolean }>({
       path: path,
-      withAuth: true,
+      withAuth: "access_token",
     });
     return cookbooks;
   };
@@ -68,7 +68,7 @@ export const useCreateCookbookMutation = (args?: MutationArgs<Cookbook>) => {
     return await poster<Partial<Cookbook>, Cookbook>({
       path: "/cookbook",
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -96,7 +96,7 @@ export const useUpdateCookbookMutation = (args?: MutationArgs<Cookbook>) => {
     return await putter<Partial<Cookbook>, Cookbook>({
       path: "/cookbook",
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -124,7 +124,7 @@ export const useDeleteCookbookMutation = (args?: MutationArgs<void>) => {
     return await deleter({
       path: "/cookbook",
       id: cookbookId,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -154,7 +154,7 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void>) => 
     return await poster<typeof data, void>({
       path: "/cookbook/recipe/add",
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -181,7 +181,7 @@ export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<void>) =
     return await poster<typeof data, void>({
       path: "/cookbook/recipe/remove",
       body: data,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 

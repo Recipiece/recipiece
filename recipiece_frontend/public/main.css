@@ -885,6 +885,10 @@ body {
   height: 3.5rem;
 }
 
+.h-16 {
+  height: 4rem;
+}
+
 .h-2 {
   height: 0.5rem;
 }
@@ -2601,6 +2605,10 @@ body {
 }
 
 @media (min-width: 640px) {
+  .sm\:visible {
+    visibility: visible;
+  }
+
   .sm\:invisible {
     visibility: hidden;
   }
@@ -2639,6 +2647,10 @@ body {
 
   .sm\:h-0 {
     height: 0px;
+  }
+
+  .sm\:h-16 {
+    height: 4rem;
   }
 
   .sm\:w-2\/3 {

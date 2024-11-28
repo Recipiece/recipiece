@@ -14,7 +14,7 @@ describe("Delete Shopping List", () => {
   });
 
   it("should allow a user to delete their shopping list", async () => {
-    const shoppingList = await prisma.shoppingList.create({
+    const shoppingList = await testPrisma.shoppingList.create({
       data: {
         name: "asdfqwer",
         user_id: user.id,
@@ -28,7 +28,7 @@ describe("Delete Shopping List", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
-    const deletedShoppingList = await prisma.shoppingList.findUnique({
+    const deletedShoppingList = await testPrisma.shoppingList.findUnique({
       where: {
         id: shoppingList.id,
       },
@@ -38,7 +38,7 @@ describe("Delete Shopping List", () => {
 
   it("should not allow a user to delete a shopping list they do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const shoppingList = await prisma.shoppingList.create({
+    const shoppingList = await testPrisma.shoppingList.create({
       data: {
         name: "asdfqwer",
         user_id: otherUser.id,
@@ -52,7 +52,7 @@ describe("Delete Shopping List", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
-    const deletedShoppingList = await prisma.shoppingList.findUnique({
+    const deletedShoppingList = await testPrisma.shoppingList.findUnique({
       where: {
         id: shoppingList.id,
       },

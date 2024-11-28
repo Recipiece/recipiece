@@ -6,12 +6,12 @@ import { UserAccount } from "../data";
 
 export const useGetSelfQuery = (args?: QueryArgs) => {
   const { getter } = useGet();
-  const { authToken } = useContext(AuthContext);
+  const { accessToken: authToken } = useContext(AuthContext);
 
   const query = async (): Promise<UserAccount> => {
     const data = await getter({
       path: "/user/self",
-      withAuth: true,
+      withAuth: "access_token",
     });
     return data.data as UserAccount;
   };
@@ -26,9 +26,8 @@ export const useGetSelfQuery = (args?: QueryArgs) => {
   });
 };
 
-export const useLoginUserMutation = (args?: MutationArgs<void>) => {
+export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }>) => {
   const { poster } = usePost();
-  const { setAuthToken } = useContext(AuthContext);
 
   const mutation = async (data: { readonly username: string; readonly password: string }) => {
     return await poster<
@@ -36,19 +35,17 @@ export const useLoginUserMutation = (args?: MutationArgs<void>) => {
         readonly username: string;
         readonly password: string;
       },
-      { readonly token: string }
+      { readonly access_token: string; readonly refresh_token: string }
     >({
       path: "/user/login",
       body: { ...data },
-      withAuth: false,
     });
   };
 
   return useMutation({
     mutationFn: mutation,
     onSuccess: (response) => {
-      setAuthToken(response.data.token);
-      args?.onSuccess?.();
+      args?.onSuccess?.(response.data);
     },
     onError: (err) => {
       args?.onFailure?.(err);
@@ -58,24 +55,26 @@ export const useLoginUserMutation = (args?: MutationArgs<void>) => {
 
 export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
-  const { setAuthToken } = useContext(AuthContext);
+  const { setAccessToken, setRefreshToken } = useContext(AuthContext);
 
   const mutation = async () => {
     return await poster<never, never>({
       path: "/user/logout",
       body: {} as never,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
   return useMutation({
     mutationFn: mutation,
     onSuccess: () => {
-      setAuthToken(undefined);
+      setAccessToken(undefined);
+      setRefreshToken(undefined);
       args?.onSuccess?.();
     },
     onError: (err) => {
-      setAuthToken(undefined);
+      setAccessToken(undefined);
+      setRefreshToken(undefined);
       args?.onFailure?.(err);
     },
   });
@@ -88,7 +87,6 @@ export const useCreateUserMutation = (args?: MutationArgs<void>) => {
     return await poster<typeof args, never>({
       path: "/user/create",
       body: args,
-      withAuth: false,
     });
   };
 
@@ -106,13 +104,13 @@ export const useCreateUserMutation = (args?: MutationArgs<void>) => {
 export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
-  const { authToken } = useContext(AuthContext);
+  const { accessToken: authToken } = useContext(AuthContext);
 
   const mutation = async (args: { readonly token: string }) => {
     return await poster<typeof args, never>({
       path: "/user/verify-email",
       body: args,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -137,7 +135,7 @@ export const useRequestVerifyAccountMutation = (args?: MutationArgs<void>) => {
     return await poster<never, never>({
       path: "/user/request-token/verify-email",
       body: {} as never,
-      withAuth: true,
+      withAuth: "access_token",
     });
   };
 
@@ -149,5 +147,48 @@ export const useRequestVerifyAccountMutation = (args?: MutationArgs<void>) => {
     onError: (err) => {
       args?.onFailure?.(err);
     },
+  });
+};
+
+export const useRequestForgotPasswordMutation = (args?: MutationArgs<void>) => {
+  const { poster } = usePost();
+
+  const mutation = async (body: { readonly username: string }) => {
+    return await poster<typeof body, never>({
+      path: "/user/request-token/forgot-password",
+      body: { ...body },
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};
+
+export const useRefreshTokenMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }>) => {
+  const { refreshToken } = useContext(AuthContext);
+  console.log("USE REFRESH", refreshToken);
+  const { poster } = usePost();
+
+  const mutation = async () => {
+    return await poster<any, { readonly access_token: string; readonly refresh_token: string }>({
+      path: "/user/refresh-token",
+      body: {},
+      withAuth: "refresh_token",
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (response) => {
+      args?.onSuccess?.(response.data);
+    },
+    retry: false,
   });
 };

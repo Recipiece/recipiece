@@ -13,7 +13,7 @@ describe("Append Shopping List Items", () => {
   });
 
   it("should append the items to the end of the incomplete items", async () => {
-    const shoppingList = await prisma.shoppingList.create({
+    const shoppingList = await testPrisma.shoppingList.create({
       data: {
         name: "Test List",
         user_id: user.id,
@@ -22,7 +22,7 @@ describe("Append Shopping List Items", () => {
 
     const items: ShoppingListItem[] = [];
     for (let i = 0; i < 10; i++) {
-      const item = await prisma.shoppingListItem.create({
+      const item = await testPrisma.shoppingListItem.create({
         data: {
           content: `item ${i}`,
           order: (i % 5) + 1,

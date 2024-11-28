@@ -14,7 +14,7 @@ describe("List Cookbooks", () => {
 
   it("should list the cookbooks for the user associated with a token", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.cookbook.create({
+      await testPrisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -40,7 +40,7 @@ describe("List Cookbooks", () => {
   it("should not list private cookbooks for another user", async () => {
     const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
     for (let i = 0; i < 10; i++) {
-      await prisma.cookbook.create({
+      await testPrisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -70,7 +70,7 @@ describe("List Cookbooks", () => {
 
   it("should allow name filtering", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.cookbook.create({
+      await testPrisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -80,7 +80,7 @@ describe("List Cookbooks", () => {
       });
     }
 
-    await prisma.cookbook.create({
+    await testPrisma.cookbook.create({
       data: {
         name: "NAME NAME NAME",
         description: "Test",
@@ -105,7 +105,7 @@ describe("List Cookbooks", () => {
 
   it("should page", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.cookbook.create({
+      await testPrisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
