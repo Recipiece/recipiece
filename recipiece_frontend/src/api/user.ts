@@ -170,25 +170,3 @@ export const useRequestForgotPasswordMutation = (args?: MutationArgs<void>) => {
     },
   });
 };
-
-export const useRefreshTokenMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }>) => {
-  const { refreshToken } = useContext(AuthContext);
-  console.log("USE REFRESH", refreshToken);
-  const { poster } = usePost();
-
-  const mutation = async () => {
-    return await poster<any, { readonly access_token: string; readonly refresh_token: string }>({
-      path: "/user/refresh-token",
-      body: {},
-      withAuth: "refresh_token",
-    });
-  };
-
-  return useMutation({
-    mutationFn: mutation,
-    onSuccess: (response) => {
-      args?.onSuccess?.(response.data);
-    },
-    retry: false,
-  });
-};

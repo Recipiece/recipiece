@@ -2,7 +2,6 @@ import { ShoppingList, ShoppingListItem, User } from "@prisma/client";
 import { randomUUID } from "crypto";
 import "jest-expect-message";
 import request from "superwstest";
-import app from "../../../src/app";
 import { Redis } from "../../../src/database";
 
 const setShoppingListToken = async (shoppingListId: number): Promise<string> => {

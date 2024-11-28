@@ -15,6 +15,7 @@ export class UserSessions {
   public static readonly ACCESS_TOKEN_EXP_LUXON = {hours: 1};
   public static readonly REFRESH_TOKEN_EXP_LUXON = {days: 90};
 
+  // 5 days, in millis
   public static readonly REFRESH_CLOSE_TO_EXPIRY_THRESHOLD_MS = 5 * 24 * 60 * 60 * 1000;
 }
 

@@ -30,7 +30,6 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
   const { isSubmitting } = form.formState;
 
   const onCreateCookbook = async (formData: CreateCookbookForm) => {
-    console.log(formData);
     try {
       await Promise.resolve(onSubmit?.(formData));
     } catch (error) {

@@ -36,7 +36,6 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const setRefreshToken = useCallback(
     (value: string | undefined) => {
-      console.log("SET REFRESH TOKEN", value);
       if (value) {
         _setRefreshToken(value);
       } else {

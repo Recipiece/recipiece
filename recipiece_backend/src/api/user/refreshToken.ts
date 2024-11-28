@@ -14,7 +14,7 @@ export const refreshToken = async (request: AuthenticatedRequest): ApiResponse<R
   let session = request.user_session;
   const sessionExpiry = DateTime.fromJSDate(session.created_at).plus(UserSessions.REFRESH_TOKEN_EXP_LUXON);
   const isCloseToExpiry =
-    sessionExpiry.minus({ milliseconds: UserSessions.REFRESH_CLOSE_TO_EXPIRY_THRESHOLD_MS }).diffNow().toMillis() < 0;
+    sessionExpiry.diff(DateTime.utc()).milliseconds < UserSessions.REFRESH_CLOSE_TO_EXPIRY_THRESHOLD_MS;
 
   if (isCloseToExpiry) {
     console.log(`session ${session.id} is close to expiry, issuing a new session`);
