@@ -170,3 +170,24 @@ export const useRequestForgotPasswordMutation = (args?: MutationArgs<void>) => {
     },
   });
 };
+
+export const useResetPasswordMutation = (args?: MutationArgs<void>) => {
+  const { poster } = usePost();
+
+  const mutation = async (body: { readonly token: string, readonly password: string }) => {
+    return await poster<typeof body, never>({
+      path: "/user/reset-password",
+      body: { ...body },
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useCreateUserMutation } from "../../api";
-import { Button, Form, FormInput, Stack, useToast } from "../../component";
+import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../component";
 
 const CreateAccountFormSchema = z
   .object({
@@ -62,7 +62,7 @@ export const CreateAccountPage: FC = () => {
           <FormInput type="email" name="username" label="Email" />
           <FormInput type="password" name="password" label="Password" />
           <FormInput type="password" name="confirmPassword" label="Confirm Password" />
-          <Button type="submit">Create Account</Button>
+          <SubmitButton>Create Account</SubmitButton>
           <Button
             variant="link"
             onClick={() => {

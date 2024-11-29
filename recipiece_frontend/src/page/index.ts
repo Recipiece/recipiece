@@ -6,5 +6,6 @@ export * from "./Login";
 export * from "./RecipeEdit";
 export * from "./RecipeView";
 export * from "./Register";
-export * from "./VerifyAccount";
+export * from "./ResetPassword";
 export * from "./ShoppingListView";
+export * from "./VerifyAccount";
