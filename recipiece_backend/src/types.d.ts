@@ -42,6 +42,7 @@ export interface Route {
   readonly authentication: "access_token" | "basic" | "none" | "refresh_token";
   readonly requestSchema?: ObjectSchema;
   readonly responseSchema?: ObjectSchema;
+  readonly version: string;
 }
 
 export interface WebsocketRoute {
@@ -50,6 +51,7 @@ export interface WebsocketRoute {
   readonly authentication: "token" | "none";
   readonly requestSchema: ObjectSchema;
   readonly responseSchema?: ObjectSchema;
+  readonly version: string;
 }
 
 export interface TokenPayload {

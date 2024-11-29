@@ -2,7 +2,6 @@ import { DateTime } from "luxon";
 import { FC, useMemo } from "react";
 import { useGetSelfQuery } from "../../api";
 import { LoadingGroup, Stack } from "../../component";
-import { AccountManagementSection } from "./AccountManagementSection";
 import { VerifyAccountSection } from "./VerifyAccountSection";
 
 export const AccountViewPage: FC = () => {
@@ -25,7 +24,18 @@ export const AccountViewPage: FC = () => {
       </LoadingGroup>
       <hr />
       <VerifyAccountSection />
-      <AccountManagementSection />
+      {/* <AccountManagementSection /> */}
+      <hr />
+      <p className="text-sm">
+        Interested in helping develop Recipiece? Found a bug perhaps?{" "}
+        <a className="underline" target="blank" href="https://github.com/sjyn/Recipiece/issues/new">
+          Find us on GitHub
+        </a>
+        .
+      </p>
+      <p className="text-sm">
+        Version <i>{process.env.REACT_APP_RECIPIECE_VERSION}</i>, December 2024
+      </p>
     </Stack>
   );
 };

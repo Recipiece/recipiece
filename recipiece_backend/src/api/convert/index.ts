@@ -1,4 +1,5 @@
 import { Route } from "../../types";
+import { Versions } from "../../util/constant";
 import { convertIngredient } from "./convertIngredient";
 
 export const CONVERT_ROUTES: Route[] = [
@@ -7,5 +8,6 @@ export const CONVERT_ROUTES: Route[] = [
     authentication: "access_token",
     method: "POST",
     function: convertIngredient,
+    version: Versions.ALL,
   },
 ];

@@ -1,5 +1,6 @@
 import { YAddRecipeToCookbookRequestSchema, YCookbookSchema, YCreateCookbookRequestSchema, YListCookbooksQuerySchema, YListCookbooksResponseSchema, YRemoveRecipeFromCookbookRequestSchema, YUpdateCookbookRequestSchema } from "../../schema";
 import { Route } from "../../types";
+import { Versions } from "../../util/constant";
 import { addRecipeToCookbook } from "./addRecipeToCookbook";
 import { createCookbook } from "./createCookbook";
 import { deleteCookbook } from "./deleteCookbook";
@@ -16,6 +17,7 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: createCookbook,
     requestSchema: YCreateCookbookRequestSchema,
     responseSchema: YCookbookSchema,
+    version: Versions.ALL,
   },
   {
     path: "/cookbook/recipe/add",
@@ -23,18 +25,21 @@ export const COOKBOOK_ROUTES: Route[] = [
     method: "POST",
     function: addRecipeToCookbook,
     requestSchema: YAddRecipeToCookbookRequestSchema,
+    version: Versions.ALL,
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "access_token",
     method: "DELETE",
     function: deleteCookbook,
+    version: Versions.ALL,
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
     function: getCookbook,
+    version: Versions.ALL,
   },
   {
     path: "/cookbook/list",
@@ -43,6 +48,7 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: listCookbooks,
     requestSchema: YListCookbooksQuerySchema,
     responseSchema: YListCookbooksResponseSchema,
+    version: Versions.ALL,
   },
   {
     path: "/cookbook/recipe/remove",
@@ -50,6 +56,7 @@ export const COOKBOOK_ROUTES: Route[] = [
     method: "POST",
     function: removeRecipeFromCookbook,
     requestSchema: YRemoveRecipeFromCookbookRequestSchema,
+    version: Versions.ALL,
   },
   {
     path: "/cookbook",
@@ -58,5 +65,6 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: updateCookbook,
     requestSchema: YUpdateCookbookRequestSchema,
     responseSchema: YCookbookSchema,
+    version: Versions.ALL,
   },
 ];

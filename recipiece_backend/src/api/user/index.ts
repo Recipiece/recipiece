@@ -7,9 +7,10 @@ import {
   YResetPasswordRequestSchema,
   YUserSchema,
   YValidateUserRequestSchema,
-  YValidateUserResponseSchema
+  YValidateUserResponseSchema,
 } from "../../schema";
 import { Route } from "../../types";
+import { Versions } from "../../util/constant";
 import { createUser } from "./createUser";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
@@ -27,20 +28,14 @@ export const LOGIN_ROUTES: Route[] = [
     function: loginUser,
     authentication: "basic",
     responseSchema: YLoginResponseSchema,
+    version: Versions.ALL,
   },
   {
     path: "/user/logout",
     method: "POST",
     function: logoutUser,
     authentication: "access_token",
-  },
-  {
-    path: "/user/create",
-    method: "POST",
-    function: createUser,
-    authentication: "none",
-    requestSchema: YCreateUserRequestSchema,
-    responseSchema: YCreateUserResponseSchema,
+    version: Versions.ALL,
   },
   {
     path: "/user/self",
@@ -48,6 +43,7 @@ export const LOGIN_ROUTES: Route[] = [
     function: getUserByToken,
     authentication: "access_token",
     responseSchema: YUserSchema,
+    version: Versions.ALL,
   },
   {
     path: "/user/verify-email",
@@ -56,12 +52,14 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "access_token",
     requestSchema: YValidateUserRequestSchema,
     responseSchema: YValidateUserResponseSchema,
+    version: Versions.ALL,
   },
   {
     path: "/user/request-token/verify-email",
     method: "POST",
     function: issueEmailVerificationToken,
     authentication: "access_token",
+    version: Versions.ALL,
   },
   {
     path: "/user/request-token/forgot-password",
@@ -69,6 +67,7 @@ export const LOGIN_ROUTES: Route[] = [
     function: issueForgotPasswordToken,
     authentication: "none",
     requestSchema: YIssueForgotPasswordTokenRequestSchema,
+    version: Versions.ALL,
   },
   {
     path: "/user/reset-password",
@@ -76,6 +75,7 @@ export const LOGIN_ROUTES: Route[] = [
     function: resetPassword,
     authentication: "none",
     requestSchema: YResetPasswordRequestSchema,
+    version: Versions.ALL,
   },
   {
     path: "/user/refresh-token",
@@ -83,5 +83,18 @@ export const LOGIN_ROUTES: Route[] = [
     function: refreshToken,
     authentication: "refresh_token",
     responseSchema: YRefreshTokenResponseSchema,
+    version: Versions.ALL,
   },
 ];
+
+if (process.env.APP_VERSION! !== Versions.CAST_IRON_SKILLET) {
+  LOGIN_ROUTES.push({
+    path: "/user/create",
+    method: "POST",
+    function: createUser,
+    authentication: "none",
+    requestSchema: YCreateUserRequestSchema,
+    responseSchema: YCreateUserResponseSchema,
+    version: Versions.ALL,
+  });
+}

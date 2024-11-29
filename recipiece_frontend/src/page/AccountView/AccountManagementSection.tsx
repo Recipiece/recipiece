@@ -1,7 +1,7 @@
-import { Download, Upload } from "lucide-react";
 import { FC } from "react";
 import { useGetSelfQuery } from "../../api";
 import { Button, Card, CardContent, CardFooter, CardHeader, Grid, GridHalfRow, Stack, Tooltip, TooltipContent, TooltipTrigger } from "../../component";
+import { Download, Upload } from "lucide-react";
 
 export const AccountManagementSection: FC = () => {
   const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();

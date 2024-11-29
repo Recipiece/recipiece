@@ -8,12 +8,11 @@ import { RefreshTokenResponse } from "../data";
 import { StorageKeys } from "../util";
 
 export const getUrl = (): string => {
-  // @TODO -- change this later
-  return "http://localhost:8080";
+  return process.env.REACT_APP_API_URL!;
 };
 
 export const getWebsocketUrl = (): string => {
-  return "ws://localhost:8080";
+  return process.env.REACT_APP_WEBSOCKET_URL!;
 };
 
 export interface MutationArgs<SuccessType> {

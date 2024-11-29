@@ -34,3 +34,8 @@ export class UserValidationTokenTypes {
     duration_ms: 1 * 60 * 60 * 1000,
   };
 }
+
+export class Versions {
+  public static readonly ALL = "*";
+  public static readonly CAST_IRON_SKILLET = "cast_iron_skillet";
+}

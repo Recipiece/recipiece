@@ -1,4 +1,3 @@
-import { Trash } from "lucide-react";
 import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
@@ -15,7 +14,6 @@ export const ShoppingListViewPage: FC = () => {
     isPerformingAction,
     addItem,
     markItemComplete,
-    deleteItem,
     markItemIncomplete,
     setItemOrder,
     setItemContent,
@@ -61,13 +59,6 @@ export const ShoppingListViewPage: FC = () => {
       clearTimeout(timeout);
     };
   }, [updatingIncompleteItem]);
-
-  const onDeleteItem = useCallback(
-    (item: ShoppingListItem) => {
-      deleteItem({ ...item });
-    },
-    [deleteItem]
-  );
 
   const onAddItem = useCallback(() => {
     if (newestShoppingListItem.trim().length > 1) {
