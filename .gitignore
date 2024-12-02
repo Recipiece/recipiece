@@ -5,7 +5,10 @@ local-recipiece-data
 coverage
 node_modules
 .env.keys
+.env.deploy
 dist
+prod_dist
+recipiece_infrastructure
 
 .venv
 __pycache__

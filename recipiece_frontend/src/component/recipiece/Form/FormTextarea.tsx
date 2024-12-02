@@ -1,11 +1,11 @@
-import { FC, useMemo } from "react";
+import { FC, ReactElement, useMemo } from "react";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Textarea, TextareaProps } from "../../shadcn";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
 
 export interface FormTextareaProps extends TextareaProps {
   readonly name: string;
-  readonly instructions?: string;
+  readonly instructions?: ReactElement;
   readonly label?: string;
   readonly className?: string;
 }

@@ -1,0 +1,12 @@
+FROM node:alpine3.19
+
+WORKDIR /home
+COPY ./prod_dist .
+COPY ./package.json package.json
+COPY .env.prod .
+COPY ./prisma/schema.prisma ./prisma/schema.prisma
+COPY ./yarn.lock .
+
+RUN yarn global add @dotenvx/dotenvx && yarn install --production && yarn prisma generate
+
+CMD ["dotenvx", "run",  "--env-file=.env.prod", "--", "node", "index.js"]

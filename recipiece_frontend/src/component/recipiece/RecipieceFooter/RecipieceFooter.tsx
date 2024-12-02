@@ -47,16 +47,6 @@ export const RecipieceFooter: FC = () => {
     },
   });
 
-  const onCreateCookbook = async (cookbookData: CreateCookbookForm) => {
-    const createdCookbook = await createCookbook({ ...cookbookData });
-    navigate(`/cookbook/${createdCookbook.data.id}`);
-  };
-
-  const onCreateShoppingList = async (shoppingListData: CreateShoppingListForm) => {
-    const createdShoppingList = await createShoppingList({ ...shoppingListData });
-    navigate(`/shopping-list/${createdShoppingList.data.id}`);
-  };
-
   const onCreatePressed = useCallback(() => {
     pushDialog("mobileCreateMenu", {
       onClose: () => popDialog("mobileCreateMenu"),
@@ -65,7 +55,10 @@ export const RecipieceFooter: FC = () => {
         switch (createType) {
           case "cookbook":
             pushDialog("createCookbook", {
-              onSubmit: onCreateCookbook,
+              onSubmit: async (cookbookData: CreateCookbookForm) => {
+                const createdCookbook = await createCookbook({ ...cookbookData });
+                navigate(`/cookbook/${createdCookbook.data.id}`);
+              },
               onClose: () => popDialog("createCookbook"),
             });
             break;
@@ -77,14 +70,17 @@ export const RecipieceFooter: FC = () => {
             break;
           case "shopping_list":
             pushDialog("createShoppingList", {
-              onSubmit: onCreateShoppingList,
+              onSubmit: async (shoppingListData: CreateShoppingListForm) => {
+                const createdShoppingList = await createShoppingList({ ...shoppingListData });
+                navigate(`/shopping-list/${createdShoppingList.data.id}`);
+              },
               onClose: () => popDialog("createShoppingList"),
             });
             break;
         }
       },
     });
-  }, [pushDialog, popDialog]);
+  }, [pushDialog, popDialog, navigate, createCookbook, createShoppingList]);
 
   const onShoppingListsPressed = useCallback(() => {
     pushDialog("mobileShoppingLists", {
@@ -93,7 +89,7 @@ export const RecipieceFooter: FC = () => {
         navigate(`/shopping-list/${list.id}`);
       },
     });
-  }, [pushDialog, popDialog]);
+  }, [pushDialog, popDialog, navigate]);
 
   const onCookbooksPressed = useCallback(() => {
     pushDialog("mobileCookbooks", {
@@ -102,7 +98,7 @@ export const RecipieceFooter: FC = () => {
         navigate(`/cookbook/${cookbook.id}`);
       },
     });
-  }, [pushDialog, popDialog]);
+  }, [pushDialog, popDialog, navigate]);
 
   return (
     <footer className="visible sm:invisible w-full fixed bottom-0 left-0 h-16 bg-primary text-white">

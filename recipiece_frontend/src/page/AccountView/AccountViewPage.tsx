@@ -3,6 +3,7 @@ import { FC, useMemo } from "react";
 import { useGetSelfQuery } from "../../api";
 import { LoadingGroup, Stack } from "../../component";
 import { VerifyAccountSection } from "./VerifyAccountSection";
+import { AccountManagementSection } from "./AccountManagementSection";
 
 export const AccountViewPage: FC = () => {
   const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();
@@ -16,7 +17,7 @@ export const AccountViewPage: FC = () => {
 
   return (
     <Stack>
-      <LoadingGroup isLoading={isLoadingAccount} className="w-full h-10">
+      <LoadingGroup isLoading={isLoadingAccount} className="w-full h-6">
         <h1 className="text-2xl">Welcome Back, {account?.email}</h1>
       </LoadingGroup>
       <LoadingGroup isLoading={isLoadingAccount}>
@@ -24,11 +25,12 @@ export const AccountViewPage: FC = () => {
       </LoadingGroup>
       <hr />
       <VerifyAccountSection />
-      {/* <AccountManagementSection /> */}
+      <hr />
+      <AccountManagementSection />
       <hr />
       <p className="text-sm">
         Interested in helping develop Recipiece? Found a bug perhaps?{" "}
-        <a className="underline" target="blank" href="https://github.com/sjyn/Recipiece/issues/new">
+        <a className="underline" target="blank" href="https://github.com/sjyn/Recipiece">
           Find us on GitHub
         </a>
         .

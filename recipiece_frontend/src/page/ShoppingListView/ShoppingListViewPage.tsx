@@ -58,6 +58,7 @@ export const ShoppingListViewPage: FC = () => {
     return () => {
       clearTimeout(timeout);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updatingIncompleteItem]);
 
   const onAddItem = useCallback(() => {
@@ -127,6 +128,7 @@ export const ShoppingListViewPage: FC = () => {
         setIsAutoCompleteOpen(false);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newestShoppingListItem, autocompleteSuggestions.length]);
 
   return (

@@ -26,7 +26,7 @@ export const RecipieceMenubar: FC = () => {
 
   const onGoHome = useCallback(() => {
     navigate("/dashboard");
-  }, []);
+  }, [navigate]);
 
   const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery({
     page_number: shoppingListsPage,

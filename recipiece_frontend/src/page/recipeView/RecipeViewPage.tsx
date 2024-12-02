@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, Grid, Label, LoadingGroup, NotFound } from "../../component";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, Grid, LoadingGroup, NotFound } from "../../component";
 import { formatIngredientAmount } from "../../util";
 
 export const RecipeViewPage: FC = () => {

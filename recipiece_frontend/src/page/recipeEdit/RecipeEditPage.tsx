@@ -4,27 +4,12 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
-import {
-  Button,
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  LoadingGroup,
-  NotFound,
-  SubmitButton,
-  Textarea,
-  useToast,
-} from "../../component";
+import { Button, Form, FormInput, FormTextarea, NotFound, Stack, SubmitButton, useToast } from "../../component";
+import { DialogContext } from "../../context";
 import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
 import { ParseRecipeFromURLForm } from "../../dialog";
 import { IngredientsForm } from "./IngredientsForm";
 import { StepsForm } from "./StepsForm";
-import { DialogContext } from "../../context";
 
 const RecipeFormSchema = z.object({
   name: z.string().min(3).max(100),
@@ -194,62 +179,37 @@ export const RecipeEditPage: FC = () => {
         return prev;
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   return (
     <div className="p-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => {
-              return (
-                <FormItem className="mb-2">
-                  {(isLoading || !isRecipeGetError) && <FormLabel>Recipe Name</FormLabel>}
-                  <FormControl>
-                    <LoadingGroup isLoading={isLoading} className="w-full h-10">
-                      {<Input type="text" placeholder="Recipe Name" {...field} />}
-                    </LoadingGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => {
-              return (
-                <FormItem className="mb-2">
-                  {(isLoading || !isRecipeGetError) && <FormLabel>Description</FormLabel>}
-                  <LoadingGroup isLoading={isLoading} className="w-full h-[138px]">
-                    <FormControl>{<Textarea placeholder="A description of your recipe" rows={5} {...field} />}</FormControl>
-                    {(isLoading || !isRecipeGetError) && <FormDescription>{recipeDescription?.length || 0} / 1000</FormDescription>}
-                  </LoadingGroup>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+          <Stack>
+            <FormInput name="name" label="Recipe Name" placeholder="What do you want to call this recipe?" />
+            <FormTextarea maxLength={1000} name="description" placeholder="What is this recipe all about?" label="Description" instructions={
+              <>{(recipeDescription || "").length} / 1000</>
+            }>
+            </FormTextarea>
 
-          {(isCreatingNewRecipe || !!recipe) && (
-            <div className="grid gap-4 grid-cols-1">
-              <IngredientsForm isLoading={isLoading} />
-              <hr />
-              <StepsForm isLoading={isLoading} />
-            </div>
-          )}
+            {(isCreatingNewRecipe || !!recipe) && (
+              <div className="grid gap-4 grid-cols-1">
+                <IngredientsForm isLoading={isLoading} />
+                <hr />
+                <StepsForm isLoading={isLoading} />
+              </div>
+            )}
 
-          {(isCreatingNewRecipe || !!recipe) && (
-            <div className="flex flex-row justify-end mt-2">
-              <Button disabled={form?.formState?.isSubmitting} onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
-                Cancel
-              </Button>
-              <SubmitButton>Save</SubmitButton>
-            </div>
-          )}
+            {(isCreatingNewRecipe || !!recipe) && (
+              <div className="flex flex-row justify-end mt-2">
+                <Button disabled={form?.formState?.isSubmitting} onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
+                  Cancel
+                </Button>
+                <SubmitButton>Save</SubmitButton>
+              </div>
+            )}
+          </Stack>
         </form>
       </Form>
 

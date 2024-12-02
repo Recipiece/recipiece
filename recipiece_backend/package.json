@@ -8,7 +8,8 @@
     "test": "dotenvx run -f .env.test -- jest --runInBand --forceExit",
     "prisma-dev": "dotenvx run -f .env.dev -- prisma migrate dev",
     "prisma-test": "dotenvx run -f .env.test -- prisma migrate dev",
-    "seed": "dotenvx run -f .env.dev -- node seed/index.mjs"
+    "seed": "dotenvx run -f .env.dev -- node seed/index.mjs",
+    "build": "tsc --project tsconfig.prod.json"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",
@@ -18,7 +19,6 @@
     "@types/convert-units": "^2.3.11",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
-    "@types/faker": "^6.6.11",
     "@types/jabber": "^1.2.4",
     "@types/jest": "^29.5.14",
     "@types/jest-expect-message": "^1.1.0",

@@ -1,9 +1,9 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import { useListRecipesToAddToCookbook } from "../../api";
-import { Button, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
+import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
 import { ListRecipeFilters, Recipe } from "../../data";
-import { BaseDialogProps } from "../BaseDialogProps";
 import { useResponsiveDialogComponents } from "../../hooks";
+import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface SearchRecipesDialogProps extends BaseDialogProps<Recipe> {
   readonly cookbookId: number;

@@ -32,6 +32,7 @@ export const ResetPasswordPage: FC = () => {
     if (!token) {
       navigate("/login");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const form = useForm<ResetPasswordForm>({
@@ -62,7 +63,7 @@ export const ResetPasswordPage: FC = () => {
         });
       }
     },
-    [token]
+    [token, navigate, resetPassword, toast]
   );
 
   return (

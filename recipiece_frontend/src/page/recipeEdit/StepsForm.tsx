@@ -1,19 +1,78 @@
-import { ArrowDown, ArrowUp, PlusIcon, XIcon } from "lucide-react";
-import { FC, useCallback } from "react";
+import { Grip, Minus, PlusIcon } from "lucide-react";
+import { FC, Fragment, useCallback, useMemo } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import {
-  Button,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  LoadingGroup,
-  Textarea
-} from "../../component";
+import { Button, FormTextarea } from "../../component";
+import { useDrag, useDrop } from "react-dnd";
+import { cn } from "../../util";
+import mergeRefs from "merge-refs";
 
 export interface StepsFormProps {
   readonly isLoading: boolean;
 }
+
+interface StepFormItemProps {
+  readonly index: number;
+  readonly onRemove: (index: number) => void;
+  readonly onMove: (srcIndex: number, destIndex: number) => void;
+  readonly draggable: boolean;
+}
+
+const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggable }) => {
+  const [{ isDragging }, dragRef, draggingRef] = useDrag(() => {
+    return {
+      type: "edit_recipe_step",
+      item: { index: index },
+      collect: (monitor) => {
+        return {
+          isDragging: !!monitor.isDragging(),
+        };
+      },
+    };
+  }, [index]);
+
+  const [{ isOver }, dropRef] = useDrop(() => {
+    return {
+      accept: "edit_recipe_step",
+      drop: (droppedItem) => {
+        onMove((droppedItem as { readonly index: number }).index, index);
+      },
+      collect: (monitor) => {
+        return {
+          isOver: monitor.isOver(),
+        };
+      },
+    };
+  }, [index, onMove]);
+
+  const wrapperClassName = useMemo(() => {
+    const baseClassName = "flex flex-col gap-1 w-full";
+    if (isDragging) {
+      return "hidden";
+    } else if (isOver) {
+      return cn(baseClassName, "pt-16");
+    } else {
+      return cn(baseClassName);
+    }
+  }, [isDragging, isOver]);
+
+  return (
+    // @ts-ignore
+    <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
+      <div className="flex flex-row items-center gap-2">
+        {draggable && (
+          <div ref={dragRef}>
+            <Grip className="text-primary cursor-grab" />
+          </div>
+        )}
+        <p className="mr-auto leading-6">Step {index + 1}</p>
+        <Button variant="link" onClick={() => onRemove(index)}>
+          <Minus className="text-destructive" />
+        </Button>
+      </div>
+      <FormTextarea readOnly={isDragging} name={`steps.${index}.content`} placeholder="What should you do?" required />
+    </div>
+  );
+};
 
 export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
   const form = useFormContext();
@@ -36,16 +95,9 @@ export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
     [stepsFieldArray]
   );
 
-  const onStepUp = useCallback(
-    (index: number) => {
-      stepsFieldArray.swap(index, index - 1);
-    },
-    [stepsFieldArray]
-  );
-
-  const onStepDown = useCallback(
-    (index: number) => {
-      stepsFieldArray.swap(index, index + 1);
+  const moveStep = useCallback(
+    (srcIndex: number, destIndex: number) => {
+      stepsFieldArray.move(srcIndex, destIndex);
     },
     [stepsFieldArray]
   );
@@ -54,73 +106,16 @@ export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
     <div>
       <div className="flex flex-row items-center mb-2">
         <h1 className="inline text-lg">Steps</h1>
-        <Button
-          type="button"
-          onClick={addStep}
-          variant="secondary"
-          className="ml-auto"
-        >
+        <Button type="button" onClick={addStep} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Step
         </Button>
       </div>
       {stepsFieldArray.fields.map((fieldArrayValue, index) => {
         return (
-          <div key={fieldArrayValue.id}>
-            <div className="flex flex-row items-center justify-start mb-2">
-              <Button
-                disabled={index === 0}
-                className="ms-0 ps-0"
-                type="button"
-                variant="link"
-                onClick={() => onStepUp(index)}
-              >
-                <ArrowUp />
-              </Button>
-              <p className="inline leading-9">{index + 1}.</p>
-              <Button
-                disabled={index === stepsFieldArray.fields.length - 1}
-                // className="m-0 p-0"
-                type="button"
-                variant="link"
-                onClick={() => onStepDown(index)}
-              >
-                <ArrowDown />
-              </Button>
-
-              <Button
-                variant="link"
-                onClick={() => removeStep(index)}
-                type="button"
-                className="ms-auto pr-0"
-              >
-                <XIcon />
-              </Button>
-            </div>
-            <FormField
-              control={form.control}
-              name={`steps.${index}.content`}
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <LoadingGroup
-                      isLoading={isLoading}
-                      className="w-1/3 h-[138px]"
-                    >
-                      <FormControl>
-                        <Textarea
-                          placeholder="What should you do?"
-                          required
-                          {...field}
-                        />
-                      </FormControl>
-                    </LoadingGroup>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-          </div>
+          <Fragment key={fieldArrayValue.id}>
+            <StepFormItem draggable={stepsFieldArray.fields.length > 1} index={index} onRemove={removeStep} onMove={moveStep} />
+          </Fragment>
         );
       })}
     </div>

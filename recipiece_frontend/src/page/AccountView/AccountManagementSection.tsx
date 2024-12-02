@@ -1,16 +1,38 @@
-import { FC } from "react";
-import { useGetSelfQuery } from "../../api";
-import { Button, Card, CardContent, CardFooter, CardHeader, Grid, GridHalfRow, Stack, Tooltip, TooltipContent, TooltipTrigger } from "../../component";
-import { Download, Upload } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { FC, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useGetSelfQuery, useLogoutUserMutation } from "../../api";
+import { Button, Card, CardContent, CardFooter, CardHeader, Grid, GridHalfRow, Stack } from "../../component";
 
 export const AccountManagementSection: FC = () => {
-  const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();
+  const { isLoading: isLoadingAccount } = useGetSelfQuery();
+  const { mutateAsync: logout, isPending: isLoggingOut } = useLogoutUserMutation();
+  const navigate = useNavigate();
+
+  const onLogout = useCallback(async () => {
+    await logout();
+    navigate("/login");
+  }, [logout, navigate]);
 
   return (
     <Stack>
       <h1 className="text-lg">Manage Your Account</h1>
       <Grid>
         <GridHalfRow>
+          <Card className="h-full flex flex-col">
+            <CardHeader>Log Out</CardHeader>
+            <CardContent className="grow">
+              <p className="text-sm">Log out of your current Recipiece session.</p>
+            </CardContent>
+            <CardFooter>
+              <Button disabled={isLoadingAccount || isLoggingOut} className="grow" onClick={onLogout}>
+                <LogOut className="mr-2" /> Log Out
+              </Button>
+            </CardFooter>
+          </Card>
+        </GridHalfRow>
+
+        {/* <GridHalfRow>
           <Card className="h-full flex flex-col">
             <CardHeader>Import Data</CardHeader>
             <CardContent className="grow">
@@ -21,7 +43,7 @@ export const AccountManagementSection: FC = () => {
             </CardContent>
             <CardFooter>
               <Tooltip>
-                <TooltipTrigger className="flex flex-row grow">
+                <TooltipTrigger className="flex flex-row grow" asChild>
                   <Button disabled={!account?.validated || isLoadingAccount} className="grow">
                     Import Data <Download className="ml-2" />
                   </Button>
@@ -30,9 +52,9 @@ export const AccountManagementSection: FC = () => {
               </Tooltip>
             </CardFooter>
           </Card>
-        </GridHalfRow>
+        </GridHalfRow> */}
 
-        <GridHalfRow>
+        {/* <GridHalfRow>
           <Card className="h-full flex flex-col">
             <CardHeader>Export Data</CardHeader>
             <CardContent className="grow">
@@ -43,7 +65,7 @@ export const AccountManagementSection: FC = () => {
             </CardContent>
             <CardFooter>
               <Tooltip>
-                <TooltipTrigger className="flex flex-row grow">
+                <TooltipTrigger className="flex flex-row grow" asChild>
                   <Button disabled={!account?.validated || isLoadingAccount} className="grow">
                     Export Data <Upload className="ml-2" />
                   </Button>
@@ -52,9 +74,9 @@ export const AccountManagementSection: FC = () => {
               </Tooltip>
             </CardFooter>
           </Card>
-        </GridHalfRow>
+        </GridHalfRow> */}
 
-        <GridHalfRow>
+        {/* <GridHalfRow>
           <Card className="h-full flex flex-col">
             <CardHeader>Change Password</CardHeader>
             <CardContent className="grow">
@@ -66,9 +88,9 @@ export const AccountManagementSection: FC = () => {
               </Button>
             </CardFooter>
           </Card>
-        </GridHalfRow>
+        </GridHalfRow> */}
 
-        <GridHalfRow>
+        {/* <GridHalfRow>
           <Card>
             <CardHeader>Delete Account</CardHeader>
             <CardContent>
@@ -88,7 +110,7 @@ export const AccountManagementSection: FC = () => {
               </Stack>
             </CardContent>
           </Card>
-        </GridHalfRow>
+        </GridHalfRow> */}
       </Grid>
     </Stack>
   );

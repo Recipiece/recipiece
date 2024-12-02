@@ -62,7 +62,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
         navigate("/login");
       }
     }
-  }, [location.pathname, accessToken, refreshToken]);
+  }, [location.pathname, accessToken, refreshToken, navigate]);
 
   return (
     <AuthContext.Provider

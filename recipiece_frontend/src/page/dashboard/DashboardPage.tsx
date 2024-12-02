@@ -101,7 +101,7 @@ export const DashboardPage: FC = () => {
     async (recipe: Recipe) => {
       await addRecipeToCookbook({ recipe_id: recipe.id, cookbook_id: +cookbookId! });
     },
-    [cookbookId]
+    [cookbookId, addRecipeToCookbook]
   );
 
   return (

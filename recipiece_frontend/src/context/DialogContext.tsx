@@ -43,6 +43,7 @@ export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
       });
     } else {
       setDialogStack((prev) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, ...rest] = prev;
         return [...rest];
       });

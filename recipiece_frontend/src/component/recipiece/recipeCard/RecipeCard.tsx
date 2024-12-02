@@ -1,4 +1,8 @@
+import { Book, BookX, MoreVertical, Pencil, ShoppingBasket, SquareArrowOutUpRight, Trash } from "lucide-react";
 import { FC, useCallback, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppendShoppingListItemsMutation, useDeleteRecipeMutation, useListCookbooksQuery, useListShoppingListsQuery, useRemoveRecipeFromCookbookMutation } from "../../../api";
+import { DialogContext } from "../../../context";
 import { Recipe } from "../../../data";
 import {
   Button,
@@ -17,11 +21,8 @@ import {
   DropdownMenuTrigger,
   useToast,
 } from "../../shadcn";
-import { Book, BookX, MoreVertical, Pencil, ShoppingBasket, SquareArrowOutUpRight, Trash, X } from "lucide-react";
 import { Shelf, ShelfSpacer } from "../Layout";
-import { useAppendShoppingListItemsMutation, useDeleteRecipeMutation, useListCookbooksQuery, useListShoppingListsQuery, useRemoveRecipeFromCookbookMutation } from "../../../api";
-import { useNavigate } from "react-router-dom";
-import { DialogContext } from "../../../context";
+import { LoadingGroup } from "../LoadingGroup";
 
 export interface RecipeCardProps {
   readonly recipe: Recipe;
@@ -61,7 +62,6 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
     onSuccess: () => {
       toast({
         title: "Recipe successfully deleted",
-        // description: `The recipe ${recipe.name} was deleted.`,
         variant: "default",
       });
       popDialog("deleteRecipe");
@@ -84,7 +84,7 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
         variant: "destructive",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: "Recipe removed",
         description: "The recipe was removed from the cookbook.",
@@ -100,24 +100,20 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
       });
     } else {
       pushDialog("deleteRecipe", {
-        onSubmit: onConfirmDeleteRecipe,
+        onSubmit: async (recipe: Recipe) => await deleteRecipe(recipe.id),
         onClose: () => popDialog("deleteRecipe"),
         recipe: recipe,
       });
     }
-  }, [cookbookId, recipe]);
-
-  const onConfirmDeleteRecipe = useCallback(async (recipe: Recipe) => {
-    await deleteRecipe(recipe.id);
-  }, []);
+  }, [cookbookId, recipe, pushDialog, popDialog, deleteRecipe, removeRecipeFromCookbook]);
 
   const onView = useCallback(() => {
     navigate(`/recipe/view/${recipe.id}`);
-  }, [recipe]);
+  }, [recipe, navigate]);
 
   const onEdit = useCallback(() => {
     navigate(`/recipe/edit/${recipe.id}`);
-  }, [recipe]);
+  }, [recipe, navigate]);
 
   const onAddToShoppingList = useCallback(async (listId: number) => {
     await appendToShoppingList({
@@ -128,12 +124,12 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
         };
       }),
     });
-  }, []);
+  }, [appendToShoppingList, recipe.ingredients]);
 
   return (
     <DropdownMenu>
       <Card className="h-full flex flex-col hover:drop-shadow-md">
-        <CardHeader className="hover:cursor-pointer">
+        <CardHeader>
           <Shelf>
             <CardTitle>{recipe.name}</CardTitle>
             <ShelfSpacer />
@@ -151,13 +147,11 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    {(cookbooks?.data || []).map((cookbook) => {
-                      return (
-                        <DropdownMenuItem key={cookbook.id}>
-                          {cookbook.name}
-                        </DropdownMenuItem>
-                      );
-                    })}
+                    <LoadingGroup variant="spinner" isLoading={isLoadingCookbook}>
+                      {(cookbooks?.data || []).map((cookbook) => {
+                        return <DropdownMenuItem key={cookbook.id}>{cookbook.name}</DropdownMenuItem>;
+                      })}
+                    </LoadingGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
@@ -169,20 +163,22 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    {(shoppingLists?.data || []).map((list) => {
-                      return (
-                        <DropdownMenuItem key={list.id} onClick={() => onAddToShoppingList(list.id)}>
-                          {list.name}
-                        </DropdownMenuItem>
-                      );
-                    })}
+                    <LoadingGroup variant="spinner" isLoading={isLoadingShoppingLists}>
+                      {(shoppingLists?.data || []).map((list) => {
+                        return (
+                          <DropdownMenuItem key={list.id} onClick={() => onAddToShoppingList(list.id)}>
+                            {list.name}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </LoadingGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
             </DropdownMenuContent>
           </Shelf>
         </CardHeader>
-        <CardContent className="grow hover:cursor-pointer">
+        <CardContent className="grow hover:cursor-pointer" onClick={onView}>
           <p className="max-h-32 overflow-hidden line-clamp-3">{recipe.description}</p>
         </CardContent>
         <CardFooter>

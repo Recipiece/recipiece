@@ -34,6 +34,7 @@ export const LoginPage: FC = () => {
 
   useEffect(() => {
     queryClient.clear();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { mutateAsync: loginUser } = useLoginUserMutation();
@@ -57,7 +58,7 @@ export const LoginPage: FC = () => {
         });
       }
     }
-  }, [setAccessToken, setRefreshToken]);
+  }, [setAccessToken, setRefreshToken, navigate, loginUser, toast]);
 
   return (
     <Form {...form}>

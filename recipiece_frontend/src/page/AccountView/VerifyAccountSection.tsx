@@ -70,7 +70,7 @@ export const VerifyAccountSection: FC = () => {
   };
 
   return (
-    <LoadingGroup isLoading={isLoadingAccount} className="w-full h-[256px]">
+    <LoadingGroup isLoading={isLoadingAccount} variant="spinner" className="w-8 h-8">
       <h1 className="text-lg">
         Account Status: <Badge variant={account?.validated ? "default" : "secondary"}>{account?.validated ? "Verified" : "Not Verified"}</Badge>
       </h1>
