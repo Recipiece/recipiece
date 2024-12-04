@@ -35,12 +35,12 @@ describe("Import Recipes", () => {
       photo_data: null,
       total_time: "",
       ingredients:
-        "1 pound ground beef\\n" +
-        "½ onion\\n" +
-        "1 bell pepper\\n" +
-        "4 oz green chile\\n" +
-        "2 cloves garlic\\n" +
-        "spices\\n" +
+        "1 pound ground beef\n" +
+        "½ onion\n" +
+        "1 bell pepper\n" +
+        "4 oz green chile\n" +
+        "2 cloves garlic\n" +
+        "spices\n" +
         "4 flour tortillas ",
       name: "Beef Burritos",
     };
@@ -49,21 +49,21 @@ describe("Import Recipes", () => {
       rating: 0,
       notes: "",
       directions:
-        "Heat the oven to 350 degrees. Butter a 13-by-9-inch baking dish. In a medium bowl, combine the flour, 1 cup/200 grams of the brown sugar, oats, pecans and salt. Add the butter, and stir with a fork until the crumbs are evenly moistened.\\n" +
-        "\\n" +
+        "Heat the oven to 350 degrees. Butter a 13-by-9-inch baking dish. In a medium bowl, combine the flour, 1 cup/200 grams of the brown sugar, oats, pecans and salt. Add the butter, and stir with a fork until the crumbs are evenly moistened.\n" +
+        "\n" +
         "Add the apples to the buttered baking dish and toss with the remaining 1/2 cup/100 grams brown sugar, cinnamon and lemon juice. Spread the apples into an even layer. Press the crumb mixture together to create clumps of different sizes, and sprinkle on top of the apples. Transfer to the oven, and bake until the apples are tender and the crumb topping is crisp and deep golden brown, about 50 to 60 minutes. Serve warm or at room temperature.",
       categories: ["Desserts"],
       servings: "8 to 10 servings",
       nutritional_info:
-        "Trans Fat: 0 grams\\n" +
-        "Fat: 23 grams\\n" +
-        "Calories: 504\\n" +
-        "Saturated Fat: 9 grams\\n" +
-        "Unsaturated Fat: 12 grams\\n" +
-        "Sodium: 201 milligrams\\n" +
-        "Sugar: 45 grams\\n" +
-        "Fiber: 7 grams\\n" +
-        "Carbohydrate: 73 grams\\n" +
+        "Trans Fat: 0 grams\n" +
+        "Fat: 23 grams\n" +
+        "Calories: 504\n" +
+        "Saturated Fat: 9 grams\n" +
+        "Unsaturated Fat: 12 grams\n" +
+        "Sodium: 201 milligrams\n" +
+        "Sugar: 45 grams\n" +
+        "Fiber: 7 grams\n" +
+        "Carbohydrate: 73 grams\n" +
         "Protein: 5 grams",
       uid: "986D8E45-173C-438F-B76F-67C10D177576",
       photo_hash: "D8D54535DFED964A477420367674648CC13ABA7A3F83D1E0DAFDB2843C794824",
@@ -83,14 +83,14 @@ describe("Import Recipes", () => {
       photo_data: "big_ol_blob_of_data===",
       total_time: "1 hr 10 min",
       ingredients:
-        "12 tablespoons/170 grams unsalted butter, melted, plus more for buttering the pan\\n" +
-        "1 1/2 cups/180 grams all-purpose flour\\n" +
-        "1 1/2 cup/300 grams packed dark brown sugar, divided\\n" +
-        "1 cup/80 grams old-fashioned rolled oats\\n" +
-        "1 cup/113 grams pecans, chopped\\n" +
-        "1 teaspoon kosher salt\\n" +
-        "3 1/2 pounds mixed apples, such as Granny Smith, Macintosh, and Pink Lady, peeled, cored, and cut into 1/2-inch wedges (about 8 medium apples)\\n" +
-        "1 tablespoon ground cinnamon\\n" +
+        "12 tablespoons/170 grams unsalted butter, melted, plus more for buttering the pan\n" +
+        "1 1/2 cups/180 grams all-purpose flour\n" +
+        "1 1/2 cup/300 grams packed dark brown sugar, divided\n" +
+        "1 cup/80 grams old-fashioned rolled oats\n" +
+        "1 cup/113 grams pecans, chopped\n" +
+        "1 teaspoon kosher salt\n" +
+        "3 1/2 pounds mixed apples, such as Granny Smith, Macintosh, and Pink Lady, peeled, cored, and cut into 1/2-inch wedges (about 8 medium apples)\n" +
+        "1 tablespoon ground cinnamon\n" +
         "2 tablespoons fresh lemon juice",
       name: "Apple Crumble",
     };
@@ -115,8 +115,8 @@ describe("Import Recipes", () => {
         zlib: { level: 9 },
       });
       archive.pipe(output);
-      archive.append(gzipped01, {name: `${rawPaprikaRecipe01.name}.paprikarecipe`});
-      archive.append(gzipped02, {name: `${rawPaprikaRecipe02.name}.paprikarecipe`});
+      archive.append(gzipped01, { name: `${rawPaprikaRecipe01.name}.paprikarecipe` });
+      archive.append(gzipped02, { name: `${rawPaprikaRecipe02.name}.paprikarecipe` });
       await archive.finalize();
     });
 
@@ -144,15 +144,13 @@ describe("Import Recipes", () => {
     });
 
     it("should do nothing if a job is not present", (done) => {
-      const worker = generateRecipeImportWorker();
+      const worker = generateRecipeImportWorker("nonsense");
       worker.on("message", (value) => {
         expect(value).toBe("done");
         done();
       });
 
-      worker.postMessage({
-        background_job_id: "nonsense",
-      });
+      worker.postMessage({});
     });
 
     it("should parse the recipes", async () => {
@@ -170,6 +168,7 @@ describe("Import Recipes", () => {
           args: {
             file_name: path.resolve(__dirname, `${RecipeImportFiles.TMP_DIR}/${user.id}/test_data.paprikarecipes`),
             user_id: user.id,
+            source: "paprika",
           },
         },
       });
@@ -193,6 +192,15 @@ describe("Import Recipes", () => {
       expect(secondCreatedRecipe).toBeTruthy();
       expect(secondCreatedRecipe!.user_id).toBe(user.id);
       expect(secondCreatedRecipe!.description).toBe(rawPaprikaRecipe02.description);
+
+      const alteredJob = await testPrisma.backgroundJob.findFirst({
+        where: {
+          id: job.id,
+        },
+      });
+      expect(alteredJob).toBeTruthy();
+      expect(alteredJob!.finished_at).toBeTruthy();
+      expect(alteredJob!.result).toBe("success");
     });
   });
 });

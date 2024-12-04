@@ -9,6 +9,7 @@ import { prisma } from "../database";
 import { RecipeIngredientSchema } from "../schema";
 import { RecipeImportFiles } from "../util/constant";
 import { replaceUnicodeFractions } from "../util/fraction";
+import { sendFinishedImportJobFailedEmail, sendFinishedImportJobSuccessEmail } from "../util/email";
 
 const paprikaImporter = async (fileName: string, userId: number) => {
   const tmpSeed = DateTime.utc().toISO();
@@ -138,8 +139,6 @@ const paprikaImporter = async (fileName: string, userId: number) => {
 
   //create the recipes
   await Promise.all(recipeCreateDataPromises);
-
-  // TODO -- email the user
 };
 
 const IMPORTER_MAP: { [key: string]: (fileName: string, userId: number) => Promise<void> } = {
@@ -147,13 +146,16 @@ const IMPORTER_MAP: { [key: string]: (fileName: string, userId: number) => Promi
 };
 
 export const runner = async (backgroundJobId: string) => {
-  // pull the first job we find
+  // pull the first job we find along with the user
   const job = await prisma.backgroundJob.findFirstOrThrow({
     where: {
       id: backgroundJobId,
       finished_at: null,
       purpose: RecipeImportFiles.IMPORT_TOPIC,
     },
+    include: {
+      user: true,
+    }
   });
 
   const innerRunner = async () => {
@@ -188,11 +190,16 @@ export const runner = async (backgroundJobId: string) => {
     },
   });
 
+  if(result === "success") {
+    await sendFinishedImportJobSuccessEmail(job.user, backgroundJobId);
+  } else {
+    await sendFinishedImportJobFailedEmail(job.user, backgroundJobId);
+  }
+
   console.log(`finished job id ${backgroundJobId} at ${now.toISO()} with status ${result}`);
 };
 
 if (!isMainThread) {
-  console.log("WORKER DATA", workerData);
   runner(workerData.background_job_id)
     .catch((err) => {
       console.error(err);

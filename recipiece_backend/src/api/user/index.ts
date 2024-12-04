@@ -93,7 +93,6 @@ export const LOGIN_ROUTES: Route[] = [
     method: "POST",
     function: requestImportRecipes,
     authentication: "access_token",
-    // requestSchema: YRequestImportRecipesRequestSchema,
     preMiddleware: [recipeImportUploader.single("file")],
     version: Versions.ALL,
   },
