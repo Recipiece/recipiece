@@ -19,4 +19,4 @@ def root(request: ParseRecipeRequest) -> ParseRecipeResponse:
 
 @app.post("/ingredients/parse")
 def parse_freetext_ingredient(request: ParseIngredientsRequest) -> ParseIngredientsResponse:
-    return parse_freetext_ingredients(request.ingredients)
+    return {"ingredients": parse_freetext_ingredients(request.ingredients)}

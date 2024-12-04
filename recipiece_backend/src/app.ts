@@ -24,6 +24,7 @@ const app = new WebSocketExpress();
 
 app.use(cors({}));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan(":method :url :status - :response-time ms"));
 
 if (process.env.APP_ENVIRONMENT === "dev") {

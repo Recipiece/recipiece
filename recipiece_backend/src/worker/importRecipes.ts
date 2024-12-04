@@ -1,13 +1,16 @@
+import { RecipeIngredient } from "@prisma/client";
 import { createReadStream, mkdirSync, readdirSync, readFileSync, rmSync } from "fs";
+import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
+import unzipper from "unzipper";
 import { isMainThread, parentPort, workerData } from "worker_threads";
 import { gunzipSync } from "zlib";
 import { prisma } from "../database";
 import { RecipeIngredientSchema } from "../schema";
 import { RecipeImportFiles } from "../util/constant";
-import unzipper from "unzipper";
+import { replaceUnicodeFractions } from "../util/fraction";
 
-const paprikaImporter = async (jobId: string, fileName: string, userId: number) => {
+const paprikaImporter = async (fileName: string, userId: number) => {
   const tmpSeed = DateTime.utc().toISO();
   mkdirSync(`${RecipeImportFiles.TMP_DIR}/${userId}/${tmpSeed}`);
   // .paprikarecipes files are zipped, so unzip the archive
@@ -47,8 +50,9 @@ const paprikaImporter = async (jobId: string, fileName: string, userId: number) 
     .map(async (item) => {
       // the ingredients come over with a newline present in them :/
       // we'll also have to run them through the NLP over in the recipe importer to parse them out
+      // oh and also strip out any of those annoying vulgar fractions
       const splitIngredients = (<string>item.ingredients || "")
-        .split("\\n")
+        .split("\n")
         .map((ing) => ing.trim())
         .filter((ing) => !!ing);
 
@@ -63,13 +67,33 @@ const paprikaImporter = async (jobId: string, fileName: string, userId: number) 
         },
       });
 
-      const parsedIngredients = (await response.json()) as { readonly ingredients: RecipeIngredientSchema[] };
+      let parsedIngredients: Partial<RecipeIngredientSchema>[];
+      if (response.status !== StatusCodes.OK) {
+        console.warn("could not parse ingredients at all! someone should check the recipe importer.");
+        parsedIngredients = splitIngredients.map((ing) => {
+          return {
+            name: ing,
+          }
+        });
+      } else {
+        parsedIngredients = ((await response.json()) as { readonly ingredients: RecipeIngredient[] }).ingredients;
+      }
+      parsedIngredients = parsedIngredients.map((ing, idx) => {
+        return {
+          ...ing,
+          name: replaceUnicodeFractions(ing.name!),
+          order: idx,
+        };
+      });
 
       // the steps also have the same problem of being newlined
-      const splitSteps: string[] = (item.directions || "").split("\\n");
-      const steps = splitSteps.map((rawStep, idx) => {
+      const splitSteps: string[] = (item.directions || "").split("\n");
+      const steps = splitSteps
+        .map((rawStep) => rawStep.trim())
+        .filter((rawStep) => !!rawStep)
+        .map((rawStep, idx) => {
         return {
-          content: rawStep,
+          content: replaceUnicodeFractions(rawStep),
           order: idx,
         };
       });
@@ -91,7 +115,7 @@ const paprikaImporter = async (jobId: string, fileName: string, userId: number) 
         data: {
           user_id: userId,
           name: item.name ?? `Paprika Import ${DateTime.utc().toISO()}`,
-          description: item.description ?? "",
+          description: (item.description ?? "").trim(),
           created_at: createdAt.toJSDate(),
           steps: {
             createMany: {
@@ -100,7 +124,7 @@ const paprikaImporter = async (jobId: string, fileName: string, userId: number) 
           },
           ingredients: {
             createMany: {
-              data: [...parsedIngredients.ingredients],
+              data: [...(parsedIngredients as RecipeIngredient[])],
             },
           },
           metadata: {
@@ -115,22 +139,11 @@ const paprikaImporter = async (jobId: string, fileName: string, userId: number) 
   //create the recipes
   await Promise.all(recipeCreateDataPromises);
 
-  // clear the files out
-
-  // update the job
-  await prisma.backgroundJob.update({
-    where: {
-      id: jobId,
-    },
-    data: {
-      finished_at: DateTime.utc().toJSDate(),
-      result: "succeeded",
-    },
-  });
+  // TODO -- email the user
 };
 
-const importerMap: { [key: string]: any } = {
-  paprikarecipes: paprikaImporter,
+const IMPORTER_MAP: { [key: string]: (fileName: string, userId: number) => Promise<void> } = {
+  paprika: paprikaImporter,
 };
 
 export const runner = async (backgroundJobId: string) => {
@@ -143,33 +156,43 @@ export const runner = async (backgroundJobId: string) => {
     },
   });
 
-  const { file_name, user_id } = job.args as { readonly file_name: string; readonly user_id: number };
-  const fileSplit = file_name.split(".");
-  const extension = fileSplit[fileSplit.length - 1];
-  const importer = importerMap[extension];
+  const innerRunner = async () => {
+    try {
+      const { file_name, user_id, source } = job.args as { readonly file_name: string; readonly user_id: number, readonly source: string };
+      const importer = IMPORTER_MAP[source];
 
-  if (importer) {
-    await importer(backgroundJobId, file_name, user_id);
-  } else {
-    console.warn(`unknown file extension ${extension}, refusing to parse file, and removing it.`);
+      if (importer) {
+        await importer(file_name, user_id);
+        return "success";
+      } else {
+        console.warn(`unknown file source ${source}, refusing to parse file, and removing it.`);
+        rmSync(file_name);
+        return "failure";
+      }
+    } catch (err) {
+      console.error(err);
+      return "failure";
+    }
+  };
 
-    // delete the file
-    rmSync(file_name);
+  const result = (await innerRunner()) ?? "failed";
 
-    // update the job
-    await prisma.backgroundJob.update({
-      where: {
-        id: backgroundJobId,
-      },
-      data: {
-        finished_at: DateTime.utc().toJSDate(),
-        result: "failed",
-      },
-    });
-  }
+  const now = DateTime.utc();
+  await prisma.backgroundJob.update({
+    where: {
+      id: backgroundJobId,
+    },
+    data: {
+      finished_at: now.toJSDate(),
+      result: result,
+    },
+  });
+
+  console.log(`finished job id ${backgroundJobId} at ${now.toISO()} with status ${result}`);
 };
 
 if (!isMainThread) {
+  console.log("WORKER DATA", workerData);
   runner(workerData.background_job_id)
     .catch((err) => {
       console.error(err);

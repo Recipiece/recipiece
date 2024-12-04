@@ -34,8 +34,9 @@ export const requestImportRecipes = async (
   }
 
   const workerData = {
-    file_name: `${RecipeImportFiles.TMP_DIR}/${user.id}/${request.file?.filename}`,
+    file_name: request.file!.path,
     user_id: user.id,
+    source: request.body.source,
   };
 
   const backgroundJob = await prisma.backgroundJob.create({
@@ -46,10 +47,8 @@ export const requestImportRecipes = async (
     },
   });
 
-  const recipeImportWorker = generateRecipeImportWorker();
-  recipeImportWorker.postMessage({
-    background_job_id: backgroundJob.id,
-  });
+  const recipeImportWorker = generateRecipeImportWorker(backgroundJob.id);
+  recipeImportWorker.postMessage({});
 
   return [StatusCodes.OK, {}];
 };

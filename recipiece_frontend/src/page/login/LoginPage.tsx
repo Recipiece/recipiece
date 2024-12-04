@@ -1,13 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { FC, useCallback, useContext, useEffect } from "react";
+import { FC, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useLoginUserMutation } from "../../api";
+import { TokenResolver } from "../../api/Request";
 import { Button, Form, FormCheckbox, FormInput, Stack, SubmitButton, useToast } from "../../component";
-import { AuthContext } from "../../context";
 
 const LoginFormSchema = z.object({
   username: z.string().email("Enter your email address."),
@@ -18,7 +18,6 @@ const LoginFormSchema = z.object({
 type LoginForm = z.infer<typeof LoginFormSchema>;
 
 export const LoginPage: FC = () => {
-  const { setAccessToken, setRefreshToken } = useContext(AuthContext);
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -34,31 +33,35 @@ export const LoginPage: FC = () => {
 
   useEffect(() => {
     queryClient.clear();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { mutateAsync: loginUser } = useLoginUserMutation();
 
-  const onSubmit = useCallback(async (formData: LoginForm) => {
-    try {
-      const response = await loginUser({
-        username: formData.username,
-        password: formData.password,
-      });
-      setAccessToken(response.data.access_token);
-      if (formData.remember) {
-        setRefreshToken(response.data.refresh_token);
-      }
-      navigate("/dashboard");
-    } catch (error) {
-      if ((error as AxiosError)?.status === 404) {
-        toast({
-          description: "Incorrect username or password",
-          variant: "destructive",
+  const onSubmit = useCallback(
+    async (formData: LoginForm) => {
+      try {
+        const response = await loginUser({
+          username: formData.username,
+          password: formData.password,
         });
+        const tokenResolver = TokenResolver.getInstance();
+        tokenResolver.accessToken = response.data.access_token;
+        if (formData.remember) {
+          tokenResolver.refreshToken = response.data.refresh_token;
+        }
+        navigate("/dashboard");
+      } catch (error) {
+        if ((error as AxiosError)?.status === 404) {
+          toast({
+            description: "Incorrect username or password",
+            variant: "destructive",
+          });
+        }
       }
-    }
-  }, [setAccessToken, setRefreshToken, navigate, loginUser, toast]);
+    },
+    [navigate, loginUser, toast]
+  );
 
   return (
     <Form {...form}>

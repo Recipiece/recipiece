@@ -24,6 +24,10 @@ const generateWorker = (file: string, wkOpts?: WorkerOptions) => {
   }
 };
 
-export const generateRecipeImportWorker = () => {
-  return generateWorker(path.resolve(__dirname, "./importRecipes.ts"));
+export const generateRecipeImportWorker = (jobId: string) => {
+  return generateWorker(path.resolve(__dirname, "./importRecipes.ts"), {
+    workerData: {
+      background_job_id: jobId,
+    }
+  });
 };

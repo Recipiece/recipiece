@@ -14,23 +14,40 @@ logger.setLevel(logging.INFO)
 def parse_freetext_ingredients(ingredients: List[str]) -> List[ParsedIngredient]:
     parsed_ingredients = []
     for ingredient in ingredients:
-        parsed_ingredient = parse_ingredient(ingredient)
+        try:
+            parsed_ingredient = parse_ingredient(ingredient) 
 
-        ing_name = parsed_ingredient.name.text
-        if parsed_ingredient.preparation and parsed_ingredient.preparation.text:
-            ing_name += f", {parsed_ingredient.preparation.text}"
+            if parsed_ingredient and parsed_ingredient.name:
+                ing_name = parsed_ingredient.name.text
+                if parsed_ingredient.preparation and parsed_ingredient.preparation.text:
+                    ing_name += f", {parsed_ingredient.preparation.text}"
 
-        ing_amount = None
-        ing_unit = None
-        if parsed_ingredient.amount:
-            ing_amount = str(parsed_ingredient.amount[0].quantity)
-            ing_unit = str(parsed_ingredient.amount[0].unit)
+                ing_amount = None
+                ing_unit = None
+                if parsed_ingredient.amount:
+                    ing_amount = str(parsed_ingredient.amount[0].quantity)
+                    ing_unit = str(parsed_ingredient.amount[0].unit)
 
-        parsed_ingredients.append({
-            "name": ing_name,
-            "amount": ing_amount,
-            "unit": ing_unit,
-        })
+                parsed_ingredients.append({
+                    "name": ing_name,
+                    "amount": ing_amount,
+                    "unit": ing_unit,
+                })
+            else:
+                logger.warning(f"unable to parse ingredient {ingredient}, blindly setting the name field :(")
+                parsed_ingredients.append({
+                    "name": ingredient,
+                    "amount": None,
+                    "unit": None,
+                })
+        except Exception as ex:
+            logger.exception(ex)
+            logger.warning(f"unable to parse ingredient {ingredient}, blindly setting the name field :(")
+            parsed_ingredients.append({
+                "name": ingredient,
+                "amount": None,
+                "unit": None,
+            })
 
     return parsed_ingredients
 

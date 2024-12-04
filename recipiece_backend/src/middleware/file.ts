@@ -22,7 +22,8 @@ const tmpRecipeImportStorage = multer.diskStorage({
   },
   filename: (req: Request, file: Express.Multer.File, cb) => {
     const seed = DateTime.utc().toMillis();
-    cb(null, `${file.originalname}_${seed}.${file.mimetype}`);
+    const fileName = `${seed}_${file.originalname}`;
+    cb(null, fileName);
   },
 });
 
