@@ -1,9 +1,11 @@
+import { recipeImportUploader } from "../../middleware";
 import {
   YCreateUserRequestSchema,
   YCreateUserResponseSchema,
   YIssueForgotPasswordTokenRequestSchema,
   YLoginResponseSchema,
   YRefreshTokenResponseSchema,
+  YRequestImportRecipesRequestSchema,
   YResetPasswordRequestSchema,
   YUserSchema,
   YValidateUserRequestSchema,
@@ -18,6 +20,7 @@ import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
 import { refreshToken } from "./refreshToken";
+import { requestImportRecipes } from "./requestImportRecipes";
 import { resetPassword } from "./resetPassword";
 import { validateUser } from "./validateUser";
 
@@ -83,6 +86,14 @@ export const LOGIN_ROUTES: Route[] = [
     function: refreshToken,
     authentication: "refresh_token",
     responseSchema: YRefreshTokenResponseSchema,
+    version: Versions.ALL,
+  },
+  {
+    path: "/user/import-recipes",
+    method: "POST",
+    function: requestImportRecipes,
+    authentication: "access_token",
+    preMiddleware: [recipeImportUploader.single("file")],
     version: Versions.ALL,
   },
 ];

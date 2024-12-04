@@ -1,12 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MutationArgs, QueryArgs, useGet, usePost } from "./Request";
-import { useContext } from "react";
-import { AuthContext } from "../context";
 import { UserAccount } from "../data";
+import { MutationArgs, QueryArgs, TokenResolver, useGet, usePost } from "./Request";
 
 export const useGetSelfQuery = (args?: QueryArgs) => {
   const { getter } = useGet();
-  const { accessToken: authToken } = useContext(AuthContext);
 
   const query = async (): Promise<UserAccount> => {
     const data = await getter({
@@ -18,7 +15,7 @@ export const useGetSelfQuery = (args?: QueryArgs) => {
 
   return useQuery({
     queryFn: query,
-    queryKey: ["user", authToken],
+    queryKey: ["currentUser"],
     refetchInterval: false,
     refetchOnMount: false,
     refetchOnReconnect: true,
@@ -55,7 +52,7 @@ export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token
 
 export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
-  const { setAccessToken, setRefreshToken } = useContext(AuthContext);
+  const tokenResolver = TokenResolver.getInstance();
 
   const mutation = async () => {
     return await poster<never, never>({
@@ -68,13 +65,11 @@ export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: () => {
-      setAccessToken(undefined);
-      setRefreshToken(undefined);
+      tokenResolver.clear();
       args?.onSuccess?.();
     },
     onError: (err) => {
-      setAccessToken(undefined);
-      setRefreshToken(undefined);
+      tokenResolver.clear();
       args?.onFailure?.(err);
     },
   });
@@ -104,7 +99,6 @@ export const useCreateUserMutation = (args?: MutationArgs<void>) => {
 export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
-  const { accessToken: authToken } = useContext(AuthContext);
 
   const mutation = async (args: { readonly token: string }) => {
     return await poster<typeof args, never>({
@@ -118,7 +112,7 @@ export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
     mutationFn: mutation,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["user", authToken],
+        queryKey: ["currentUser"],
       });
       args?.onSuccess?.();
     },
@@ -174,10 +168,39 @@ export const useRequestForgotPasswordMutation = (args?: MutationArgs<void>) => {
 export const useResetPasswordMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
 
-  const mutation = async (body: { readonly token: string, readonly password: string }) => {
+  const mutation = async (body: { readonly token: string; readonly password: string }) => {
     return await poster<typeof body, never>({
       path: "/user/reset-password",
       body: { ...body },
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};
+
+export const useRequestRecipeImport = (args?: MutationArgs<void>) => {
+  const { poster } = usePost();
+
+  const mutation = async (body: { readonly file: File, readonly source: string }) => {
+    const formData = new FormData();
+    formData.append("file", body.file);
+    formData.append("source", body.source);
+
+    return await poster<FormData, never>({
+      path: "/user/import-recipes",
+      body: formData,
+      withAuth: "access_token",
+      extraHeaders: {
+        "Content-Type": "multipart/form-data",
+      }
     });
   };
 

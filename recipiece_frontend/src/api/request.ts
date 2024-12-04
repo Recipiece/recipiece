@@ -1,9 +1,8 @@
 import axios, { AxiosError, AxiosHeaders, AxiosResponse } from "axios";
 import { jwtDecode } from "jwt-decode";
 import { DateTime } from "luxon";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context";
 import { RefreshTokenResponse } from "../data";
 import { StorageKeys } from "../util";
 
@@ -33,6 +32,7 @@ export interface PostRequest<T> {
   readonly path: string;
   readonly body?: T;
   readonly withAuth?: "access_token" | "refresh_token";
+  readonly extraHeaders?: { readonly [key: string]: string };
 }
 
 export interface PutRequest<T> {
@@ -57,11 +57,27 @@ export interface GetRequest<T> {
  * This class intentionally sits outside of the state/render system.
  * We want to lazily make a refresh token call when the access token is about to expire,
  * BUT we don't want to send that call a bunch of times, we only want it once when needed.
- * 
+ *
  * I also wrote this at 2330 on a weeknight over a holiday so probably a little janky but it works
  */
-class TokenResolver {
+export class TokenResolver {
   public static instance: TokenResolver;
+
+  public set accessToken(newVal: string | undefined | null) {
+    if (newVal) {
+      sessionStorage.setItem(StorageKeys.ACCESS_TOKEN, JSON.stringify(newVal));
+    } else {
+      sessionStorage.removeItem(StorageKeys.ACCESS_TOKEN);
+    }
+  }
+
+  public set refreshToken(newVal: string | undefined | null) {
+    if (newVal) {
+      localStorage.setItem(StorageKeys.REFRESH_TOKEN, JSON.stringify(newVal));
+    } else {
+      localStorage.removeItem(StorageKeys.REFRESH_TOKEN);
+    }
+  }
 
   public get accessToken(): string | undefined {
     const item = sessionStorage.getItem(StorageKeys.ACCESS_TOKEN);
@@ -77,6 +93,11 @@ class TokenResolver {
       return JSON.parse(item);
     }
     return undefined;
+  }
+
+  public clear() {
+    this.accessToken = null;
+    this.refreshToken = null;
   }
 
   public static getInstance(): TokenResolver {
@@ -113,7 +134,7 @@ class TokenResolver {
     }
   }
 
-  public async resolveTokens(): Promise<{readonly refresh_token?: string, readonly access_token?: string}> {
+  public async resolveTokens(): Promise<{ readonly refresh_token?: string; readonly access_token?: string }> {
     if (this.accessToken) {
       const decodedAccessToken = jwtDecode(this.accessToken);
       if (decodedAccessToken.exp) {
@@ -158,7 +179,6 @@ class TokenResolver {
 }
 
 export const usePut = (args?: HookArgs) => {
-  const { setAccessToken, setRefreshToken } = useContext(AuthContext);
   const tokenResolver = TokenResolver.getInstance();
   const navigate = useNavigate();
 
@@ -184,8 +204,7 @@ export const usePut = (args?: HookArgs) => {
       });
 
       if (autoLogoutStatusCodes.includes(response.status)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
         return Promise.reject();
       } else {
@@ -195,8 +214,7 @@ export const usePut = (args?: HookArgs) => {
       const statusCode = (error as AxiosError)?.status;
 
       if (statusCode && autoLogoutStatusCodes.includes(statusCode)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
       }
 
@@ -208,7 +226,6 @@ export const usePut = (args?: HookArgs) => {
 };
 
 export const usePost = (args?: HookArgs) => {
-  const { setAccessToken, setRefreshToken } = useContext(AuthContext);
   const tokenResolver = TokenResolver.getInstance();
   const navigate = useNavigate();
 
@@ -228,14 +245,19 @@ export const usePost = (args?: HookArgs) => {
       headers.set("Authorization", `Bearer ${tokens.access_token}`);
     }
 
+    if (postRequest.extraHeaders) {
+      Object.keys(postRequest.extraHeaders).forEach((key) => {
+        headers.set(key, postRequest.extraHeaders![key]);
+      });
+    }
+
     try {
       const response = await axios.post(`${getUrl()}${postRequest.path}`, postRequest.body, {
         headers: headers,
       });
 
       if (autoLogoutStatusCodes.includes(response.status)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
         return Promise.reject();
       } else {
@@ -245,8 +267,7 @@ export const usePost = (args?: HookArgs) => {
       const statusCode = (error as AxiosError)?.status;
 
       if (statusCode && autoLogoutStatusCodes.includes(statusCode)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
       }
 
@@ -258,7 +279,6 @@ export const usePost = (args?: HookArgs) => {
 };
 
 export const useGet = (args?: HookArgs) => {
-  const { setAccessToken, setRefreshToken } = useContext(AuthContext);
   const tokenResolver = TokenResolver.getInstance();
   const navigate = useNavigate();
 
@@ -290,8 +310,7 @@ export const useGet = (args?: HookArgs) => {
         headers: headers,
       });
       if (autoLogoutStatusCodes.includes(response.status)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
         return Promise.reject();
       } else {
@@ -301,8 +320,7 @@ export const useGet = (args?: HookArgs) => {
       const statusCode = (error as AxiosError)?.status;
 
       if (statusCode && autoLogoutStatusCodes.includes(statusCode)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
       }
 
@@ -314,7 +332,6 @@ export const useGet = (args?: HookArgs) => {
 };
 
 export const useDelete = (args?: HookArgs) => {
-  const { setAccessToken, setRefreshToken } = useContext(AuthContext);
   const tokenResolver = TokenResolver.getInstance();
   const navigate = useNavigate();
 
@@ -340,8 +357,7 @@ export const useDelete = (args?: HookArgs) => {
       });
 
       if (autoLogoutStatusCodes.includes(response.status)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
         return Promise.reject();
       } else {
@@ -351,8 +367,7 @@ export const useDelete = (args?: HookArgs) => {
       const statusCode = (error as AxiosError)?.status;
 
       if (statusCode && autoLogoutStatusCodes.includes(statusCode)) {
-        setAccessToken(undefined);
-        setRefreshToken(undefined);
+        tokenResolver.clear();
         navigate("/login");
       }
 

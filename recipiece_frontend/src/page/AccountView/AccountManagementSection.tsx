@@ -1,18 +1,46 @@
-import { LogOut } from "lucide-react";
-import { FC, useCallback } from "react";
+import { Download, LogOut } from "lucide-react";
+import { FC, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetSelfQuery, useLogoutUserMutation } from "../../api";
-import { Button, Card, CardContent, CardFooter, CardHeader, Grid, GridHalfRow, Stack } from "../../component";
+import { useGetSelfQuery, useLogoutUserMutation, useRequestRecipeImport } from "../../api";
+import { Button, Card, CardContent, CardFooter, CardHeader, Grid, GridHalfRow, Stack, Tooltip, TooltipContent, TooltipTrigger, useToast } from "../../component";
+import { DialogContext } from "../../context";
+import { ImportRecipesForm } from "../../dialog";
 
 export const AccountManagementSection: FC = () => {
-  const { isLoading: isLoadingAccount } = useGetSelfQuery();
+  const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();
   const { mutateAsync: logout, isPending: isLoggingOut } = useLogoutUserMutation();
+  const { mutateAsync: importRecipes } = useRequestRecipeImport();
+  const { toast } = useToast();
   const navigate = useNavigate();
+
+  const { pushDialog, popDialog } = useContext(DialogContext);
 
   const onLogout = useCallback(async () => {
     await logout();
     navigate("/login");
   }, [logout, navigate]);
+
+  const onImportRecipes = useCallback(() => {
+    pushDialog("importRecipes", {
+      onClose: () => popDialog("importRecipes"),
+      onSubmit: async (formData: ImportRecipesForm) => {
+        try {
+          await importRecipes({
+            file: formData.file[0],
+            source: formData.source,
+          });
+        } catch {
+          toast({
+            title: "Cannot Import Recipes",
+            description: "There was an error importing your recipes. Try again later.",
+            variant: "destructive",
+          });
+        } finally {
+          popDialog("importRecipes");
+        }
+      },
+    });
+  }, [pushDialog, popDialog, importRecipes, toast]);
 
   return (
     <Stack>
@@ -32,7 +60,7 @@ export const AccountManagementSection: FC = () => {
           </Card>
         </GridHalfRow>
 
-        {/* <GridHalfRow>
+        <GridHalfRow>
           <Card className="h-full flex flex-col">
             <CardHeader>Import Data</CardHeader>
             <CardContent className="grow">
@@ -44,7 +72,7 @@ export const AccountManagementSection: FC = () => {
             <CardFooter>
               <Tooltip>
                 <TooltipTrigger className="flex flex-row grow" asChild>
-                  <Button disabled={!account?.validated || isLoadingAccount} className="grow">
+                  <Button disabled={!account?.validated || isLoadingAccount} className="grow" onClick={onImportRecipes}>
                     Import Data <Download className="ml-2" />
                   </Button>
                 </TooltipTrigger>
@@ -52,7 +80,7 @@ export const AccountManagementSection: FC = () => {
               </Tooltip>
             </CardFooter>
           </Card>
-        </GridHalfRow> */}
+        </GridHalfRow>
 
         {/* <GridHalfRow>
           <Card className="h-full flex flex-col">

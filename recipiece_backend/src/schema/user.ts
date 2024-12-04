@@ -1,4 +1,5 @@
-import { boolean, date, InferType, number, object, string } from "yup";
+import { boolean, date, InferType, mixed, number, object, string } from "yup";
+import { RecipeImportFiles } from "../util/constant";
 
 export const YUserSchema = object({
   email: string().required(),
@@ -98,3 +99,23 @@ export const YRefreshTokenResponseSchema = object({
 }).strict().noUnknown();
 
 export interface RefreshTokenResponseSchema extends InferType<typeof YRefreshTokenResponseSchema> {}
+
+/**
+ * Request Import Recipes
+ */
+export const YRequestImportRecipesRequestSchema = object({
+  source: string().oneOf(["paprika"], "The file format is not one of the known file formats").required(),
+  file: mixed()
+    .test("fileSize", "The provided file is too large", (value) => {
+      // @ts-ignore
+      return value[0].size <= RecipeImportFiles.MAX_SIZE;
+    })
+    .test("fileType", "The provided file is not an acceptable format", (value) => {
+      RecipeImportFiles.SUPPORTED_EXTENSIONS.includes(value as string);
+    })
+    .required(),
+})
+  .strict()
+  .noUnknown();
+
+  export interface RequestImportRecipesRequestSchema extends InferType<typeof YRequestImportRecipesRequestSchema> {}

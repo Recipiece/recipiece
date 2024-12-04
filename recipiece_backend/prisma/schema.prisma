@@ -26,6 +26,7 @@ model User {
   credentials UserCredentials?
   user_access_records UserAccessRecord[]
   user_sessions UserSession[]
+  background_jobs BackgroundJob[]
 }
 
 model UserAccessRecord {
@@ -82,6 +83,7 @@ model Recipe {
   name String
   description String?
   private Boolean @default(false)
+  metadata Json?
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
@@ -90,7 +92,7 @@ model Recipe {
   steps RecipeStep[]
   recipe_cookbook_attachments RecipeCookbookAttachment[]
 
-  @@unique([user_id, name])
+  @@index([user_id, name])
 }
 
 model RecipeIngredient {
@@ -187,4 +189,18 @@ model KnownIngredient {
   // for unknown
   unitless_amount Float?
   preferred_measure String?
+}
+
+model BackgroundJob {
+  @@map("background_jobs")
+
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  finished_at DateTime?
+  result String @default("pending")
+  purpose String
+  args Json?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
 }

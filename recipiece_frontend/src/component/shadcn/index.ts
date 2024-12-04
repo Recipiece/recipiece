@@ -21,3 +21,4 @@ export * from "./Skeleton";
 export * from "./Textarea";
 export * from "./Toast";
 export * from "./Tooltip";
+export * from "./Select";

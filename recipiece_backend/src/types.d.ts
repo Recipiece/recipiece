@@ -1,5 +1,5 @@
 import { User, UserSession } from "@prisma/client";
-import { Request, Response, ParamsDictionary } from "express";
+import { Request, Response, ParamsDictionary, NextFunction } from "express";
 import { WSRequest, WSRequestHandler } from "websocket-express";
 import { ObjectSchema } from "yup";
 
@@ -40,6 +40,8 @@ export interface Route {
   readonly function: ApiMethod;
   readonly path: string;
   readonly authentication: "access_token" | "basic" | "none" | "refresh_token";
+  readonly preMiddleware?: any[];
+  readonly postMiddleware?: any[];
   readonly requestSchema?: ObjectSchema;
   readonly responseSchema?: ObjectSchema;
   readonly version: string;

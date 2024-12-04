@@ -24,6 +24,7 @@ const app = new WebSocketExpress();
 
 app.use(cors({}));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan(":method :url :status - :response-time ms"));
 
 if (process.env.APP_ENVIRONMENT === "dev") {
@@ -72,11 +73,21 @@ ROUTES.forEach((route) => {
     }
   }
 
+  if(route.preMiddleware) {
+    console.log(`  installing extra pre-middleware for ${route.path}`);
+    routeHandlers.push(...route.preMiddleware);
+  }
+
   routeHandlers.push(async (req: Request, res: Response) => {
     // @ts-ignore
     const [statusCode, responseBody] = await route.function(req);
     res.status(statusCode).send(responseBody);
   });
+
+  if(route.postMiddleware) {
+    console.log(`  installing extra post-middleware for ${route.path}`);
+    routeHandlers.push(...route.postMiddleware);
+  }
 
   if (route.responseSchema) {
     routeHandlers.push(validateResponseSchema(route.responseSchema));
