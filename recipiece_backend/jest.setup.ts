@@ -16,6 +16,7 @@ import app from "./src/app";
 import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
+import { enableFetchMocks } from "jest-fetch-mock";
 
 declare global {
   var testPrisma: typeof jestPrisma.client;
@@ -68,14 +69,14 @@ globalThis.fixtures = {
         scope: UserSessions.REFRESH_TOKEN_SCOPE,
       },
     });
-  
+
     const accessTokenPayload = {
       session: session.id,
       id: randomUUID().toString(),
       user: user.id,
       scope: UserSessions.ACCESS_TOKEN_SCOPE,
     };
-  
+
     const refreshTokenPayload = {
       session: session.id,
       id: session.id,
@@ -102,6 +103,11 @@ jest.mock("./src/database/prisma", () => {
 // just in case there's any extra users hanging around.
 beforeEach(async () => {
   await jestPrisma.client.user.deleteMany();
+});
+
+// enable the fetch mocks
+beforeAll(() => {
+  enableFetchMocks();
 });
 
 // setup the server object before each test, and tear it down after each test

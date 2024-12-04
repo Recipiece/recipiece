@@ -1,4 +1,4 @@
-import { array, boolean, date, InferType, number, object, string, ValidationError } from "yup";
+import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YRecipeIngredientSchema = object({

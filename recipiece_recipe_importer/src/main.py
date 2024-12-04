@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from .model.recipe import ParseRecipeRequest, ParseRecipeResponse
-from .api.recipe import parse_recipe_from_url
+from .model.recipe import ParseRecipeRequest, ParseRecipeResponse, ParseIngredientsRequest, ParseIngredientsResponse
+from .api.recipe import parse_recipe_from_url, parse_freetext_ingredients
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,3 +16,7 @@ def hello_world():
 def root(request: ParseRecipeRequest) -> ParseRecipeResponse:
     url = request.source_url
     return parse_recipe_from_url(url)
+
+@app.post("/ingredients/parse")
+def parse_freetext_ingredient(request: ParseIngredientsRequest) -> ParseIngredientsResponse:
+    return parse_freetext_ingredients(request.ingredients)
