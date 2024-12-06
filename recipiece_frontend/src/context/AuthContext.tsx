@@ -1,7 +1,7 @@
 import { createContext, FC, PropsWithChildren, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { TokenResolver } from "../api/Request";
 import { authenticatedPaths, unauthenticatedPaths } from "../routes";
+import { TokenManager } from "../api";
 
 export const AuthContext = createContext<{}>({});
 
@@ -32,7 +32,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   // );
 
   useEffect(() => {
-    const tokenResolver = TokenResolver.getInstance();
+    const tokenResolver = TokenManager.getInstance();
     const isUnauthenticatedPath = unauthenticatedPaths.includes(location.pathname);
     const isAuthenticatedPath = authenticatedPaths.includes(location.pathname);
     const hasAccessToken = !!tokenResolver.accessToken;

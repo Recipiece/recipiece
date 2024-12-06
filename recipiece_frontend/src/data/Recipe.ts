@@ -23,6 +23,8 @@ export interface Recipe {
   readonly ingredients: RecipeIngredient[];
   readonly steps: RecipeStep[];
   readonly private?: boolean;
+  readonly duration_ms?: number;
+  readonly servings?: number;
 }
 
 export interface ListRecipeFilters {

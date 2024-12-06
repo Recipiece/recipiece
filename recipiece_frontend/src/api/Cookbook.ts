@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cookbook, ListCookbookFilters, Recipe } from "../data";
+import { Cookbook, ListCookbookFilters } from "../data";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "./Request";
 
 export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const recipe = await getter<never, Recipe>({
+    const recipe = await getter<never, Cookbook>({
       path: `/cookbook/${cookbookId}`,
       withAuth: "access_token",
     });

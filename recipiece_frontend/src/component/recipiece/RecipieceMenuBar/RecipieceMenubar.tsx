@@ -1,17 +1,25 @@
-import { FC, useCallback, useContext, useState } from "react";
+import { FC, Fragment, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCreateCookbookMutation, useCreateShoppingListMutation, useListCookbooksQuery, useListShoppingListsQuery, useLogoutUserMutation } from "../../../api";
-import { DialogContext } from "../../../context";
-import { CreateCookbookForm, CreateShoppingListForm } from "../../../dialog";
+import {
+  useCreateCookbookMutation,
+  useCreateShoppingListMutation,
+  useListCookbooksQuery,
+  useListShoppingListsQuery,
+  useLogoutUserMutation
+} from "../../../api";
+import { DialogContext, TimerContext } from "../../../context";
+import { CreateCookbookForm, CreateShoppingListForm, CreateTimerForm } from "../../../dialog";
 import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator, useToast } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { Pager } from "../Pager";
 import { RecipieceHeader } from "../Typography";
+import { TimerMenuItem } from "./TimerMenuItem";
 
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { pushDialog, popDialog } = useContext(DialogContext);
+  const { activeTimers, createTimer } = useContext(TimerContext);
   const [cookbooksPage, setCookbooksPage] = useState(0);
   const [shoppingListsPage, setShoppingListsPage] = useState(0);
 
@@ -92,9 +100,24 @@ export const RecipieceMenubar: FC = () => {
     });
   };
 
+  const onStartCreateTimer = () => {
+    pushDialog("createTimer", {
+      onSubmit: async (timerData: CreateTimerForm) => {
+        const hoursMs = timerData.hours * 60 * 60 * 1000;
+        const minutesMs = timerData.minutes * 60 * 1000;
+        const secondsMs = timerData.seconds * 1000;
+        await createTimer({
+          duration_ms: hoursMs + minutesMs + secondsMs,
+        });
+        popDialog("createTimer");
+      },
+      onClose: () => popDialog("createTimer"),
+    });
+  };
+
   return (
-    <Menubar className="invisible sm:visible rounded-none border-0 p-0 sm:p-4 h-0 sm:h-16 bg-primary text-white">
-      <RecipieceHeader className="text-center w-full md:w-auto md:mr-auto" />
+    <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 bg-white sm:bg-primary text-white">
+      <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white" />
       <span className="hidden w-0 sm:w-auto sm:block">
         <MenubarMenu>
           <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
@@ -147,6 +170,34 @@ export const RecipieceMenubar: FC = () => {
               })}
               {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />}
             </LoadingGroup>
+          </MenubarContent>
+        </MenubarMenu>
+      </span>
+
+      <span className="hidden w-0 sm:w-auto sm:block">
+        <MenubarMenu>
+          <MenubarTrigger>Timers</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem onClick={onStartCreateTimer}>New Timer</MenubarItem>
+            {activeTimers.length > 0 && <Separator />}
+            {activeTimers.map((activeTimer) => {
+              return (
+                <Fragment key={activeTimer.id}>
+                  <TimerMenuItem timer={activeTimer} />
+                </Fragment>
+              );
+            })}
+            {/* <LoadingGroup isLoading={isLoadingShoppingLists} className="w-full h-10">
+              {shoppingLists?.data && <Separator />}
+              {(shoppingLists?.data || []).map((shoppingList) => {
+                return (
+                  <MenubarItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}>
+                    {shoppingList.name}
+                  </MenubarItem>
+                );
+              })}
+              {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />}
+            </LoadingGroup> */}
           </MenubarContent>
         </MenubarMenu>
       </span>

@@ -1,4 +1,6 @@
-import Fraction from 'fraction.js';
+import Fraction from "fraction.js";
+import { Timer } from "../data";
+import { DateTime } from "luxon";
 
 export function isDecimal(value: string) {
   if (isNaN(parseFloat(value))) {
@@ -9,7 +11,7 @@ export function isDecimal(value: string) {
 }
 
 export function formatIngredientAmount(value: string): string {
-  if(isDecimal(value)) {
+  if (isDecimal(value)) {
     // if the value is coming across like 1.5 or 0.75 then lets make it a fractional value
     const decimalValue = parseFloat(value);
     return new Fraction(decimalValue).simplify(0.1).toFraction(true);
@@ -18,3 +20,31 @@ export function formatIngredientAmount(value: string): string {
     return value;
   }
 }
+
+export function millisToHoursMinuteSeconds(ms: number) {
+  // 1- Convert to seconds:
+  let seconds = Math.floor(ms / 1000);
+
+  // 2- Extract hours:
+  let hours = Math.floor(seconds / 3600);
+  seconds = seconds % 3600;
+
+  // 3- Extract minutes:
+  let minutes = Math.floor(seconds / 60);
+  seconds = seconds % 60;
+
+  return [hours, minutes, seconds];
+}
+
+export const calculateRemainingTimerMillis = (timer: Timer): number => {
+  const absoluteDuration = DateTime.fromISO(timer.created_at).toMillis() + timer.duration_ms;
+  return absoluteDuration - DateTime.now().toMillis();
+}
+
+export const getTimerDisplay = (timer: Timer) => {
+  const remainingMs = calculateRemainingTimerMillis(timer);
+  const [hours, minutes, seconds] = millisToHoursMinuteSeconds(remainingMs).map((item) => {
+    return String(item).padStart(2, "0");
+  });
+  return `${hours}:${minutes}:${seconds}`;
+};

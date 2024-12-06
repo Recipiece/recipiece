@@ -1,5 +1,7 @@
+import { AddTimeToTimerDialog } from "./AddTimeToTimer";
 import { CreateCookbookDialog } from "./CreateCookbook";
 import { CreateShoppingListDialog } from "./CreateShoppingList";
+import { CreateTimerDialog } from "./CreateTimer";
 import { DeleteRecipeDialog } from "./DeleteRecipe";
 import { ImportRecipesDialog } from "./ImportRecipes";
 import { MobileCreateMenuDialog } from "./MobileCreateMenu";
@@ -36,4 +38,10 @@ export const Dialogs = {
   importRecipes: {
     component: ImportRecipesDialog,
   },
+  createTimer: {
+    component: CreateTimerDialog,
+  },
+  addTimeToTimer: {
+    component: AddTimeToTimerDialog,
+  }
 };

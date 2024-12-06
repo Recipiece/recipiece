@@ -1,16 +1,17 @@
 import { Book, CirclePlus, CircleUserRound, Home, ShoppingBasket } from "lucide-react";
 import { FC, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { DialogContext } from "../../../context";
-import { CreateCookbookForm, CreateShoppingListForm, MobileCreateMenuDialogOption } from "../../../dialog";
-import { Button, useToast } from "../../shadcn";
-import { Cookbook, ShoppingList } from "../../../data";
 import { useCreateCookbookMutation, useCreateShoppingListMutation } from "../../../api";
+import { DialogContext, TimerContext } from "../../../context";
+import { Cookbook, ShoppingList } from "../../../data";
+import { CreateCookbookForm, CreateShoppingListForm, CreateTimerForm, MobileCreateMenuDialogOption } from "../../../dialog";
+import { Button, useToast } from "../../shadcn";
 
 export const RecipieceFooter: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { pushDialog, popDialog } = useContext(DialogContext);
+  const { createTimer } = useContext(TimerContext);
 
   const { mutateAsync: createCookbook } = useCreateCookbookMutation({
     onSuccess: () => {
@@ -77,10 +78,23 @@ export const RecipieceFooter: FC = () => {
               onClose: () => popDialog("createShoppingList"),
             });
             break;
+          case "timer":
+            pushDialog("createTimer", {
+              onSubmit: async (timerData: CreateTimerForm) => {
+                const hoursMs = timerData.hours * 60 * 60 * 1000;
+                const minutesMs = timerData.minutes * 60 * 1000;
+                const secondsMs = timerData.seconds * 1000;
+                await createTimer({
+                  duration_ms: hoursMs + minutesMs + secondsMs,
+                });
+                popDialog("createTimer");
+              },
+              onClose: () => popDialog("createTimer"),
+            });
         }
       },
     });
-  }, [pushDialog, popDialog, navigate, createCookbook, createShoppingList]);
+  }, [pushDialog, popDialog, navigate, createCookbook, createShoppingList, createTimer]);
 
   const onShoppingListsPressed = useCallback(() => {
     pushDialog("mobileShoppingLists", {

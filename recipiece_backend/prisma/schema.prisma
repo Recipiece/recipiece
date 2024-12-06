@@ -27,6 +27,9 @@ model User {
   user_access_records UserAccessRecord[]
   user_sessions UserSession[]
   background_jobs BackgroundJob[]
+  timers Timer[]
+  meal_plans MealPlan[]
+  user_push_notification_subscriptions UserPushNotificationSubscription[]
 }
 
 model UserAccessRecord {
@@ -48,6 +51,17 @@ model UserSession {
   id String @id @default(uuid())
   created_at DateTime @default(now())
   scope String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+}
+
+model UserPushNotificationSubscription {
+  @@map("user_push_notification_subscriptions")
+
+  id String @id
+  created_at DateTime @default(now())
+  subscription_data Json
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
@@ -82,6 +96,8 @@ model Recipe {
   created_at DateTime @default(now())
   name String
   description String?
+  duration_ms Int?
+  servings Int?
   private Boolean @default(false)
   metadata Json?
 
@@ -91,6 +107,8 @@ model Recipe {
   ingredients RecipeIngredient[]
   steps RecipeStep[]
   recipe_cookbook_attachments RecipeCookbookAttachment[]
+  meal_plan_recipe_attachments MealPlanRecipeAttachment[]
+  scheduled_notifications ScheduledNotification[]
 
   @@index([user_id, name])
 }
@@ -114,6 +132,7 @@ model RecipeStep {
   id Int @id @default(autoincrement())
   content String
   order Int
+  duration_ms Int?
 
   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe_id Int
@@ -203,4 +222,56 @@ model BackgroundJob {
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
+}
+
+model Timer {
+  @@map("timers")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  duration_ms Int
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+}
+
+model MealPlan {
+  @@map("meal_plans")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  name String
+  
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+
+  meal_plan_recipe_attachments MealPlanRecipeAttachment[]
+}
+
+model MealPlanRecipeAttachment {
+  @@map("meal_plan_recipe_attachments")
+  @@id(name: "id", [recipe_id, meal_plan_id])
+
+  recipe_id Int
+  meal_plan_id Int
+
+  recipe_scale Int?
+  duration_ms Int?
+  order Int
+
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model ScheduledNotification {
+  @@map("scheduled_notifications")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  to_be_run_at DateTime
+  purpose String
+  args Json?
+
+  recipe_id Int
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

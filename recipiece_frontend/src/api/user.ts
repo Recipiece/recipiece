@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserAccount } from "../data";
-import { MutationArgs, QueryArgs, TokenResolver, useGet, usePost } from "./Request";
+import { MutationArgs, QueryArgs, useGet, usePost } from "./Request";
+import { TokenManager } from "./TokenManager";
 
 export const useGetSelfQuery = (args?: QueryArgs) => {
   const { getter } = useGet();
@@ -52,7 +53,7 @@ export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token
 
 export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
-  const tokenResolver = TokenResolver.getInstance();
+  const tokenResolver = TokenManager.getInstance();
 
   const mutation = async () => {
     return await poster<never, never>({

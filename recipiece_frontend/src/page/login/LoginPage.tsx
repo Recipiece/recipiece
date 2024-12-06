@@ -5,8 +5,7 @@ import { FC, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { useLoginUserMutation } from "../../api";
-import { TokenResolver } from "../../api/Request";
+import { TokenManager, useLoginUserMutation } from "../../api";
 import { Button, Form, FormCheckbox, FormInput, Stack, SubmitButton, useToast } from "../../component";
 
 const LoginFormSchema = z.object({
@@ -45,7 +44,7 @@ export const LoginPage: FC = () => {
           username: formData.username,
           password: formData.password,
         });
-        const tokenResolver = TokenResolver.getInstance();
+        const tokenResolver = TokenManager.getInstance();
         tokenResolver.accessToken = response.data.access_token;
         if (formData.remember) {
           tokenResolver.refreshToken = response.data.refresh_token;

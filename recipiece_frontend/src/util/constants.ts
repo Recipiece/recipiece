@@ -11,3 +11,7 @@ export class Environment {
   public static readonly VERSION_CAST_IRON_SKILLET = "cast_iron_skillet";
   public static readonly RECIPIECE_VERSION = process.env.REACT_APP_RECIPIECE_VERSION;
 }
+
+export class Timers {
+  public static readonly MAX_TIME_MS = 24 * 60 * 60 * 1000;
+}

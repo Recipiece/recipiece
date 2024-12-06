@@ -28,6 +28,8 @@ export const YRecipeSchema = object({
   created_at: date().required(),
   description: string().notRequired(),
   private: boolean().notRequired().default(false),
+  duration_ms: number().notRequired(),
+  servings: number().notRequired(),
   ingredients: array().of(YRecipeIngredientSchema).notRequired(),
   steps: array().of(YRecipeStepSchema).notRequired(),
 })
