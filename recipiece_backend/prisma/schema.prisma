@@ -59,12 +59,15 @@ model UserSession {
 model UserPushNotificationSubscription {
   @@map("user_push_notification_subscriptions")
 
-  id String @id
+  id Int @id @default(autoincrement())
   created_at DateTime @default(now())
   subscription_data Json
+  device_id String
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
+
+  @@unique([user_id, device_id])
 }
 
 model UserCredentials {

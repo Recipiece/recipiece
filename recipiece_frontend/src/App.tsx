@@ -5,7 +5,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
 import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
-import { AuthContextProvider, DialogContextProvider, TimerContextProvider } from "./context";
+import { AuthContextProvider, DialogContextProvider, PushNotificationContextProvider, TimerContextProvider } from "./context";
 import { useLayout } from "./hooks";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
 
@@ -13,6 +13,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity,
+      retry: 1,
       refetchOnMount: true,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
@@ -30,29 +31,31 @@ export const AppRoutes: FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
-        <TooltipProvider>
-          <ToastProvider>
-            <DndProvider backend={dndBackend}>
-              <DialogContextProvider>
-                <TimerContextProvider>
-                  <Routes>
-                    <Route element={<UnauthenticatedLayout />}>
-                      {unauthenticatedRoutes.map((r) => {
-                        return <Route key={r.path} path={r.path} element={<r.element />} />;
-                      })}
-                    </Route>
-                    <Route element={<AuthenticatedLayout />}>
-                      {authenticatedRoutes.map((r) => {
-                        return <Route key={r.path} path={r.path} element={<r.element />} />;
-                      })}
-                    </Route>
-                  </Routes>
-                </TimerContextProvider>
-              </DialogContextProvider>
-            </DndProvider>
-            <Toaster />
-          </ToastProvider>
-        </TooltipProvider>
+        <PushNotificationContextProvider>
+          <TooltipProvider>
+            <ToastProvider>
+              <DndProvider backend={dndBackend}>
+                <DialogContextProvider>
+                  <TimerContextProvider>
+                    <Routes>
+                      <Route element={<UnauthenticatedLayout />}>
+                        {unauthenticatedRoutes.map((r) => {
+                          return <Route key={r.path} path={r.path} element={<r.element />} />;
+                        })}
+                      </Route>
+                      <Route element={<AuthenticatedLayout />}>
+                        {authenticatedRoutes.map((r) => {
+                          return <Route key={r.path} path={r.path} element={<r.element />} />;
+                        })}
+                      </Route>
+                    </Routes>
+                  </TimerContextProvider>
+                </DialogContextProvider>
+              </DndProvider>
+              <Toaster />
+            </ToastProvider>
+          </TooltipProvider>
+        </PushNotificationContextProvider>
       </AuthContextProvider>
     </QueryClientProvider>
   );

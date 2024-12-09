@@ -96,7 +96,9 @@ export interface ResetPasswordRequestSchema extends InferType<typeof YResetPassw
 export const YRefreshTokenResponseSchema = object({
   access_token: string().required(),
   refresh_token: string().required(),
-}).strict().noUnknown();
+})
+  .strict()
+  .noUnknown();
 
 export interface RefreshTokenResponseSchema extends InferType<typeof YRefreshTokenResponseSchema> {}
 
@@ -118,4 +120,23 @@ export const YRequestImportRecipesRequestSchema = object({
   .strict()
   .noUnknown();
 
-  export interface RequestImportRecipesRequestSchema extends InferType<typeof YRequestImportRecipesRequestSchema> {}
+export interface RequestImportRecipesRequestSchema extends InferType<typeof YRequestImportRecipesRequestSchema> {}
+
+/**
+ * Create a push notification subscription
+ */
+export const YCreatePushNotificationRequestSchema = object({
+  device_id: string().required(),
+  subscription_data: object({
+    endpoint: string().required(),
+    expirationTime: string().nullable(),
+    keys: object({
+      p256dh: string().required(),
+      auth: string().required(),
+    }),
+  }),
+})
+  .strict()
+  .noUnknown();
+
+export interface CreatePushNotificationRequestSchema extends InferType<typeof YCreatePushNotificationRequestSchema> {}

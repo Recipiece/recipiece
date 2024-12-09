@@ -1970,10 +1970,6 @@ body {
   animation-timing-function: linear;
 }
 
-.running {
-  animation-play-state: running;
-}
-
 .line-clamp-3 {
   overflow: hidden;
   display: -webkit-box;

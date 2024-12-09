@@ -11,7 +11,9 @@ self.addEventListener("install", (event) => {
       return cache.addAll(urlsToCache);
     })
   );
-}); //Activate the sw after install
+});
+
+//Activate the sw after install
 //Place where old caches are cleared
 self.addEventListener("activate", (event) => {
   console.log("sw activate event");
@@ -30,28 +32,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// set up the push notification service
-self.addEventListener("activate", async () => {
-  const urlB64ToUint8Array = (base64String) => {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-      .replace(/\-/g, "+")
-      .replace(/_/g, "/");
-    const rawData = atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-  };
-  
-
-  const applicationServerKey = urlB64ToUint8Array("BNwO_-PWSDeuulw1__wNQ7bESdUriIluXGCIiD4ZA35Qg0o1ini5ULnPEm3RpgRWXedG_KL4SlDAONPhBrCoqcY");
-  const options = { applicationServerKey, userVisibleOnly: true };
-  const subscription = await self.registration.pushManager.subscribe(options);
-  console.log(subscription);
-})
-
 //listen for requests
 self.addEventListener("fetch", (event) => {
   event.respondWith(
@@ -66,5 +46,17 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 self.addEventListener("push", (event) => {
+  console.log("Push notification", event.data?.json());
+  const eventJson = event.data?.json();
+  if (eventJson) {
+    const { title, ...restNotificationOptions } = eventJson;
+    self.registration.showNotification(title, {
+      icon: "./icon-512x512.png",
+      ...restNotificationOptions,
+    });
+  }
+});
 
-})
+self.addEventListener("pushsubscriptionchange", (event) => {
+
+});

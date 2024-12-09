@@ -215,3 +215,26 @@ export const useRequestRecipeImport = (args?: MutationArgs<void>) => {
     },
   });
 };
+
+export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<void>) => {
+  const { poster } = usePost();
+
+  const mutation = async (body: {readonly subscription_data: PushSubscriptionJSON, readonly device_id: string }) => {
+    return await poster<typeof body, never>({
+      path: "/user/push-notifications/opt-in",
+      body: {...body},
+      withAuth: "access_token",
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+    mutationKey: ["pushNotificationOptIn"],
+  });
+}

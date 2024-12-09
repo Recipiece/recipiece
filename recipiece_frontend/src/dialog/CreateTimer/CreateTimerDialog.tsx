@@ -1,11 +1,11 @@
-import { FC, useCallback } from "react";
-import { z } from "zod";
-import { BaseDialogProps } from "../BaseDialogProps";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useResponsiveDialogComponents } from "../../hooks";
+import { FC, useCallback, useContext } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button, Form, FormInput, SubmitButton, useToast } from "../../component";
-import { lazyRequestNotificationsPermissions } from "../../util/permissions";
+import { PushNotificationContext } from "../../context";
+import { useResponsiveDialogComponents } from "../../hooks";
+import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface CreateTimerDialogProps extends BaseDialogProps<CreateTimerForm> {}
 
@@ -20,6 +20,7 @@ export type CreateTimerForm = z.infer<typeof CreateTimerFormSchema>;
 export const CreateTimerDialog: FC<CreateTimerDialogProps> = ({ onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const { toast } = useToast();
+  const { requestAndSaveNotificationPermissions } = useContext(PushNotificationContext);
 
   const form = useForm<CreateTimerForm>({
     resolver: zodResolver(CreateTimerFormSchema),
@@ -38,7 +39,7 @@ export const CreateTimerDialog: FC<CreateTimerDialogProps> = ({ onClose, onSubmi
         await onSubmit(formData);
       }
       try {
-        const grantResult = await lazyRequestNotificationsPermissions();
+        const grantResult = await requestAndSaveNotificationPermissions();
         if (grantResult === "granted") {
           toast({
             title: "Notifications Allowed",
@@ -53,7 +54,7 @@ export const CreateTimerDialog: FC<CreateTimerDialogProps> = ({ onClose, onSubmi
         }
       } catch {}
     },
-    [onSubmit, toast]
+    [onSubmit, toast, requestAndSaveNotificationPermissions],
   );
 
   return (

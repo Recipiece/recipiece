@@ -5,14 +5,14 @@ import {
   YIssueForgotPasswordTokenRequestSchema,
   YLoginResponseSchema,
   YRefreshTokenResponseSchema,
-  YRequestImportRecipesRequestSchema,
   YResetPasswordRequestSchema,
   YUserSchema,
   YValidateUserRequestSchema,
-  YValidateUserResponseSchema,
+  YValidateUserResponseSchema
 } from "../../schema";
 import { Route } from "../../types";
 import { Versions } from "../../util/constant";
+import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
 import { createUser } from "./createUser";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
@@ -94,6 +94,13 @@ export const LOGIN_ROUTES: Route[] = [
     function: requestImportRecipes,
     authentication: "access_token",
     preMiddleware: [recipeImportUploader.single("file")],
+    version: Versions.ALL,
+  },
+  {
+    path: "/user/push-notifications/opt-in",
+    method: "POST",
+    function: createPushNotificationSubscription,
+    authentication: "access_token",
     version: Versions.ALL,
   },
 ];
