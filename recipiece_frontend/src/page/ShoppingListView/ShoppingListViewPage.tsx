@@ -53,7 +53,7 @@ export const ShoppingListViewPage: FC = () => {
         setItemContent({ ...updatingIncompleteItem });
         setUpdatingIncompleteItem(undefined);
       }
-    }, 500);
+    }, 3000);
 
     return () => {
       clearTimeout(timeout);

@@ -65,17 +65,20 @@ export interface ListShoppingListsResponseSchema extends InferType<typeof YListS
 /**
  * Modify Shopping List
  */
+const MODIFY_SHOPPING_LIST_ACTIONS = [
+  "current_items",
+  "mark_item_complete",
+  "add_item",
+  "delete_item",
+  "set_item_complete",
+  "mark_item_incomplete",
+  "set_item_order",
+  "set_item_content",
+  "__ping__",
+];
+
 export const YModifyShoppingListMessage = object({
-  action: string().oneOf([
-    "current_items",
-    "mark_item_complete",
-    "add_item",
-    "delete_item",
-    "set_item_complete",
-    "mark_item_incomplete",
-    "set_item_order",
-    "set_item_content",
-  ]),
+  action: string().oneOf([...MODIFY_SHOPPING_LIST_ACTIONS]),
   item: YShoppingListItemSchema.partial().notRequired().default(undefined),
 })
   .strict()
@@ -83,7 +86,10 @@ export const YModifyShoppingListMessage = object({
 
 export interface ModifyShoppingListMessage extends InferType<typeof YModifyShoppingListMessage> {}
 
-export const YModifyShoppingListResponse = array(YShoppingListItemSchema).strict().required();
+export const YModifyShoppingListResponse = object({
+  responding_to_action: string().oneOf([...MODIFY_SHOPPING_LIST_ACTIONS]),
+  items: array(YShoppingListItemSchema).strict().required(),
+});
 
 export interface ModifyShoppingListResponse extends InferType<typeof YModifyShoppingListResponse> {}
 
@@ -101,4 +107,5 @@ export interface AppendShoppingListItemsRequestSchema extends InferType<typeof Y
 
 export const YAppendShoppingListItemsResponseSchema = array(YShoppingListItemSchema).strict().required();
 
-export interface AppendShoppingListItemsResponseSchema extends InferType<typeof YAppendShoppingListItemsResponseSchema> {}
+export interface AppendShoppingListItemsResponseSchema
+  extends InferType<typeof YAppendShoppingListItemsResponseSchema> {}

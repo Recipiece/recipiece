@@ -100,6 +100,17 @@ jest.mock("./src/database/prisma", () => {
   };
 });
 
+jest.mock('bullmq', () => {
+  return {
+    Queue: jest.fn().mockImplementation(() => {
+      return {
+        add: jest.fn()
+      };
+    }),
+    Worker: jest.fn().mockImplementation(),
+  };
+});
+
 // just in case there's any extra users hanging around.
 beforeEach(async () => {
   await jestPrisma.client.user.deleteMany();

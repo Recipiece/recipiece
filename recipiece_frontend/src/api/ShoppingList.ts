@@ -28,7 +28,10 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
         setIsWebsocketLoading(false);
       },
       onMessage: (event) => {
-        setShoppingListItems(JSON.parse(event.data) as ShoppingListItem[]);
+        const {responding_to_action, items} = JSON.parse(event.data);
+        if(responding_to_action !== "__ping__") {
+          setShoppingListItems(items as ShoppingListItem[]);
+        }
         setIsPerformingAction(false);
       },
       onOpen: () => {
@@ -41,6 +44,26 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
     },
     !!wsSession?.token && !isFetchingWsSession && !isLoadingWsSession
   );
+
+  /**
+   * Ping Pong with the websocket to keep it alive
+   */
+  useEffect(() => {
+    if (readyState === ReadyState.OPEN) {
+      const interval = setInterval(() => {
+        sendMessage(
+          JSON.stringify({
+            action: "__ping__",
+          })
+        );
+      }, 5000);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readyState]);
 
   const setItemContent = useCallback(
     (item: Partial<ShoppingListItem>) => {
@@ -159,7 +182,6 @@ export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryA
     staleTime: 1000,
     refetchOnMount: "always",
     refetchOnReconnect: "always",
-    refetchOnWindowFocus: "always",
   });
 };
 

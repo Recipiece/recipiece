@@ -1,13 +1,27 @@
-import { YAppendShoppingListItemsRequestSchema, YAppendShoppingListItemsResponseSchema, YCreateShoppingListSchema, YListShoppingListsQuerySchema, YListShoppingListsResponseSchema, YModifyShoppingListMessage, YModifyShoppingListResponse, YShoppingListSchema, YUpdateShoppingListSchema } from "../../schema";
+import {
+  YAppendShoppingListItemsRequestSchema,
+  YAppendShoppingListItemsResponseSchema,
+  YCreateShoppingListSchema,
+  YGrantShareRequestSchema,
+  YListShoppingListsQuerySchema,
+  YListShoppingListsResponseSchema,
+  YModifyShoppingListMessage,
+  YModifyShoppingListResponse,
+  YRevokeShareRequestSchema,
+  YShoppingListSchema,
+  YUpdateShoppingListSchema,
+} from "../../schema";
 import { Route, WebsocketRoute } from "../../types";
 import { Versions } from "../../util/constant";
 import { appendShoppingListItems } from "./appendShoppingListItems";
 import { createShoppingList } from "./createShoppingList";
 import { deleteShoppingList } from "./deleteShoppingList";
 import { getShoppingList } from "./getShoppingList";
+import { grantShoppingListShare } from "./grantShoppingListShare";
 import { listShoppingLists } from "./listShoppingLists";
 import { modifyShoppingListItems } from "./modifyShoppingListItems";
 import { requestShoppingListSession } from "./requestShoppingListSession";
+import { revokeShoppingListShare } from "./revokeShoppingListShare";
 import { updateShoppingList } from "./updateShoppingList";
 
 export const SHOPPING_LIST_ROUTES: Route[] = [
@@ -67,7 +81,23 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     requestSchema: YAppendShoppingListItemsRequestSchema,
     responseSchema: YAppendShoppingListItemsResponseSchema,
     version: Versions.ALL,
-  }
+  },
+  {
+    path: "/shopping-list/share/grant",
+    function: grantShoppingListShare,
+    method: "POST",
+    requestSchema: YGrantShareRequestSchema,
+    version: Versions.ALL,
+    authentication: "access_token",
+  },
+  {
+    path: "/shopping-list/share/revoke",
+    function: revokeShoppingListShare,
+    method: "POST",
+    requestSchema: YRevokeShareRequestSchema,
+    version: Versions.ALL,
+    authentication: "access_token",
+  },
 ];
 
 export const SHOPPING_LIST_WEBSOCKET_ROUTES: WebsocketRoute[] = [
@@ -78,5 +108,5 @@ export const SHOPPING_LIST_WEBSOCKET_ROUTES: WebsocketRoute[] = [
     requestSchema: YModifyShoppingListMessage,
     responseSchema: YModifyShoppingListResponse,
     version: Versions.ALL,
-  }
-]
+  },
+];
