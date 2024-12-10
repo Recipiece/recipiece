@@ -1,12 +1,27 @@
+import { MoreVertical } from "lucide-react";
 import { FC, useCallback, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, CardContent, Checkbox, Grid, LoadingGroup, NotFound } from "../../component";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  Grid,
+  LoadingGroup,
+  NotFound,
+  RecipeContextMenu
+} from "../../component";
 import { formatIngredientAmount } from "../../util";
 
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const {
     data: recipe,
     isLoading: isLoadingRecipe,
@@ -57,10 +72,23 @@ export const RecipeViewPage: FC = () => {
           <LoadingGroup isLoading={isLoading} className="h-[40px] w-full">
             <div className="flex flex-row">
               <h1 className="text-4xl font-medium mr-auto">{recipe?.name}</h1>
-              {recipe?.user_id === currentUser?.id && (
-                <Button onClick={() => navigate(`/recipe/edit/${id}`)} variant="outline">
-                  Edit
-                </Button>
+              {recipe && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost">
+                      <MoreVertical />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <RecipeContextMenu
+                    recipe={recipe}
+                    canFork={recipe.user_id !== currentUser?.id}
+                    canDelete={recipe.user_id === currentUser?.id}
+                    canEdit={recipe.user_id === currentUser?.id}
+                    canShare={!recipe.private}
+                    canAddToShoppingList={recipe.user_id === currentUser?.id}
+                    canAddToCookbook={recipe.user_id === currentUser?.id}
+                  />
+                </DropdownMenu>
               )}
             </div>
           </LoadingGroup>

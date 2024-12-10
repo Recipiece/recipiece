@@ -40,9 +40,13 @@ export const appendShoppingListItems = async (
   });
 
   const collapsed = await collapseOrders(shoppingListId);
+  const websocketMessage = {
+    responding_to_action: "append_from_recipe",
+    items: collapsed,
+  }
 
   // broadcast the message to any listening
-  await broadcastMessageViaEntityId("modifyShoppingListSession", shoppingList.id, collapsed);
+  await broadcastMessageViaEntityId("modifyShoppingListSession", shoppingList.id, websocketMessage);
 
   return [StatusCodes.OK, collapsed];
 };

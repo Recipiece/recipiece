@@ -29,7 +29,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
       },
       onMessage: (event) => {
         const {responding_to_action, items} = JSON.parse(event.data);
-        if(responding_to_action !== "__ping__") {
+        if(responding_to_action !== "__ping__" && !!items) {
           setShoppingListItems(items as ShoppingListItem[]);
         }
         setIsPerformingAction(false);

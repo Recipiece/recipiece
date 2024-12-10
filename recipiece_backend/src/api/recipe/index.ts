@@ -1,5 +1,6 @@
 import {
   YCreateRecipeRequestSchema,
+  YForkRecipeRequestSchema,
   YListCookbooksResponseSchema,
   YListRecipesQuerySchema,
   YParseRecipeFromURLRequestSchema,
@@ -10,6 +11,7 @@ import { Route } from "../../types";
 import { Versions } from "../../util/constant";
 import { createRecipe } from "./createRecipe";
 import { deleteRecipe } from "./deleteRecipe";
+import { forkRecipe } from "./forkRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
 import { parseRecipeFromUrl } from "./parseFromUrl";
@@ -66,5 +68,14 @@ export const RECIPE_ROUTES: Route[] = [
     method: "DELETE",
     function: deleteRecipe,
     version: Versions.ALL,
+  },
+  {
+    path: "/recipe/fork",
+    authentication: "access_token",
+    method: "POST",
+    function: forkRecipe,
+    version: Versions.ALL,
+    requestSchema: YForkRecipeRequestSchema,
+    responseSchema: YRecipeSchema,
   },
 ];

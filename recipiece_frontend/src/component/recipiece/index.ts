@@ -5,6 +5,7 @@ export * from "./LoadingGroup";
 export * from "./NotFound";
 export * from "./Pager";
 export * from "./RecipeCard";
+export * from "./RecipeContextMenu";
 export * from "./RecipieceFooter";
 export * from "./RecipieceMenuBar";
 export * from "./Typography";

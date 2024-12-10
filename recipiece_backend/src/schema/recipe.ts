@@ -144,3 +144,14 @@ export interface ListRecipesQuerySchema extends InferType<typeof YListRecipesQue
 export const YListRecipesResponseSchema = generateYListQuerySchema(YRecipeSchema);
 
 export interface ListRecipesResponseSchema extends InferType<typeof YListRecipesResponseSchema> {}
+
+/**
+ * Fork Recipes Schema
+ */
+export const YForkRecipeRequestSchema = object({
+  original_recipe_id: number().required(),
+})
+  .strict()
+  .noUnknown();
+
+export interface ForkRecipeRequestSchema extends InferType<typeof YForkRecipeRequestSchema> {}

@@ -1,3 +1,4 @@
+import { AddRecipeToShoppingListDialog } from "./AddRecipeToShoppingList";
 import { AddTimeToTimerDialog } from "./AddTimeToTimer";
 import { CreateCookbookDialog } from "./CreateCookbook";
 import { CreateShoppingListDialog } from "./CreateShoppingList";
@@ -43,5 +44,8 @@ export const Dialogs = {
   },
   addTimeToTimer: {
     component: AddTimeToTimerDialog,
+  },
+  addRecipeToShoppingList: {
+    component: AddRecipeToShoppingListDialog,
   }
 };

@@ -6,7 +6,7 @@ import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export const MobileListCookbooksDialog: FC<BaseDialogProps<Cookbook>> = ({ onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveTitle } = useResponsiveDialogComponents();
   const { data: cookbooks, isLoading: isLoadingCookbooks } = useListCookbooksQuery({
     page_number: 0,
   });
@@ -15,7 +15,6 @@ export const MobileListCookbooksDialog: FC<BaseDialogProps<Cookbook>> = ({ onSub
     <ResponsiveContent className="p-6">
       <ResponsiveHeader>
         <ResponsiveTitle>Cookbooks</ResponsiveTitle>
-        <ResponsiveDescription>Go to...</ResponsiveDescription>
       </ResponsiveHeader>
       <div className="grid grid-cols-1 gap-2 p-2 overflow-scroll">
         <LoadingGroup variant="spinner" isLoading={isLoadingCookbooks}>

@@ -202,3 +202,31 @@ export const useParseRecipeFromURLMutation = (args?: MutationArgs<void>) => {
     },
   });
 };
+
+export const useForkRecipeMutation = (args?: MutationArgs<Recipe>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (body: { readonly original_recipe_id: number }) => {
+    return await poster<typeof body, Recipe>({
+      path: "/recipe/fork",
+      body: { ...body },
+      withAuth: "access_token",
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["recipe", data.data.id], data.data);
+      queryClient.invalidateQueries({
+        queryKey: ["recipeList"],
+        refetchType: "all",
+      });
+      args?.onSuccess?.(data.data);
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};

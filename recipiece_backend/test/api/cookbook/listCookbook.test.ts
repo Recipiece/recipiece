@@ -128,4 +128,49 @@ describe("List Cookbooks", () => {
     const results = response.body.data as Cookbook[];
     expect(results.length).toEqual(5);
   });
+
+  it("should exclude cookbooks containing a certain recipe when instructed", async () => {
+    const containingCookbook = await testPrisma.cookbook.create({
+      data: {
+        name: "Containing",
+        user_id: user.id,
+      },
+    });
+
+    const notContainingCookbook = await testPrisma.cookbook.create({
+      data: {
+        name: "Not Containing",
+        user_id: user.id,
+      },
+    });
+
+    const recipe = await testPrisma.recipe.create({
+      data: {
+        name: "Test Recipe",
+        user_id: user.id,
+      },
+    });
+
+    await testPrisma.recipeCookbookAttachment.create({
+      data: {
+        cookbook_id: containingCookbook.id,
+        recipe_id: recipe.id,
+      },
+    });
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query({
+        page_number: 1,
+        exclude_containing_recipe_id: recipe.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.status).toBe(StatusCodes.OK);
+    const data: Cookbook[] = response.body.data;
+
+    expect(data.length).toBe(1);
+    expect(data[0].id).toBe(notContainingCookbook.id);
+  });
 });

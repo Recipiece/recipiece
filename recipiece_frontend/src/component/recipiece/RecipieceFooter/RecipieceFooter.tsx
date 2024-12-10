@@ -84,8 +84,9 @@ export const RecipieceFooter: FC = () => {
                 const hoursMs = timerData.hours * 60 * 60 * 1000;
                 const minutesMs = timerData.minutes * 60 * 1000;
                 const secondsMs = timerData.seconds * 1000;
+                const duration = hoursMs + minutesMs + secondsMs;
                 await createTimer({
-                  duration_ms: hoursMs + minutesMs + secondsMs,
+                  duration_ms: duration,
                 });
                 popDialog("createTimer");
               },
