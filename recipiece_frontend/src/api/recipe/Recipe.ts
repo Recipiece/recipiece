@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListRecipeFilters, ListRecipesResponse, Recipe } from "../data";
-import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "./Request";
+import { ListRecipeFilters, ListRecipesResponse, Recipe } from "../../data";
+import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { RecipeQueryKeys } from "./RecipeQueryKeys";
 
 export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
   const { getter } = useGet();
@@ -14,7 +15,7 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
   };
 
   return useQuery({
-    queryKey: ["recipe", recipeId],
+    queryKey: RecipeQueryKeys.GET_RECIPE(recipeId),
     queryFn: query,
     enabled: args?.disabled !== true,
     retry: 0,
@@ -22,7 +23,6 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
 };
 
 export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs) => {
-  const queryKey = ["recipeCookbookSearch", search, cookbook_id];
   const path = `/recipe/list?page_number=0&search=${search}&page_size=5&exclude_cookbook_id=${cookbook_id}`;
   const { getter } = useGet();
 
@@ -35,7 +35,7 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   };
 
   return useQuery({
-    queryKey: queryKey,
+    queryKey: RecipeQueryKeys.LIST_RECIPES_AVAILABLE_TO_COOKBOOK({ search, cookbook_id }),
     queryFn: async () => {
       try {
         const results = await query();
@@ -52,19 +52,14 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
-  const queryKey: any[] = ["recipeList"];
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
 
   if (filters.cookbook_id) {
-    queryKey.push({ cookbookId: filters.cookbook_id });
     searchParams.append("cookbook_id", filters.cookbook_id.toString());
   }
 
-  queryKey.push({ pageNumber: filters.page_number });
-
   if (filters.search) {
-    queryKey.push({ search: filters.search });
     searchParams.append("search", filters.search);
   }
 
@@ -77,12 +72,12 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   };
 
   return useQuery({
-    queryKey: queryKey,
+    queryKey: RecipeQueryKeys.LIST_RECIPE(filters),
     queryFn: async () => {
       try {
         const results = await query();
         results.data.data.forEach((recipe) => {
-          queryClient.setQueryData(["recipe", recipe.id], recipe);
+          queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(recipe.id), recipe);
         });
         return results.data;
       } catch (err) {
@@ -108,11 +103,16 @@ export const useCreateRecipeMutation = (args?: MutationArgs<Recipe>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["recipeList"],
-        refetchType: "all",
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            data: [{ ...data.data }, ...oldData.data],
+          };
+        }
+        return undefined;
       });
-      queryClient.setQueryData(["recipe", data.data.id], data.data);
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {
@@ -136,11 +136,18 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["recipeList"],
-        refetchType: "all",
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
+        if (oldData) {
+          const indexOfRecipe = oldData.data.findIndex((r) => r.id === data.data.id);
+          const newData = [...oldData.data.splice(0, indexOfRecipe), { ...data.data }, ...oldData.data.splice(indexOfRecipe + 1)];
+          return {
+            ...oldData,
+            data: [...newData],
+          };
+        }
+        return undefined;
       });
-      queryClient.setQueryData(["recipe", data.data.id], data.data);
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {
@@ -164,12 +171,17 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<void>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (_, recipeId) => {
-      queryClient.invalidateQueries({
-        queryKey: ["recipeList"],
-        refetchType: "all",
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            data: [...oldData.data.filter((r) => r.id !== recipeId)],
+          };
+        }
+        return undefined;
       });
       queryClient.invalidateQueries({
-        queryKey: ["recipe", recipeId],
+        queryKey: RecipeQueryKeys.GET_RECIPE(recipeId),
       });
       args?.onSuccess?.();
     },
@@ -218,10 +230,14 @@ export const useForkRecipeMutation = (args?: MutationArgs<Recipe>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.setQueryData(["recipe", data.data.id], data.data);
-      queryClient.invalidateQueries({
-        queryKey: ["recipeList"],
-        refetchType: "all",
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            data: [{ ...data.data }, ...oldData.data],
+          };
+        }
       });
       args?.onSuccess?.(data.data);
     },

@@ -1,7 +1,14 @@
 import { Book, BookMinus, Edit, Share, ShoppingBasket, Trash, Utensils } from "lucide-react";
-import { FC, useCallback, useContext } from "react";
+import { FC, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAttachRecipeToCookbookMutation, useForkRecipeMutation, useListCookbooksQuery, useListShoppingListsQuery, useRemoveRecipeFromCookbookMutation } from "../../../api";
+import {
+  useAttachRecipeToCookbookMutation,
+  useForkRecipeMutation,
+  useGetCookbookByIdQuery,
+  useListCookbooksQuery,
+  useListShoppingListsQuery,
+  useRemoveRecipeFromCookbookMutation,
+} from "../../../api";
 import { Cookbook, Recipe, ShoppingList } from "../../../data";
 import { useAddRecipeToShoppingListDialog, useDeleteRecipeDialog } from "../../../dialog";
 import {
@@ -46,23 +53,34 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const { isMobile } = useLayout();
   const { pushDialog, popDialog } = useContext(DialogContext);
 
+  /**
+   * Save the bytes, and don't fetch these queries until the user actually opens the context menu for them
+   */
+  const [isShoppingListContextMenuOpen, setIsShoppingListContextMenuOpen] = useState(false);
+  const [isCookbookListContextMenuOpen, setIsCookbookContextMenuOpen] = useState(false);
+
   const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery(
     {
       page_number: 0,
     },
     {
-      disabled: !canAddToShoppingList,
+      disabled: !canAddToShoppingList || !isShoppingListContextMenuOpen,
     }
   );
 
   const { data: cookbooks, isLoading: isLoadingCookbook } = useListCookbooksQuery(
     {
       page_number: 0,
+      exclude_containing_recipe_id: recipe.id,
     },
     {
-      disabled: !canAddToCookbook,
+      disabled: !canAddToCookbook || !isCookbookListContextMenuOpen,
     }
   );
+
+  const { data: cookbook } = useGetCookbookByIdQuery(cookbookId!, {
+    disabled: !cookbookId,
+  });
 
   const { mutateAsync: forkRecipe } = useForkRecipeMutation({
     onSuccess: (recipe) => {
@@ -96,7 +114,8 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   });
 
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation({
-    onFailure: () => {
+    onFailure: (err) => {
+      console.error(err);
       toast({
         title: "Cannot add recipe to cookbook",
         description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
@@ -126,12 +145,13 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
   const mobileOnAddToCookbook = useCallback(() => {
     pushDialog("mobileCookbooks", {
+      excludeContainingRecipeId: recipe.id,
       onClose: () => popDialog("mobileCookbooks"),
       onSubmit: async (cookbook: Cookbook) => {
         try {
           await addRecipeToCookbook({
-            recipe_id: recipe.id,
-            cookbook_id: cookbook.id,
+            recipe: recipe,
+            cookbook: cookbook,
           });
         } catch {
         } finally {
@@ -145,8 +165,8 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     async (cookbook: Cookbook) => {
       try {
         await addRecipeToCookbook({
-          recipe_id: recipe.id,
-          cookbook_id: cookbook.id,
+          recipe: recipe,
+          cookbook: cookbook,
         });
       } catch {}
     },
@@ -156,13 +176,13 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const onRemoveRecipeFromCookbook = useCallback(async () => {
     try {
       await removeRecipeFromCookbook({
-        recipe_id: recipe.id,
-        cookbook_id: cookbookId!,
+        recipe: recipe,
+        cookbook: cookbook!,
       });
     } catch {
       // noop
     }
-  }, [removeRecipeFromCookbook, cookbookId, recipe]);
+  }, [removeRecipeFromCookbook, cookbook, recipe]);
 
   const onShareRecipe = useCallback(async () => {
     let url: string = "";
@@ -222,14 +242,14 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
       {/* add to cookbook */}
       {canAddToCookbook && !isMobile && (
-        <DropdownMenuSub>
+        <DropdownMenuSub onOpenChange={(open) => setIsCookbookContextMenuOpen(open)}>
           <DropdownMenuSubTrigger>
             <Book />
             Add to Cookbook
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
-              <LoadingGroup variant="spinner" isLoading={isLoadingCookbook}>
+              <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingCookbook}>
                 {(cookbooks?.data || []).map((cookbook) => {
                   return (
                     <DropdownMenuItem onClick={() => onAddToCookbook(cookbook)} key={cookbook.id}>
@@ -250,14 +270,14 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
       )}
       {/* add to shopping list */}
       {canAddToShoppingList && !isMobile && (
-        <DropdownMenuSub>
+        <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
           <DropdownMenuSubTrigger>
             <ShoppingBasket />
             Add to Shopping List
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
-              <LoadingGroup variant="spinner" isLoading={isLoadingShoppingLists}>
+              <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
                 {(shoppingLists?.data || []).map((list) => {
                   return (
                     <DropdownMenuItem key={list.id} onClick={() => onAddToShoppingList(list.id)}>

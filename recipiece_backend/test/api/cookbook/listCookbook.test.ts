@@ -161,7 +161,7 @@ describe("List Cookbooks", () => {
     const response = await request(server)
       .get("/cookbook/list")
       .query({
-        page_number: 1,
+        page_number: 0,
         exclude_containing_recipe_id: recipe.id,
       })
       .set("Content-Type", "application/json")

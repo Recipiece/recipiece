@@ -99,9 +99,9 @@ export const DashboardPage: FC = () => {
 
   const onSubmitFindRecipe = useCallback(
     async (recipe: Recipe) => {
-      await addRecipeToCookbook({ recipe_id: recipe.id, cookbook_id: +cookbookId! });
+      await addRecipeToCookbook({ recipe: recipe, cookbook: cookbook! });
     },
-    [cookbookId, addRecipeToCookbook]
+    [cookbook, addRecipeToCookbook]
   );
 
   return (

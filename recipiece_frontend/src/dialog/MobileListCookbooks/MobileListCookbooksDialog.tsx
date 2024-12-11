@@ -1,14 +1,31 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { useListCookbooksQuery } from "../../api";
 import { Button, LoadingGroup } from "../../component";
-import { Cookbook } from "../../data";
+import { Cookbook, ListCookbookFilters } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export const MobileListCookbooksDialog: FC<BaseDialogProps<Cookbook>> = ({ onSubmit }) => {
+export interface MobileListCookbooksDialogProps extends BaseDialogProps<Cookbook> {
+  readonly excludeContainingRecipeId?: number;
+}
+
+export const MobileListCookbooksDialog: FC<MobileListCookbooksDialogProps> = ({ onSubmit, excludeContainingRecipeId }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveTitle } = useResponsiveDialogComponents();
+
+  const queryFilters: ListCookbookFilters = useMemo(() => {
+    const base = { page_number: 0 };
+    if (excludeContainingRecipeId) {
+      return {
+        ...base,
+        exclude_containing_recipe_id: excludeContainingRecipeId,
+      };
+    } else {
+      return base;
+    }
+  }, [excludeContainingRecipeId]);
+
   const { data: cookbooks, isLoading: isLoadingCookbooks } = useListCookbooksQuery({
-    page_number: 0,
+    ...queryFilters,
   });
 
   return (

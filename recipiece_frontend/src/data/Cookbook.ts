@@ -10,4 +10,5 @@ export interface Cookbook {
 export interface ListCookbookFilters {
   readonly page_number: number;
   readonly search?: string;
+  readonly exclude_containing_recipe_id?: number;
 }

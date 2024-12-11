@@ -29,11 +29,6 @@ export const listCookbooks = async (
       none: {
         recipe_id: excludeContainingRecipeId,
       },
-      // every: {
-      //   recipe_id: {
-      //     not: excludeContainingRecipeId,
-      //   },
-      // },
     };
   }
 
