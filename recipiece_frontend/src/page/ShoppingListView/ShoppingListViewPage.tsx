@@ -1,4 +1,4 @@
-import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { createRef, FC, KeyboardEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
 import { Button, LoadingGroup, Popover, PopoverContent, PopoverTrigger, Shelf, Stack } from "../../component";
@@ -22,44 +22,64 @@ export const ShoppingListViewPage: FC = () => {
   const [newestShoppingListItem, setNewestShoppingListItem] = useState("");
   const [isAutoCompleteOpen, setIsAutoCompleteOpen] = useState(false);
   const [incompleteItems, setIncompleteItems] = useState<ShoppingListItem[]>([]);
-  const [updatingIncompleteItem, setUpdatingIncompleteItem] = useState<ShoppingListItem | undefined>(undefined);
+  const newItemRef = createRef<HTMLInputElement>();
 
   useEffect(() => {
     setIncompleteItems(shoppingListItems.filter((item) => !item.completed));
   }, [shoppingListItems]);
 
-  const onChangeItem = useCallback((event: React.ChangeEvent<HTMLInputElement>, item: ShoppingListItem) => {
-    setUpdatingIncompleteItem({ ...item, content: event.target.value });
-    setIncompleteItems((prev) => {
-      return prev.map((previousItem) => {
-        if (item.id === previousItem.id) {
-          return {
-            ...previousItem,
-            content: event.target.value,
-          };
-        } else {
-          return { ...previousItem };
-        }
+  const onChangeItemContent = useCallback(
+    (item: ShoppingListItem) => {
+      setItemContent({
+        ...item,
       });
-    });
-  }, []);
+    },
+    [setItemContent]
+  );
 
-  /**
-   * Handle the debounced item update when you're making a change
-   */
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (updatingIncompleteItem && updatingIncompleteItem.content.trim().length > 1) {
-        setItemContent({ ...updatingIncompleteItem });
-        setUpdatingIncompleteItem(undefined);
+  const onChangeItemKeyDown = useCallback(
+    (event: KeyboardEvent, item: ShoppingListItem) => {
+      if (event.key === "Enter") {
+        onChangeItemContent(item);
       }
-    }, 3000);
+    },
+    [onChangeItemContent]
+  );
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updatingIncompleteItem]);
+  // const onChangeItem = useCallback((event: React.ChangeEvent<HTMLInputElement>, item: ShoppingListItem) => {
+
+  //   // setUpdatingIncompleteItem({ ...item, content: event.target.value });
+
+  //   // setIncompleteItems((prev) => {
+  //   //   return prev.map((previousItem) => {
+  //   //     if (item.id === previousItem.id) {
+  //   //       return {
+  //   //         ...previousItem,
+  //   //         content: event.target.value,
+  //   //       };
+  //   //     } else {
+  //   //       return { ...previousItem };
+  //   //     }
+  //   //   });
+  //   // });
+  // }, []);
+
+  // /**
+  //  * Handle the debounced item update when you're making a change
+  //  */
+  // useEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     if (updatingIncompleteItem && updatingIncompleteItem.content.trim().length > 1) {
+  //       setItemContent({ ...updatingIncompleteItem });
+  //       setUpdatingIncompleteItem(undefined);
+  //     }
+  //   }, 3000);
+
+  //   return () => {
+  //     clearTimeout(timeout);
+  //   };
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [updatingIncompleteItem]);
 
   const onAddItem = useCallback(() => {
     if (newestShoppingListItem.trim().length > 1) {
@@ -128,7 +148,7 @@ export const ShoppingListViewPage: FC = () => {
         setIsAutoCompleteOpen(false);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newestShoppingListItem, autocompleteSuggestions.length]);
 
   return (
@@ -154,7 +174,9 @@ export const ShoppingListViewPage: FC = () => {
                         disabled={isPerformingAction}
                         value={item.content}
                         onCheck={markItemComplete}
-                        onChange={(event) => onChangeItem(event, item)}
+                        onBlur={() => onChangeItemContent(item)}
+                        onKeyDown={(event) => onChangeItemKeyDown(event, item)}
+                        // onChange={(event) => onChangeItem(event, item)}
                         onItemDropped={onShoppingListItemDropped}
                       />
                       {/* <Button onClick={() => onDeleteItem(item)} variant="ghost">
@@ -167,6 +189,7 @@ export const ShoppingListViewPage: FC = () => {
               <div className="flex-col">
                 <div className="w-full inline-flex flex-row gap-4">
                   <ShoppingListItemInput
+                    ref={newItemRef}
                     disabled={isPerformingAction}
                     className="flex-grow"
                     placeholder="Add an item..."
