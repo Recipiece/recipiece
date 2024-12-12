@@ -3,6 +3,7 @@ import { Cookbook, ListCookbookFilters, Recipe } from "../../data";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "../recipe";
 import { CookbookQueryKeys } from "./CookbookQueryKeys";
+import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 
 export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs) => {
   const { getter } = useGet();
@@ -86,15 +87,7 @@ export const useCreateCookbookMutation = (args?: MutationArgs<Cookbook>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.setQueryData(CookbookQueryKeys.LIST_COOKBOOK(), (oldData: { data: Cookbook[] }) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            data: [{ ...data.data }, ...oldData.data],
-          };
-        }
-        return undefined;
-      });
+      queryClient.setQueryData(CookbookQueryKeys.LIST_COOKBOOK(), oldDataCreator(data.data));
       queryClient.setQueryData(CookbookQueryKeys.GET_COOKBOOK(data.data.id), data.data);
       args?.onSuccess?.(data.data);
     },
@@ -120,17 +113,7 @@ export const useUpdateCookbookMutation = (args?: MutationArgs<Cookbook>) => {
     mutationFn: mutation,
     onSuccess: (data) => {
       queryClient.setQueryData(CookbookQueryKeys.GET_COOKBOOK(data.data.id), data.data);
-      queryClient.setQueryData(CookbookQueryKeys.LIST_COOKBOOK(), (oldData: { data: Cookbook[] }) => {
-        if (oldData) {
-          const indexOfCookbook = oldData.data.findIndex((r) => r.id === data.data.id);
-          const newData = [...oldData.data.splice(0, indexOfCookbook), { ...data.data }, ...oldData.data.splice(indexOfCookbook + 1)];
-          return {
-            ...oldData,
-            data: [...newData],
-          };
-        }
-        return undefined;
-      });
+      queryClient.setQueryData(CookbookQueryKeys.LIST_COOKBOOK(), oldDataUpdater(data.data));
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {
@@ -157,15 +140,7 @@ export const useDeleteCookbookMutation = (args?: MutationArgs<void>) => {
       queryClient.invalidateQueries({
         queryKey: CookbookQueryKeys.GET_COOKBOOK(cookbookId),
       });
-      queryClient.setQueryData(CookbookQueryKeys.LIST_COOKBOOK(), (oldData: { data: Cookbook[] }) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            data: [...oldData.data.filter((cb) => cb.id !== cookbookId)],
-          };
-        }
-        return undefined;
-      });
+      queryClient.setQueryData(CookbookQueryKeys.LIST_COOKBOOK(), oldDataDeleter({id: cookbookId}));
       args?.onSuccess?.();
     },
     onError: (err) => {

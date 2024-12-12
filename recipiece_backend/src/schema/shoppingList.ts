@@ -74,6 +74,7 @@ const MODIFY_SHOPPING_LIST_ACTIONS = [
   "mark_item_incomplete",
   "set_item_order",
   "set_item_content",
+  "clear_items",
   "__ping__",
 ];
 

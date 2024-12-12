@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ListRecipeFilters, ListRecipesResponse, Recipe } from "../../data";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
+import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 
 export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
   const { getter } = useGet();
@@ -103,15 +104,7 @@ export const useCreateRecipeMutation = (args?: MutationArgs<Recipe>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            data: [{ ...data.data }, ...oldData.data],
-          };
-        }
-        return undefined;
-      });
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data.data));
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
       args?.onSuccess?.(data.data);
     },
@@ -136,17 +129,7 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
-        if (oldData) {
-          const indexOfRecipe = oldData.data.findIndex((r) => r.id === data.data.id);
-          const newData = [...oldData.data.splice(0, indexOfRecipe), { ...data.data }, ...oldData.data.splice(indexOfRecipe + 1)];
-          return {
-            ...oldData,
-            data: [...newData],
-          };
-        }
-        return undefined;
-      });
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataUpdater(data.data));
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
       args?.onSuccess?.(data.data);
     },
@@ -171,18 +154,8 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<void>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (_, recipeId) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            data: [...oldData.data.filter((r) => r.id !== recipeId)],
-          };
-        }
-        return undefined;
-      });
-      queryClient.invalidateQueries({
-        queryKey: RecipeQueryKeys.GET_RECIPE(recipeId),
-      });
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataDeleter({ id: recipeId }));
+      queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE(recipeId) });
       args?.onSuccess?.();
     },
     onError: (err) => {
@@ -231,14 +204,7 @@ export const useForkRecipeMutation = (args?: MutationArgs<Recipe>) => {
     mutationFn: mutation,
     onSuccess: (data) => {
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), (oldData: { data: Recipe[] }) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            data: [{ ...data.data }, ...oldData.data],
-          };
-        }
-      });
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data.data));
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {

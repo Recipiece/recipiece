@@ -5,6 +5,7 @@ export * from "./CreateShoppingList";
 export * from "./CreateTimer";
 export * from "./DeleteCookbook";
 export * from "./DeleteRecipe";
+export * from "./DeleteShoppingList";
 export * from "./Dialogs";
 export * from "./hooks";
 export * from "./ImportRecipes";

@@ -1,6 +1,6 @@
 export * from "./cookbook";
 export * from "./recipe";
 export * from "./User";
-export * from "./ShoppingList";
+export * from "./shoppingList";
 export * from "./Timer";
 export * from "./TokenManager";

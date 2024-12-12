@@ -257,6 +257,18 @@ const setItemContent: WebsocketMethod<ModifyShoppingListMessage, ShoppingListIte
   return [StatusCodes.OK, items];
 };
 
+const clearItems: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
+  req: WebsocketRequest<ModifyShoppingListMessage>
+) => {
+  const shoppingListId = +req.ws_token_payload.entity_id;
+  await prisma.shoppingListItem.deleteMany({
+    where: {
+      shopping_list_id: shoppingListId,
+    }
+  });
+  return [StatusCodes.OK, []];
+};
+
 const __ping__: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
   _: WebsocketRequest<ModifyShoppingListMessage>
 ) => {
@@ -271,6 +283,7 @@ const MESSAGE_ACTION_MAP: { readonly [k: string]: WebsocketMethod<ModifyShopping
   delete_item: deleteItem,
   set_item_order: setItemOrder,
   set_item_content: setItemContent,
+  clear_items: clearItems,
   __ping__: __ping__,
 };
 

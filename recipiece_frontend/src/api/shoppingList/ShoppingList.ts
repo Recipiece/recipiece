@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ListShoppingListFilters, ListShoppingListResponse, ShoppingList, ShoppingListItem } from "../data";
-import { getWebsocketUrl, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "./Request";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import { ListShoppingListFilters, ListShoppingListResponse, ShoppingList, ShoppingListItem } from "../../data";
+import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { getWebsocketUrl, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
 
 export const useShoppingListItemsSubscription = (shoppingListId: number) => {
   const { data: wsSession, isLoading: isLoadingWsSession, isFetching: isFetchingWsSession } = useRequestShoppingListSessionQuery(+shoppingListId!);
@@ -28,8 +30,8 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
         setIsWebsocketLoading(false);
       },
       onMessage: (event) => {
-        const {responding_to_action, items} = JSON.parse(event.data);
-        if(responding_to_action !== "__ping__" && !!items) {
+        const { responding_to_action, items } = JSON.parse(event.data);
+        if (responding_to_action !== "__ping__" && !!items) {
           setShoppingListItems(items as ShoppingListItem[]);
         }
         setIsPerformingAction(false);
@@ -64,6 +66,15 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readyState]);
+
+  const clearItems = useCallback(() => {
+    setIsPerformingAction(true);
+    sendMessage(
+      JSON.stringify({
+        action: "clear_items",
+      })
+    );
+  }, [sendMessage]);
 
   const setItemContent = useCallback(
     (item: Partial<ShoppingListItem>) => {
@@ -161,6 +172,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
     deleteItem,
     setItemOrder,
     setItemContent,
+    clearItems,
   };
 };
 
@@ -176,7 +188,7 @@ export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryA
   };
 
   return useQuery({
-    queryKey: ["shoppingList", "session", listId],
+    queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST_SESSION(listId),
     queryFn: query,
     enabled: args?.disabled !== true,
     staleTime: 1000,
@@ -197,7 +209,7 @@ export const useGetShoppingListByIdQuery = (listId: number, args?: QueryArgs) =>
   };
 
   return useQuery({
-    queryKey: ["shoppingList", listId],
+    queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST(listId),
     queryFn: query,
     enabled: args?.disabled !== true,
     retry: 0,
@@ -209,14 +221,10 @@ export const useListShoppingListsQuery = (filters: ListShoppingListFilters, args
   const { getter } = useGet();
 
   // lol
-  const queryKey: any[] = ["shoppingListList"];
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
 
-  queryKey.push({ pageNumber: filters.page_number });
-
   if (filters.search) {
-    queryKey.push({ search: filters.search });
     searchParams.append("search", filters.search);
   }
 
@@ -229,7 +237,7 @@ export const useListShoppingListsQuery = (filters: ListShoppingListFilters, args
   };
 
   return useQuery({
-    queryKey: queryKey,
+    queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(filters),
     queryFn: async () => {
       try {
         const results = await query();
@@ -260,11 +268,8 @@ export const useCreateShoppingListMutation = (args?: MutationArgs<ShoppingList>)
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["shoppingListList"],
-        refetchType: "all",
-      });
-      queryClient.setQueryData(["shoppingList", data.data.id], data.data);
+      queryClient.setQueryData(ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), oldDataCreator(data.data));
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(data.data.id), data.data);
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {
@@ -288,11 +293,8 @@ export const useUpdateShoppingListMutation = (args?: MutationArgs<ShoppingList>)
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["shoppingListList"],
-        refetchType: "all",
-      });
-      queryClient.setQueryData(["shoppingList", data.data.id], data.data);
+      queryClient.setQueryData(ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), oldDataUpdater(data.data));
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(data.data.id), data.data);
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {
@@ -316,13 +318,8 @@ export const useDeleteShoppingListMutation = (args?: MutationArgs<void>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (_, shoppingListId) => {
-      queryClient.invalidateQueries({
-        queryKey: ["shoppingListList"],
-        refetchType: "all",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["shoppingList", shoppingListId],
-      });
+      queryClient.invalidateQueries({ queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST(shoppingListId) });
+      queryClient.setQueryData(ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), oldDataDeleter({ id: shoppingListId }));
       args?.onSuccess?.();
     },
     onError: (err) => {
@@ -332,7 +329,6 @@ export const useDeleteShoppingListMutation = (args?: MutationArgs<void>) => {
 };
 
 export const useAppendShoppingListItemsMutation = (args?: MutationArgs<ShoppingListItem[]>) => {
-  const queryClient = useQueryClient();
   const { poster } = usePost();
 
   const mutation = async (data: { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItem>[] }) => {
@@ -345,15 +341,15 @@ export const useAppendShoppingListItemsMutation = (args?: MutationArgs<ShoppingL
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data, vars) => {
-      queryClient.invalidateQueries({
-        queryKey: ["shoppingListList"],
-        refetchType: "all",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["shoppingList", vars.shopping_list_id],
-        refetchType: "all",
-      });
+    onSuccess: (data) => {
+      // queryClient.invalidateQueries({
+      //   queryKey: ["shoppingListList"],
+      //   refetchType: "all",
+      // });
+      // queryClient.invalidateQueries({
+      //   queryKey: ["shoppingList", vars.shopping_list_id],
+      //   refetchType: "all",
+      // });
       args?.onSuccess?.(data.data);
     },
     onError: (err) => {

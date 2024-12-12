@@ -192,6 +192,7 @@ model ShoppingListItem {
   completed Boolean @default(false)
   order Int
   content String
+  notes String?
 
   shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

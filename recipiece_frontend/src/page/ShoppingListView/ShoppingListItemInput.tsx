@@ -1,5 +1,5 @@
 import { Grip } from "lucide-react";
-import { FC, Ref, useMemo } from "react";
+import { FC, forwardRef, Ref, useMemo } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { Checkbox, Input, InputProps } from "../../component";
 import { ShoppingListItem } from "../../data";
@@ -28,9 +28,9 @@ export const SHOPPING_LIST_ITEM_INPUT_CLASSES = [
   "focus-visible:ring-0",
 ];
 
-export const ShoppingListItemInput: FC<InputProps & {readonly ref?: Ref<HTMLInputElement>}> = ({ className, ref, ...restProps }) => {
+export const ShoppingListItemInput = forwardRef<HTMLInputElement, InputProps>(({ className, ...restProps }, ref) => {
   return <Input ref={ref} className={cn(...SHOPPING_LIST_ITEM_INPUT_CLASSES, className)} {...restProps} />;
-};
+});
 
 export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputProps> = ({ shoppingListItem, onCheck, isDraggable, onItemDropped, disabled, ...restProps }) => {
   const { isMobile } = useLayout();
