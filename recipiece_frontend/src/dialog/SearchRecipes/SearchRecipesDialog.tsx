@@ -1,15 +1,11 @@
 import { FC, useCallback, useEffect, useState } from "react";
-import { useListRecipesToAddToCookbook } from "../../api";
+import { useListRecipesQuery } from "../../api";
 import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
 import { ListRecipeFilters, Recipe } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface SearchRecipesDialogProps extends BaseDialogProps<Recipe> {
-  readonly cookbookId: number;
-}
-
-export const SearchRecipesDialog: FC<SearchRecipesDialogProps> = ({ onClose, onSubmit, cookbookId }) => {
+export const SearchRecipesDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
@@ -23,9 +19,7 @@ export const SearchRecipesDialog: FC<SearchRecipesDialogProps> = ({ onClose, onS
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesToAddToCookbook(filters.search!, cookbookId, {
-    disabled: (filters.search || "").length < 2,
-  });
+  } = useListRecipesQuery({ search: filters.search!, page_number: 0 }, { disabled: (filters.search || "").length < 2 });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -60,7 +54,7 @@ export const SearchRecipesDialog: FC<SearchRecipesDialogProps> = ({ onClose, onS
     <ResponsiveContent className="p-6">
       <ResponsiveHeader>
         <ResponsiveTitle>Find a recipe</ResponsiveTitle>
-        <ResponsiveDescription>Search for a recipe to add to your cookbook.</ResponsiveDescription>
+        <ResponsiveDescription>Search for a recipe by name.</ResponsiveDescription>
       </ResponsiveHeader>
       <Stack>
         <Input type="text" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />

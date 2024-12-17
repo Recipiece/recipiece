@@ -44,7 +44,7 @@ ROUTES.forEach((route) => {
   const routeHandlers: any[] = [];
 
   // set up authentication first
-  console.log(`configuring routing for ${route.path}`);
+  console.log(`configuring routing for ${route.method} ${route.path}`);
   switch (route.authentication) {
     case "access_token":
       routeHandlers.push(accessTokenAuthMiddleware);

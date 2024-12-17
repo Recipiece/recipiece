@@ -12,7 +12,7 @@ export const MAX_NUM_ITEMS = 100000;
  */
 export const collapseOrders = async (
   shoppingListId: number,
-  tx?: Prisma.TransactionClient
+  tx?: any
 ): Promise<ShoppingListItem[]> => {
   return (await (tx ?? prisma).$queryRaw`
     with updated as (

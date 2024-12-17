@@ -73,7 +73,7 @@ export const DashboardPage: FC = () => {
         title: "Recipe Added to Cookbook",
         description: "The recipe was added to your cookbook.",
       });
-      popDialog("searchRecipes");
+      popDialog("searchRecipesForCookbook");
     },
     onFailure: () => {
       toast({
@@ -81,7 +81,7 @@ export const DashboardPage: FC = () => {
         description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
         variant: "destructive",
       });
-      popDialog("searchRecipes");
+      popDialog("searchRecipesForCookbook");
     },
   });
 
@@ -90,10 +90,10 @@ export const DashboardPage: FC = () => {
   }, [recipeData]);
 
   const onFindRecipe = () => {
-    pushDialog("searchRecipes", {
+    pushDialog("searchRecipesForCookbook", {
       cookbookId: +cookbookId!,
       onSubmit: onSubmitFindRecipe,
-      onClose: () => popDialog("searchRecipes"),
+      onClose: () => popDialog("searchRecipesForCookbook"),
     });
   };
 

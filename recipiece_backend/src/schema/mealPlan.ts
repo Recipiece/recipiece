@@ -1,10 +1,28 @@
-import { array, date, InferType, number, object, string } from "yup";
+import { array, boolean, date, InferType, number, object, string } from "yup";
 import { YRecipeSchema } from "./recipe";
+import { generateYListQuerySchema, YListQuerySchema } from "./list";
+
+export const YMealPlanItemSchema = object({
+  id: number().required(),
+  created_at: date().required(),
+  meal_plan_id: number().required(),
+  start_date: date().required(),
+  freeform_content: string().notRequired().nullable(),
+  notes: string().notRequired().nullable(),
+  recipe_id: number().notRequired().nullable(),
+  recipe: YRecipeSchema.notRequired().nullable(),
+})
+  .strict()
+  .noUnknown();
+
+export interface MealPlanItemSchema extends InferType<typeof YMealPlanItemSchema> {}
 
 export const YMealPlanSchema = object({
   id: number().required(),
   name: string().required(),
+  duration: string().required(),
   created_at: date().required(),
+  start_date: date().required(),
 })
   .strict()
   .noUnknown();
@@ -16,32 +34,89 @@ export interface MealPlanSchema extends InferType<typeof YMealPlanSchema> {}
  */
 export const YCreateMealPlanRequestSchema = object({
   name: string().required(),
-  recipes: array(
-    object({
-      id: number().required(),
-      recipe_scale: number().required(),
-      duration_ms: number().required().positive(),
-      order: number().required(),
-    })
-  ).required(),
+  duration: string().required(),
+  start_date: string().datetime().required(),
 })
   .strict()
   .noUnknown();
 
-export interface CreateMealPlanSchema extends InferType<typeof YCreateMealPlanRequestSchema> {}
+export interface CreateMealPlanRequestSchema extends InferType<typeof YCreateMealPlanRequestSchema> {}
 
-export const YCreateMealPlanResponseSchema = object({
+/**
+ * Update meal plan
+ */
+export const YUpdateMealPlanRequestSchema = object({
   id: number().required(),
-  name: string().required(),
-  created_at: date().required(),
-  recipes: array(
-    YRecipeSchema.shape({
-      recipe_scale: number().required(),
-      duration_ms: number().required().positive(),
-      order: number().required(),
-    }),
-  ).required(),
+  name: string().notRequired(),
+  duration: string().notRequired(),
+  start_date: string().datetime().notRequired(),
+})
+  .strict()
+  .noUnknown();
+
+export interface UpdateMealPlanRequestSchema extends InferType<typeof YUpdateMealPlanRequestSchema> {}
+
+/**
+ * List meal plans
+ */
+export const YListMealPlanQuerySchema = YListQuerySchema.shape({});
+
+export interface ListMealPlanQuerySchema extends InferType<typeof YListMealPlanQuerySchema> {}
+
+export const YListMealPlanResponseSchema = generateYListQuerySchema(YMealPlanSchema);
+
+export interface ListMealPlanResponseSchema extends InferType<typeof YListMealPlanResponseSchema> {}
+
+/**
+ * List items for meal plan
+ */
+export const YListItemsForMealPlanQuerySchema = object({
+  start_date: string().datetime().notRequired(),
+  end_date: string().datetime().notRequired(),
+})
+  .strict()
+  .noUnknown();
+
+export interface ListItemsForMealPlanQuerySchema extends InferType<typeof YListItemsForMealPlanQuerySchema> {}
+
+export const YListItemsForMealPlanResponseSchema = object({
+  meal_plan_items: array(YMealPlanItemSchema),
 });
 
-export interface CreateMealPlanResponseSchema extends InferType<typeof YCreateMealPlanResponseSchema> {}
+export interface ListItemsForMealPlanResponseSchema extends InferType<typeof YListItemsForMealPlanResponseSchema> {}
 
+/**
+ * Create meal plan item
+ */
+export const YCreateMealPlanItemRequestSchema = object({
+  meal_plan_id: number().required(),
+  start_date: string().datetime().required(),
+  freeform_content: string().notRequired().nullable(),
+  notes: string().notRequired().nullable(),
+  recipe_id: number().notRequired().nullable(),
+})
+  .test("oneOfFreeformContentOrRecipeId", (ctx) => {
+    return ctx.freeform_content !== undefined || !!ctx.recipe_id;
+  })
+  .strict()
+  .noUnknown();
+
+export interface CreateMealPlanItemRequestSchema extends InferType<typeof YCreateMealPlanItemRequestSchema> {}
+
+/**
+ * Update meal plan item
+ */
+export const YUpdateMealPlanItemRequestSchema = object({
+  id: number().required(),
+  start_date: string().datetime().required(),
+  freeform_content: string().notRequired().nullable(),
+  notes: string().notRequired().nullable(),
+  recipe_id: number().notRequired().nullable(),
+})
+  .test("oneOfFreeformContentOrRecipeId", (ctx) => {
+    return ctx.freeform_content !== undefined || !!ctx.recipe_id;
+  })
+  .strict()
+  .noUnknown();
+
+export interface UpdateMealPlanItemRequestSchema extends InferType<typeof YUpdateMealPlanItemRequestSchema> {}

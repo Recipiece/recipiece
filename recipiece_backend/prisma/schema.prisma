@@ -6,6 +6,12 @@ generator client {
   binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
+generator kysely {
+  provider = "prisma-kysely"
+  output = "../src/database/kysely"
+  fileName = "index.ts"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -110,7 +116,7 @@ model Recipe {
   ingredients RecipeIngredient[]
   steps RecipeStep[]
   recipe_cookbook_attachments RecipeCookbookAttachment[]
-  meal_plan_recipe_attachments MealPlanRecipeAttachment[]
+  meal_plan_items MealPlanItem[]
   scheduled_notifications ScheduledNotification[]
 
   @@index([user_id, name])
@@ -244,27 +250,29 @@ model MealPlan {
 
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
+  start_date DateTime
+  duration String
   name String
-  
+
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
 
-  meal_plan_recipe_attachments MealPlanRecipeAttachment[]
+  meal_plan_items MealPlanItem[]
 }
 
-model MealPlanRecipeAttachment {
-  @@map("meal_plan_recipe_attachments")
-  @@id(name: "id", [recipe_id, meal_plan_id])
+model MealPlanItem {
+  @@map("meal_plan_items")
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
 
-  recipe_id Int
   meal_plan_id Int
+  start_date DateTime
+  freeform_content String?
+  notes String?
+  recipe_id Int?
 
-  recipe_scale Int?
-  duration_ms Int?
-  order Int
-
-  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipe Recipe? @relation(fields: [recipe_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
 }
 
 model ScheduledNotification {

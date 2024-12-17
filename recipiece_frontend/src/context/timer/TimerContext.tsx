@@ -56,22 +56,7 @@ export const TimerContextProvider: FC<PropsWithChildren> = ({ children }) => {
   );
 
   const { mutateAsync: _deleteTimer } = useDeleteTimerMutation();
-
-  const { mutateAsync: _createTimer } = useCreateTimerMutation({
-    onSuccess: () => {
-      toast({
-        title: "Timer Created",
-        description: "Your timer has been created",
-      });
-    },
-    onFailure: () => {
-      toast({
-        title: "Could Not Create Timer",
-        description: "This timer couldn't be created. Try again later.",
-        variant: "destructive",
-      });
-    },
-  });
+  const { mutateAsync: _createTimer } = useCreateTimerMutation();
 
   const { mutateAsync: _updateTimer } = useUpdateTimerMutation({
     onSuccess: () => {
@@ -89,7 +74,6 @@ export const TimerContextProvider: FC<PropsWithChildren> = ({ children }) => {
     },
   });
 
-  // const [timerTimeouts, setTimerTimeouts] = useState<NodeJS.Timeout[]>([]);
   const timerTimeoutIds = useRef<NodeJS.Timeout[]>([]);
   const [allTimers, setAllTimers] = useState<Timer[]>([]);
   const [activeTimers, setActiveTimers] = useState<Timer[]>([]);

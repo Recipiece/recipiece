@@ -12,5 +12,7 @@ export * from "./ImportRecipes";
 export * from "./MobileCreateMenu";
 export * from "./MobileListCookbooks";
 export * from "./MobileListShoppingLists";
+export * from "./ModifyMealPlan";
 export * from "./ParseRecipeFromURL";
+export * from "./SearchRecipesForCookbook";
 export * from "./SearchRecipes";

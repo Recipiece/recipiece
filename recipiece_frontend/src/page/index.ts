@@ -3,6 +3,7 @@ export * from "./CreateAccount";
 export * from "./Dashboard";
 export * from "./ForgotPassword";
 export * from "./Login";
+export * from "./MealPlanView";
 export * from "./RecipeEdit";
 export * from "./RecipeView";
 export * from "./Register";

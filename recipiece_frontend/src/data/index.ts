@@ -3,3 +3,4 @@ export * from "./Recipe";
 export * from "./User";
 export * from "./ShoppingList";
 export * from "./Timer";
+export * from "./MealPlan";

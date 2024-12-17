@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { Outlet } from "react-router-dom";
-import { RecipieceFooter } from "../RecipieceFooter";
 import { RecipieceMenubar } from "../RecipieceMenuBar";
 
 export const AuthenticatedLayout: FC = () => {
@@ -11,7 +10,6 @@ export const AuthenticatedLayout: FC = () => {
         <Outlet />
         <div className="h-14 sm:h-0" />
       </div>
-      <RecipieceFooter />
     </div>
   )
 }

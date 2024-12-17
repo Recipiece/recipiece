@@ -9,8 +9,10 @@ import { ImportRecipesDialog } from "./ImportRecipes";
 import { MobileCreateMenuDialog } from "./MobileCreateMenu";
 import { MobileListCookbooksDialog } from "./MobileListCookbooks";
 import { MobileListShoppingListsDialog } from "./MobileListShoppingLists";
+import { ModifyMealPlanDialog } from "./ModifyMealPlan";
 import { ParseRecipeFromURLDialog } from "./ParseRecipeFromURL";
 import { SearchRecipesDialog } from "./SearchRecipes";
+import { SearchRecipesForCookbookDialog } from "./SearchRecipesForCookbook";
 
 export const Dialogs = {
   createCookbook: {
@@ -18,6 +20,9 @@ export const Dialogs = {
   },
   searchRecipes: {
     component: SearchRecipesDialog,
+  },
+  searchRecipesForCookbook: {
+    component: SearchRecipesForCookbookDialog,
   },
   parseRecipeFromURL: {
     component: ParseRecipeFromURLDialog,
@@ -51,5 +56,8 @@ export const Dialogs = {
   },
   deleteShoppingList: {
     component: DeleteShoppingListDialog,
-  }
+  },
+  modifyMealPlan: {
+    component: ModifyMealPlanDialog,
+  },
 };
