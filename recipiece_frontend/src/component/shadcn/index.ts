@@ -5,7 +5,6 @@ export * from "./Card";
 export * from "./Carousel";
 export * from "./Checkbox";
 export * from "./Command";
-export * from "./DateTimePicker";
 export * from "./Dialog";
 export * from "./Drawer";
 export * from "./DropdownMenu";

@@ -614,10 +614,6 @@ body {
   visibility: visible;
 }
 
-.invisible {
-  visibility: hidden;
-}
-
 .static {
   position: static;
 }
@@ -785,11 +781,6 @@ body {
   margin-bottom: 0.25rem;
 }
 
-.my-auto {
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
 .-ml-4 {
   margin-left: -1rem;
 }
@@ -840,14 +831,6 @@ body {
 
 .mr-auto {
   margin-right: auto;
-}
-
-.ms-1 {
-  margin-inline-start: 0.25rem;
-}
-
-.ms-2 {
-  margin-inline-start: 0.5rem;
 }
 
 .mt-0 {
@@ -914,16 +897,6 @@ body {
   height: 1rem;
 }
 
-.size-6 {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.size-9 {
-  width: 2.25rem;
-  height: 2.25rem;
-}
-
 .h-0 {
   height: 0px;
 }
@@ -972,10 +945,6 @@ body {
   height: 1.25rem;
 }
 
-.h-56 {
-  height: 14rem;
-}
-
 .h-6 {
   height: 1.5rem;
 }
@@ -1022,10 +991,6 @@ body {
 
 .h-auto {
   height: auto;
-}
-
-.h-fit {
-  height: fit-content;
 }
 
 .h-full {
@@ -1220,10 +1185,6 @@ body {
   flex-basis: 100%;
 }
 
-.border-collapse {
-  border-collapse: collapse;
-}
-
 .-translate-x-1\/2 {
   --tw-translate-x: -50%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -1287,10 +1248,6 @@ body {
   cursor: grab;
 }
 
-.cursor-not-allowed {
-  cursor: not-allowed;
-}
-
 .cursor-pointer {
   cursor: pointer;
 }
@@ -1320,20 +1277,8 @@ body {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
-.grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
 .flex-row {
   flex-direction: row;
-}
-
-.flex-row-reverse {
-  flex-direction: row-reverse;
 }
 
 .flex-col {
@@ -1354,10 +1299,6 @@ body {
 
 .items-center {
   align-items: center;
-}
-
-.items-stretch {
-  align-items: stretch;
 }
 
 .justify-start {
@@ -1400,12 +1341,6 @@ body {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.25rem * var(--tw-space-x-reverse));
   margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
-}
-
-.space-x-2 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
-  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
@@ -1482,16 +1417,6 @@ body {
 
 .rounded-xl {
   border-radius: 0.75rem;
-}
-
-.rounded-l-md {
-  border-top-left-radius: calc(var(--radius) - 2px);
-  border-bottom-left-radius: calc(var(--radius) - 2px);
-}
-
-.rounded-r-md {
-  border-top-right-radius: calc(var(--radius) - 2px);
-  border-bottom-right-radius: calc(var(--radius) - 2px);
 }
 
 .rounded-t-\[10px\] {
@@ -1774,22 +1699,6 @@ body {
   padding-bottom: 1rem;
 }
 
-.pb-48 {
-  padding-bottom: 12rem;
-}
-
-.pe-1 {
-  padding-inline-end: 0.25rem;
-}
-
-.pe-2 {
-  padding-inline-end: 0.5rem;
-}
-
-.pe-3 {
-  padding-inline-end: 0.75rem;
-}
-
 .pl-2\.5 {
   padding-left: 0.625rem;
 }
@@ -1812,14 +1721,6 @@ body {
 
 .pr-8 {
   padding-right: 2rem;
-}
-
-.ps-1 {
-  padding-inline-start: 0.25rem;
-}
-
-.ps-3 {
-  padding-inline-start: 0.75rem;
 }
 
 .pt-0 {
@@ -1860,10 +1761,6 @@ body {
   line-height: 2.5rem;
 }
 
-.text-\[0\.8rem\] {
-  font-size: 0.8rem;
-}
-
 .text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem;
@@ -1882,10 +1779,6 @@ body {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.font-bold {
-  font-weight: 700;
 }
 
 .font-medium {
@@ -1919,10 +1812,6 @@ body {
 
 .tracking-widest {
   letter-spacing: 0.1em;
-}
-
-.text-accent-foreground {
-  color: hsl(var(--accent-foreground));
 }
 
 .text-card-foreground {
@@ -2241,14 +2130,6 @@ body {
   width: 2px;
 }
 
-.focus-within\:relative:focus-within {
-  position: relative;
-}
-
-.focus-within\:z-20:focus-within {
-  z-index: 20;
-}
-
 .hover\:cursor-pointer:hover {
   cursor: pointer;
 }
@@ -2263,10 +2144,6 @@ body {
 
 .hover\:bg-destructive\/90:hover {
   background-color: hsl(var(--destructive) / 0.9);
-}
-
-.hover\:bg-primary:hover {
-  background-color: var(--primary);
 }
 
 .hover\:bg-secondary:hover {
@@ -2287,10 +2164,6 @@ body {
 
 .hover\:text-foreground:hover {
   color: hsl(var(--foreground));
-}
-
-.hover\:text-primary-foreground:hover {
-  color: hsl(var(--primary-foreground));
 }
 
 .hover\:text-sidebar-accent-foreground:hover {
@@ -2325,16 +2198,8 @@ body {
   background-color: hsl(var(--accent));
 }
 
-.focus\:bg-primary:focus {
-  background-color: var(--primary);
-}
-
 .focus\:text-accent-foreground:focus {
   color: hsl(var(--accent-foreground));
-}
-
-.focus\:text-primary-foreground:focus {
-  color: hsl(var(--primary-foreground));
 }
 
 .focus\:opacity-100:focus {
@@ -2486,30 +2351,6 @@ body {
 
 .aria-disabled\:opacity-50[aria-disabled="true"] {
   opacity: 0.5;
-}
-
-.aria-selected\:bg-accent[aria-selected="true"] {
-  background-color: hsl(var(--accent));
-}
-
-.aria-selected\:bg-accent\/50[aria-selected="true"] {
-  background-color: hsl(var(--accent) / 0.5);
-}
-
-.aria-selected\:text-accent-foreground[aria-selected="true"] {
-  color: hsl(var(--accent-foreground));
-}
-
-.aria-selected\:text-muted-foreground[aria-selected="true"] {
-  color: hsl(var(--muted-foreground));
-}
-
-.aria-selected\:opacity-100[aria-selected="true"] {
-  opacity: 1;
-}
-
-.aria-selected\:opacity-30[aria-selected="true"] {
-  opacity: 0.3;
 }
 
 .data-\[disabled\=true\]\:pointer-events-none[data-disabled="true"] {
@@ -3145,29 +2986,6 @@ body {
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-}
-
-.\[\&\:has\(\[aria-selected\]\)\]\:bg-accent:has([aria-selected]) {
-  background-color: hsl(var(--accent));
-}
-
-.first\:\[\&\:has\(\[aria-selected\]\)\]\:rounded-l-md:has([aria-selected]):first-child {
-  border-top-left-radius: calc(var(--radius) - 2px);
-  border-bottom-left-radius: calc(var(--radius) - 2px);
-}
-
-.last\:\[\&\:has\(\[aria-selected\]\)\]\:rounded-r-md:has([aria-selected]):last-child {
-  border-top-right-radius: calc(var(--radius) - 2px);
-  border-bottom-right-radius: calc(var(--radius) - 2px);
-}
-
-.\[\&\:has\(\[aria-selected\]\.day-outside\)\]\:bg-accent\/50:has([aria-selected].day-outside) {
-  background-color: hsl(var(--accent) / 0.5);
-}
-
-.\[\&\:has\(\[aria-selected\]\.day-range-end\)\]\:rounded-r-md:has([aria-selected].day-range-end) {
-  border-top-right-radius: calc(var(--radius) - 2px);
-  border-bottom-right-radius: calc(var(--radius) - 2px);
 }
 
 .\[\&\>button\]\:hidden>button {

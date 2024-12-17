@@ -1,11 +1,11 @@
 import { Grip } from "lucide-react";
-import { FC, forwardRef, Ref, useMemo } from "react";
+import mergeRefs from "merge-refs";
+import { FC, forwardRef, useMemo } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { Checkbox, Input, InputProps } from "../../component";
 import { ShoppingListItem } from "../../data";
-import { cn } from "../../util";
-import mergeRefs from "merge-refs";
 import { useLayout } from "../../hooks";
+import { cn } from "../../util";
 
 export interface CheckableShoppingListItemInputProps extends InputProps {
   readonly onCheck: (item: ShoppingListItem) => void;
