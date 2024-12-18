@@ -2,12 +2,27 @@ import { ChartNoAxesGantt, CircleArrowDown, CircleArrowUp, Edit, ListCheck, More
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDeleteMealPlanMutation, useGetMealPlanByIdQuery, useListItemsForMealPlanQuery, useUpdateMealPlanMutation } from "../../api";
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, LoadingGroup, Stack, useToast } from "../../component";
+import { useDeleteMealPlanMutation, useGetMealPlanByIdQuery, useListItemsForMealPlanQuery, useListShoppingListsQuery, useUpdateMealPlanMutation } from "../../api";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  LoadingGroup,
+  Stack,
+  useToast,
+} from "../../component";
 import { DialogContext } from "../../context";
-import { MealPlan, MealPlanItem } from "../../data";
+import { MealPlan, MealPlanItem, ShoppingList } from "../../data";
 import { floorDateToDay } from "../../util";
 import { MealPlanItemsCard } from "./MealPlanItemCard";
+import { useLayout } from "../../hooks";
 
 /**
  * This is a rather tricky form, and we're not even really using a form for this.
@@ -38,8 +53,10 @@ export const MealPlanViewPage: FC = () => {
   const { pushDialog, popDialog } = useContext(DialogContext);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isMobile } = useLayout();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isShoppingListContextMenuOpen, setIsShoppingListContextMenuOpen] = useState(false);
 
   const { data: mealPlan, isLoading: isLoadingMealPlan } = useGetMealPlanByIdQuery(mealPlanId);
   const { mutateAsync: updateMealPlan } = useUpdateMealPlanMutation();
@@ -67,6 +84,15 @@ export const MealPlanViewPage: FC = () => {
     },
     {
       disabled: !mealPlan,
+    }
+  );
+
+  const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery(
+    {
+      page_number: 0,
+    },
+    {
+      disabled: !isShoppingListContextMenuOpen,
     }
   );
 
@@ -161,6 +187,16 @@ export const MealPlanViewPage: FC = () => {
     });
   }, [deleteMealPlan, mealPlan, navigate, popDialog, pushDialog, toast]);
 
+  const mobileOnAddToShoppingList = useCallback(() => {
+    pushDialog("mobileShoppingLists", {
+      onClose: () => popDialog("mobileShoppingLists"),
+      onSubmit: (shoppingList: ShoppingList) => {
+        popDialog("mobileShoppingLists");
+        // onAddToShoppingList(shoppingList.id);
+      },
+    });
+  }, [pushDialog, popDialog]);
+
   return (
     <Stack>
       <LoadingGroup isLoading={isLoadingMealPlan} className="h-8 w-52">
@@ -183,9 +219,32 @@ export const MealPlanViewPage: FC = () => {
                   <ListCheck /> Save Meals
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem>
-                <ShoppingBasket /> Add to Shopping List
-              </DropdownMenuItem>
+              {!isMobile && (
+                <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
+                  <DropdownMenuSubTrigger>
+                    <ShoppingBasket />
+                    Add to Shopping List
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
+                        {(shoppingLists?.data || []).map((list) => {
+                          return (
+                            <DropdownMenuItem key={list.id}>
+                              {list.name}
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </LoadingGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              )}
+              {isMobile && (
+                <DropdownMenuItem onClick={mobileOnAddToShoppingList}>
+                  <ShoppingBasket /> Add to Shopping List
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onResetDateBounds}>
                 <RefreshCcw /> Reset View
