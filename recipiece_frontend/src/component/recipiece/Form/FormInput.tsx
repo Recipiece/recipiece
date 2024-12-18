@@ -29,10 +29,18 @@ export const FormInput: FC<FormInputProps> = ({ isLoading, name, className, labe
           <FormItem className={fullClassName}>
             {label && <FormLabel>{label}</FormLabel>}
             <FormControl>
-              <Input {...restInputProps} {...field} onBlur={(event) => {
-                field.onBlur();
-                onBlur?.(event);
-              }} />
+              <Input
+                {...restInputProps}
+                {...field}
+                onBlur={(event) => {
+                  event.preventDefault();
+                  if (onBlur) {
+                    onBlur?.(event);
+                  } else {
+                    field.onBlur();
+                  }
+                }}
+              />
             </FormControl>
             <FormMessage />
             {instructions && <FormDescription>{instructions}</FormDescription>}

@@ -108,14 +108,12 @@ export interface CreateMealPlanItemRequestSchema extends InferType<typeof YCreat
  */
 export const YUpdateMealPlanItemRequestSchema = object({
   id: number().required(),
-  start_date: string().datetime().required(),
+  meal_plan_id: number().required(),
+  start_date: string().datetime().notRequired(),
   freeform_content: string().notRequired().nullable(),
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
 })
-  .test("oneOfFreeformContentOrRecipeId", (ctx) => {
-    return ctx.freeform_content !== undefined || !!ctx.recipe_id;
-  })
   .strict()
   .noUnknown();
 

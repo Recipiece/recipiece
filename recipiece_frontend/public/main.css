@@ -2785,6 +2785,10 @@ body {
     margin-bottom: 0px;
   }
 
+  .sm\:ml-auto {
+    margin-left: auto;
+  }
+
   .sm\:block {
     display: block;
   }
@@ -2819,10 +2823,6 @@ body {
 
   .sm\:w-auto {
     width: auto;
-  }
-
-  .sm\:max-w-\[240px\] {
-    max-width: 240px;
   }
 
   .sm\:max-w-sm {
