@@ -57,7 +57,7 @@ export const listItemsForMealPlan = async (
   const items = await prisma.mealPlanItem.findMany({
     where: filters,
     orderBy: {
-      start_date: "asc",
+      created_at: "asc",
     },
     include: {
       recipe: {

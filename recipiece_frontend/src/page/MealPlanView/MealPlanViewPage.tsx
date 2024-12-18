@@ -3,9 +3,9 @@ import { DateTime } from "luxon";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMealPlanByIdQuery, useListItemsForMealPlanQuery } from "../../api";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, LoadingGroup, Stack } from "../../component";
+import { Button, LoadingGroup, Stack } from "../../component";
 import { MealPlanItem } from "../../data";
-import { floorDateToBeginningOfWeek, floorDateToDay } from "../../util";
+import { floorDateToDay } from "../../util";
 import { MealPlanItemsCard } from "./MealPlanItemCard";
 
 /**
@@ -33,17 +33,17 @@ type MealPlanItemsFormType = { readonly [key: string]: Partial<MealPlanItem>[] }
 export const MealPlanViewPage: FC = () => {
   const { id } = useParams();
   const mealPlanId = +id!;
+  const [isEditing, setIsEditing] = useState(false);
 
   const { data: mealPlan, isLoading: isLoadingMealPlan } = useGetMealPlanByIdQuery(mealPlanId);
 
   const todayDate = useMemo(() => floorDateToDay(DateTime.now()), []);
-  const baseDate = useMemo(() => floorDateToBeginningOfWeek(DateTime.utc()), []);
 
-  const [currentStartDate, setCurrentStartDate] = useState<DateTime>(baseDate);
-  const [currentEndDate, setCurrentEndDate] = useState<DateTime>(baseDate.plus({ days: 7 }));
+  const [currentStartDate, setCurrentStartDate] = useState<DateTime>(todayDate);
+  const [currentEndDate, setCurrentEndDate] = useState<DateTime>(todayDate.plus({ days: 5 }));
 
   const daysBetweenBounds: DateTime[] = useMemo(() => {
-    const duration = currentEndDate.diff(currentStartDate, ["days"]);
+    const duration = currentEndDate.toLocal().diff(currentStartDate.toLocal(), ["days"]);
     const datesArray = [];
     for (let i = 0; i < duration.days; i++) {
       datesArray[i] = currentStartDate.plus({ days: i });
@@ -100,7 +100,10 @@ export const MealPlanViewPage: FC = () => {
     setCurrentEndDate(shifted);
   }, [currentEndDate]);
 
-  const onResetDateBounds = useCallback(() => {}, []);
+  const onResetDateBounds = useCallback(() => {
+    setCurrentStartDate(todayDate);
+    setCurrentEndDate(todayDate.plus({ days: 5 }));
+  }, [todayDate]);
 
   return (
     <Stack>
@@ -113,25 +116,23 @@ export const MealPlanViewPage: FC = () => {
         </div>
       </LoadingGroup>
       {mealPlan && (
-        <div>
+        <div className="flex flex-col gap-4">
           <div className="text-center">
             <Button variant="ghost" onClick={onLoadMoreAbove} disabled={currentStartDate <= mealPlanCreatedAt}>
               <CircleArrowUp />
             </Button>
           </div>
-          <Accordion type="multiple" defaultValue={[todayDate.toFormat("LLLL dd")]}>
-            {daysBetweenBounds.map((day, index) => {
-              console.log(defaultValues[floorDateToDay(day).toISO()!]);
-              return (
-                <AccordionItem key={index} value={day.toFormat("LLLL dd")}>
-                  <AccordionTrigger>{day.toFormat("EEEE, LLLL dd")}</AccordionTrigger>
-                  <AccordionContent>
-                    <MealPlanItemsCard startDate={floorDateToDay(day)} mealPlan={mealPlan} initialMealPlanItems={defaultValues[floorDateToDay(day).toISO()!]} />
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
+          {daysBetweenBounds.map((day) => {
+            return (
+              <MealPlanItemsCard
+                key={day.toMillis()}
+                isEditing={isEditing}
+                startDate={floorDateToDay(day)}
+                mealPlan={mealPlan}
+                initialMealPlanItems={defaultValues[floorDateToDay(day).toISO()!]}
+              />
+            );
+          })}
           <div className="text-center mt-2">
             <Button variant="ghost" onClick={onLoadMoreBelow} disabled={currentEndDate.diff(currentStartDate, ["months"]).months > 6}>
               <CircleArrowDown />

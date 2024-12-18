@@ -11,6 +11,7 @@ export const YMealPlanItemSchema = object({
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
   recipe: YRecipeSchema.notRequired().nullable(),
+  label: string().notRequired().nullable(),
 })
   .strict()
   .noUnknown();
@@ -20,9 +21,7 @@ export interface MealPlanItemSchema extends InferType<typeof YMealPlanItemSchema
 export const YMealPlanSchema = object({
   id: number().required(),
   name: string().required(),
-  duration: string().required(),
   created_at: date().required(),
-  start_date: date().required(),
 })
   .strict()
   .noUnknown();
@@ -94,6 +93,7 @@ export const YCreateMealPlanItemRequestSchema = object({
   freeform_content: string().notRequired().nullable(),
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
+  label: string().notRequired().nullable(),
 })
   .test("oneOfFreeformContentOrRecipeId", (ctx) => {
     return ctx.freeform_content !== undefined || !!ctx.recipe_id;
@@ -113,6 +113,7 @@ export const YUpdateMealPlanItemRequestSchema = object({
   freeform_content: string().notRequired().nullable(),
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
+  label: string().notRequired().nullable(),
 })
   .strict()
   .noUnknown();

@@ -1,13 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, Fragment, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormFile, FormSelect, SelectItem, Stack, SubmitButton } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
-
-// const SUPPORTED_FILE_FORMATS = [".paprikarecipes"];
-// const SUPPORTED_APPLICATIONS = ["Paprika"];
 
 const SUPPORTED_FILES = [
   {
@@ -21,12 +18,8 @@ const ImportRecipesFormSchema = z.object({
   file: z
     .instanceof(FileList)
     .refine((fileData) => !!fileData && !!fileData[0], "Select a file")
-    // .refine((fileData) => {
-    //   const extension = fileData[0].name.slice(fileData[0].name.lastIndexOf("."));
-    //   return SUPPORTED_FILES.map((f) => f.extension).includes(extension);
-    // }, "File format is not supported")
     .refine((fileData) => {
-      console.log(fileData[0].size)
+      console.log(fileData[0].size);
       return fileData[0].size <= 40000000;
     }, "File must be under 40 MB"),
   source: z.string().refine((val) => SUPPORTED_FILES.map((f) => f.format).includes(val), "File must come from a supported application"),

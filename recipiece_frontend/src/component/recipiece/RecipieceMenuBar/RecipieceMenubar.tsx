@@ -149,7 +149,6 @@ export const RecipieceMenubar: FC = () => {
         try {
           const createdMealPlan = await createMealPlan({
             ...data,
-            start_date: DateTime.utc().toISO(),
           });
           navigate(`/meal-plan/view/${createdMealPlan.data.id}`);
           toast({

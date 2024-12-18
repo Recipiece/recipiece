@@ -8,14 +8,13 @@ export interface MealPlanItem {
   readonly notes?: string;
   readonly recipe_id?: number;
   readonly recipe?: Recipe;
+  readonly label?: string;
 }
 
 export interface MealPlan {
   readonly id: number;
   readonly name: string;
-  readonly duration: string;
   readonly created_at: string;
-  readonly start_date: string;
 }
 
 export interface ListMealPlanFilters {
