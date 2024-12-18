@@ -162,8 +162,8 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
               <div>
                 <Link to={`/recipe/view/${recipe.id}`} target="_blank" rel="noopener noreferrer">
                   <div className="inline-flex flex-row items-center gap-2">
-                    <h1 className="text-lg">{recipe.name}</h1>
-                    <SquareArrowOutUpRight />
+                    <h1 className="text-lg underline">{recipe.name}</h1>
+                    <SquareArrowOutUpRight className="hidden sm:block"/>
                   </div>
                 </Link>
 

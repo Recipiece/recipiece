@@ -1,10 +1,11 @@
-import { CircleArrowDown, CircleArrowUp, RefreshCcw } from "lucide-react";
+import { ChartNoAxesGantt, CircleArrowDown, CircleArrowUp, Edit, ListCheck, MoreVertical, RefreshCcw, ShoppingBasket, Trash } from "lucide-react";
 import { DateTime } from "luxon";
-import { FC, useCallback, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useGetMealPlanByIdQuery, useListItemsForMealPlanQuery } from "../../api";
-import { Button, LoadingGroup, Stack } from "../../component";
-import { MealPlanItem } from "../../data";
+import { FC, useCallback, useContext, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDeleteMealPlanMutation, useGetMealPlanByIdQuery, useListItemsForMealPlanQuery, useUpdateMealPlanMutation } from "../../api";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, LoadingGroup, Stack, useToast } from "../../component";
+import { DialogContext } from "../../context";
+import { MealPlan, MealPlanItem } from "../../data";
 import { floorDateToDay } from "../../util";
 import { MealPlanItemsCard } from "./MealPlanItemCard";
 
@@ -33,9 +34,16 @@ type MealPlanItemsFormType = { readonly [key: string]: Partial<MealPlanItem>[] }
 export const MealPlanViewPage: FC = () => {
   const { id } = useParams();
   const mealPlanId = +id!;
+
+  const { pushDialog, popDialog } = useContext(DialogContext);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: mealPlan, isLoading: isLoadingMealPlan } = useGetMealPlanByIdQuery(mealPlanId);
+  const { mutateAsync: updateMealPlan } = useUpdateMealPlanMutation();
+  const { mutateAsync: deleteMealPlan } = useDeleteMealPlanMutation();
 
   const todayDate = useMemo(() => floorDateToDay(DateTime.now()), []);
 
@@ -105,14 +113,92 @@ export const MealPlanViewPage: FC = () => {
     setCurrentEndDate(todayDate.plus({ days: 5 }));
   }, [todayDate]);
 
+  const onEditMealPlan = useCallback(() => {
+    pushDialog("modifyMealPlan", {
+      mealPlan: mealPlan,
+      onClose: () => popDialog("modifyMealPlan"),
+      onSubmit: async (modifiedMealPlan: MealPlan) => {
+        try {
+          await updateMealPlan({ ...modifiedMealPlan, id: mealPlan?.id! });
+          toast({
+            title: "Meal Plan Updated",
+            description: "Your meal plan was updated.",
+          });
+        } catch {
+          toast({
+            title: "Unable to Update Meal Plan",
+            description: "We were unable to update your meal plan. Try again later",
+            variant: "destructive",
+          });
+        } finally {
+          popDialog("modifyMealPlan");
+        }
+      },
+    });
+  }, [pushDialog, mealPlan, popDialog, updateMealPlan, toast]);
+
+  const onDeleteMealPlan = useCallback(async () => {
+    pushDialog("deleteMealPlan", {
+      mealPlan: mealPlan,
+      onClose: () => popDialog("deleteMealPlan"),
+      onSubmit: async (mealPlanToDelete: MealPlan) => {
+        popDialog("deleteMealPlan");
+        try {
+          await deleteMealPlan(mealPlanToDelete.id);
+          navigate("/");
+          toast({
+            title: "Meal Plan Deleted",
+            description: "Your meal plan has been deleted",
+          });
+        } catch {
+          toast({
+            title: "Unable to Delete Meal Plan",
+            description: "Your meal plan could not be deleted. Try again later.",
+            variant: "destructive",
+          });
+        }
+      },
+    });
+  }, [deleteMealPlan, mealPlan, navigate, popDialog, pushDialog, toast]);
+
   return (
     <Stack>
       <LoadingGroup isLoading={isLoadingMealPlan} className="h-8 w-52">
         <div className="flex flex-col sm:flex-row">
           <h1 className="text-2xl">{mealPlan?.name}</h1>
-          <Button variant="secondary" className="sm:ml-auto" onClick={onResetDateBounds}>
-            <RefreshCcw />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="sm:ml-auto">
+                <MoreVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {!isEditing && (
+                <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                  <ChartNoAxesGantt /> Manage Meals
+                </DropdownMenuItem>
+              )}
+              {isEditing && (
+                <DropdownMenuItem onClick={() => setIsEditing(false)}>
+                  <ListCheck /> Save Meals
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem>
+                <ShoppingBasket /> Add to Shopping List
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onResetDateBounds}>
+                <RefreshCcw /> Reset View
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onEditMealPlan}>
+                <Edit /> Edit Meal Plan
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={onDeleteMealPlan}>
+                <Trash /> Delete Meal Plan
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </LoadingGroup>
       {mealPlan && (

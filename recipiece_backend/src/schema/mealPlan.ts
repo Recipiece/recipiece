@@ -33,8 +33,6 @@ export interface MealPlanSchema extends InferType<typeof YMealPlanSchema> {}
  */
 export const YCreateMealPlanRequestSchema = object({
   name: string().required(),
-  duration: string().required(),
-  start_date: string().datetime().required(),
 })
   .strict()
   .noUnknown();
@@ -47,8 +45,6 @@ export interface CreateMealPlanRequestSchema extends InferType<typeof YCreateMea
 export const YUpdateMealPlanRequestSchema = object({
   id: number().required(),
   name: string().notRequired(),
-  duration: string().notRequired(),
-  start_date: string().datetime().notRequired(),
 })
   .strict()
   .noUnknown();
