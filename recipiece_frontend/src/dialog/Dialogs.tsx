@@ -1,3 +1,4 @@
+import { AddMealPlanToShoppingListDialog } from "./AddMealPlanToShoppingList";
 import { AddRecipeToShoppingListDialog } from "./AddRecipeToShoppingList";
 import { AddTimeToTimerDialog } from "./AddTimeToTimer";
 import { CreateCookbookDialog } from "./CreateCookbook";
@@ -63,5 +64,8 @@ export const Dialogs = {
   },
   deleteMealPlan: {
     component: DeleteMealPlanDialog,
+  },
+  addMealPlanToShoppingList: {
+    component: AddMealPlanToShoppingListDialog,
   },
 };

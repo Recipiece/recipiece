@@ -1,58 +1,67 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useCallback } from "react";
+import { DateTime } from "luxon";
+import { FC, useCallback, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormCheckbox, ScrollArea, SubmitButton } from "../../component";
-import { Recipe } from "../../data";
+import { MealPlan, MealPlanItem } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface AddRecipeToShoppingListDialogProps extends BaseDialogProps<AddRecipeToShoppingListForm> {
-  readonly recipe: Recipe;
+export interface AddMealPlanToShoppingListDialogProps extends BaseDialogProps<AddMealPlanToShoppingListForm> {
+  readonly mealPlan: MealPlan;
+  readonly mealPlanItems: MealPlanItem[];
 }
 
-const AddRecipeToShoppingListFormSchema = z.object({
+const AddMealPlanToShoppingListFormSchema = z.object({
   items: z.array(
     z.object({
       name: z.string(),
-      selected: z.boolean(),
       notes: z.string(),
+      selected: z.boolean(),
     })
   ),
 });
 
-export type AddRecipeToShoppingListForm = z.infer<typeof AddRecipeToShoppingListFormSchema>;
+export type AddMealPlanToShoppingListForm = z.infer<typeof AddMealPlanToShoppingListFormSchema>;
 
-export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProps> = ({ onSubmit, onClose, recipe }) => {
+export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialogProps> = ({ onSubmit, onClose, mealPlan, mealPlanItems }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
 
-  const form = useForm<AddRecipeToShoppingListForm>({
-    resolver: zodResolver(AddRecipeToShoppingListFormSchema),
+  const defaultValues: AddMealPlanToShoppingListForm = useMemo(() => {
+    const items = mealPlanItems
+      .filter((item) => !!item.recipe?.ingredients)
+      .map((item) => {
+        let notesString = item.label ? `${item.label} - ` : "";
+        notesString += DateTime.fromISO(item.start_date).toFormat("EEE, MMM dd");
+        notesString += ` - ${item.recipe!.name}`;
+        return item.recipe!.ingredients.map((ing) => {
+          return {
+            name: ing.name,
+            selected: true,
+            notes: notesString.trim(),
+          };
+        });
+      })
+      .flat();
+
+    return { items: [...items] };
+  }, [mealPlanItems]);
+
+  const form = useForm<AddMealPlanToShoppingListForm>({
+    resolver: zodResolver(AddMealPlanToShoppingListFormSchema),
     defaultValues: {
-      items: recipe.ingredients.map((ing) => {
-        let notesString = `${recipe.name} - `;
-        if(ing.amount) {
-          notesString += `${ing.unit} `
-        }
-        if(ing.amount) {
-          notesString += `${ing.amount}`
-        }
-        return {
-          name: ing.name,
-          selected: true,
-          notes: notesString.trim(),
-        };
-      }),
+      ...defaultValues,
     },
   });
 
   const itemsFieldArray = useFieldArray({
-    control: form?.control,
+    control: form.control,
     name: "items",
   });
 
   const onAddToShoppingList = useCallback(
-    async (formData: AddRecipeToShoppingListForm) => {
+    async (formData: AddMealPlanToShoppingListForm) => {
       onSubmit?.(formData);
     },
     [onSubmit]
@@ -60,33 +69,31 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
 
   const onSelectAll = useCallback(() => {
     form.reset({
-      items: recipe.ingredients.map((ing) => {
-        return {
-          name: ing.name,
-          selected: true,
-        };
-      }),
+      items: [
+        ...defaultValues.items.map((item) => {
+          return { ...item, selected: true };
+        }),
+      ],
     });
-  }, [form, recipe]);
+  }, [form, defaultValues]);
 
   const onDeselectAll = useCallback(() => {
     form.reset({
-      items: recipe.ingredients.map((ing) => {
-        return {
-          name: ing.name,
-          selected: false,
-        };
-      }),
+      items: [
+        ...defaultValues.items.map((item) => {
+          return { ...item, selected: false };
+        }),
+      ],
     });
-  }, [form, recipe]);
+  }, [form, defaultValues]);
 
   return (
     <ResponsiveContent className="p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onAddToShoppingList)}>
           <ResponsiveHeader className="mb-4">
-            <ResponsiveTitle>Add {recipe.name} to your shopping list</ResponsiveTitle>
-            <ResponsiveDescription>Add the ingredients from {recipe.name} to your shopping list.</ResponsiveDescription>
+            <ResponsiveTitle>Add {mealPlan.name} to your shopping list</ResponsiveTitle>
+            <ResponsiveDescription>Add the ingredients from the recipes in {mealPlan.name} to your shopping list.</ResponsiveDescription>
           </ResponsiveHeader>
 
           <div>
@@ -102,6 +109,7 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
               return (
                 <div key={fieldArrayValue.id} className="pb-3">
                   <FormCheckbox name={`items.${index}.selected`} label={fieldArrayValue.name} />
+                  <p className="text-sm">{fieldArrayValue.notes}</p>
                 </div>
               );
             })}

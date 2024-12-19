@@ -16,6 +16,7 @@ export const YShoppingListItemSchema = object({
   completed: boolean().required(),
   order: number().required(),
   content: string().required(),
+  notes: string().notRequired().nullable(),
 })
   .strict()
   .noUnknown();

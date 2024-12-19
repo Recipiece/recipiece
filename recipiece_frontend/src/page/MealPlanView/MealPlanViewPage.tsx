@@ -2,7 +2,14 @@ import { ChartNoAxesGantt, CircleArrowDown, CircleArrowUp, Edit, ListCheck, More
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDeleteMealPlanMutation, useGetMealPlanByIdQuery, useListItemsForMealPlanQuery, useListShoppingListsQuery, useUpdateMealPlanMutation } from "../../api";
+import {
+  useAppendShoppingListItemsMutation,
+  useDeleteMealPlanMutation,
+  useGetMealPlanByIdQuery,
+  useListItemsForMealPlanQuery,
+  useListShoppingListsQuery,
+  useUpdateMealPlanMutation,
+} from "../../api";
 import {
   Button,
   DropdownMenu,
@@ -19,10 +26,11 @@ import {
   useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
-import { MealPlan, MealPlanItem, ShoppingList } from "../../data";
+import { MealPlan, MealPlanItem, ShoppingList, ShoppingListItem } from "../../data";
 import { floorDateToDay } from "../../util";
 import { MealPlanItemsCard } from "./MealPlanItemCard";
 import { useLayout } from "../../hooks";
+import { AddMealPlanToShoppingListForm } from "../../dialog";
 
 /**
  * This is a rather tricky form, and we're not even really using a form for this.
@@ -96,9 +104,15 @@ export const MealPlanViewPage: FC = () => {
     }
   );
 
+  const { mutateAsync: appendItemsToShoppingList } = useAppendShoppingListItemsMutation();
+
   const mealPlanCreatedAt = useMemo(() => {
     return DateTime.fromISO(mealPlan?.created_at!);
   }, [mealPlan]);
+
+  const canAddToShoppingList = useMemo(() => {
+    return !!(mealPlanItems?.meal_plan_items ?? []).find((item) => !!item.recipe);
+  }, [mealPlanItems]);
 
   const defaultValues: MealPlanItemsFormType = useMemo(() => {
     if (mealPlanItems) {
@@ -123,14 +137,14 @@ export const MealPlanViewPage: FC = () => {
   }, [mealPlanItems]);
 
   const onLoadMoreAbove = useCallback(() => {
-    const shifted = currentStartDate.minus({ days: 7 });
+    const shifted = currentStartDate.minus({ days: 1 });
     const mealPlanCreatedAt = DateTime.fromISO(mealPlan!.created_at);
     const newVal = DateTime.max(shifted, mealPlanCreatedAt);
     setCurrentStartDate(newVal);
   }, [currentStartDate, mealPlan]);
 
   const onLoadMoreBelow = useCallback(() => {
-    const shifted = currentEndDate.plus({ days: 7 });
+    const shifted = currentEndDate.plus({ days: 1 });
     setCurrentEndDate(shifted);
   }, [currentEndDate]);
 
@@ -187,15 +201,57 @@ export const MealPlanViewPage: FC = () => {
     });
   }, [deleteMealPlan, mealPlan, navigate, popDialog, pushDialog, toast]);
 
+  const onAddMealPlanToShoppingList = useCallback(
+    (shoppingList: ShoppingList) => {
+      pushDialog("addMealPlanToShoppingList", {
+        mealPlan: mealPlan!,
+        mealPlanItems: mealPlanItems!.meal_plan_items,
+        onClose: () => popDialog("addMealPlanToShoppingList"),
+        onSubmit: async (managedItems: AddMealPlanToShoppingListForm) => {
+          try {
+            const selectedItems: Partial<ShoppingListItem>[] = managedItems.items
+              .filter((item) => item.selected)
+              .map((item) => {
+                return {
+                  content: item.name,
+                  notes: item.notes,
+                };
+              });
+
+            if (selectedItems.length > 0) {
+              await appendItemsToShoppingList({
+                shopping_list_id: shoppingList.id,
+                items: selectedItems,
+              });
+              toast({
+                title: "Items Added",
+                description: "The items have been added to your shopping list!",
+              });
+            }
+          } catch {
+            toast({
+              title: "Error Adding Items",
+              description: "There was an error adding the items to your shopping list. Try again later.",
+              variant: "destructive",
+            });
+          } finally {
+            popDialog("addMealPlanToShoppingList");
+          }
+        },
+      });
+    },
+    [appendItemsToShoppingList, mealPlan, mealPlanItems, popDialog, pushDialog, toast]
+  );
+
   const mobileOnAddToShoppingList = useCallback(() => {
     pushDialog("mobileShoppingLists", {
       onClose: () => popDialog("mobileShoppingLists"),
       onSubmit: (shoppingList: ShoppingList) => {
         popDialog("mobileShoppingLists");
-        // onAddToShoppingList(shoppingList.id);
+        onAddMealPlanToShoppingList(shoppingList);
       },
     });
-  }, [pushDialog, popDialog]);
+  }, [pushDialog, popDialog, onAddMealPlanToShoppingList]);
 
   return (
     <Stack>
@@ -221,7 +277,7 @@ export const MealPlanViewPage: FC = () => {
               )}
               {!isMobile && (
                 <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
-                  <DropdownMenuSubTrigger>
+                  <DropdownMenuSubTrigger disabled={!canAddToShoppingList}>
                     <ShoppingBasket />
                     Add to Shopping List
                   </DropdownMenuSubTrigger>
@@ -230,7 +286,7 @@ export const MealPlanViewPage: FC = () => {
                       <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
                         {(shoppingLists?.data || []).map((list) => {
                           return (
-                            <DropdownMenuItem key={list.id}>
+                            <DropdownMenuItem onClick={() => onAddMealPlanToShoppingList(list)} key={list.id}>
                               {list.name}
                             </DropdownMenuItem>
                           );
@@ -241,7 +297,7 @@ export const MealPlanViewPage: FC = () => {
                 </DropdownMenuSub>
               )}
               {isMobile && (
-                <DropdownMenuItem onClick={mobileOnAddToShoppingList}>
+                <DropdownMenuItem disabled={!canAddToShoppingList} onClick={mobileOnAddToShoppingList}>
                   <ShoppingBasket /> Add to Shopping List
                 </DropdownMenuItem>
               )}

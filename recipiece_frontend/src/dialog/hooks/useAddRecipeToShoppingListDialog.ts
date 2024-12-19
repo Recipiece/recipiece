@@ -36,6 +36,7 @@ export const useAddRecipeToShoppingListDialog = (recipe: Recipe) => {
             .map((item) => {
               return {
                 content: item.name,
+                notes: item.notes,
               };
             });
           if (itemsToAdd.length > 0) {

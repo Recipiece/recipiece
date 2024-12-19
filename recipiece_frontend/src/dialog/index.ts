@@ -1,3 +1,4 @@
+export * from "./AddMealPlanToShoppingList";
 export * from "./AddRecipeToShoppingList";
 export * from "./AddTimeToTimer";
 export * from "./CreateCookbook";
