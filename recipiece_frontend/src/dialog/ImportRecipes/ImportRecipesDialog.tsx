@@ -19,7 +19,6 @@ const ImportRecipesFormSchema = z.object({
     .instanceof(FileList)
     .refine((fileData) => !!fileData && !!fileData[0], "Select a file")
     .refine((fileData) => {
-      console.log(fileData[0].size);
       return fileData[0].size <= 40000000;
     }, "File must be under 40 MB"),
   source: z.string().refine((val) => SUPPORTED_FILES.map((f) => f.format).includes(val), "File must come from a supported application"),
