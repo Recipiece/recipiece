@@ -67,6 +67,19 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readyState]);
 
+  const setItemNotes = useCallback(
+    (item: Partial<ShoppingListItem>) => {
+      setIsPerformingAction(true);
+      sendMessage(
+        JSON.stringify({
+          action: "set_item_notes",
+          item: { ...item },
+        })
+      );
+    },
+    [sendMessage],
+  )
+
   const clearItems = useCallback(() => {
     setIsPerformingAction(true);
     sendMessage(
@@ -173,6 +186,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
     setItemOrder,
     setItemContent,
     clearItems,
+    setItemNotes,
   };
 };
 

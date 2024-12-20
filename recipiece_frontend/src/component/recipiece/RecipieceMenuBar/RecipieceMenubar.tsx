@@ -17,13 +17,14 @@ import { Button, Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigg
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
 import { TimerMenuItem } from "./TimerMenuItem";
+import { Cookbook, ShoppingList } from "../../../data";
 
 /**
  * The almighty menu bar
  *
  * Both the desktop and mobile behaviors are handled here. The content inside the `footer` is
  * only displayed on mobile views.
- * 
+ *
  * Some Menubar content is displayed on mobile, but most of it is not shown.
  */
 export const RecipieceMenubar: FC = () => {
@@ -197,6 +198,26 @@ export const RecipieceMenubar: FC = () => {
     });
   }, [pushDialog, popDialog, navigate, onStartCreateCookbook, onStartCreateMealPlan, onStartCreateShoppingList, onStartCreateTimer]);
 
+  const onMobileViewShoppingLists = useCallback(() => {
+    pushDialog("mobileShoppingLists", {
+      onClose: () => popDialog("mobileShoppingLists"),
+      onSubmit: (shoppingList: ShoppingList) => {
+        popDialog("mobileShoppingLists");
+        navigate(`/shopping-list/${shoppingList.id}`);
+      },
+    });
+  }, [navigate, popDialog, pushDialog]);
+
+  const onMobileViewCookbooks = useCallback(() => {
+    pushDialog("mobileCookbooks", {
+      onClose: () => popDialog("mobileCookbooks"),
+      onSubmit: (cookbook: Cookbook) => {
+        popDialog("mobileCookbooks");
+        navigate(`/cookbook/${cookbook.id}`);
+      },
+    });
+  }, [navigate, popDialog, pushDialog]);
+
   return (
     <>
       <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 bg-white sm:bg-primary text-white">
@@ -320,7 +341,7 @@ export const RecipieceMenubar: FC = () => {
             <Home />
           </Button>
 
-          <Button className="text-white grow" onClick={() => {}}>
+          <Button className="text-white grow" onClick={onMobileViewCookbooks}>
             <Book />
           </Button>
 
@@ -328,7 +349,7 @@ export const RecipieceMenubar: FC = () => {
             <CirclePlus />
           </Button>
 
-          <Button onClick={() => {}} className="text-white grow">
+          <Button onClick={onMobileViewShoppingLists} className="text-white grow">
             <ShoppingBasket />
           </Button>
 
