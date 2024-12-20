@@ -11,6 +11,7 @@ export const YMealPlanItemSchema = object({
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
   recipe: YRecipeSchema.notRequired().nullable(),
+  label: string().notRequired().nullable(),
 })
   .strict()
   .noUnknown();
@@ -20,9 +21,7 @@ export interface MealPlanItemSchema extends InferType<typeof YMealPlanItemSchema
 export const YMealPlanSchema = object({
   id: number().required(),
   name: string().required(),
-  duration: string().required(),
   created_at: date().required(),
-  start_date: date().required(),
 })
   .strict()
   .noUnknown();
@@ -34,8 +33,6 @@ export interface MealPlanSchema extends InferType<typeof YMealPlanSchema> {}
  */
 export const YCreateMealPlanRequestSchema = object({
   name: string().required(),
-  duration: string().required(),
-  start_date: string().datetime().required(),
 })
   .strict()
   .noUnknown();
@@ -48,8 +45,6 @@ export interface CreateMealPlanRequestSchema extends InferType<typeof YCreateMea
 export const YUpdateMealPlanRequestSchema = object({
   id: number().required(),
   name: string().notRequired(),
-  duration: string().notRequired(),
-  start_date: string().datetime().notRequired(),
 })
   .strict()
   .noUnknown();
@@ -94,6 +89,7 @@ export const YCreateMealPlanItemRequestSchema = object({
   freeform_content: string().notRequired().nullable(),
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
+  label: string().notRequired().nullable(),
 })
   .test("oneOfFreeformContentOrRecipeId", (ctx) => {
     return ctx.freeform_content !== undefined || !!ctx.recipe_id;
@@ -108,14 +104,13 @@ export interface CreateMealPlanItemRequestSchema extends InferType<typeof YCreat
  */
 export const YUpdateMealPlanItemRequestSchema = object({
   id: number().required(),
-  start_date: string().datetime().required(),
+  meal_plan_id: number().required(),
+  start_date: string().datetime().notRequired(),
   freeform_content: string().notRequired().nullable(),
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
+  label: string().notRequired().nullable(),
 })
-  .test("oneOfFreeformContentOrRecipeId", (ctx) => {
-    return ctx.freeform_content !== undefined || !!ctx.recipe_id;
-  })
   .strict()
   .noUnknown();
 

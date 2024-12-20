@@ -16,6 +16,7 @@ export const YShoppingListItemSchema = object({
   completed: boolean().required(),
   order: number().required(),
   content: string().required(),
+  notes: string().notRequired().nullable(),
 })
   .strict()
   .noUnknown();
@@ -75,6 +76,7 @@ const MODIFY_SHOPPING_LIST_ACTIONS = [
   "set_item_order",
   "set_item_content",
   "clear_items",
+  "set_item_notes",
   "__ping__",
 ];
 

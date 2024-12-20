@@ -9,28 +9,6 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // const setAccessToken = useCallback(
-  //   (value: string | undefined) => {
-  //     if (value) {
-  //       _setAccessToken(value);
-  //     } else {
-  //       _removeAccessToken();
-  //     }
-  //   },
-  //   [_setAccessToken, _removeAccessToken]
-  // );
-
-  // const setRefreshToken = useCallback(
-  //   (value: string | undefined) => {
-  //     if (value) {
-  //       _setRefreshToken(value);
-  //     } else {
-  //       _removeRefreshToken();
-  //     }
-  //   },
-  //   [_setRefreshToken, _removeRefreshToken]
-  // );
-
   useEffect(() => {
     const tokenResolver = TokenManager.getInstance();
     const isUnauthenticatedPath = unauthenticatedPaths.includes(location.pathname);

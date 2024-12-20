@@ -1,5 +1,5 @@
 import { Edit, Eraser, Minus, MoreVertical, Share, Trash } from "lucide-react";
-import { createRef, FC, KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createRef, FC, KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteShoppingListMutation, useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
 import {
@@ -9,23 +9,29 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Input,
   LoadingGroup,
   Popover,
   PopoverContent,
   PopoverTrigger,
+  RecipieceMenuBarContext,
   Shelf,
   ShelfSpacer,
   Stack,
-  useToast
+  useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
 import { ShoppingList, ShoppingListItem } from "../../data";
-import { CheckableShoppingListItemInput, ShoppingListItemInput } from "./ShoppingListItemInput";
+import { CheckableShoppingListItemInput } from "./ShoppingListItemInput";
+import { useLayout } from "../../hooks";
+import { createPortal } from "react-dom";
 
 export const ShoppingListViewPage: FC = () => {
   const { shoppingListId } = useParams();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isMobile } = useLayout();
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
 
   const { data: shoppingList, isLoading: isLoadingShoppingList } = useGetShoppingListByIdQuery(+shoppingListId!);
@@ -40,6 +46,7 @@ export const ShoppingListViewPage: FC = () => {
     setItemContent,
     deleteItem,
     clearItems,
+    setItemNotes,
   } = useShoppingListItemsSubscription(+shoppingListId!);
 
   const { mutateAsync: deleteShoppingList } = useDeleteShoppingListMutation({
@@ -76,6 +83,10 @@ export const ShoppingListViewPage: FC = () => {
     );
   }, [shoppingListItems]);
 
+  const sortedIncompleteItems = useMemo(() => {
+    return Object.values(incompleteItems).sort((a, b) => a.order - b.order);
+  }, [incompleteItems]);
+
   const onChangeItemContent = useCallback(
     (item: ShoppingListItem) => {
       setItemContent({
@@ -85,7 +96,7 @@ export const ShoppingListViewPage: FC = () => {
     [setItemContent]
   );
 
-  const onChangeItemKeyDown = useCallback(
+  const onChangeItemContentKeyDown = useCallback(
     (event: KeyboardEvent, item: ShoppingListItem) => {
       if (event.key === "Enter") {
         onChangeItemContent(item);
@@ -94,11 +105,38 @@ export const ShoppingListViewPage: FC = () => {
     [onChangeItemContent]
   );
 
-  const onChangeItem = useCallback((event: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+  const onChangeItemValue = useCallback((event: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
     setIncompleteItems((prev) => {
       return {
         ...prev,
         [itemId]: { ...prev[itemId], content: event.target.value },
+      };
+    });
+  }, []);
+
+  const onChangeItemNotes = useCallback(
+    (item: ShoppingListItem) => {
+      setItemNotes({
+        ...item,
+      });
+    },
+    [setItemNotes]
+  );
+
+  const onChangeItemNotesKeyDown = useCallback(
+    (event: KeyboardEvent, item: ShoppingListItem) => {
+      if (event.key === "Enter") {
+        onChangeItemNotes(item);
+      }
+    },
+    [onChangeItemNotes]
+  );
+
+  const onChangeNotesValue = useCallback((event: React.ChangeEvent<HTMLInputElement>, itemId: number) => {
+    setIncompleteItems((prev) => {
+      return {
+        ...prev,
+        [itemId]: { ...prev[itemId], notes: event.target.value },
       };
     });
   }, []);
@@ -197,6 +235,33 @@ export const ShoppingListViewPage: FC = () => {
     });
   }, [pushDialog, popDialog, deleteShoppingList, navigate, shoppingList]);
 
+  const contextMenu = useMemo(() => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="text-primary">
+            <MoreVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <Edit /> Edit List Name
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Share /> Share List
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={clearItems} className="text-destructive">
+            <Eraser /> Clear All Items
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onRequestShoppingListDelete} className="text-destructive">
+            <Trash /> Delete List
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }, [clearItems, onRequestShoppingListDelete]);
+
   return (
     <Popover open={isAutoCompleteOpen}>
       <Stack>
@@ -205,28 +270,10 @@ export const ShoppingListViewPage: FC = () => {
             <h1 className="text-2xl">{shoppingList?.name}</h1>
             <ShelfSpacer />
             {shoppingList && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost">
-                    <MoreVertical />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <Edit /> Edit List Name
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Share /> Share List
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={clearItems} className="text-destructive">
-                    <Eraser /> Clear All Items
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onRequestShoppingListDelete} className="text-destructive">
-                    <Trash /> Delete List
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <>
+                {(isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current) && createPortal(contextMenu, mobileMenuPortalRef.current)}
+                {!isMobile && <>{contextMenu}</>}
+              </>
             )}
           </Shelf>
         </LoadingGroup>
@@ -235,10 +282,10 @@ export const ShoppingListViewPage: FC = () => {
             <Stack>
               <div className="flex-col">
                 <div className="w-full inline-flex flex-row gap-4">
-                  <ShoppingListItemInput
+                  <Input
                     ref={newItemRef}
                     disabled={isPerformingAction}
-                    className="flex-grow"
+                    className="border-y-0 border-b-[1px] border-l-[1px] border-r-0 w-full p-1 rounded-none ring-0 outline-none focus-visible:ring-0 focus-visible:outline-none rounded-bl-md"
                     placeholder="Add an item..."
                     value={newestShoppingListItem}
                     onChange={onNewestItemTextChange}
@@ -275,21 +322,22 @@ export const ShoppingListViewPage: FC = () => {
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-4">
-                {Object.values(incompleteItems).map((item) => {
+                {sortedIncompleteItems.map((item) => {
                   return (
-                    <div className="inline-flex flex-row gap-2 w-full" key={item.id}>
+                    <div className="inline-flex flex-row gap-2 w-full items-center" key={item.id}>
                       <CheckableShoppingListItemInput
-                        id={item.id.toString()}
                         className="flex-grow"
                         isDraggable
                         shoppingListItem={item}
                         disabled={isPerformingAction}
-                        value={item.content}
                         onCheck={markItemComplete}
-                        onBlur={() => onChangeItemContent(item)}
-                        onKeyDown={(event) => onChangeItemKeyDown(event, item)}
-                        onChange={(event) => onChangeItem(event, item.id)}
+                        onContentBlurred={() => onChangeItemContent(item)}
+                        onContentKeyDown={(event) => onChangeItemContentKeyDown(event, item)}
+                        onContentChanged={(event) => onChangeItemValue(event, item.id)}
                         onItemDropped={onShoppingListItemDropped}
+                        onNotesBlurred={() => onChangeItemNotes(item)}
+                        onNotesChanged={(event) => onChangeNotesValue(event, item.id)}
+                        onNotesKeyDown={(event) => onChangeItemNotesKeyDown(event, item)}
                       />
                       <Button onClick={() => onDeleteItem(item)} variant="ghost">
                         <Minus className="text-destructive" />
@@ -303,8 +351,8 @@ export const ShoppingListViewPage: FC = () => {
 
               {completeShoppingListItems.map((item) => {
                 return (
-                  <div key={item.id} className="flex flex-row gap-2 opacity-70">
-                    <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} value={item.content} readOnly />
+                  <div key={item.id} className="flex flex-row gap-2 opacity-70 items-center">
+                    <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} readOnly />
                     <Button onClick={() => onDeleteItem(item)} variant="ghost">
                       <Minus className="text-destructive" />
                     </Button>

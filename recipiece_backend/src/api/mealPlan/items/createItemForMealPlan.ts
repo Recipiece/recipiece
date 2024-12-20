@@ -30,6 +30,14 @@ export const createItemForMealPlan = async (
       ...restMealPlanItem,
       meal_plan_id: mealPlan.id,
     },
+    include: {
+      recipe: {
+        include: {
+          ingredients: true,
+          steps: true,
+        },
+      },
+    }
   });
   return [StatusCodes.OK, mealPlanItem];
 };

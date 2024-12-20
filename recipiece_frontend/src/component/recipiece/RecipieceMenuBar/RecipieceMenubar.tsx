@@ -1,6 +1,5 @@
-import { Book, CirclePlus, CircleUserRound, Home, Plus, ShoppingBasket } from "lucide-react";
-import { DateTime } from "luxon";
-import { FC, Fragment, useCallback, useContext, useState } from "react";
+import { Book, CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
+import { createContext, createRef, FC, Fragment, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateCookbookMutation,
@@ -12,23 +11,37 @@ import {
   useLogoutUserMutation,
 } from "../../../api";
 import { DialogContext, TimerContext } from "../../../context";
+import { Cookbook, ShoppingList } from "../../../data";
 import { CreateCookbookForm, CreateShoppingListForm, CreateTimerForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
 import { Button, Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator, useToast } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
 import { TimerMenuItem } from "./TimerMenuItem";
 
+export const RecipieceMenuBarContext = createContext<{
+  readonly mobileMenuPortalRef: undefined | RefObject<HTMLSpanElement>;
+}>({
+  mobileMenuPortalRef: undefined,
+});
+
+export const RecipieceMenuBarContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const mobileMenuPortalRef = createRef<HTMLSpanElement>();
+
+  return <RecipieceMenuBarContext.Provider value={{ mobileMenuPortalRef: mobileMenuPortalRef }}>{children}</RecipieceMenuBarContext.Provider>;
+};
+
 /**
  * The almighty menu bar
  *
  * Both the desktop and mobile behaviors are handled here. The content inside the `footer` is
  * only displayed on mobile views.
- * 
+ *
  * Some Menubar content is displayed on mobile, but most of it is not shown.
  */
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
   const { activeTimers, createTimer } = useContext(TimerContext);
   const [cookbooksPage, setCookbooksPage] = useState(0);
@@ -149,7 +162,6 @@ export const RecipieceMenubar: FC = () => {
         try {
           const createdMealPlan = await createMealPlan({
             ...data,
-            start_date: DateTime.utc().toISO(),
           });
           navigate(`/meal-plan/view/${createdMealPlan.data.id}`);
           toast({
@@ -198,10 +210,46 @@ export const RecipieceMenubar: FC = () => {
     });
   }, [pushDialog, popDialog, navigate, onStartCreateCookbook, onStartCreateMealPlan, onStartCreateShoppingList, onStartCreateTimer]);
 
+  const onMobileViewShoppingLists = useCallback(() => {
+    pushDialog("mobileShoppingLists", {
+      onClose: () => popDialog("mobileShoppingLists"),
+      onSubmit: (shoppingList: ShoppingList) => {
+        popDialog("mobileShoppingLists");
+        navigate(`/shopping-list/${shoppingList.id}`);
+      },
+    });
+  }, [navigate, popDialog, pushDialog]);
+
+  const onMobileViewCookbooks = useCallback(() => {
+    pushDialog("mobileCookbooks", {
+      onClose: () => popDialog("mobileCookbooks"),
+      onSubmit: (cookbook: Cookbook) => {
+        popDialog("mobileCookbooks");
+        navigate(`/cookbook/${cookbook.id}`);
+      },
+    });
+  }, [navigate, popDialog, pushDialog]);
+
+  const onMobileViewMealPlans = useCallback(() => {
+    pushDialog("mobileMealPlans", {
+      onClose: () => popDialog("mobileMealPlans"),
+      onSubmit: (cookbook: Cookbook) => {
+        popDialog("mobileMealPlans");
+        navigate(`/meal-plan/view/${cookbook.id}`);
+      },
+    });
+  }, [navigate, popDialog, pushDialog]);
+
   return (
     <>
       <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 bg-white sm:bg-primary text-white">
         <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white" />
+        <span className="ml-auto block sm:hidden">
+          <Button onClick={() => navigate("/account")} variant="link" className="text-primary">
+            <CircleUserRound />
+          </Button>
+        </span>
+        <span className="ml-auto block sm:hidden" ref={mobileMenuPortalRef} />
         <span className="hidden w-0 sm:w-auto sm:block">
           <MenubarMenu>
             <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
@@ -321,7 +369,7 @@ export const RecipieceMenubar: FC = () => {
             <Home />
           </Button>
 
-          <Button className="text-white grow" onClick={() => {}}>
+          <Button className="text-white grow" onClick={onMobileViewCookbooks}>
             <Book />
           </Button>
 
@@ -329,12 +377,12 @@ export const RecipieceMenubar: FC = () => {
             <CirclePlus />
           </Button>
 
-          <Button onClick={() => {}} className="text-white grow">
+          <Button onClick={onMobileViewShoppingLists} className="text-white grow">
             <ShoppingBasket />
           </Button>
 
-          <Button onClick={() => navigate("/account")} variant="link" className="text-white grow">
-            <CircleUserRound />
+          <Button onClick={onMobileViewMealPlans} className="text-white grow">
+            <GanttChart />
           </Button>
         </div>
       </footer>

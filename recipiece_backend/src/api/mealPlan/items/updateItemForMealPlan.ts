@@ -31,6 +31,14 @@ export const updateItemForMealPlan = async (request: AuthenticatedRequest): ApiR
       where: {
         id: mealPlanItemId,
       },
+      include: {
+        recipe: {
+          include: {
+            ingredients: true,
+            steps: true,
+          },
+        },
+      },
     });
     return [StatusCodes.OK, mealPlanItem];
   } catch (err: any) {

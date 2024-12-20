@@ -1,12 +1,12 @@
-import { FC, useCallback, useMemo } from "react";
-import { BaseDialogProps } from "../BaseDialogProps";
-import { MealPlan } from "../../data";
-import { z } from "zod";
-import { Duration } from "luxon";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Duration } from "luxon";
+import { FC, useCallback, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button, Form, FormInput, Stack, SubmitButton } from "../../component";
+import { MealPlan } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
-import { Button, Form, FormInput, FormSelect, SelectItem, Stack, SubmitButton } from "../../component";
+import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface ModifyMealPlanDialogProps extends BaseDialogProps<ModifyMealPlanForm> {
   readonly mealPlan?: MealPlan;
@@ -14,7 +14,6 @@ export interface ModifyMealPlanDialogProps extends BaseDialogProps<ModifyMealPla
 
 const ModifyMealPlanFormSchema = z.object({
   name: z.string().max(50).min(1, "A name is required"),
-  duration: z.string().duration(),
 });
 
 export type ModifyMealPlanForm = z.infer<typeof ModifyMealPlanFormSchema>;
@@ -28,12 +27,10 @@ export const ModifyMealPlanDialog: FC<ModifyMealPlanDialogProps> = ({ onSubmit, 
     if (mealPlan) {
       return {
         name: mealPlan.name,
-        duration: mealPlan.duration,
       };
     } else {
       return {
         name: "",
-        duration: Duration.fromObject({ days: 1 }).toISO(),
       };
     }
   }, [mealPlan]);
@@ -60,17 +57,6 @@ export const ModifyMealPlanDialog: FC<ModifyMealPlanDialogProps> = ({ onSubmit, 
 
           <Stack>
             <FormInput required placeholder="What do you want to call your meal plan?" name="name" type="text" label="Name" />
-            <FormSelect name="duration" label="Duration" instructions="How many days does this meal plan last?">
-              <SelectItem value={Duration.fromObject({days: 1}).toISO()}>1 Day</SelectItem>
-              <SelectItem value={Duration.fromObject({days: 2}).toISO()}>2 Days</SelectItem>
-              <SelectItem value={Duration.fromObject({days: 3}).toISO()}>3 Days</SelectItem>
-              <SelectItem value={Duration.fromObject({days: 4}).toISO()}>4 Days</SelectItem>
-              <SelectItem value={Duration.fromObject({days: 5}).toISO()}>5 Days</SelectItem>
-              <SelectItem value={Duration.fromObject({days: 6}).toISO()}>6 Days</SelectItem>
-              <SelectItem value={Duration.fromObject({weeks: 1}).toISO()}>1 Week</SelectItem>
-              <SelectItem value={Duration.fromObject({weeks: 2}).toISO()}>2 Weeks</SelectItem>
-              <SelectItem value={Duration.fromObject({months: 1}).toISO()}>1 Month</SelectItem>
-            </FormSelect>
           </Stack>
 
           <ResponsiveFooter className="mt-4 flex-col-reverse">

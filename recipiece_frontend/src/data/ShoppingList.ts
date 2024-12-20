@@ -4,6 +4,7 @@ export interface ShoppingListItem {
   readonly completed: boolean;
   readonly order: number;
   readonly content: string;
+  readonly notes?: string;
 }
 
 export interface ShoppingList {

@@ -250,8 +250,6 @@ model MealPlan {
 
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
-  start_date DateTime
-  duration String
   name String
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -270,6 +268,7 @@ model MealPlanItem {
   freeform_content String?
   notes String?
   recipe_id Int?
+  label String?
 
   meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe Recipe? @relation(fields: [recipe_id], references: [id], onDelete: SetNull, onUpdate: SetNull)

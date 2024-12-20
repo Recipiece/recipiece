@@ -33,8 +33,6 @@ export type KnownIngredient = {
 export type MealPlan = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
-    start_date: Timestamp;
-    duration: string;
     name: string;
     user_id: number;
 };
@@ -46,6 +44,7 @@ export type MealPlanItem = {
     freeform_content: string | null;
     notes: string | null;
     recipe_id: number | null;
+    label: string | null;
 };
 export type Recipe = {
     id: Generated<number>;
