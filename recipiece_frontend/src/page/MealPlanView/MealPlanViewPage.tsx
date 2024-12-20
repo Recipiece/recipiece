@@ -22,6 +22,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   LoadingGroup,
+  RecipieceMenuBarContext,
   Stack,
   useToast,
 } from "../../component";
@@ -31,6 +32,7 @@ import { floorDateToDay } from "../../util";
 import { MealPlanItemsCard } from "./MealPlanItemCard";
 import { useLayout } from "../../hooks";
 import { AddMealPlanToShoppingListForm } from "../../dialog";
+import { createPortal } from "react-dom";
 
 /**
  * This is a rather tricky form, and we're not even really using a form for this.
@@ -58,6 +60,7 @@ export const MealPlanViewPage: FC = () => {
   const { id } = useParams();
   const mealPlanId = +id!;
 
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -253,67 +256,74 @@ export const MealPlanViewPage: FC = () => {
     });
   }, [pushDialog, popDialog, onAddMealPlanToShoppingList]);
 
+  const contextMenu = useMemo(() => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="sm:ml-auto text-primary">
+            <MoreVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {!isEditing && (
+            <DropdownMenuItem onClick={() => setIsEditing(true)}>
+              <ChartNoAxesGantt /> Manage Meals
+            </DropdownMenuItem>
+          )}
+          {isEditing && (
+            <DropdownMenuItem onClick={() => setIsEditing(false)}>
+              <ListCheck /> Save Meals
+            </DropdownMenuItem>
+          )}
+          {!isMobile && (
+            <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
+              <DropdownMenuSubTrigger disabled={!canAddToShoppingList}>
+                <ShoppingBasket />
+                Add to Shopping List
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
+                    {(shoppingLists?.data || []).map((list) => {
+                      return (
+                        <DropdownMenuItem onClick={() => onAddMealPlanToShoppingList(list)} key={list.id}>
+                          {list.name}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </LoadingGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
+          {isMobile && (
+            <DropdownMenuItem disabled={!canAddToShoppingList} onClick={mobileOnAddToShoppingList}>
+              <ShoppingBasket /> Add to Shopping List
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={onResetDateBounds}>
+            <RefreshCcw /> Reset View
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={onEditMealPlan}>
+            <Edit /> Edit Meal Plan
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive" onClick={onDeleteMealPlan}>
+            <Trash /> Delete Meal Plan
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }, [canAddToShoppingList, isEditing, isLoadingShoppingLists, isMobile, mobileOnAddToShoppingList, onAddMealPlanToShoppingList, onDeleteMealPlan, onEditMealPlan, onResetDateBounds, shoppingLists?.data]);
+
   return (
     <Stack>
       <LoadingGroup isLoading={isLoadingMealPlan} className="h-8 w-52">
         <div className="flex flex-col sm:flex-row">
           <h1 className="text-2xl">{mealPlan?.name}</h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="sm:ml-auto">
-                <MoreVertical />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {!isEditing && (
-                <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                  <ChartNoAxesGantt /> Manage Meals
-                </DropdownMenuItem>
-              )}
-              {isEditing && (
-                <DropdownMenuItem onClick={() => setIsEditing(false)}>
-                  <ListCheck /> Save Meals
-                </DropdownMenuItem>
-              )}
-              {!isMobile && (
-                <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
-                  <DropdownMenuSubTrigger disabled={!canAddToShoppingList}>
-                    <ShoppingBasket />
-                    Add to Shopping List
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
-                        {(shoppingLists?.data || []).map((list) => {
-                          return (
-                            <DropdownMenuItem onClick={() => onAddMealPlanToShoppingList(list)} key={list.id}>
-                              {list.name}
-                            </DropdownMenuItem>
-                          );
-                        })}
-                      </LoadingGroup>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
-              )}
-              {isMobile && (
-                <DropdownMenuItem disabled={!canAddToShoppingList} onClick={mobileOnAddToShoppingList}>
-                  <ShoppingBasket /> Add to Shopping List
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onResetDateBounds}>
-                <RefreshCcw /> Reset View
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onEditMealPlan}>
-                <Edit /> Edit Meal Plan
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive" onClick={onDeleteMealPlan}>
-                <Trash /> Delete Meal Plan
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {(isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current) && createPortal(contextMenu, mobileMenuPortalRef?.current)}
+          {!isMobile && <>{contextMenu}</>}
         </div>
       </LoadingGroup>
       {mealPlan && (

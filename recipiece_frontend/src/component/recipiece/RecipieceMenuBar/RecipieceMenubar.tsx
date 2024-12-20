@@ -1,6 +1,5 @@
-import { Book, CirclePlus, CircleUserRound, Home, Plus, ShoppingBasket } from "lucide-react";
-import { DateTime } from "luxon";
-import { FC, Fragment, useCallback, useContext, useState } from "react";
+import { Book, CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
+import { createContext, createRef, FC, Fragment, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateCookbookMutation,
@@ -12,12 +11,24 @@ import {
   useLogoutUserMutation,
 } from "../../../api";
 import { DialogContext, TimerContext } from "../../../context";
+import { Cookbook, ShoppingList } from "../../../data";
 import { CreateCookbookForm, CreateShoppingListForm, CreateTimerForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
 import { Button, Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator, useToast } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
 import { TimerMenuItem } from "./TimerMenuItem";
-import { Cookbook, ShoppingList } from "../../../data";
+
+export const RecipieceMenuBarContext = createContext<{
+  readonly mobileMenuPortalRef: undefined | RefObject<HTMLSpanElement>;
+}>({
+  mobileMenuPortalRef: undefined,
+});
+
+export const RecipieceMenuBarContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const mobileMenuPortalRef = createRef<HTMLSpanElement>();
+
+  return <RecipieceMenuBarContext.Provider value={{ mobileMenuPortalRef: mobileMenuPortalRef }}>{children}</RecipieceMenuBarContext.Provider>;
+};
 
 /**
  * The almighty menu bar
@@ -30,6 +41,7 @@ import { Cookbook, ShoppingList } from "../../../data";
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
   const { activeTimers, createTimer } = useContext(TimerContext);
   const [cookbooksPage, setCookbooksPage] = useState(0);
@@ -218,10 +230,26 @@ export const RecipieceMenubar: FC = () => {
     });
   }, [navigate, popDialog, pushDialog]);
 
+  const onMobileViewMealPlans = useCallback(() => {
+    pushDialog("mobileMealPlans", {
+      onClose: () => popDialog("mobileMealPlans"),
+      onSubmit: (cookbook: Cookbook) => {
+        popDialog("mobileMealPlans");
+        navigate(`/meal-plan/view/${cookbook.id}`);
+      },
+    });
+  }, [navigate, popDialog, pushDialog]);
+
   return (
     <>
       <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 bg-white sm:bg-primary text-white">
         <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white" />
+        <span className="ml-auto block sm:hidden">
+          <Button onClick={() => navigate("/account")} variant="link" className="text-primary">
+            <CircleUserRound />
+          </Button>
+        </span>
+        <span className="ml-auto block sm:hidden" ref={mobileMenuPortalRef} />
         <span className="hidden w-0 sm:w-auto sm:block">
           <MenubarMenu>
             <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
@@ -353,8 +381,8 @@ export const RecipieceMenubar: FC = () => {
             <ShoppingBasket />
           </Button>
 
-          <Button onClick={() => navigate("/account")} variant="link" className="text-white grow">
-            <CircleUserRound />
+          <Button onClick={onMobileViewMealPlans} className="text-white grow">
+            <GanttChart />
           </Button>
         </div>
       </footer>

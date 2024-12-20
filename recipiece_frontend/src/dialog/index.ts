@@ -13,6 +13,7 @@ export * from "./hooks";
 export * from "./ImportRecipes";
 export * from "./MobileCreateMenu";
 export * from "./MobileListCookbooks";
+export * from "./MobileListMealPlans";
 export * from "./MobileListShoppingLists";
 export * from "./ModifyMealPlan";
 export * from "./ParseRecipeFromURL";

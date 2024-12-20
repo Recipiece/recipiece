@@ -14,6 +14,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  RecipieceMenuBarContext,
   Shelf,
   ShelfSpacer,
   Stack,
@@ -22,11 +23,15 @@ import {
 import { DialogContext } from "../../context";
 import { ShoppingList, ShoppingListItem } from "../../data";
 import { CheckableShoppingListItemInput } from "./ShoppingListItemInput";
+import { useLayout } from "../../hooks";
+import { createPortal } from "react-dom";
 
 export const ShoppingListViewPage: FC = () => {
   const { shoppingListId } = useParams();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isMobile } = useLayout();
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
 
   const { data: shoppingList, isLoading: isLoadingShoppingList } = useGetShoppingListByIdQuery(+shoppingListId!);
@@ -230,6 +235,33 @@ export const ShoppingListViewPage: FC = () => {
     });
   }, [pushDialog, popDialog, deleteShoppingList, navigate, shoppingList]);
 
+  const contextMenu = useMemo(() => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="text-primary">
+            <MoreVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <Edit /> Edit List Name
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Share /> Share List
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={clearItems} className="text-destructive">
+            <Eraser /> Clear All Items
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onRequestShoppingListDelete} className="text-destructive">
+            <Trash /> Delete List
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }, [clearItems, onRequestShoppingListDelete]);
+
   return (
     <Popover open={isAutoCompleteOpen}>
       <Stack>
@@ -238,28 +270,10 @@ export const ShoppingListViewPage: FC = () => {
             <h1 className="text-2xl">{shoppingList?.name}</h1>
             <ShelfSpacer />
             {shoppingList && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost">
-                    <MoreVertical />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <Edit /> Edit List Name
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Share /> Share List
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={clearItems} className="text-destructive">
-                    <Eraser /> Clear All Items
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onRequestShoppingListDelete} className="text-destructive">
-                    <Trash /> Delete List
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <>
+                {(isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current) && createPortal(contextMenu, mobileMenuPortalRef.current)}
+                {!isMobile && <>{contextMenu}</>}
+              </>
             )}
           </Shelf>
         </LoadingGroup>

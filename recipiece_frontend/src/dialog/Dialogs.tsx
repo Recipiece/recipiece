@@ -10,6 +10,7 @@ import { DeleteShoppingListDialog } from "./DeleteShoppingList";
 import { ImportRecipesDialog } from "./ImportRecipes";
 import { MobileCreateMenuDialog } from "./MobileCreateMenu";
 import { MobileListCookbooksDialog } from "./MobileListCookbooks";
+import { MobileListMealPlansDialog } from "./MobileListMealPlans";
 import { MobileListShoppingListsDialog } from "./MobileListShoppingLists";
 import { ModifyMealPlanDialog } from "./ModifyMealPlan";
 import { ParseRecipeFromURLDialog } from "./ParseRecipeFromURL";
@@ -67,5 +68,8 @@ export const Dialogs = {
   },
   addMealPlanToShoppingList: {
     component: AddMealPlanToShoppingListDialog,
+  },
+  mobileMealPlans: {
+    component: MobileListMealPlansDialog,
   },
 };
