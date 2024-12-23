@@ -18,6 +18,7 @@ import { ParseRecipeFromURLDialog } from "./ParseRecipeFromURL";
 import { RelativeScaleIngredientDialog } from "./RelativeScaleIngredient";
 import { SearchRecipesDialog } from "./SearchRecipes";
 import { SearchRecipesForCookbookDialog } from "./SearchRecipesForCookbook";
+import { SearchRecipesForMealPlanDialog } from "./SearchRecipesForMealPlan";
 
 export const Dialogs = {
   createCookbook: {
@@ -79,5 +80,8 @@ export const Dialogs = {
   },
   relativeScaleIngredient: {
     component: RelativeScaleIngredientDialog,
+  },
+  searchRecipesForMealPlan: {
+    component: SearchRecipesForMealPlanDialog,
   }
 };

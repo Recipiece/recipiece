@@ -1,11 +1,10 @@
+import Fraction from "fraction.js";
 import { MoreVertical, PencilRuler, Scale } from "lucide-react";
 import { FC, useCallback, useContext, useMemo } from "react";
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../component";
 import { DialogContext } from "../../context";
 import { RecipeIngredient } from "../../data";
 import { RelativeScaleIngredientSubmit } from "../../dialog";
-import Fraction from "fraction.js";
-import { ALL_UNITS } from "../../util";
 
 export interface IngredientContextMenuProps {
   readonly ingredient: RecipeIngredient;

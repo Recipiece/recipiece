@@ -34,7 +34,7 @@ export const listItemsForMealPlan = async (
     safeStartDate = DateTime.utc().minus({ days: 7 });
   } else {
     // if they did provide a start date, clamp it to the min of the meal plan's created_at and whatever they gave
-    safeStartDate = DateTime.max(DateTime.fromISO(start_date), DateTime.fromJSDate(mealPlan.created_at));
+    safeStartDate = DateTime.max(DateTime.fromISO(start_date), DateTime.fromJSDate(mealPlan.created_at).minus({days: 1}));
   }
 
   let safeEndDate;

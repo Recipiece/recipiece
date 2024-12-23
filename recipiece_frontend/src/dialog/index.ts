@@ -20,3 +20,4 @@ export * from "./ParseRecipeFromURL";
 export * from "./RelativeScaleIngredient";
 export * from "./SearchRecipes";
 export * from "./SearchRecipesForCookbook";
+export * from "./SearchRecipesForMealPlan";

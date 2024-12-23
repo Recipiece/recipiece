@@ -27,8 +27,8 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
   }, [initialMealPlanItems]);
 
   const onAddRecipe = useCallback(() => {
-    pushDialog("searchRecipes", {
-      onClose: () => popDialog("searchRecipes"),
+    pushDialog("searchRecipesForMealPlan", {
+      onClose: () => popDialog("searchRecipesForMealPlan"),
       onSubmit: async (recipe: Recipe) => {
         const createdItem = await createMealPlanItem({
           recipe_id: recipe.id,
@@ -38,7 +38,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
           label: `Meal ${currentValues.length + 1}`,
         });
         setCurrentValues((prev) => [...prev, { ...createdItem.data }]);
-        popDialog("searchRecipes");
+        popDialog("searchRecipesForMealPlan");
       },
     });
   }, [pushDialog, popDialog, createMealPlanItem, mealPlan.id, startDate, currentValues]);
@@ -163,7 +163,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
                 <Link to={`/recipe/view/${recipe.id}`} target="_blank" rel="noopener noreferrer">
                   <div className="inline-flex flex-row items-center gap-2">
                     <h1 className="text-lg underline">{recipe.name}</h1>
-                    <SquareArrowOutUpRight className="hidden sm:block"/>
+                    <SquareArrowOutUpRight className="hidden sm:block" />
                   </div>
                 </Link>
 

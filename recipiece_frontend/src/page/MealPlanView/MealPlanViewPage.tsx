@@ -87,7 +87,7 @@ export const MealPlanViewPage: FC = () => {
     return datesArray;
   }, [currentStartDate, currentEndDate]);
 
-  const { data: mealPlanItems, isLoading: isLoadingMealPlanItems } = useListItemsForMealPlanQuery(
+  const { data: mealPlanItems } = useListItemsForMealPlanQuery(
     mealPlan?.id!,
     {
       start_date: currentStartDate.toUTC().toISO()!,

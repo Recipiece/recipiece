@@ -49,6 +49,38 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   });
 };
 
+export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?: QueryArgs) => {
+  const { getter } = useGet();
+
+  const searchParams = new URLSearchParams();
+  searchParams.append("page_number", filters.page_number.toString());
+
+  if (filters.search) {
+    searchParams.append("search", filters.search);
+  }
+
+  const query = async () => {
+    const recipe = await getter<never, ListRecipesResponse>({
+      path: `/recipe/list?${searchParams.toString()}`,
+      withAuth: "access_token",
+    });
+    return recipe;
+  };
+
+  return useQuery({
+    queryKey: RecipeQueryKeys.LIST_RECIPES_FOR_MEAL_PLAN(filters),
+    queryFn: async () => {
+      try {
+        const results = await query();
+        return results.data;
+      } catch (err) {
+        throw err;
+      }
+    },
+    enabled: args?.disabled !== true,
+  });
+};
+
 export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
