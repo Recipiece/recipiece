@@ -17,5 +17,6 @@ export * from "./MobileListMealPlans";
 export * from "./MobileListShoppingLists";
 export * from "./ModifyMealPlan";
 export * from "./ParseRecipeFromURL";
+export * from "./RelativeScaleIngredient";
 export * from "./SearchRecipes";
 export * from "./SearchRecipesForCookbook";

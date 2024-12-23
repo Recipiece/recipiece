@@ -1,24 +1,26 @@
 import { MoreVertical } from "lucide-react";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
   Button,
   Card,
   CardContent,
+  CardTitle,
   Checkbox,
   DropdownMenu,
   DropdownMenuTrigger,
-  Grid,
   LoadingGroup,
   NotFound,
-  RecipeContextMenu
+  RecipeContextMenu,
+  RecipieceMenuBarContext,
 } from "../../component";
+import { RecipeIngredient } from "../../data";
 import { formatIngredientAmount } from "../../util";
+import { IngredientContextMenu } from "./IngredientContextMenu";
+import { useLayout } from "../../hooks";
+import { createPortal } from "react-dom";
+import Fraction from "fraction.js";
 
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
@@ -29,6 +31,8 @@ export const RecipeViewPage: FC = () => {
   } = useGetRecipeByIdQuery(+id!, {
     disabled: !id,
   });
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
+  const { isMobile } = useLayout();
 
   const { data: currentUser, isLoading: isLoadingCurrentUser } = useGetSelfQuery();
 
@@ -36,8 +40,17 @@ export const RecipeViewPage: FC = () => {
     return isLoadingCurrentUser || isLoadingRecipe;
   }, [isLoadingCurrentUser, isLoadingRecipe]);
 
+  const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
   const [checkedOffSteps, setCheckedOffSteps] = useState<number[]>([]);
   const [checkedOffIngredients, setCheckedOffIngredients] = useState<number[]>([]);
+
+  useEffect(() => {
+    setIngredients(recipe?.ingredients ?? []);
+
+    return () => {
+      setIngredients([]);
+    };
+  }, [recipe]);
 
   const onStepChecked = useCallback(
     (stepId: number) => {
@@ -65,6 +78,61 @@ export const RecipeViewPage: FC = () => {
     [checkedOffIngredients]
   );
 
+  const onIngredientConverted = useCallback((ingredient: RecipeIngredient, newAmount: string, newUnit: string) => {
+    setIngredients((prev) => {
+      return prev.map((ing) => {
+        if (ing.id === ingredient.id) {
+          return { ...ing, amount: newAmount, unit: newUnit };
+        } else {
+          return { ...ing };
+        }
+      });
+    });
+  }, []);
+
+  const onScaleIngredients = useCallback((scaleFactor: number) => {
+    setIngredients((prev) => {
+      return prev.map((ing) => {
+        if (ing.amount) {
+          try {
+            const fractional = new Fraction(ing.amount);
+            return { ...ing, amount: fractional.mul(new Fraction(scaleFactor)).toString(2) };
+          } catch {
+            // couldn't do anything, just return the ingredient
+            return { ...ing };
+          }
+        } else {
+          return {...ing};
+        }
+      });
+    });
+  }, []);
+
+  const dropdownMenuComponent = useMemo(() => {
+    return (
+      <>
+        {currentUser && recipe && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="text-primary">
+                <MoreVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <RecipeContextMenu
+              recipe={recipe!}
+              canFork={recipe!.user_id !== currentUser?.id}
+              canDelete={recipe!.user_id === currentUser?.id}
+              canEdit={recipe!.user_id === currentUser?.id}
+              canShare={!recipe!.private}
+              canAddToShoppingList={recipe!.user_id === currentUser?.id}
+              canAddToCookbook={recipe!.user_id === currentUser?.id}
+            />
+          </DropdownMenu>
+        )}
+      </>
+    );
+  }, [currentUser, recipe]);
+
   return (
     <div className="p-4">
       <div>
@@ -73,77 +141,70 @@ export const RecipeViewPage: FC = () => {
             <div className="flex flex-row">
               <h1 className="text-4xl font-medium mr-auto">{recipe?.name}</h1>
               {recipe && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost">
-                      <MoreVertical />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <RecipeContextMenu
-                    recipe={recipe}
-                    canFork={recipe.user_id !== currentUser?.id}
-                    canDelete={recipe.user_id === currentUser?.id}
-                    canEdit={recipe.user_id === currentUser?.id}
-                    canShare={!recipe.private}
-                    canAddToShoppingList={recipe.user_id === currentUser?.id}
-                    canAddToCookbook={recipe.user_id === currentUser?.id}
-                  />
-                </DropdownMenu>
+                <>
+                  {isMobile && mobileMenuPortalRef?.current && createPortal(dropdownMenuComponent, mobileMenuPortalRef.current)}
+                  {!isMobile && <>{dropdownMenuComponent}</>}
+                </>
               )}
             </div>
           </LoadingGroup>
           <LoadingGroup isLoading={isLoading} className="h-[96px] w-full">
             <p>{recipe?.description}</p>
+            {recipe?.servings && (
+              <p className="text-xs">
+                Makes {recipe.servings} serving{recipe.servings > 1 ? "s" : ""}
+              </p>
+            )}
           </LoadingGroup>
         </div>
 
         {recipe && (
-          <Accordion type="multiple">
-            <AccordionItem value="ingredients">
-              <AccordionTrigger>Ingredients</AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-4">
-                    <Grid className="sm:grid-cols-3">
-                      {(recipe?.ingredients || []).map((ing) => {
-                        return (
-                          <div key={ing.id} className="flex flex-col" onClick={() => onIngredientChecked(ing.id)}>
-                            <div className="inline-flex items-center">
-                              <Checkbox className="mr-2" checked={checkedOffIngredients.includes(ing.id)} />
-                              <span className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}>{ing.name}</span>
-                            </div>
-                            <div className={`ml-6 inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}>
-                              {!!ing.amount && <>{formatIngredientAmount(ing.amount)} </>}
-                              {!!ing.unit && <>{ing.unit}</>}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="steps">
-              <AccordionTrigger>Steps</AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-4">
-                    {(recipe?.steps || []).map((step) => {
-                      return (
-                        <div key={step.id} className="mb-4 flex items-top">
-                          <Checkbox checked={checkedOffSteps.includes(step.id)} onClick={() => onStepChecked(step.id)} className="mr-2" />
-                          <p onClick={() => onStepChecked(step.id)} className={`inline cursor-pointer ${checkedOffSteps.includes(step.id) ? "line-through" : ""}`}>
-                            {step.content}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <div className="flex flex-col-reverse gap-2 mt-2 sm:flex-row">
+            <Card className="p-2 sm:p-4 basis-0 sm:basis-8/12">
+              <CardTitle>Steps</CardTitle>
+              <CardContent className="p-1 sm:p-4">
+                <div className="flex flex-col gap-2">
+                  {(recipe?.steps || []).map((step) => {
+                    return (
+                      <div key={step.id} className="flex flex-row gap-1 items-top">
+                        <Checkbox checked={checkedOffSteps.includes(step.id)} onClick={() => onStepChecked(step.id)} className="mt-1" />
+                        <span>{step.order + 1}. </span>
+                        <p onClick={() => onStepChecked(step.id)} className={`inline cursor-pointer ${checkedOffSteps.includes(step.id) ? "line-through" : ""}`}>
+                          {step.content}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="p-2 sm:p-4 basis-0 sm:basis-4/12">
+              <CardTitle className="mb-1">Ingredients</CardTitle>
+              <CardContent>
+                <div className="flex flex-col gap-1">
+                  {ingredients.map((ing) => {
+                    return (
+                      <div key={ing.id} className="flex flex-row gap-2 items-center">
+                        <Checkbox checked={checkedOffIngredients.includes(ing.id)} />
+                        <span
+                          className={`text-black inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}
+                          onClick={() => onIngredientChecked(ing.id)}
+                        >
+                          {(!!ing.amount || !!ing.unit) && (
+                            <span>
+                              {formatIngredientAmount(ing.amount ?? "")} {ing.unit ?? ""}{" "}
+                            </span>
+                          )}
+                          <span>{ing.name}</span>
+                        </span>
+                        <IngredientContextMenu ingredient={ing} onIngredientConverted={onIngredientConverted} onIngredientRelativeScaled={onScaleIngredients} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
         {recipeError && <NotFound backNav="/" />}
       </div>

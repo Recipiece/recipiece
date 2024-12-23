@@ -1,6 +1,7 @@
 import { AddMealPlanToShoppingListDialog } from "./AddMealPlanToShoppingList";
 import { AddRecipeToShoppingListDialog } from "./AddRecipeToShoppingList";
 import { AddTimeToTimerDialog } from "./AddTimeToTimer";
+import { ConvertIngredientDialog } from "./ConvertIngredient";
 import { CreateCookbookDialog } from "./CreateCookbook";
 import { CreateShoppingListDialog } from "./CreateShoppingList";
 import { CreateTimerDialog } from "./CreateTimer";
@@ -14,6 +15,7 @@ import { MobileListMealPlansDialog } from "./MobileListMealPlans";
 import { MobileListShoppingListsDialog } from "./MobileListShoppingLists";
 import { ModifyMealPlanDialog } from "./ModifyMealPlan";
 import { ParseRecipeFromURLDialog } from "./ParseRecipeFromURL";
+import { RelativeScaleIngredientDialog } from "./RelativeScaleIngredient";
 import { SearchRecipesDialog } from "./SearchRecipes";
 import { SearchRecipesForCookbookDialog } from "./SearchRecipesForCookbook";
 
@@ -72,4 +74,10 @@ export const Dialogs = {
   mobileMealPlans: {
     component: MobileListMealPlansDialog,
   },
+  convertIngredient: {
+    component: ConvertIngredientDialog,
+  },
+  relativeScaleIngredient: {
+    component: RelativeScaleIngredientDialog,
+  }
 };

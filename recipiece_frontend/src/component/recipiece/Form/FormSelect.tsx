@@ -9,9 +9,11 @@ export interface FormSelectProps extends PropsWithChildren {
   readonly label?: string;
   readonly className?: string;
   readonly isLoading?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
 }
 
-export const FormSelect: FC<FormSelectProps> = ({ children, name, label, instructions, placeholder }) => {
+export const FormSelect: FC<FormSelectProps> = ({ children, name, label, instructions, placeholder, required, disabled }) => {
   const form = useFormContext();
 
   return (
@@ -21,7 +23,7 @@ export const FormSelect: FC<FormSelectProps> = ({ children, name, label, instruc
       render={({ field }) => (
         <FormItem>
           {label && <FormLabel>{label}</FormLabel>}
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} required={required} disabled={disabled}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder={placeholder ?? ""} />
