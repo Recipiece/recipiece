@@ -1,12 +1,14 @@
 import { Grip, Minus, PlusIcon } from "lucide-react";
 import mergeRefs from "merge-refs";
-import { FC, Fragment, useCallback, useMemo } from "react";
+import { FC, Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Button, FormInput } from "../../component";
-import { cn } from "../../util";
+import { Button, FormInput, Popover, PopoverContent, PopoverTrigger } from "../../component";
+import { ALL_UNITS, cn } from "../../util";
 
-const ingredientFields = ["name", "amount", "unit"];
+const UNIT_AUTOCOMPLETE_OPTIONS = ALL_UNITS.map((au) => {
+  return au.display_name.singular;
+});
 
 export interface IngredientsFormProps {
   readonly isLoading: boolean;
@@ -17,9 +19,123 @@ interface IngredientFormItemProps {
   readonly onRemove: (index: number) => void;
   readonly onMove: (srcIndex: number, destIndex: number) => void;
   readonly draggable: boolean;
+  readonly onKeyDown: (event: React.KeyboardEvent) => void;
 }
 
-const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMove, draggable }) => {
+const IngredientFormNameInput: FC<{ readonly isDragging: boolean; readonly index: number; readonly onKeyDown: (event: React.KeyboardEvent) => void }> = ({
+  isDragging,
+  index,
+  onKeyDown,
+}) => {
+  return (
+    <FormInput
+      onKeyDown={(event) => {
+        event.preventDefault();
+        onKeyDown(event);
+      }}
+      className="flex-grow"
+      autoComplete="off"
+      readOnly={isDragging}
+      name={`ingredients.${index}.name`}
+      key={`name.${index}`}
+      placeholder="Name"
+      required={true}
+    />
+  );
+};
+
+const IngredientFormAmountInput: FC<{ readonly isDragging: boolean; readonly index: number; readonly onKeyDown: (event: React.KeyboardEvent) => void }> = ({
+  isDragging,
+  index,
+  onKeyDown,
+}) => {
+  return (
+    <FormInput
+      onKeyDown={(event) => {
+        event.preventDefault();
+        onKeyDown(event);
+      }}
+      className="flex-grow"
+      autoComplete="off"
+      readOnly={isDragging}
+      name={`ingredients.${index}.amount`}
+      key={`amount.${index}`}
+      placeholder="Amount"
+    />
+  );
+};
+
+const IngredientFormUnitInput: FC<{ readonly isDragging: boolean; index: number; onKeyDown: (event: React.KeyboardEvent) => void }> = ({ isDragging, index, onKeyDown }) => {
+  const form = useFormContext();
+  const currentUnit = form.watch(`ingredients.${index}.unit`);
+  const [currentAutocompleteItems, setCurrentAutocompleteItems] = useState<string[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  useEffect(() => {
+    if (currentUnit?.length >= 1) {
+      const newUnits = UNIT_AUTOCOMPLETE_OPTIONS.filter((opt) => {
+        return opt.toLowerCase().startsWith(currentUnit.toLowerCase().trim()) && opt.toLowerCase() !== currentUnit.toLowerCase().trim();
+      });
+      setCurrentAutocompleteItems(newUnits);
+      setIsPopoverOpen(newUnits.length > 0);
+    } else {
+      setCurrentAutocompleteItems([]);
+      setIsPopoverOpen(false);
+    }
+  }, [currentUnit]);
+
+  const onSelectItem = useCallback(
+    (item: string) => {
+      form.setValue(`ingredients.${index}.unit`, item);
+      setIsPopoverOpen(false);
+    },
+    [form, index]
+  );
+
+  return (
+    <Popover open={isPopoverOpen}>
+      <div>
+        <FormInput
+          onKeyDown={(event) => {
+            event.preventDefault();
+            onKeyDown(event);
+          }}
+          className="flex-grow"
+          autoComplete="off"
+          readOnly={isDragging}
+          name={`ingredients.${index}.unit`}
+          key={`unit.${index}`}
+          placeholder="Unit"
+        />
+        <div className="ml-4 h-0 w-0">
+          <PopoverTrigger className="h-0 w-0" />
+          <PopoverContent
+            alignOffset={-16}
+            align="start"
+            className="p-1 min-w-[200px]"
+            side="bottom"
+            sideOffset={-14}
+            onOpenAutoFocus={(event) => event.preventDefault()}
+            onCloseAutoFocus={(event) => event.preventDefault()}
+            avoidCollisions={false}
+          >
+            <div className="grid grid-cols-1">
+              {currentAutocompleteItems.map((item) => {
+                return (
+                  <Button className="justify-start p-1 h-auto" variant="ghost" key={item} onClick={() => onSelectItem(item)}>
+                    {item}
+                  </Button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </div>
+      </div>
+    </Popover>
+  );
+};
+
+const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMove, draggable, onKeyDown }) => {
   const [{ isDragging }, dragRef, draggingRef] = useDrag(() => {
     return {
       type: "edit_recipe_ingredient",
@@ -47,11 +163,12 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
   }, [index, onMove]);
 
   const wrapperClassName = useMemo(() => {
-    const baseClassName = "grid gap-1 grid-flow-row sm:grid-flow-col content-center mb-2";
+    // const baseClassName = "grid gap-1 grid-flow-row sm:grid-flow-col content-center mb-2";
+    const baseClassName = "flex flex-col sm:flex-row gap-1 mb-2";
     if (isOver) {
       return cn(baseClassName, "pt-24 sm:pt-12");
     } else if (isDragging) {
-      return "hidden";
+      return cn(baseClassName, "opacity-50");
     } else {
       return cn(baseClassName);
     }
@@ -61,23 +178,14 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
     // @ts-ignore
     <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
       <div ref={dragRef} className="flex flex-row sm:block">
-        {draggable && <Grip className="h-full m-0 p-0 cursor-grab text-primary" />}
+        {draggable && <Grip className="h-full m-0 p-0 cursor-grab text-primary flex-shrink" />}
         <Button className="block sm:hidden m-0 p-0 ml-auto" type="button" variant="link" onClick={() => onRemove(index)}>
           <Minus className="text-destructive" />
         </Button>
       </div>
-      {ingredientFields.map((ingFieldName, indexY) => {
-        return (
-          <FormInput
-            autoComplete="off"
-            readOnly={isDragging}
-            name={`ingredients.${index}.${ingFieldName}`}
-            key={`${ingFieldName}.${indexY}`}
-            placeholder={ingFieldName.charAt(0).toUpperCase() + ingFieldName.substring(1)}
-            required={ingFieldName === "name"}
-          />
-        );
-      })}
+      <IngredientFormNameInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
+      <IngredientFormAmountInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
+      <IngredientFormUnitInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
       <Button className="hidden sm:block m-0 p-0" type="button" variant="link" onClick={() => onRemove(index)}>
         <Minus className="text-destructive" />
       </Button>
@@ -115,9 +223,19 @@ export const IngredientsForm: FC<IngredientsFormProps> = ({ isLoading }) => {
     [ingredientsFieldArray]
   );
 
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      event.preventDefault();
+      if (event.key === "Enter") {
+        addIngredient();
+      }
+    },
+    [addIngredient]
+  );
+
   return (
     <div>
-      <div className="flex flex-row items-center mb-2">
+      <div className="flex flex-row items-center mb-4">
         <h1 className="inline text-lg">Ingredients</h1>
         <Button type="button" onClick={addIngredient} variant="secondary" className="ml-auto">
           <PlusIcon />
@@ -127,7 +245,7 @@ export const IngredientsForm: FC<IngredientsFormProps> = ({ isLoading }) => {
       {ingredientsFieldArray.fields.map((fieldArrayValue, index) => {
         return (
           <Fragment key={fieldArrayValue.id}>
-            <IngredientFormItem draggable={ingredientsFieldArray.fields.length > 1} index={index} onRemove={removeIngredient} onMove={onMoveIngredient} />
+            <IngredientFormItem onKeyDown={onKeyDown} draggable={ingredientsFieldArray.fields.length > 1} index={index} onRemove={removeIngredient} onMove={onMoveIngredient} />
           </Fragment>
         );
       })}

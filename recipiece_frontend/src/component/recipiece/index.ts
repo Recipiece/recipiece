@@ -7,5 +7,6 @@ export * from "./Pager";
 export * from "./RecipeCard";
 export * from "./RecipeContextMenu";
 export * from "./RecipieceMenuBar";
+export * from "./TypeaheadInput";
 export * from "./Typography";
 export * from "./UnauthenticatedLayout";

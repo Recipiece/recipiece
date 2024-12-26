@@ -1,4 +1,4 @@
-import { Book, BookMinus, Edit, Share, ShoppingBasket, Trash, Utensils } from "lucide-react";
+import { Book, BookMinus, Edit, RefreshCw, Scaling, Share, ShoppingBasket, SignalHigh, SignalLow, SignalMedium, SignalZero, Trash, Utensils } from "lucide-react";
 import { FC, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,8 +9,10 @@ import {
   useListShoppingListsQuery,
   useRemoveRecipeFromCookbookMutation,
 } from "../../../api";
+import { DialogContext } from "../../../context";
 import { Cookbook, Recipe, ShoppingList } from "../../../data";
-import { useAddRecipeToShoppingListDialog, useDeleteRecipeDialog } from "../../../dialog";
+import { ScaleRecipeSubmit, useAddRecipeToShoppingListDialog, useDeleteRecipeDialog } from "../../../dialog";
+import { useLayout } from "../../../hooks";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -22,8 +24,6 @@ import {
   useToast,
 } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
-import { useLayout } from "../../../hooks";
-import { DialogContext } from "../../../context";
 
 export interface RecipeContextMenuProps {
   readonly canAddToCookbook?: boolean;
@@ -33,6 +33,10 @@ export interface RecipeContextMenuProps {
   readonly canEdit?: boolean;
   readonly canDelete?: boolean;
   readonly canRemoveFromCookbook?: boolean;
+  readonly canScale?: boolean;
+  readonly onScale?: (scaleFactor: number) => void;
+  readonly canReset?: boolean;
+  readonly onReset?: () => void;
   readonly recipe: Recipe;
   readonly cookbookId?: number;
 }
@@ -45,6 +49,10 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   canDelete,
   canEdit,
   canRemoveFromCookbook,
+  canScale,
+  onScale,
+  canReset,
+  onReset,
   recipe,
   cookbookId,
 }) => {
@@ -226,20 +234,57 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     }
   }, [recipe, forkRecipe, navigate]);
 
+  const onCustomScaleRecipe = useCallback(() => {
+    pushDialog("scaleRecipe", {
+      onClose: () => popDialog("scaleRecipe"),
+      onSubmit: (data: ScaleRecipeSubmit) => {
+        popDialog("scaleRecipe");
+        onScale?.(data.scaleFactor);
+      },
+    });
+  }, [onScale, popDialog, pushDialog]);
+
   return (
     <DropdownMenuContent>
-      {canFork && (
-        <DropdownMenuItem onClick={onForkRecipe}>
-          <Utensils /> Fork This Recipe
+      {/* reset */}
+      {canReset && (
+        <DropdownMenuItem onClick={() => onReset?.()}>
+          <RefreshCw /> Reset Changes
         </DropdownMenuItem>
       )}
-      {canEdit && (
-        <DropdownMenuItem onClick={() => navigate(`/recipe/edit/${recipe!.id}`)}>
-          <Edit /> Edit This Recipe
+      {canReset && <DropdownMenuSeparator />}
+      {/* scaling */}
+      {canScale && (
+        <DropdownMenuItem onClick={() => onScale?.(0.5)}>
+          <SignalZero />
+          1/2 Recipe
         </DropdownMenuItem>
       )}
-      {(canFork || canEdit) && <DropdownMenuSeparator />}
-
+      {canScale && (
+        <DropdownMenuItem onClick={() => onScale?.(2)}>
+          <SignalLow />
+          2x Recipe
+        </DropdownMenuItem>
+      )}
+      {canScale && (
+        <DropdownMenuItem onClick={() => onScale?.(3)}>
+          <SignalMedium />
+          3x Recipe
+        </DropdownMenuItem>
+      )}
+      {canScale && (
+        <DropdownMenuItem onClick={() => onScale?.(4)}>
+          <SignalHigh />
+          4x Recipe
+        </DropdownMenuItem>
+      )}
+      {canScale && (
+        <DropdownMenuItem onClick={onCustomScaleRecipe}>
+          <Scaling />
+          Scale Custom
+        </DropdownMenuItem>
+      )}
+      {canScale && <DropdownMenuSeparator />}
       {/* add to cookbook */}
       {canAddToCookbook && !isMobile && (
         <DropdownMenuSub onOpenChange={(open) => setIsCookbookContextMenuOpen(open)}>
@@ -296,6 +341,17 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
         </DropdownMenuItem>
       )}
       {(canAddToShoppingList || canAddToCookbook) && canShare && <DropdownMenuSeparator />}
+      {canFork && (
+        <DropdownMenuItem onClick={onForkRecipe}>
+          <Utensils /> Fork This Recipe
+        </DropdownMenuItem>
+      )}
+      {canEdit && (
+        <DropdownMenuItem onClick={() => navigate(`/recipe/edit/${recipe!.id}`)}>
+          <Edit /> Edit This Recipe
+        </DropdownMenuItem>
+      )}
+      {(canFork || canEdit) && <DropdownMenuSeparator />}
       {canShare && (
         <DropdownMenuItem onClick={onShareRecipe} disabled={recipe?.private}>
           <Share /> Share Recipe

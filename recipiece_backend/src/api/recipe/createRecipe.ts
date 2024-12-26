@@ -12,6 +12,7 @@ export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequest
     const createInput: Prisma.RecipeCreateInput = {
       name: recipeBody.name,
       description: recipeBody.description,
+      servings: recipeBody.servings,
       user: {
         connect: {
           id: user.id,

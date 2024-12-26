@@ -1,0 +1,33 @@
+.recipiece-striped {
+  background: repeating-linear-gradient(-35deg, var(--primary), var(--primary) 40px, #f0f0f0 40px, #f0f0f0 80px);
+  overflow: hidden;
+  z-index: -11;
+}
+
+.recipiece-striped-utensils {
+  position: fixed;
+  top: calc(-50% - 44px);
+  left: calc(-50% - 44px);
+  background-image: url("./utensils_crossed.svg");
+  background-size: 40px 40px;
+  transform: rotate(-35deg) translateY(-8px);
+  width: calc(200% + 40px);
+  height: calc(200% + 40px);
+  mask-image: repeating-linear-gradient(0deg, white 0px, white 40px, transparent 40px, transparent 160px);
+  -webkit-mask-image: repeating-linear-gradient(0deg, white 0px, white 40px, transparent 40px, transparent 160px);
+  z-index: -10;
+}
+
+.recipiece-striped-pot {
+  position: fixed;
+  top: calc(-50% - 102px);
+  left: calc(-50% - 102px);
+  background-image: url("./cooking_pot.svg");
+  background-size: 40px 40px;
+  transform: rotate(-35deg) translateY(-8px);
+  width: calc(200% + 40px);
+  height: calc(200% + 40px);
+  mask-image: repeating-linear-gradient(0deg, white 0px, white 40px, transparent 40px, transparent 160px);
+  -webkit-mask-image: repeating-linear-gradient(0deg, white 0px, white 40px, transparent 40px, transparent 160px);
+  z-index: -10;
+}

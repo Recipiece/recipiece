@@ -15,7 +15,7 @@ import {
   RecipeContextMenu,
   RecipieceMenuBarContext,
 } from "../../component";
-import { RecipeIngredient } from "../../data";
+import { Recipe, RecipeIngredient } from "../../data";
 import { formatIngredientAmount } from "../../util";
 import { IngredientContextMenu } from "./IngredientContextMenu";
 import { useLayout } from "../../hooks";
@@ -25,7 +25,7 @@ import Fraction from "fraction.js";
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
   const {
-    data: recipe,
+    data: originalRecipe,
     isLoading: isLoadingRecipe,
     error: recipeError,
   } = useGetRecipeByIdQuery(+id!, {
@@ -40,17 +40,20 @@ export const RecipeViewPage: FC = () => {
     return isLoadingCurrentUser || isLoadingRecipe;
   }, [isLoadingCurrentUser, isLoadingRecipe]);
 
-  const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
+  const [recipe, setRecipe] = useState<Recipe | undefined>(originalRecipe);
   const [checkedOffSteps, setCheckedOffSteps] = useState<number[]>([]);
   const [checkedOffIngredients, setCheckedOffIngredients] = useState<number[]>([]);
 
   useEffect(() => {
-    setIngredients(recipe?.ingredients ?? []);
+    if (originalRecipe) {
+      setRecipe({ ...originalRecipe });
+    }
 
     return () => {
-      setIngredients([]);
+      setRecipe(undefined);
     };
-  }, [recipe]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [originalRecipe]);
 
   const onStepChecked = useCallback(
     (stepId: number) => {
@@ -79,34 +82,53 @@ export const RecipeViewPage: FC = () => {
   );
 
   const onIngredientConverted = useCallback((ingredient: RecipeIngredient, newAmount: string, newUnit: string) => {
-    setIngredients((prev) => {
-      return prev.map((ing) => {
-        if (ing.id === ingredient.id) {
-          return { ...ing, amount: newAmount, unit: newUnit };
-        } else {
-          return { ...ing };
-        }
-      });
+    setRecipe((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          ingredients: (prev?.ingredients ?? []).map((ing) => {
+            if (ing.id === ingredient.id) {
+              return { ...ing, amount: newAmount, unit: newUnit };
+            } else {
+              return { ...ing };
+            }
+          }),
+        };
+      } else {
+        return undefined;
+      }
     });
   }, []);
 
   const onScaleIngredients = useCallback((scaleFactor: number) => {
-    setIngredients((prev) => {
-      return prev.map((ing) => {
-        if (ing.amount) {
-          try {
-            const fractional = new Fraction(ing.amount);
-            return { ...ing, amount: fractional.mul(new Fraction(scaleFactor)).toString(2) };
-          } catch {
-            // couldn't do anything, just return the ingredient
-            return { ...ing };
-          }
-        } else {
-          return {...ing};
-        }
-      });
+    setRecipe((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          servings: !!prev?.servings ? prev.servings * scaleFactor : undefined,
+          ingredients: (prev?.ingredients || []).map((ing) => {
+            if (ing.amount) {
+              try {
+                const fractional = new Fraction(ing.amount);
+                return { ...ing, amount: fractional.mul(new Fraction(scaleFactor)).toString(2) };
+              } catch {
+                // couldn't do anything, just return the ingredient
+                return { ...ing };
+              }
+            } else {
+              return { ...ing };
+            }
+          }),
+        };
+      } else {
+        return undefined;
+      }
     });
   }, []);
+
+  const onResetChanges = useCallback(() => {
+    setRecipe(originalRecipe ? { ...originalRecipe } : undefined);
+  }, [originalRecipe]);
 
   const dropdownMenuComponent = useMemo(() => {
     return (
@@ -126,12 +148,16 @@ export const RecipeViewPage: FC = () => {
               canShare={!recipe!.private}
               canAddToShoppingList={recipe!.user_id === currentUser?.id}
               canAddToCookbook={recipe!.user_id === currentUser?.id}
+              canScale
+              onScale={onScaleIngredients}
+              canReset
+              onReset={onResetChanges}
             />
           </DropdownMenu>
         )}
       </>
     );
-  }, [currentUser, recipe]);
+  }, [currentUser, onResetChanges, onScaleIngredients, recipe]);
 
   return (
     <div className="p-4">
@@ -182,7 +208,7 @@ export const RecipeViewPage: FC = () => {
               <CardTitle className="mb-1">Ingredients</CardTitle>
               <CardContent>
                 <div className="flex flex-col gap-1">
-                  {ingredients.map((ing) => {
+                  {(recipe?.ingredients ?? []).map((ing) => {
                     return (
                       <div key={ing.id} className="flex flex-row gap-2 items-center">
                         <Checkbox checked={checkedOffIngredients.includes(ing.id)} />

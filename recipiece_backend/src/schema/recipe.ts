@@ -49,6 +49,7 @@ export const YCreateRecipeRequestSchema = object({
   name: string().required(),
   description: string().required(),
   private: boolean().notRequired().default(false),
+  servings: number().notRequired(),
   ingredients: array()
     .of(
       object({
@@ -104,6 +105,7 @@ export const YUpdateRecipeRequestSchema = object({
   name: string().notRequired(),
   description: string().notRequired(),
   private: boolean().notRequired().default(false),
+  servings: number().notRequired(),
   ingredients: array()
     .of(
       object({

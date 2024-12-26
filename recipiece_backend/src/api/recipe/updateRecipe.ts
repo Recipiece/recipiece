@@ -99,6 +99,9 @@ export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequest
       if (recipeBody.private) {
         recipeUpdateData.private = recipeBody.private;
       }
+      if(recipeBody.servings) {
+        recipeUpdateData.servings = recipeBody.servings;
+      }
 
       const updatedRecipe = await tx.recipe.update({
         data: { ...recipeUpdateData },
