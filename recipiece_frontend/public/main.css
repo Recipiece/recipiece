@@ -1165,12 +1165,12 @@ body {
   flex: 1 1 0%;
 }
 
-.flex-shrink-0 {
-  flex-shrink: 0;
-}
-
 .flex-shrink {
   flex-shrink: 1;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 
 .shrink-0 {
@@ -1937,10 +1937,6 @@ body {
 
 .opacity-90 {
   opacity: 0.9;
-}
-
-.opacity-35 {
-  opacity: 0.35;
 }
 
 .shadow-\[0_0_0_1px_hsl\(var\(--sidebar-border\)\)\] {
