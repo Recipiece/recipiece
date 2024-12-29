@@ -6,7 +6,6 @@ coverage
 node_modules
 .env.keys
 .env.deploy
-.env.dev
 dist
 prod_dist
 recipiece_infrastructure
