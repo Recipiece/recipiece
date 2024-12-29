@@ -14,7 +14,7 @@ import { formatIngredientAmount } from "../../util";
 
 const RecipeFormSchema = z.object({
   name: z.string().min(3).max(100),
-  description: z.string().min(3).max(1000).optional(),
+  description: z.string().max(1000).optional(),
   servings: z.coerce.number().min(0).optional(),
   steps: z.array(
     z.object({

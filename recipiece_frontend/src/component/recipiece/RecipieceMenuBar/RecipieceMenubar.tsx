@@ -1,5 +1,5 @@
 import { Book, CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
-import { createContext, createRef, FC, Fragment, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
+import { createContext, createRef, FC, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateCookbookMutation,
@@ -16,7 +16,6 @@ import { CreateCookbookForm, CreateShoppingListForm, CreateTimerForm, MobileCrea
 import { Button, Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator, useToast } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
-import { TimerMenuItem } from "./TimerMenuItem";
 
 export const RecipieceMenuBarContext = createContext<{
   readonly mobileMenuPortalRef: undefined | RefObject<HTMLSpanElement>;
@@ -332,7 +331,7 @@ export const RecipieceMenubar: FC = () => {
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        {/* <span className="hidden w-0 sm:w-auto sm:block">
           <MenubarMenu>
             <MenubarTrigger>Timers</MenubarTrigger>
             <MenubarContent>
@@ -350,7 +349,7 @@ export const RecipieceMenubar: FC = () => {
               })}
             </MenubarContent>
           </MenubarMenu>
-        </span>
+        </span> */}
 
         <span className="hidden w-0 sm:w-auto sm:block">
           <MenubarMenu>
