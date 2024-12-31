@@ -3,12 +3,14 @@ import request from "supertest";
 
 describe("Create User", () => {
   it("should create a user, their credentials, and their access level", async () => {
-    const username = "newuser@recipiece.org";
+    const email = "newuser@recipiece.org";
+    const username = "testuser";
     const password = "reallyCoolP@ss1234!";
 
     const response = await request(server)
-      .post("/user/create")
+      .post("/user")
       .send({
+        email: email,
         username: username,
         password: password,
       })
@@ -18,7 +20,7 @@ describe("Create User", () => {
 
     const matchingUser = await testPrisma.user.findUnique({
       where: {
-        email: username,
+        email: email,
       },
       include: {
         user_access_records: true,
@@ -32,17 +34,39 @@ describe("Create User", () => {
     expect(matchingUser?.user_access_records).toBeTruthy();
   });
 
-  it("should not allow a duplicate user to be created", async () => {
+  it("should not allow an existing email to be used", async () => {
     const existingUser = await testPrisma.user.create({
       data: {
         email: "existing@recipiece.org",
+        username: "uniqueusername",
       },
     });
 
     const response = await request(server)
-      .post("/user/create")
+      .post("/user")
       .send({
-        username: existingUser.email,
+        username: "ajsdhfjkashdklf",
+        email: existingUser.email,
+        password: "anythingGoes",
+      })
+      .set("Content-Type", "application/json");
+
+    expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+  });
+
+  it("should not allow an existing username to be used", async () => {
+    const existingUser = await testPrisma.user.create({
+      data: {
+        email: "existing@recipiece.org",
+        username: "uniqueusername",
+      },
+    });
+
+    const response = await request(server)
+      .post("/user")
+      .send({
+        email: "yeet@asdf.qwer",
+        username: existingUser.username,
         password: "anythingGoes",
       })
       .set("Content-Type", "application/json");

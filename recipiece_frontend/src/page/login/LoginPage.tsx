@@ -9,7 +9,7 @@ import { TokenManager, useLoginUserMutation } from "../../api";
 import { Button, Form, FormCheckbox, FormInput, Stack, SubmitButton, useToast } from "../../component";
 
 const LoginFormSchema = z.object({
-  username: z.string().email("Enter your email address."),
+  username: z.string().email("Enter your username or email address."),
   password: z.string().min(1, "Enter your password."),
   remember: z.boolean().optional().default(false),
 });
@@ -66,7 +66,7 @@ export const LoginPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput name="username" type="email" label="Username" />
+          <FormInput name="username" type="text" label="Username or Email" />
           <FormInput name="password" type="password" label="Password" />
           <FormCheckbox className="mt-1 mb-1" name="remember" label="Remember Me" />
           <SubmitButton type="submit">Login</SubmitButton>

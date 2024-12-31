@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import "jest-expect-message";
 import request from "superwstest";
 import { Redis } from "../../../src/database";
+import { ModifyShoppingListResponse } from "../../../src/schema";
 
 const setShoppingListToken = async (shoppingListId: number): Promise<string> => {
   const wsToken = randomUUID().toString();
@@ -72,7 +73,9 @@ describe("Modify Shopping List", () => {
           action: "set_item_content",
           item: { ...itemToUpdate, content: "wholly new content" },
         })
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("set_item_content");
+          const actualJson = response.items;
           expect(actualJson.length).toBe(10);
           expect(actualJson[0].content).toEqual(shoppingListItems[0].content);
           expect(actualJson[1].content).toEqual(shoppingListItems[1].content);
@@ -111,7 +114,9 @@ describe("Modify Shopping List", () => {
             shopping_list_id: shoppingList.id + 1,
           },
         })
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("set_item_content");
+          const actualJson = response.items;
           expect(actualJson.length).toBe(10);
           expect(actualJson[0].content).toEqual(shoppingListItems[0].content);
           expect(actualJson[1].content).toEqual(shoppingListItems[1].content);
@@ -150,7 +155,9 @@ describe("Modify Shopping List", () => {
           action: "delete_item",
           item: { ...itemToDelete },
         })
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("delete_item");
+          const actualJson = response.items;
           expect(actualJson.length).toBe(9);
           expect(actualJson[0].order).toBe(1);
           expect(actualJson[1].order).toBe(2);
@@ -184,7 +191,9 @@ describe("Modify Shopping List", () => {
           action: "delete_item",
           item: { id: shoppingListItems[shoppingListItems.length - 1].id + 1, shopping_list_id: shoppingList.id + 1 },
         })
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("delete_item");
+          const actualJson = response.items;
           expect(actualJson.length).toBe(10);
         });
     });
@@ -215,7 +224,9 @@ describe("Modify Shopping List", () => {
           action: "mark_item_incomplete",
           item: { ...itemToMarkIncomplete },
         })
-        .expectJson((allItems: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("mark_item_incomplete");
+          const allItems = response.items;
           // check that the matching item was setup correctly
           const matchingItem = allItems.find((item) => item.id === itemToMarkIncomplete.id);
           expect(matchingItem).toBeTruthy();
@@ -266,7 +277,9 @@ describe("Modify Shopping List", () => {
           action: "mark_item_incomplete",
           item: { ...itemToMarkIncomplete },
         })
-        .expectJson((allItems: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("mark_item_incomplete");
+          const allItems = response.items;
           allItems.forEach((item) => {
             const matchingItem = shoppingListItems.find((originalItem) => item.id === originalItem.id);
             expect(matchingItem).toBeTruthy();
@@ -302,7 +315,9 @@ describe("Modify Shopping List", () => {
           action: "mark_item_complete",
           item: { ...itemToMarkComplete },
         })
-        .expectJson((allItems: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("mark_item_complete");
+          const allItems = response.items;
           // check that the matching item was setup correctly
           const matchingItem = allItems.find((item) => item.id === itemToMarkComplete.id);
           expect(matchingItem).toBeTruthy();
@@ -353,7 +368,9 @@ describe("Modify Shopping List", () => {
           action: "mark_item_complete",
           item: { ...itemToMarkComplete },
         })
-        .expectJson((allItems: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("mark_item_complete");
+          const allItems = response.items;
           allItems.forEach((item) => {
             const matchingItem = shoppingListItems.find((originalItem) => item.id === originalItem.id);
             expect(matchingItem).toBeTruthy();
@@ -376,7 +393,9 @@ describe("Modify Shopping List", () => {
             order: 1,
           },
         })
-        .expectJson((allItems: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("add_item");
+          const allItems = response.items;
           const actualJson = allItems[0];
           expect(actualJson.id).toBeTruthy();
           expect(actualJson.shopping_list_id).toEqual(shoppingList.id);
@@ -407,7 +426,9 @@ describe("Modify Shopping List", () => {
             completed: false,
           },
         })
-        .expectJson((allItems: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("add_item");
+          const allItems = response.items;
           const actualJson = allItems[5];
           expect(actualJson).toBeTruthy();
           expect(actualJson.id).toBeTruthy();
@@ -426,7 +447,9 @@ describe("Modify Shopping List", () => {
             completed: true,
           },
         })
-        .expectJson((allItems: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("add_item");
+          const allItems = response.items;
           const actualJson = allItems[6];
           expect(actualJson).toBeTruthy();
           expect(actualJson.id).toBeTruthy();
@@ -488,7 +511,9 @@ describe("Modify Shopping List", () => {
             },
           })
         )
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("set_item_order");
+          const actualJson = response.items;
           actualJson.forEach((actualItem) => {
             const matchingExpectedItem = expectedJsonMessage.find((item) => item.id === actualItem.id);
             expect(matchingExpectedItem).toBeTruthy();
@@ -546,7 +571,9 @@ describe("Modify Shopping List", () => {
             },
           })
         )
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("set_item_order");
+          const actualJson = response.items;
           actualJson.forEach((actualItem) => {
             const matchingExpectedItem = expectedJsonMessage.find((item) => item.id === actualItem.id);
             expect(matchingExpectedItem).toBeTruthy();
@@ -604,7 +631,9 @@ describe("Modify Shopping List", () => {
             },
           })
         )
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("set_item_order");
+          const actualJson = response.items;
           actualJson.forEach((actualItem) => {
             const matchingExpectedItem = expectedJsonMessage.find((item) => item.id === actualItem.id);
             expect(matchingExpectedItem).toBeTruthy();
@@ -662,7 +691,9 @@ describe("Modify Shopping List", () => {
             },
           })
         )
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("set_item_order");
+          const actualJson = response.items;
           actualJson.forEach((actualItem) => {
             const matchingExpectedItem = expectedJsonMessage.find((item) => item.id === actualItem.id);
             expect(matchingExpectedItem).toBeTruthy();
@@ -721,7 +752,9 @@ describe("Modify Shopping List", () => {
             },
           })
         )
-        .expectJson((actualJson: ShoppingListItem[]) => {
+        .expectJson((response: ModifyShoppingListResponse) => {
+          expect(response.responding_to_action).toBe("set_item_order");
+          const actualJson = response.items;
           actualJson.forEach((actualItem) => {
             const matchingExpectedItem = expectedJsonMessage.find((item) => item.id === actualItem.id);
             expect(matchingExpectedItem).toBeTruthy();

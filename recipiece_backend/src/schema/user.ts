@@ -3,6 +3,7 @@ import { RecipeImportFiles } from "../util/constant";
 
 export const YUserSchema = object({
   email: string().required(),
+  username: string().required(),
   created_at: date().required(),
   validated: boolean().required(),
   id: number().required(),
@@ -16,6 +17,7 @@ export interface UserSchema extends InferType<typeof YUserSchema> {}
  * Create user
  */
 export const YCreateUserRequestSchema = object({
+  email: string().required(),
   username: string().required(),
   password: string().required(),
 })
@@ -27,6 +29,7 @@ export interface CreateUserRequestSchema extends InferType<typeof YCreateUserReq
 export const YCreateUserResponseSchema = object({
   id: number().required(),
   validated: boolean().required(),
+  username: string().required(),
   email: string().required(),
   created_at: date().required(),
 })
@@ -34,6 +37,18 @@ export const YCreateUserResponseSchema = object({
   .noUnknown();
 
 export interface CreateUserResponseSchema extends InferType<typeof YCreateUserResponseSchema> {}
+
+/**
+ * Update user schema
+ */
+export const YUpdateUserRequestSchema = object({
+  id: number().required(),
+  username: string().optional(),
+})
+  .strict()
+  .noUnknown();
+
+export interface UpdateUserRequestSchema extends InferType<typeof YUpdateUserRequestSchema> {}
 
 /**
  * Validate user account
@@ -70,7 +85,7 @@ export interface LoginResponseSchema extends InferType<typeof YLoginResponseSche
  * Issue forgot password token
  */
 export const YIssueForgotPasswordTokenRequestSchema = object({
-  username: string().required(),
+  username_or_email: string().required(),
 })
   .strict()
   .noUnknown();

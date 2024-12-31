@@ -8,6 +8,6 @@ export const KNOWN_INGREDIENT_ROUTES: Route[] = [
     authentication: "access_token",
     function: listKnownIngredients,
     method: "GET",
-    version: Versions.ALL,
+    
   },
 ];

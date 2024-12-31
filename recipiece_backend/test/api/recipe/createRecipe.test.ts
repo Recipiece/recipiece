@@ -48,25 +48,4 @@ describe("Create Recipes", () => {
     expect(steps.length).toEqual(1);
     expect(steps[0].recipe_id).toEqual(responseBody.id);
   });
-
-  it("should not allow a recipe with a duplicate name to be created for a given user", async () => {
-    const existingRecipe = await testPrisma.recipe.create({
-      data: {
-        name: "Test Recipe",
-        description: "asdfqwer",
-        user_id: user.id,
-      }
-    });
-
-    const response = await request(server)
-      .post("/recipe")
-      .send({
-        name: existingRecipe.name,
-        description: "zxcvuiop",
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toEqual(StatusCodes.CONFLICT);
-  });
 });

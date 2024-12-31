@@ -10,13 +10,21 @@ import { sendForgotPasswordEmail } from "../../util/email";
 export const issueForgotPasswordToken = async (
   request: Request<any, any, IssueForgotPasswordTokenRequestSchema>
 ): ApiResponse<{}> => {
-  const { username } = request.body;
+  const { username_or_email } = request.body;
 
-  const matchingUser = await prisma.user.findUnique({
+  const matchingUser = await prisma.user.findFirst({
     where: {
-      email: username,
+      OR: [
+        {
+          email: username_or_email
+        },
+        {
+          username: username_or_email,
+        }
+      ],
     }
   });
+
   if(!matchingUser) {
     return [StatusCodes.CREATED, {}];
   }

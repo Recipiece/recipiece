@@ -19,7 +19,7 @@ export const TIMER_ROUTES: Route[] = [
     function: createTimer,
     authentication: "access_token",
     method: "POST",
-    version: Versions.ALL,
+    
     requestSchema: YCreateTimerRequestSchema,
     responseSchema: YTimerSchema,
   },
@@ -28,14 +28,14 @@ export const TIMER_ROUTES: Route[] = [
     function: deleteTimer,
     authentication: "access_token",
     method: "DELETE",
-    version: Versions.ALL,
+    
   },
   {
     path: "/timer/:id(\\d+)",
     function: getTimer,
     authentication: "access_token",
     method: "GET",
-    version: Versions.ALL,
+    
   },
   {
     path: "/timer/list",
@@ -44,7 +44,7 @@ export const TIMER_ROUTES: Route[] = [
     function: listTimers,
     requestSchema: YListTimersQuerySchema,
     responseSchema: YListTimersResponseSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/timer",
@@ -53,6 +53,6 @@ export const TIMER_ROUTES: Route[] = [
     function: updateTimer,
     requestSchema: YUpdateTimerRequestSchema,
     responseSchema: YTimerSchema,
-    version: Versions.ALL,
+    
   },
 ];

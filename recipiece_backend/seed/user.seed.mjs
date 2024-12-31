@@ -21,6 +21,7 @@ export const seedUsers = async () => {
     const user = await tx.user.create({
       data: {
         email: "dev@recipiece.org",
+        username: "dev29",
         validated: true,
       },
     });
@@ -34,6 +35,7 @@ export const seedUsers = async () => {
     const otherUser = await tx.user.create({
       data: {
         email: "other@recipiece.org",
+        username: "other92",
         validated: true,
       },
     });

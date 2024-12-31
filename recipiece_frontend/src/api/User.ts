@@ -79,7 +79,7 @@ export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
 export const useCreateUserMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
 
-  const mutation = async (args: { readonly username: string; readonly password: string }) => {
+  const mutation = async (args: { readonly username: string; readonly password: string, readonly email: string }) => {
     return await poster<typeof args, never>({
       path: "/user/create",
       body: args,

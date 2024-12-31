@@ -1,8 +1,8 @@
-import { Prisma, PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../database";
-import { ApiResponse, ErrorResponse } from "../types";
+import { ApiResponse } from "../types";
 import { verifyPassword } from "../util/password";
 
 export const basicAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
@@ -29,9 +29,16 @@ const runBasicAuth = async (username?: string, password?: string): ApiResponse<U
     ];
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findFirst({
     where: {
-      email: username,
+      OR: [
+        {
+          email: username,
+        },
+        {
+          username: username,
+        }
+      ],
     },
   });
 

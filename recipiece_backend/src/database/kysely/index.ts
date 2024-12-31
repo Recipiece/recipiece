@@ -109,6 +109,7 @@ export type User = {
     created_at: Generated<Timestamp>;
     email: string;
     validated: Generated<boolean>;
+    username: string;
 };
 export type UserAccessRecord = {
     id: Generated<number>;

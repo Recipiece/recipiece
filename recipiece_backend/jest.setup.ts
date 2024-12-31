@@ -41,6 +41,7 @@ globalThis.fixtures = {
     }
 
     const email = absoluteEmail ?? `${stringGen(15)}@${stringGen(5)}.${stringGen(3)}`;
+    const username = stringGen(10);
     const password = "test1234!";
     const hashedPassword = await hashPassword(password);
 
@@ -48,6 +49,7 @@ globalThis.fixtures = {
     const user = await jestPrisma.client.user.create({
       data: {
         email: email,
+        username: username,
         credentials: {
           create: {
             password_hash: hashedPassword!,

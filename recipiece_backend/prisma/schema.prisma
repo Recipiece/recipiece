@@ -24,6 +24,7 @@ model User {
   created_at DateTime @default(now())
   email String @unique
   validated Boolean @default(false)
+  username String @unique
 
   recipes Recipe[]
   cookbooks Cookbook[]
@@ -36,6 +37,8 @@ model User {
   timers Timer[]
   meal_plans MealPlan[]
   user_push_notification_subscriptions UserPushNotificationSubscription[]
+  // origination_recipe_shares RecipeShare[] @relation(name: "originator_user")
+  // destination_recipe_shares RecipeShare[] @relation(name: "destination_user")
 }
 
 model UserAccessRecord {
@@ -98,6 +101,21 @@ model UserValidationToken {
   user_id Int
 }
 
+// model RecipeShare {
+//   @@map("recipe_shares")
+
+//   @@id(name: "id", [recipe_id, originator_user_id, destination_user_id])
+//   created_at DateTime @default(now())
+
+//   recipe_id Int
+//   originator_user_id Int
+//   destination_user_id Int
+
+//   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   originator_user User @relation(name: "originator_user", fields: [originator_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+// }
+
 model Recipe {
   @@map("recipes")
 
@@ -118,6 +136,7 @@ model Recipe {
   recipe_cookbook_attachments RecipeCookbookAttachment[]
   meal_plan_items MealPlanItem[]
   scheduled_notifications ScheduledNotification[]
+  // recipe_shares RecipeShare[]
 
   @@index([user_id, name])
 }

@@ -44,7 +44,6 @@ export interface Route {
   readonly postMiddleware?: any[];
   readonly requestSchema?: ObjectSchema;
   readonly responseSchema?: ObjectSchema;
-  readonly version: string;
 }
 
 export interface WebsocketRoute {
@@ -53,7 +52,6 @@ export interface WebsocketRoute {
   readonly authentication: "token" | "none";
   readonly requestSchema: ObjectSchema;
   readonly responseSchema?: ObjectSchema;
-  readonly version: string;
 }
 
 export interface TokenPayload {

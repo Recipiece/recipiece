@@ -25,7 +25,7 @@ export const RECIPE_ROUTES: Route[] = [
     function: createRecipe,
     requestSchema: YCreateRecipeRequestSchema,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/recipe",
@@ -34,7 +34,7 @@ export const RECIPE_ROUTES: Route[] = [
     function: updateRecipe,
     requestSchema: YUpdateRecipeRequestSchema,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/recipe/parse/url",
@@ -43,7 +43,7 @@ export const RECIPE_ROUTES: Route[] = [
     function: parseRecipeFromUrl,
     requestSchema: YParseRecipeFromURLRequestSchema,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/recipe/list",
@@ -52,7 +52,7 @@ export const RECIPE_ROUTES: Route[] = [
     function: listRecipes,
     requestSchema: YListRecipesQuerySchema,
     responseSchema: YListCookbooksResponseSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/recipe/:id(\\d+)",
@@ -60,21 +60,21 @@ export const RECIPE_ROUTES: Route[] = [
     method: "GET",
     function: getRecipe,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/recipe/:id(\\d+)",
     authentication: "access_token",
     method: "DELETE",
     function: deleteRecipe,
-    version: Versions.ALL,
+    
   },
   {
     path: "/recipe/fork",
     authentication: "access_token",
     method: "POST",
     function: forkRecipe,
-    version: Versions.ALL,
+    
     requestSchema: YForkRecipeRequestSchema,
     responseSchema: YRecipeSchema,
   },
