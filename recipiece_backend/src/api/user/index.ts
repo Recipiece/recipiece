@@ -16,6 +16,7 @@ import { Route } from "../../types";
 import { changePassword } from "./changePassword";
 import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
 import { createUser } from "./createUser";
+import { deleteSelf } from "./deleteSelf";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
@@ -47,6 +48,12 @@ export const LOGIN_ROUTES: Route[] = [
     function: getUserByToken,
     authentication: "access_token",
     responseSchema: YUserSchema,
+  },
+  {
+    path: "/user/self",
+    method: "DELETE",
+    function: deleteSelf,
+    authentication: "access_token",
   },
   {
     path: "/user",

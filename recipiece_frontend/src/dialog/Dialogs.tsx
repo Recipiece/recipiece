@@ -5,6 +5,7 @@ import { ConvertIngredientDialog } from "./ConvertIngredient";
 import { CreateCookbookDialog } from "./CreateCookbook";
 import { CreateShoppingListDialog } from "./CreateShoppingList";
 import { CreateTimerDialog } from "./CreateTimer";
+import { DeleteAccountDialog } from "./DeleteAccount";
 import { DeleteMealPlanDialog } from "./DeleteMealPlan";
 import { DeleteRecipeDialog } from "./DeleteRecipe";
 import { DeleteShoppingListDialog } from "./DeleteShoppingList";
@@ -88,4 +89,7 @@ export const Dialogs = {
   scaleRecipe: {
     component: ScaleRecipeDialog,
   },
+  deleteAccount: {
+    component: DeleteAccountDialog,
+  }
 };

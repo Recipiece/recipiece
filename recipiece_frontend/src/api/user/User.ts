@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserAccount } from "../../data";
-import { MutationArgs, QueryArgs, useGet, usePost, usePut } from "../Request";
+import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { TokenManager } from "../TokenManager";
 import { UserQueryKeys } from "./UserQueryKeys";
 import { Buffer } from "buffer";
@@ -295,5 +295,28 @@ export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<void>) =
       args?.onFailure?.(err);
     },
     mutationKey: ["pushNotificationOptIn"],
+  });
+};
+
+export const useDeleteSelfMutation = (args?: MutationArgs<void>) => {
+  const { deleter } = useDelete();
+  const queryClient = useQueryClient();
+
+  const mutation = async () => {
+    return await deleter({
+      path: "/user/self",
+      withAuth: "access_token",
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      queryClient.clear();
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
   });
 };

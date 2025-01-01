@@ -40,7 +40,7 @@ export interface PutRequest<T> {
 
 export interface DeleteRequest {
   readonly path: string;
-  readonly id: number;
+  readonly id?: number;
   readonly withAuth?: "access_token" | "refresh_token";
 }
 
@@ -224,7 +224,11 @@ export const useDelete = (args?: HookArgs) => {
     }
 
     try {
-      const response = await axios.delete(`${getUrl()}${deleteRequest.path}/${deleteRequest.id}`, {
+      let path = `${getUrl()}${deleteRequest.path}`;
+      if (deleteRequest.id) {
+        path += `/${deleteRequest.id}`;
+      }
+      const response = await axios.delete(path, {
         headers: headers,
       });
 

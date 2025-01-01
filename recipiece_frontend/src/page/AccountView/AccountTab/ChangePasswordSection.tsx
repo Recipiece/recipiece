@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useChangePasswordMutation, useGetSelfQuery } from "../../../api";
-import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../../component";
+import { Button, Form, FormInput, H3, Stack, SubmitButton, useToast } from "../../../component";
 
 const ChangePasswordFormSchema = z
   .object({
@@ -73,7 +73,7 @@ export const ChangePasswordSection: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-2">
-          <h1 className="text-lg">Password</h1>
+          <H3>Password</H3>
           <p className="text-sm">
             You can change your password by clicking the button below. If you change your password, you will be logged out immediately from all devices and will need to login again
             with your new password.

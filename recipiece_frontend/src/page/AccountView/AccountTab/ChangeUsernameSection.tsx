@@ -1,7 +1,7 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useGetSelfQuery, useUpdateUserMutation } from "../../../api";
-import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../../component";
+import { Button, Form, FormInput, H3, Stack, SubmitButton, useToast } from "../../../component";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -75,9 +75,9 @@ export const ChangeUsernameSection: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <h1 className="text-lg">Account Details</h1>
+          <H3>Account Details</H3>
           <p className="text-sm">
-            Your username and email are listed below. You can change them by clicking the <i>Edit Account Information </i>
+            Your username and email are listed below. You can change them by clicking the <i>Edit Account Details </i>
             button below. This will take effect upon saving, and you will need to use the new username/email address when
             logging in in the future.
           </p>
@@ -85,7 +85,7 @@ export const ChangeUsernameSection: FC = () => {
           <FormInput name="email" readOnly={!isEditing} label="Email Address" type="email" className="sm:pr-[50%]" />
           <div className="flex flex-row gap-2">
             <span className="mr-auto" />
-            {!isEditing && <Button onClick={() => setIsEditing(true)}>Edit Account Information</Button>}
+            {!isEditing && <Button onClick={() => setIsEditing(true)}>Edit Account Details</Button>}
             {isEditing && (
               <Button variant="secondary" onClick={onCancel}>
                 Cancel

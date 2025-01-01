@@ -16,12 +16,12 @@ export const AccountViewPage: FC = () => {
 
   return (
     <Stack>
-      <LoadingGroup isLoading={isLoadingAccount} className="w-full h-6">
+      {/* <LoadingGroup isLoading={isLoadingAccount} className="w-full h-6">
         <h1 className="text-2xl">Welcome Back, {account?.username}</h1>
       </LoadingGroup>
       <LoadingGroup isLoading={isLoadingAccount}>
         <p className="text-sm">You joined Recipiece on {joinDate}.</p>
-      </LoadingGroup>
+      </LoadingGroup> */}
       <Tabs defaultValue="account">
         <TabsList className="w-full items-left justify-start">
           <TabsTrigger value="account">Account</TabsTrigger>

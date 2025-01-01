@@ -4,6 +4,7 @@ export * from "./AddTimeToTimer";
 export * from "./CreateCookbook";
 export * from "./CreateShoppingList";
 export * from "./CreateTimer";
+export * from "./DeleteAccount";
 export * from "./DeleteCookbook";
 export * from "./DeleteMealPlan";
 export * from "./DeleteRecipe";

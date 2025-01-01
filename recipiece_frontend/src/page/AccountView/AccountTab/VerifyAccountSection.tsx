@@ -4,7 +4,7 @@ import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useGetSelfQuery, useRequestVerifyAccountMutation, useVerifyAccountMutation } from "../../../api";
-import { Badge, Button, Form, FormInput, LoadingGroup, Shelf, ShelfSpacer, Stack, useToast } from "../../../component";
+import { Badge, Button, Form, FormInput, H3, LoadingGroup, Shelf, ShelfSpacer, Stack, useToast } from "../../../component";
 
 const VerifyAccountFormSchema = z.object({
   token: z.string().uuid("Enter a valid token"),
@@ -74,9 +74,11 @@ export const VerifyAccountSection: FC = () => {
 
   return (
     <LoadingGroup isLoading={isLoadingAccount} variant="spinner" className="w-8 h-8">
-      <h1 className="text-lg">
-        Account Status: <Badge variant={account?.validated ? "default" : "secondary"}>{account?.validated ? "Verified" : "Not Verified"}</Badge>
-      </h1>
+      <H3>
+        <div className="flex flex-row items-center gap-2">
+        Account Status <Badge variant={account?.validated ? "default" : "secondary"}>{account?.validated ? "Verified" : "Not Verified"}</Badge>
+        </div>
+      </H3>
       {!account?.validated && (
         <Stack>
           <p className="text-sm">
@@ -100,6 +102,11 @@ export const VerifyAccountSection: FC = () => {
             </Form>
           )}
         </Stack>
+      )}
+      {account?.validated && (
+        <p className="text-sm">
+          Your account has been verified. You now have access to all the features of Recipiece.
+        </p>
       )}
     </LoadingGroup>
   );
