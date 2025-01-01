@@ -55,7 +55,7 @@ describe("Get Recipes", () => {
   });
 
   it(`should ${StatusCodes.NOT_FOUND} when the recipe is private and does not belong to the requesting user`, async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const existingRecipe = await testPrisma.recipe.create({
       data: {
         name: "Test Recipe",

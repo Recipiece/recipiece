@@ -1,5 +1,6 @@
 import { recipeImportUploader } from "../../middleware";
 import {
+  YChangePasswordRequestSchema,
   YCreateUserRequestSchema,
   YCreateUserResponseSchema,
   YIssueForgotPasswordTokenRequestSchema,
@@ -12,6 +13,7 @@ import {
   YValidateUserResponseSchema,
 } from "../../schema";
 import { Route } from "../../types";
+import { changePassword } from "./changePassword";
 import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
 import { createUser } from "./createUser";
 import { getUserByToken } from "./getUserByToken";
@@ -89,6 +91,13 @@ export const LOGIN_ROUTES: Route[] = [
     function: resetPassword,
     authentication: "none",
     requestSchema: YResetPasswordRequestSchema,
+  },
+  {
+    path: "/user/change-password",
+    method: "POST",
+    function: changePassword,
+    authentication: "basic",
+    requestSchema: YChangePasswordRequestSchema,
   },
   {
     path: "/user/refresh-token",

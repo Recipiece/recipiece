@@ -13,7 +13,7 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
 
   try {
     const hashedPassword = await hashPassword(password);
-    if (!hashPassword) {
+    if (!hashedPassword) {
       return [
         StatusCodes.INTERNAL_SERVER_ERROR,
         {

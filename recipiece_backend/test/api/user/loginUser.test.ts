@@ -1,35 +1,23 @@
+import { User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { LoginResponseSchema } from "../../../src/schema";
-import { hashPassword } from "../../../src/util/password";
 
 describe("Login User", () => {
+  let user: User;
+  const defaultPassword = "test1234!";
+
+  beforeEach(async () => {
+    const userAndToken = await fixtures.createUserAndToken({ password: defaultPassword });
+    user = userAndToken[0];
+  });
+
   it("should allow a user to login with a valid email and password", async () => {
-    const password = "test1234";
-    const email = "user@recipiece.org";
-    const username = "recipieceuser";
-    const hashedPassword = await hashPassword(password);
-
-    const user = await testPrisma.user.create({
-      data: {
-        email: email,
-        username: username,
-      },
-    });
-
-    await testPrisma.userCredentials.create({
-      data: {
-        password_hash: hashedPassword!,
-        user_id: user.id,
-      },
-    });
+    const emailBasicHeader = Buffer.from(`${user.email}:${defaultPassword}`).toString("base64");
 
     const response = await request(server)
       .post("/user/login")
-      .send({
-        username: email,
-        password: password,
-      })
+      .set("Authorization", `Basic ${emailBasicHeader}`)
       .set("Content-Type", "application/json");
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
@@ -40,31 +28,11 @@ describe("Login User", () => {
   });
 
   it("should allow a user to login with a valid username and password", async () => {
-    const password = "test1234";
-    const email = "user@recipiece.org";
-    const username = "recipieceuser";
-    const hashedPassword = await hashPassword(password);
-
-    const user = await testPrisma.user.create({
-      data: {
-        email: email,
-        username: username,
-      },
-    });
-
-    await testPrisma.userCredentials.create({
-      data: {
-        password_hash: hashedPassword!,
-        user_id: user.id,
-      },
-    });
+    const usernameBasicHeader = Buffer.from(`${user.username}:${defaultPassword}`).toString("base64");
 
     const response = await request(server)
       .post("/user/login")
-      .send({
-        username: username,
-        password: password,
-      })
+      .set("Authorization", `Basic ${usernameBasicHeader}`)
       .set("Content-Type", "application/json");
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
@@ -75,45 +43,23 @@ describe("Login User", () => {
   });
 
   it("should not allow a login when the password does not match", async () => {
-    const password = "test1234";
-    const email = "user@recipiece.org";
-    const username = "recipieceuser";
-    const hashedPassword = await hashPassword(password);
-
-    const user = await testPrisma.user.create({
-      data: {
-        username: username,
-        email: email,
-      },
-    });
-
-    await testPrisma.userCredentials.create({
-      data: {
-        password_hash: hashedPassword!,
-        user_id: user.id,
-      },
-    });
-
+    const badPasswordHeader = Buffer.from(`${user.username}:${defaultPassword + "asdf"}`).toString("base64");
     const response = await request(server)
       .post("/user/login")
-      .send({
-        username: username,
-        password: "nonsensePassword1234!",
-      })
+      .set("Authorization", `Basic ${badPasswordHeader}`)
       .set("Content-Type", "application/json");
 
-    expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
+    expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
   });
 
   it("should not allow a login when the user does not exist", async () => {
+    const nonsenseHeader = Buffer.from(`${user.username + "asdf"}:${defaultPassword + "asdf"}`).toString("base64");
+
     const response = await request(server)
       .post("/user/login")
-      .send({
-        username: "nonsenseUser@recipiece.org",
-        password: "nonsensePassword1234!",
-      })
+      .set("Authorization", `Basic ${nonsenseHeader}`)
       .set("Content-Type", "application/json");
 
-    expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
+    expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
   });
 });

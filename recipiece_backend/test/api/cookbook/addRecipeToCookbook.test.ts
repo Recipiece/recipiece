@@ -49,7 +49,7 @@ describe("Add Recipe to Cookbook", () => {
   });
 
   it("should allow another users public recipe to be attached to a cookbook", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const otherRecipe = await testPrisma.recipe.create({
       data: {
         name: "other users recipe",
@@ -87,7 +87,7 @@ describe("Add Recipe to Cookbook", () => {
   });
 
   it("should not allow another users private recipe to be attached to a cookbook", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const otherRecipe = await testPrisma.recipe.create({
       data: {
         name: "other users recipe",

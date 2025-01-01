@@ -1,9 +1,8 @@
 import { DateTime } from "luxon";
 import { FC, useMemo } from "react";
 import { useGetSelfQuery } from "../../api";
-import { LoadingGroup, Stack } from "../../component";
-import { VerifyAccountSection } from "./VerifyAccountSection";
-import { AccountManagementSection } from "./AccountManagementSection";
+import { LoadingGroup, Stack, Tabs, TabsContent, TabsList, TabsTrigger } from "../../component";
+import { AccountTab } from "./AccountTab";
 
 export const AccountViewPage: FC = () => {
   const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();
@@ -18,12 +17,24 @@ export const AccountViewPage: FC = () => {
   return (
     <Stack>
       <LoadingGroup isLoading={isLoadingAccount} className="w-full h-6">
-        <h1 className="text-2xl">Welcome Back, {account?.email}</h1>
+        <h1 className="text-2xl">Welcome Back, {account?.username}</h1>
       </LoadingGroup>
       <LoadingGroup isLoading={isLoadingAccount}>
         <p className="text-sm">You joined Recipiece on {joinDate}.</p>
       </LoadingGroup>
-      <hr />
+      <Tabs defaultValue="account">
+        <TabsList className="w-full items-left justify-start">
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="data">Data</TabsTrigger>
+          <TabsTrigger value="about">About</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="account">
+          <AccountTab />
+        </TabsContent>
+      </Tabs>
+
+      {/* <hr />
       <VerifyAccountSection />
       <hr />
       <AccountManagementSection />
@@ -37,7 +48,7 @@ export const AccountViewPage: FC = () => {
       </p>
       <p className="text-sm">
         Version <i>{process.env.REACT_APP_RECIPIECE_VERSION}</i>, December 2024
-      </p>
+      </p> */}
     </Stack>
   );
 };

@@ -1,6 +1,7 @@
 export interface UserAccount {
   readonly id: number;
   readonly email: string;
+  readonly username: string;
   readonly created_at: string;
   readonly validated: boolean;
 }

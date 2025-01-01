@@ -37,7 +37,7 @@ describe("Delete Recipes", () => {
   });
 
   it("should not allow a user to delete a recipe they do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const recipe = await testPrisma.recipe.create({
       data: {
         name: "asdfqwer",

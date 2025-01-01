@@ -53,25 +53,46 @@ export const resetPassword = async (request: Request<any, any, ResetPasswordRequ
     return [
       StatusCodes.INTERNAL_SERVER_ERROR,
       {
-        message: "Unable to create account",
+        message: "Unable to reset password",
       },
     ];
   }
 
-  await prisma.userCredentials.update({
-    where: {
-      user_id: accountToken.user_id,
-    },
-    data: {
-      password_hash: hashedPassword,
-    },
-  });
+  try {
+    await prisma.$transaction(async (tx) => {
+      // update the users credentials
+      await tx.userCredentials.update({
+        where: {
+          user_id: accountToken.user_id,
+        },
+        data: {
+          password_hash: hashedPassword,
+        },
+      });
 
-  await prisma.userValidationToken.delete({
-    where: {
-      id: token,
-    },
-  });
+      // delete any sessions belonging to the user
+      await tx.userSession.deleteMany({
+        where: {
+          user_id: accountToken.user_id,
+        },
+      });
 
-  return [StatusCodes.OK, {}];
+      // remove the token
+      await tx.userValidationToken.delete({
+        where: {
+          id: token,
+        },
+      });
+    });
+
+    return [StatusCodes.OK, {}];
+  } catch (err) {
+    console.error(err);
+    return [
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      {
+        message: "Unable to reset password",
+      },
+    ];
+  }
 };

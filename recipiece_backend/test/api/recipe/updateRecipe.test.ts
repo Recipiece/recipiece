@@ -121,7 +121,7 @@ describe("Update Recipes", () => {
   });
 
   it(`should ${StatusCodes.NOT_FOUND} when trying to update a recipe you don't own`, async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
 
     const existingRecipe = await testPrisma.recipe.create({
       data: {
@@ -166,7 +166,7 @@ describe("Update Recipes", () => {
   });
 
   it("should remove any recipe cookbook attachments in cookbooks the user does not own when making the recipe private", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
 
     const usersCookbook = await testPrisma.cookbook.create({
       data: {

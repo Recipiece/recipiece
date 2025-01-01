@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useGetSelfQuery, useRequestVerifyAccountMutation, useVerifyAccountMutation } from "../../api";
-import { Badge, Button, Form, FormInput, LoadingGroup, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
+import { useGetSelfQuery, useRequestVerifyAccountMutation, useVerifyAccountMutation } from "../../../api";
+import { Badge, Button, Form, FormInput, LoadingGroup, Shelf, ShelfSpacer, Stack, useToast } from "../../../component";
 
 const VerifyAccountFormSchema = z.object({
   token: z.string().uuid("Enter a valid token"),
@@ -14,6 +14,8 @@ type VerifyAccountForm = z.infer<typeof VerifyAccountFormSchema>;
 
 export const VerifyAccountSection: FC = () => {
   const { toast } = useToast();
+
+  const [hasRequestedToken, setHasRequestedToken] = useState(false);
 
   const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();
   const { mutateAsync: requestNewToken } = useRequestVerifyAccountMutation({
@@ -41,6 +43,7 @@ export const VerifyAccountSection: FC = () => {
   const onRequestVerificationToken = async () => {
     try {
       await requestNewToken();
+      setHasRequestedToken(true);
     } catch (error) {
       if ((error as AxiosError)?.status === 429) {
         toast({
@@ -78,22 +81,24 @@ export const VerifyAccountSection: FC = () => {
         <Stack>
           <p className="text-sm">
             In order to keep using Recipiece, please verify your email address by entering the token that was emailed to {account?.email} in the field below. If you need another
-            verification token, click the link below to request a new one.
+            verification token, click the button below to request a new one.
           </p>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <Stack>
-                <FormInput name="token" label="Email Verification Token" instructions={`Enter the token emailed to ${account?.email}`} />
-                <Button type="submit">Verify Account</Button>
-                <Shelf>
-                  <Button onClick={() => onRequestVerificationToken()} className="px-0 py-0" variant="link">
-                    Send another verification token
-                  </Button>
-                  <ShelfSpacer />
-                </Shelf>
-              </Stack>
-            </form>
-          </Form>
+          <Shelf>
+            <Button onClick={() => onRequestVerificationToken()} variant="secondary">
+              Send verification token
+            </Button>
+            <ShelfSpacer />
+          </Shelf>
+          {hasRequestedToken && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <Stack>
+                  <FormInput name="token" label="Email Verification Token" instructions={`Enter the token emailed to ${account?.email}`} />
+                  <Button type="submit">Verify Account</Button>
+                </Stack>
+              </form>
+            </Form>
+          )}
         </Stack>
       )}
     </LoadingGroup>

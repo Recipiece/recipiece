@@ -44,6 +44,7 @@ export interface CreateUserResponseSchema extends InferType<typeof YCreateUserRe
 export const YUpdateUserRequestSchema = object({
   id: number().required(),
   username: string().optional(),
+  email: string().optional(),
 })
   .strict()
   .noUnknown();
@@ -155,3 +156,12 @@ export const YCreatePushNotificationRequestSchema = object({
   .noUnknown();
 
 export interface CreatePushNotificationRequestSchema extends InferType<typeof YCreatePushNotificationRequestSchema> {}
+
+/**
+ * Change password
+ */
+export const YChangePasswordRequestSchema = object({
+  new_password: string().required()
+}).strict().noUnknown();
+
+export interface ChangePasswordRequestSchema extends InferType<typeof YChangePasswordRequestSchema> {}

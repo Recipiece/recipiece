@@ -37,7 +37,7 @@ describe("Delete Cookbooks", () => {
   });
 
   it("should not delete a cookbook the user does not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,

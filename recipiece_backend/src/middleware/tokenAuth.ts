@@ -71,9 +71,9 @@ const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_
   if (!token) {
     console.log("no token provided");
     return [
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.FORBIDDEN,
       {
-        message: "Not authorized",
+        message: "Missing bearer token",
       },
     ];
   }
@@ -84,9 +84,9 @@ const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_
   if (!decodedToken) {
     console.log(`token ${decodedToken} could not be verified`);
     return [
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.FORBIDDEN,
       {
-        message: "Not authorized",
+        message: "Invalid bearer token",
       },
     ];
   }
@@ -96,7 +96,7 @@ const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_
   if (scope !== expectedScope) {
     console.log(`token has incorrect scope, expected ${expectedScope} but got ${scope}`);
     return [
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.FORBIDDEN,
       {
         message: "Not authorized",
       },
@@ -116,7 +116,7 @@ const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_
   if (!session) {
     console.log(`could not find a session for user ${userId} with id ${sessionId}`);
     return [
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.FORBIDDEN,
       {
         message: "Not authorized",
       },
@@ -135,7 +135,7 @@ const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_
     });
 
     return [
-      StatusCodes.UNAUTHORIZED,
+      StatusCodes.FORBIDDEN,
       {
         message: "Not authorized",
       },

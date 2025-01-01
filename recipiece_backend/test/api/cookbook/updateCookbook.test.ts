@@ -35,7 +35,7 @@ describe("Update Cookbooks", () => {
   });
 
   it("should not allow you to update a cookbook you do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const otherCookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,

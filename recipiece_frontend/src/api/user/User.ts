@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserAccount } from "../data";
-import { MutationArgs, QueryArgs, useGet, usePost } from "./Request";
-import { TokenManager } from "./TokenManager";
+import { UserAccount } from "../../data";
+import { MutationArgs, QueryArgs, useGet, usePost, usePut } from "../Request";
+import { TokenManager } from "../TokenManager";
+import { UserQueryKeys } from "./UserQueryKeys";
+import { Buffer } from "buffer";
 
 export const useGetSelfQuery = (args?: QueryArgs) => {
   const { getter } = useGet();
@@ -16,7 +18,7 @@ export const useGetSelfQuery = (args?: QueryArgs) => {
 
   return useQuery({
     queryFn: query,
-    queryKey: ["currentUser"],
+    queryKey: [UserQueryKeys.CURRENT_USER],
     refetchInterval: false,
     refetchOnMount: false,
     refetchOnReconnect: true,
@@ -28,15 +30,13 @@ export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token
   const { poster } = usePost();
 
   const mutation = async (data: { readonly username: string; readonly password: string }) => {
-    return await poster<
-      {
-        readonly username: string;
-        readonly password: string;
-      },
-      { readonly access_token: string; readonly refresh_token: string }
-    >({
+    const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
+    return await poster<{}, { readonly access_token: string; readonly refresh_token: string }>({
       path: "/user/login",
-      body: { ...data },
+      body: {},
+      extraHeaders: {
+        Authorization: `Basic ${encoded}`,
+      },
     });
   };
 
@@ -44,6 +44,33 @@ export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token
     mutationFn: mutation,
     onSuccess: (response) => {
       args?.onSuccess?.(response.data);
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};
+
+export const useChangePasswordMutation = (args?: MutationArgs<void>) => {
+  const { poster } = usePost({
+    autoLogoutOnCodes: [],
+  });
+
+  const mutation = async (data: { readonly username: string; readonly password: string; readonly new_password: string }) => {
+    const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
+    return await poster<{}, never>({
+      path: "/user/change-password",
+      body: { new_password: data.new_password },
+      extraHeaders: {
+        Authorization: `Basic ${encoded}`,
+      },
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: () => {
+      args?.onSuccess?.();
     },
     onError: (err) => {
       args?.onFailure?.(err);
@@ -79,9 +106,9 @@ export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
 export const useCreateUserMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
 
-  const mutation = async (args: { readonly username: string; readonly password: string, readonly email: string }) => {
+  const mutation = async (args: { readonly username: string; readonly password: string; readonly email: string }) => {
     return await poster<typeof args, never>({
-      path: "/user/create",
+      path: "/user",
       body: args,
     });
   };
@@ -89,6 +116,35 @@ export const useCreateUserMutation = (args?: MutationArgs<void>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: () => {
+      args?.onSuccess?.();
+    },
+    onError: (err) => {
+      args?.onFailure?.(err);
+    },
+  });
+};
+
+export const useUpdateUserMutation = (args?: MutationArgs<void>) => {
+  const { putter } = usePut();
+  const queryClient = useQueryClient();
+
+  const mutation = async (args: { readonly id: number; readonly username?: string; readonly email?: string }) => {
+    return await putter<typeof args, UserAccount>({
+      path: "/user",
+      body: args,
+      withAuth: "access_token",
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data) => {
+      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
+        if (old) {
+          return { ...old, username: data.data.username };
+        }
+        return undefined;
+      });
       args?.onSuccess?.();
     },
     onError: (err) => {
@@ -112,8 +168,11 @@ export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["currentUser"],
+      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
+        if (old) {
+          return { ...old, validated: true };
+        }
+        return undefined;
       });
       args?.onSuccess?.();
     },
@@ -190,7 +249,7 @@ export const useResetPasswordMutation = (args?: MutationArgs<void>) => {
 export const useRequestRecipeImport = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
 
-  const mutation = async (body: { readonly file: File, readonly source: string }) => {
+  const mutation = async (body: { readonly file: File; readonly source: string }) => {
     const formData = new FormData();
     formData.append("file", body.file);
     formData.append("source", body.source);
@@ -201,7 +260,7 @@ export const useRequestRecipeImport = (args?: MutationArgs<void>) => {
       withAuth: "access_token",
       extraHeaders: {
         "Content-Type": "multipart/form-data",
-      }
+      },
     });
   };
 
@@ -219,10 +278,10 @@ export const useRequestRecipeImport = (args?: MutationArgs<void>) => {
 export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
 
-  const mutation = async (body: {readonly subscription_data: PushSubscriptionJSON, readonly device_id: string }) => {
+  const mutation = async (body: { readonly subscription_data: PushSubscriptionJSON; readonly device_id: string }) => {
     return await poster<typeof body, never>({
       path: "/user/push-notifications/opt-in",
-      body: {...body},
+      body: { ...body },
       withAuth: "access_token",
     });
   };
@@ -237,4 +296,4 @@ export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<void>) =
     },
     mutationKey: ["pushNotificationOptIn"],
   });
-}
+};

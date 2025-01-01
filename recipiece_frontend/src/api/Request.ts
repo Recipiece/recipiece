@@ -55,10 +55,10 @@ export const usePut = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 
@@ -102,10 +102,10 @@ export const usePost = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 
@@ -155,10 +155,10 @@ export const useGet = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 
@@ -208,10 +208,10 @@ export const useDelete = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 

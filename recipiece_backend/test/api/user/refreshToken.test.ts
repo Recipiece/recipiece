@@ -80,6 +80,6 @@ describe("Refresh Token", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+    expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
   });
 });

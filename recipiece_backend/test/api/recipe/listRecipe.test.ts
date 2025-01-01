@@ -38,7 +38,7 @@ describe("List Recipes", () => {
   });
 
   it("should not list private recipes for another user", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     for (let i = 0; i < 10; i++) {
       await testPrisma.recipe.create({
         data: {

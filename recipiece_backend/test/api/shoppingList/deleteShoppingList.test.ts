@@ -37,7 +37,7 @@ describe("Delete Shopping List", () => {
   });
 
   it("should not allow a user to delete a shopping list they do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const shoppingList = await testPrisma.shoppingList.create({
       data: {
         name: "asdfqwer",

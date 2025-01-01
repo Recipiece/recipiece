@@ -18,17 +18,23 @@ import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
 import { enableFetchMocks } from "jest-fetch-mock";
 
+interface CreateUserAndTokenArgs {
+  readonly email?: string;
+  readonly username?: string;
+  readonly password?: string;
+}
+
 declare global {
   var testPrisma: typeof jestPrisma.client;
   var server: ReturnType<typeof app.listen>;
   var fixtures: {
-    createUserAndToken: (email?: string) => Promise<[User, string, string]>;
+    createUserAndToken: (opts?: CreateUserAndTokenArgs) => Promise<[User, string, string]>;
   };
 }
 
 // setup fixtures
 globalThis.fixtures = {
-  createUserAndToken: async (absoluteEmail?: string, accessLevels = ["alpha"]): Promise<[User, string, string]> => {
+  createUserAndToken: async (opts?: CreateUserAndTokenArgs): Promise<[User, string, string]> => {
     function stringGen(len: number) {
       var text = "";
       var charset = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -40,9 +46,9 @@ globalThis.fixtures = {
       return text;
     }
 
-    const email = absoluteEmail ?? `${stringGen(15)}@${stringGen(5)}.${stringGen(3)}`;
-    const username = stringGen(10);
-    const password = "test1234!";
+    const email = opts?.email ?? `${stringGen(15)}@${stringGen(5)}.${stringGen(3)}`;
+    const username = opts?.username ?? stringGen(10);
+    const password = opts?.password ?? stringGen(10);
     const hashedPassword = await hashPassword(password);
 
     // create a user
@@ -55,12 +61,12 @@ globalThis.fixtures = {
             password_hash: hashedPassword!,
           },
         },
-        user_access_records: {
-          create: {
-            access_levels: accessLevels,
-            start_date: DateTime.utc().toJSDate(),
-          },
-        },
+        // user_access_records: {
+        //   create: {
+        //     access_levels: accessLevels,
+        //     start_date: DateTime.utc().toJSDate(),
+        //   },
+        // },
       },
     });
 
