@@ -781,6 +781,11 @@ body {
   margin-bottom: 0.25rem;
 }
 
+.my-6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .-ml-4 {
   margin-left: -1rem;
 }
@@ -853,12 +858,16 @@ body {
   margin-top: 1rem;
 }
 
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
 .mt-auto {
   margin-top: auto;
 }
 
-.mt-6 {
-  margin-top: 1.5rem;
+.ml-6 {
+  margin-left: 1.5rem;
 }
 
 .line-clamp-3 {
@@ -882,6 +891,10 @@ body {
 
 .inline-flex {
   display: inline-flex;
+}
+
+.table {
+  display: table;
 }
 
 .grid {
@@ -1289,6 +1302,10 @@ body {
   scroll-margin: 5rem;
 }
 
+.list-disc {
+  list-style-type: disc;
+}
+
 .grid-flow-row {
   grid-auto-flow: row;
 }
@@ -1447,6 +1464,10 @@ body {
   border-radius: 0.75rem;
 }
 
+.rounded {
+  border-radius: 0.25rem;
+}
+
 .rounded-t-\[10px\] {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
@@ -1490,6 +1511,10 @@ body {
   border-left-width: 1px;
 }
 
+.border-l-2 {
+  border-left-width: 2px;
+}
+
 .border-l-\[1px\] {
   border-left-width: 1px;
 }
@@ -1508,10 +1533,6 @@ body {
 
 .border-t-2 {
   border-top-width: 2px;
-}
-
-.border-l-2 {
-  border-left-width: 2px;
 }
 
 .border-solid {
@@ -1716,6 +1737,20 @@ body {
   padding-bottom: 1.5rem;
 }
 
+.px-\[0\.3rem\] {
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
+}
+
+.py-\[0\.2rem\] {
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
 .pb-3 {
   padding-bottom: 0.75rem;
 }
@@ -1730,6 +1765,10 @@ body {
 
 .pl-4 {
   padding-left: 1rem;
+}
+
+.pl-6 {
+  padding-left: 1.5rem;
 }
 
 .pl-8 {
@@ -1764,14 +1803,6 @@ body {
   padding-top: 1rem;
 }
 
-.pb-2 {
-  padding-bottom: 0.5rem;
-}
-
-.pl-6 {
-  padding-left: 1.5rem;
-}
-
 .text-left {
   text-align: left;
 }
@@ -1780,13 +1811,26 @@ body {
   text-align: center;
 }
 
+.text-right {
+  text-align: right;
+}
+
 .text-start {
   text-align: start;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
 .text-4xl {
@@ -1814,13 +1858,12 @@ body {
   line-height: 1rem;
 }
 
-.text-3xl {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-}
-
 .font-bold {
   font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
 }
 
 .font-medium {
@@ -1833,10 +1876,6 @@ body {
 
 .font-semibold {
   font-weight: 600;
-}
-
-.font-extrabold {
-  font-weight: 800;
 }
 
 .italic {
@@ -1852,12 +1891,12 @@ body {
   line-height: 1.5rem;
 }
 
-.leading-none {
-  line-height: 1;
-}
-
 .leading-7 {
   line-height: 1.75rem;
+}
+
+.leading-none {
+  line-height: 1;
 }
 
 .tracking-tight {
@@ -2195,6 +2234,10 @@ body {
 
 .first\:mt-0:first-child {
   margin-top: 0px;
+}
+
+.even\:bg-muted:nth-child(even) {
+  background-color: hsl(var(--muted));
 }
 
 .focus-within\:outline-none:focus-within {
@@ -3113,6 +3156,10 @@ body {
   display: none;
 }
 
+.\[\&\>li\]\:mt-2>li {
+  margin-top: 0.5rem;
+}
+
 .\[\&\>span\:last-child\]\:truncate>span:last-child {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3137,6 +3184,14 @@ body {
 
 .\[\&\>svg\]\:text-sidebar-accent-foreground>svg {
   color: hsl(var(--sidebar-accent-foreground));
+}
+
+.\[\&\[align\=center\]\]\:text-center[align=center] {
+  text-align: center;
+}
+
+.\[\&\[align\=right\]\]\:text-right[align=right] {
+  text-align: right;
 }
 
 .\[\&\[data-state\=open\]\>svg\]\:rotate-180[data-state=open]>svg {

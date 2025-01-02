@@ -246,7 +246,7 @@ export const useResetPasswordMutation = (args?: MutationArgs<void>) => {
   });
 };
 
-export const useRequestRecipeImport = (args?: MutationArgs<void>) => {
+export const useRequestRecipeImportMutation = (args?: MutationArgs<void>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly file: File; readonly source: string }) => {
