@@ -37,8 +37,27 @@ model User {
   timers Timer[]
   meal_plans MealPlan[]
   user_push_notification_subscriptions UserPushNotificationSubscription[]
-  // origination_recipe_shares RecipeShare[] @relation(name: "originator_user")
-  // destination_recipe_shares RecipeShare[] @relation(name: "destination_user")
+  source_user_kitchen_memberships UserKitchenMembership[] @relation(name: "source_user")
+  destination_user_kitchen_memberships UserKitchenMembership[] @relation(name: "destination_user")
+}
+
+model UserKitchenMembership {
+  @@map("user_kitchen_memberships")
+  
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  source_user_id Int
+  source_user User @relation(name: "source_user", fields: [source_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  destination_user_id Int
+  destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  status String
+
+  // recipe_shares RecipeShare[]
+
+  @@index([destination_user_id, status])
+  @@unique([source_user_id, destination_user_id])
 }
 
 model UserAccessRecord {
@@ -104,16 +123,15 @@ model UserValidationToken {
 // model RecipeShare {
 //   @@map("recipe_shares")
 
-//   @@id(name: "id", [recipe_id, originator_user_id, destination_user_id])
+//   @@id([recipe_id, user_kitchen_membership_destination_user_id, user_kitchen_membership_source_user_id])
 //   created_at DateTime @default(now())
 
 //   recipe_id Int
-//   originator_user_id Int
-//   destination_user_id Int
-
 //   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   originator_user User @relation(name: "originator_user", fields: [originator_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+//   user_kitchen_membership_source_user_id Int
+//   user_kitchen_membership_destination_user_id Int
+//   user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_destination_user_id, user_kitchen_membership_source_user_id], references: [source_user_id, destination_user_id], onDelete: Cascade, onUpdate: Cascade)
 // }
 
 model Recipe {

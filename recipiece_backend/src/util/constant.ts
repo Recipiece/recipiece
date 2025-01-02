@@ -46,3 +46,15 @@ export class Versions {
   public static readonly ALL = "*";
   public static readonly CAST_IRON_SKILLET = "cast_iron_skillet";
 }
+
+export class UserKitchenInvitationStatus {
+  public static readonly PENDING = "pending";
+  public static readonly DENIED = "denied";
+  public static readonly ACCEPTED = "accepted";
+
+  public static readonly ALL_STATUSES = [
+    UserKitchenInvitationStatus.PENDING,
+    UserKitchenInvitationStatus.DENIED,
+    UserKitchenInvitationStatus.ACCEPTED,
+  ];
+}

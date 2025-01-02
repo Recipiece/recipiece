@@ -125,6 +125,13 @@ export type UserCredentials = {
     password_hash: string;
     user_id: number;
 };
+export type UserKitchenMembership = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    source_user_id: number;
+    destination_user_id: number;
+    status: string;
+};
 export type UserPushNotificationSubscription = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
@@ -160,6 +167,7 @@ export type DB = {
     timers: Timer;
     user_access_records: UserAccessRecord;
     user_credentials: UserCredentials;
+    user_kitchen_memberships: UserKitchenMembership;
     user_push_notification_subscriptions: UserPushNotificationSubscription;
     user_sessions: UserSession;
     user_validation_tokens: UserValidationToken;
