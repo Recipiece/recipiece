@@ -174,7 +174,7 @@ export const useGet = (args?: HookArgs) => {
 
     let url = `${getUrl()}${getRequest.path}`;
     if (queryString) {
-      url = `?${queryString}`;
+      url += `?${queryString}`;
     }
 
     try {

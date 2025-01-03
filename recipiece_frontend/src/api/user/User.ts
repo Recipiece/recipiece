@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserAccount } from "../../data";
+import { Buffer } from "buffer";
+import { ListUserKitchenMembershipFilters, ListUserKitchenMembershipsResponse, UserAccount, UserKitchenMembership, UserKitchenMembershipStatus } from "../../data";
+import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { TokenManager } from "../TokenManager";
 import { UserQueryKeys } from "./UserQueryKeys";
-import { Buffer } from "buffer";
 
 export const useGetSelfQuery = (args?: QueryArgs) => {
   const { getter } = useGet();
@@ -317,6 +318,106 @@ export const useDeleteSelfMutation = (args?: MutationArgs<void>) => {
     },
     onError: (err) => {
       args?.onFailure?.(err);
+    },
+  });
+};
+
+export const useListKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipFilters, args?: QueryArgs) => {
+  const { getter } = useGet();
+  const queryClient = useQueryClient();
+
+  const query = async () => {
+    return await getter<ListUserKitchenMembershipFilters, ListUserKitchenMembershipsResponse>({
+      path: "/user/kitchen/membership/list",
+      withAuth: "access_token",
+      query: {
+        ...(filters ?? { page_number: 0 }),
+      },
+    });
+  };
+
+  return useQuery({
+    queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS(filters),
+    queryFn: async () => {
+      const results = await query();
+      results.data.data.forEach((membership) => {
+        queryClient.setQueryData(UserQueryKeys.GET_KITCHEN_MEMBERSHIP(membership.id), membership);
+      });
+      return results.data;
+    },
+    enabled: args?.disabled !== true,
+  });
+};
+
+export const useCreateKitchenMembershipMutation = () => {
+  const { poster } = usePost();
+  const queryClient = useQueryClient();
+
+  const mutation = async (body: { readonly username: string }) => {
+    return await poster<typeof body, UserKitchenMembership>({
+      withAuth: "access_token",
+      path: "/user/kitchen/membership",
+      body: { ...body },
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (response) => {
+      const membership = response.data;
+      queryClient.setQueryData(UserQueryKeys.GET_KITCHEN_MEMBERSHIP(membership.id), response);
+      queryClient.setQueriesData(
+        {
+          queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS({
+            from_self: true,
+          }),
+        },
+        oldDataCreator(membership)
+      );
+    },
+  });
+};
+
+export const useUpdateKitchenMembershipMutation = () => {
+  const { putter } = usePut();
+  const queryClient = useQueryClient();
+
+  const mutation = async (body: { readonly id: number; readonly status: UserKitchenMembershipStatus }) => {
+    return await putter<typeof body, UserKitchenMembership>({
+      path: "/user/kitchen/membership",
+      body: {
+        ...body,
+      },
+      withAuth: "access_token",
+    });
+  };
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (response, params) => {
+      const membership = response.data;
+      queryClient.setQueryData(UserQueryKeys.GET_KITCHEN_MEMBERSHIP(membership.id), response);
+
+      // if (params.status === "pending") {
+      queryClient.setQueriesData(
+        {
+          queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS({
+            targeting_self: true,
+            status: ["pending"],
+          }),
+        },
+        oldDataDeleter(membership)
+      );
+      // }
+      queryClient.setQueriesData(
+        {
+          queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS({
+            targeting_self: true,
+            status: ["accepted", "denied"],
+          }),
+        },
+        oldDataUpdater(membership)
+      );
     },
   });
 };

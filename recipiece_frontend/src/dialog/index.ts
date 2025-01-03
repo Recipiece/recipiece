@@ -10,6 +10,7 @@ export * from "./DeleteMealPlan";
 export * from "./DeleteRecipe";
 export * from "./DeleteShoppingList";
 export * from "./Dialogs";
+export * from "./ExtendKitchenInvitation";
 export * from "./hooks";
 export * from "./ImportRecipes";
 export * from "./MobileCreateMenu";

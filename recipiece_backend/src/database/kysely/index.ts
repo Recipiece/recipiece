@@ -69,6 +69,12 @@ export type RecipeIngredient = {
     order: number;
     recipe_id: number;
 };
+export type RecipeShare = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    recipe_id: number;
+    user_kitchen_membership_id: number;
+};
 export type RecipeStep = {
     id: Generated<number>;
     content: string;
@@ -159,6 +165,7 @@ export type DB = {
     meal_plans: MealPlan;
     recipe_cookbook_attachments: RecipeCookbookAttachment;
     recipe_ingredients: RecipeIngredient;
+    recipe_shares: RecipeShare;
     recipe_steps: RecipeStep;
     recipes: Recipe;
     scheduled_notifications: ScheduledNotification;

@@ -13,6 +13,7 @@ import {
   YSetUserKitchenMembershipStatusRequestSchema,
   YSetUserKitchenMembershipStatusResponseSchema,
   YUpdateUserRequestSchema,
+  YUserKitchenMembershipSchema,
   YUserSchema,
   YValidateUserRequestSchema,
   YValidateUserResponseSchema,
@@ -140,6 +141,7 @@ export const LOGIN_ROUTES: Route[] = [
     method: "POST",
     function: createUserKitchenMembership,
     requestSchema: YCreateUserKitchenMembershipRequestSchema,
+    responseSchema: YUserKitchenMembershipSchema,
     authentication: "access_token",
   },
   {

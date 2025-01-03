@@ -9,6 +9,7 @@ import { DeleteAccountDialog } from "./DeleteAccount";
 import { DeleteMealPlanDialog } from "./DeleteMealPlan";
 import { DeleteRecipeDialog } from "./DeleteRecipe";
 import { DeleteShoppingListDialog } from "./DeleteShoppingList";
+import { ExtendKitchenInvitationDialog } from "./ExtendKitchenInvitation";
 import { ImportRecipesDialog } from "./ImportRecipes";
 import { MobileCreateMenuDialog } from "./MobileCreateMenu";
 import { MobileListCookbooksDialog } from "./MobileListCookbooks";
@@ -91,5 +92,8 @@ export const Dialogs = {
   },
   deleteAccount: {
     component: DeleteAccountDialog,
-  }
+  },
+  extendKitchenInvitation: {
+    component: ExtendKitchenInvitationDialog,
+  },
 };

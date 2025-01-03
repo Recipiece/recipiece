@@ -234,7 +234,6 @@ export const useListShoppingListsQuery = (filters: ListShoppingListFilters, args
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
-  // lol
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
 

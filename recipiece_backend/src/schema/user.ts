@@ -231,7 +231,9 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
   from_self: boolean().notRequired(),
   status: array(
     string().oneOf(UserKitchenInvitationStatus.ALL_STATUSES)
-  ).notRequired(),
+  ).notRequired().transform((val) => {
+    return val.split(",");
+  }),
 })
   .test("oneOfTargetingSelfOrFromSelf", "Must specify at least one of targeting_self or from_self", (ctx) => {
     return !!ctx.from_self || !!ctx.targeting_self;

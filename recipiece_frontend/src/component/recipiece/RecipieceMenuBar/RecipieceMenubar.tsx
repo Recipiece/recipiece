@@ -13,7 +13,22 @@ import {
 import { DialogContext, TimerContext } from "../../../context";
 import { Cookbook, ShoppingList } from "../../../data";
 import { CreateCookbookForm, CreateShoppingListForm, CreateTimerForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
-import { Button, Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger, Separator, useToast } from "../../shadcn";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+  Separator,
+  useToast,
+} from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
 
@@ -244,9 +259,23 @@ export const RecipieceMenubar: FC = () => {
       <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 bg-white sm:bg-primary text-white">
         <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white" />
         <span className="ml-auto block sm:hidden">
-          <Button onClick={() => navigate("/account")} variant="link" className="text-primary">
-            <CircleUserRound />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="link" className="text-primary">
+                <CircleUserRound />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => navigate("/kitchen")}>
+                My Kitchen
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/account")}>
+                My Account
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => logout()}>Sign Out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </span>
         <span className="ml-auto block sm:hidden" ref={mobileMenuPortalRef} />
         <span className="hidden w-0 sm:w-auto sm:block">
@@ -355,7 +384,9 @@ export const RecipieceMenubar: FC = () => {
           <MenubarMenu>
             <MenubarTrigger>Account</MenubarTrigger>
             <MenubarContent>
+              <MenubarItem onClick={() => navigate("/kitchen")}>My Kitchen</MenubarItem>
               <MenubarItem onClick={() => navigate("/account")}>My Account</MenubarItem>
+              <MenubarSeparator />
               <MenubarItem onClick={() => logout()}>Sign Out</MenubarItem>
             </MenubarContent>
           </MenubarMenu>

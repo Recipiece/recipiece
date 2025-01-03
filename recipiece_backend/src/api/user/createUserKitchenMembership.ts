@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CreateUserKitchenMembershipRequestSchema } from "../../schema";
+import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserKitchenInvitationStatus } from "../../util/constant";
 
@@ -12,7 +12,7 @@ import { UserKitchenInvitationStatus } from "../../util/constant";
  */
 export const createUserKitchenMembership = async (
   request: AuthenticatedRequest<CreateUserKitchenMembershipRequestSchema>
-): ApiResponse<{}> => {
+): ApiResponse<UserKitchenMembershipSchema> => {
   const targetUsername = request.body.username;
   const targetUser = await prisma.user.findFirst({
     where: {
@@ -55,14 +55,27 @@ export const createUserKitchenMembership = async (
   }
 
   try {
-    await prisma.userKitchenMembership.create({
+    const membership = await prisma.userKitchenMembership.create({
       data: {
         source_user_id: request.user.id,
         destination_user_id: targetUser.id,
         status: UserKitchenInvitationStatus.PENDING,
       },
+      include: {
+        source_user: true,
+        destination_user: true,
+      },
     });
-    return [StatusCodes.OK, {}];
+    return [
+      StatusCodes.OK,
+      {
+        ...membership,
+        status: membership.status as
+          | typeof UserKitchenInvitationStatus.PENDING
+          | typeof UserKitchenInvitationStatus.ACCEPTED
+          | typeof UserKitchenInvitationStatus.DENIED,
+      },
+    ];
   } catch (err) {
     console.error(err);
     return [

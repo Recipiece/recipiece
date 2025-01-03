@@ -4,6 +4,7 @@ export * from "./Button";
 export * from "./Card";
 export * from "./Carousel";
 export * from "./Checkbox";
+export * from "./Collapsible";
 export * from "./Command";
 export * from "./Dialog";
 export * from "./Drawer";

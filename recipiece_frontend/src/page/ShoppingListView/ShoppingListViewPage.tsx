@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  H2,
   Input,
   LoadingGroup,
   Popover,
@@ -267,7 +268,7 @@ export const ShoppingListViewPage: FC = () => {
       <Stack>
         <LoadingGroup isLoading={isLoadingShoppingList} className="w-[200px] h-6">
           <Shelf>
-            <h1 className="text-2xl">{shoppingList?.name}</h1>
+            <H2>{shoppingList?.name}</H2>
             <ShelfSpacer />
             {shoppingList && (
               <>

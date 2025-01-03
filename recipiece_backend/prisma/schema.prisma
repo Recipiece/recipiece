@@ -54,7 +54,7 @@ model UserKitchenMembership {
 
   status String
 
-  // recipe_shares RecipeShare[]
+  recipe_shares RecipeShare[]
 
   @@index([destination_user_id, status])
   @@unique([source_user_id, destination_user_id])
@@ -120,19 +120,20 @@ model UserValidationToken {
   user_id Int
 }
 
-// model RecipeShare {
-//   @@map("recipe_shares")
+model RecipeShare {
+  @@map("recipe_shares")
 
-//   @@id([recipe_id, user_kitchen_membership_destination_user_id, user_kitchen_membership_source_user_id])
-//   created_at DateTime @default(now())
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
 
-//   recipe_id Int
-//   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipe_id Int
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-//   user_kitchen_membership_source_user_id Int
-//   user_kitchen_membership_destination_user_id Int
-//   user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_destination_user_id, user_kitchen_membership_source_user_id], references: [source_user_id, destination_user_id], onDelete: Cascade, onUpdate: Cascade)
-// }
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([recipe_id, user_kitchen_membership_id])
+}
 
 model Recipe {
   @@map("recipes")
@@ -154,7 +155,7 @@ model Recipe {
   recipe_cookbook_attachments RecipeCookbookAttachment[]
   meal_plan_items MealPlanItem[]
   scheduled_notifications ScheduledNotification[]
-  // recipe_shares RecipeShare[]
+  recipe_shares RecipeShare[]
 
   @@index([user_id, name])
 }

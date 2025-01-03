@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
-import { Button, Grid, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
+import { Button, Grid, H2, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ListRecipeFilters, Recipe } from "../../data";
 
@@ -106,11 +106,11 @@ export const DashboardPage: FC = () => {
 
   return (
     <Stack>
-      {!cookbookId && <h1 className="text-xl">All Your Recipes</h1>}
+      {!cookbookId && <H2>All Your Recipes</H2>}
       {cookbookId && (
         <LoadingGroup className="h-8 w-[250px]" isLoading={isLoadingCookbook}>
           <Shelf>
-            <h1 className="text-xl">{cookbook?.name}</h1>
+            <H2>{cookbook?.name}</H2>
             <ShelfSpacer />
             <Button onClick={onFindRecipe} variant="outline">
               <Plus size={20} className="mr-1" /> Add a recipe
