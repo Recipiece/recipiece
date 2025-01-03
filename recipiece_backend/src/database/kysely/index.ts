@@ -18,7 +18,6 @@ export type Cookbook = {
     user_id: number;
     name: string;
     description: string | null;
-    private: Generated<boolean>;
     created_at: Generated<Timestamp>;
 };
 export type KnownIngredient = {
@@ -53,7 +52,6 @@ export type Recipe = {
     description: string | null;
     duration_ms: number | null;
     servings: number | null;
-    private: Generated<boolean>;
     metadata: unknown | null;
     user_id: number;
 };

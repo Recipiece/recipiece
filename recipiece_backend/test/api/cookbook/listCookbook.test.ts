@@ -19,7 +19,6 @@ describe("List Cookbooks", () => {
           name: `Test cookbook ${i}`,
           description: "Test",
           user_id: user.id,
-          private: i % 2 === 0,
         },
       });
     }
@@ -37,37 +36,6 @@ describe("List Cookbooks", () => {
     expect(results.length).toEqual(10);
   });
 
-  it("should not list private cookbooks for another user", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    for (let i = 0; i < 10; i++) {
-      await testPrisma.cookbook.create({
-        data: {
-          name: `Test cookbook ${i}`,
-          description: "Test",
-          user_id: otherUser.id,
-          private: i % 2 === 0,
-        },
-      });
-    }
-
-    const response = await request(server)
-      .get("/cookbook/list")
-      .query({
-        user_id: otherUser.id,
-        page_number: 0,
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toEqual(StatusCodes.OK);
-    const results = response.body.data as Cookbook[];
-    expect(results.length).toEqual(5);
-
-    results.forEach((cookbook) => {
-      expect(cookbook.private).toBeFalsy();
-    });
-  });
-
   it("should allow name filtering", async () => {
     for (let i = 0; i < 10; i++) {
       await testPrisma.cookbook.create({
@@ -75,7 +43,6 @@ describe("List Cookbooks", () => {
           name: `Test cookbook ${i}`,
           description: "Test",
           user_id: user.id,
-          private: i % 2 === 0,
         },
       });
     }
@@ -110,7 +77,6 @@ describe("List Cookbooks", () => {
           name: `Test cookbook ${i}`,
           description: "Test",
           user_id: user.id,
-          private: i % 2 === 0,
         },
       });
     }

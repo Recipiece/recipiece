@@ -10,10 +10,11 @@ export const getCookbook = async (req: AuthenticatedRequest): ApiResponse<Cookbo
   const cookbook = await prisma.cookbook.findFirst({
     where: {
       id: cookbookId,
+      user_id: user.id,
     },
   });
 
-  if (!cookbook || (cookbook.private && cookbook.user_id !== user.id)) {
+  if (!cookbook) {
     return [
       StatusCodes.NOT_FOUND,
       {

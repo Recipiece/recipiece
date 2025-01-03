@@ -30,13 +30,12 @@ describe("Get Cookbooks", () => {
     expect(response.body.id).toEqual(cookbook.id);
   });
 
-  it("should not get a cookbook that is private that you do not own", async () => {
+  it("should not get a cookbook that you do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     const cookbook = await testPrisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",
-        private: true,
       }
     });
 
@@ -46,25 +45,6 @@ describe("Get Cookbooks", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
-  });
-
-  it("should get a public cookbook that you do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    const cookbook = await testPrisma.cookbook.create({
-      data: {
-        user_id: otherUser.id,
-        name: "test cookbook",
-        private: false,
-      }
-    });
-
-    const response = await request(server)
-      .get(`/cookbook/${cookbook.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toEqual(StatusCodes.OK);
-    expect(response.body.id).toEqual(cookbook.id);
   });
 
   it("should not get a cookbook that does not exist", async () => {

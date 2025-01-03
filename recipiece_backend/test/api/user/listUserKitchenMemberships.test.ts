@@ -166,10 +166,10 @@ describe("List User Kitchen Memberships", () => {
 
     const response = await request(server)
       .get("/user/kitchen/membership/list")
-      .query(<ListUserKitchenMembershipsQuerySchema>{
+      .query({
         from_self: true,
         targeting_self: true,
-        status: [UserKitchenInvitationStatus.PENDING, UserKitchenInvitationStatus.DENIED],
+        status: [UserKitchenInvitationStatus.PENDING, UserKitchenInvitationStatus.DENIED].join(","),
         page_number: 0,
       })
       .set("Authorization", `Bearer ${bearerToken}`)

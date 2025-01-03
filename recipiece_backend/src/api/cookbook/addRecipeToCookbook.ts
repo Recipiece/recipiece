@@ -51,11 +51,10 @@ export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToC
   }
 
   /**
-   * If you don't own a recipe, and that recipe is private, you cannot attach it to your cookbook.
-   * You can, however, attach other people's recipes into your cookbooks provided that they are public.
+   * You cannot attach recipes you do not own to a cookbook
    */
-  if (recipe.private && recipe.user_id !== user.id) {
-    console.warn(`User ${user.id} attempted to attach recipe ${recipe.id} to ${cookbook.id}. They do not own the recipe and the recipe is private.`);
+  if (recipe.user_id !== user.id) {
+    console.warn(`User ${user.id} attempted to attach recipe ${recipe.id} to ${cookbook.id}. They do not own the recipe.`);
     return [
       StatusCodes.NOT_FOUND,
       {

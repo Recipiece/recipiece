@@ -144,7 +144,6 @@ model Recipe {
   description String?
   duration_ms Int?
   servings Int?
-  private Boolean @default(false)
   metadata Json?
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -194,7 +193,6 @@ model Cookbook {
 
   name String
   description String?
-  private Boolean @default(false)
   created_at DateTime @default(now())
 
   recipe_cookbook_attachments RecipeCookbookAttachment[]

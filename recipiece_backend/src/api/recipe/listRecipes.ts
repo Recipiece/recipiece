@@ -9,7 +9,6 @@ export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuer
   const query = req.query;
   const user = req.user;
 
-  const userId = query.user_id ?? user.id;
   const pageSize = query.page_size || DEFAULT_PAGE_SIZE;
   const page = query.page_number;
   const search = query.search;
@@ -17,12 +16,8 @@ export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuer
   const excludeCookbookId = query.exclude_cookbook_id;
 
   let where: Prisma.RecipeWhereInput = {
-    user_id: userId,
+    user_id: user.id,
   };
-
-  if (userId && userId !== user.id) {
-    where.private = false;
-  }
 
   if (search) {
     where.name = {

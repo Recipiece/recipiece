@@ -34,8 +34,11 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<Recipe> 
     ];
   }
 
-  if (recipe.private && recipe.user_id !== user.id) {
-    console.log(`user ${user.id} attempted to access private recipe ${recipe.id} owned by user ${recipe.user_id}`);
+  /**
+   * You cannot get a recipe you do not own
+   */
+  if (recipe.user_id !== user.id) {
+    console.log(`user ${user.id} attempted to access recipe ${recipe.id} owned by user ${recipe.user_id}`);
     return [
       StatusCodes.NOT_FOUND,
       {

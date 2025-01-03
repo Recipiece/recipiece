@@ -10,7 +10,6 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
   const originalRecipe = await prisma.recipe.findFirst({
     where: {
       id: original_recipe_id,
-      private: false,
     },
     include: {
       ingredients: true,

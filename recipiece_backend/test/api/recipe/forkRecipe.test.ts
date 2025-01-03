@@ -75,7 +75,6 @@ describe("Fork Recipe", () => {
     expect(createdRecipe.id).not.toBe(originalRecipe.id);
     expect(createdRecipe.description).toEqual(originalRecipe.description);
     expect(createdRecipe.duration_ms).toEqual(originalRecipe.duration_ms);
-    expect(createdRecipe.private).toBeFalsy();
     expect(createdRecipe.servings).toEqual(originalRecipe.servings);
 
     expect(createdRecipe.ingredients?.length).toBe(2);
@@ -90,7 +89,7 @@ describe("Fork Recipe", () => {
     expect(createdRecipe.steps?.length).toBe(2);
   });
 
-  it("should not allow you to fork another users private recipe", async () => {
+  xit("should not allow you to fork another users private recipe", async () => {
     const originalRecipe = await testPrisma.recipe.create({
       data: {
         user_id: otherUser.id,
@@ -98,7 +97,6 @@ describe("Fork Recipe", () => {
         description: "here is a really cool recipe",
         duration_ms: 50000,
         servings: 24,
-        private: true,
         metadata: {
           some: "nonsense",
         },

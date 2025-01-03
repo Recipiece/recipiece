@@ -1,4 +1,4 @@
-import { array, boolean, date, InferType, number, object, string } from "yup";
+import { array, date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YRecipeIngredientSchema = object({
@@ -27,7 +27,6 @@ export const YRecipeSchema = object({
   name: string().required(),
   created_at: date().required(),
   description: string().notRequired(),
-  private: boolean().notRequired().default(false),
   duration_ms: number().notRequired(),
   servings: number().notRequired(),
   ingredients: array().of(YRecipeIngredientSchema).notRequired(),
@@ -48,7 +47,6 @@ export interface RecipeStepSchema extends InferType<typeof YRecipeStepSchema> {}
 export const YCreateRecipeRequestSchema = object({
   name: string().required(),
   description: string().required(),
-  private: boolean().notRequired().default(false),
   servings: number().notRequired(),
   ingredients: array()
     .of(
@@ -104,7 +102,6 @@ export const YUpdateRecipeRequestSchema = object({
   id: number().required(),
   name: string().notRequired(),
   description: string().notRequired(),
-  private: boolean().notRequired().default(false),
   servings: number().notRequired(),
   ingredients: array()
     .of(
@@ -134,7 +131,6 @@ export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecip
  * List recipes schema
  */
 export const YListRecipesQuerySchema = YListQuerySchema.shape({
-  user_id: number().notRequired(),
   cookbook_id: number().notRequired(),
   exclude_cookbook_id: number().notRequired(),
 })

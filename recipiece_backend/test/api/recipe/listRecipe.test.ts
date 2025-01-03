@@ -19,7 +19,6 @@ describe("List Recipes", () => {
           name: `Test recipe ${i}`,
           description: "Test",
           user_id: user.id,
-          private: i % 2 === 0,
         },
       });
     }
@@ -37,7 +36,7 @@ describe("List Recipes", () => {
     expect(results.length).toEqual(10);
   });
 
-  it("should not list private recipes for another user", async () => {
+  it("should not list recipes for another user", async () => {
     const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
     for (let i = 0; i < 10; i++) {
       await testPrisma.recipe.create({
@@ -45,7 +44,6 @@ describe("List Recipes", () => {
           name: `Test recipe ${i}`,
           description: "Test",
           user_id: otherUser.id,
-          private: i % 2 === 0,
         },
       });
     }
@@ -61,11 +59,7 @@ describe("List Recipes", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const results = response.body.data as Recipe[];
-    expect(results.length).toEqual(5);
-
-    results.forEach((recipe) => {
-      expect(recipe.private).toBeFalsy();
-    });
+    expect(results.length).toEqual(0);
   });
 
   it("should allow name filtering", async () => {
@@ -75,7 +69,6 @@ describe("List Recipes", () => {
           name: `Test recipe ${i}`,
           description: "Test",
           user_id: user.id,
-          private: i % 2 === 0,
         },
       });
     }
@@ -110,7 +103,6 @@ describe("List Recipes", () => {
           name: `Test recipe ${i}`,
           description: "Test",
           user_id: user.id,
-          private: i % 2 === 0,
         },
       });
     }
