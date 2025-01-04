@@ -9,14 +9,13 @@
  */
 
 import { User } from "@prisma/client";
-// import "@quramy/jest-prisma-node";
 import { randomUUID } from "crypto";
 import { enableFetchMocks } from "jest-fetch-mock";
 import app from "./src/app";
+import { prisma } from "./src/database";
 import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
-import { prisma } from "./src/database";
 
 interface CreateUserAndTokenArgs {
   readonly email?: string;
@@ -25,7 +24,7 @@ interface CreateUserAndTokenArgs {
 }
 
 declare global {
-  var testPrisma: typeof jestPrisma.client;
+  // var testPrisma: typeof jestPrisma.client;
   var server: ReturnType<typeof app.listen>;
   var fixtures: {
     createUserAndToken: (opts?: CreateUserAndTokenArgs) => Promise<[User, string, string]>;
@@ -99,20 +98,11 @@ globalThis.fixtures = {
   },
 };
 
-// setup the jest prisma client and mock
-globalThis.testPrisma = jestPrisma.client;
-
-// jest.mock("./src/database/prisma", () => {
-//   return {
-//     prisma: jestPrisma.client,
-//   };
-// });
-
-jest.mock('bullmq', () => {
+jest.mock("bullmq", () => {
   return {
     Queue: jest.fn().mockImplementation(() => {
       return {
-        add: jest.fn()
+        add: jest.fn(),
       };
     }),
     Worker: jest.fn().mockImplementation(),
@@ -121,7 +111,7 @@ jest.mock('bullmq', () => {
 
 // just in case there's any extra users hanging around.
 beforeEach(async () => {
-  await jestPrisma.client.user.deleteMany();
+  await prisma.user.deleteMany();
 });
 
 // enable the fetch mocks

@@ -19,8 +19,13 @@ import {
   refreshTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
+import { Logger } from "./util/logger";
 
 const app = new WebSocketExpress();
+const logger = Logger.getLogger({
+  name: "app.ts",
+  disabledEnvs: ["test"],
+});
 
 app.use(cors({}));
 app.use(bodyParser.json());
@@ -44,7 +49,7 @@ ROUTES.forEach((route) => {
   const routeHandlers: any[] = [];
 
   // set up authentication first
-  console.log(`configuring routing for ${route.method} ${route.path}`);
+  logger.log(`configuring routing for ${route.method} ${route.path}`);
   switch (route.authentication) {
     case "access_token":
       routeHandlers.push(accessTokenAuthMiddleware);
@@ -56,7 +61,7 @@ ROUTES.forEach((route) => {
       routeHandlers.push(basicAuthMiddleware);
       break;
     case "none":
-      console.warn(`  no auth specified for ${route.path}!`);
+      logger.warn(`  no auth specified for ${route.path}!`);
       break;
   }
 
@@ -74,7 +79,7 @@ ROUTES.forEach((route) => {
   }
 
   if(route.preMiddleware) {
-    console.log(`  installing extra pre-middleware for ${route.path}`);
+    logger.log(`  installing extra pre-middleware for ${route.path}`);
     routeHandlers.push(...route.preMiddleware);
   }
 
@@ -85,7 +90,7 @@ ROUTES.forEach((route) => {
   });
 
   if(route.postMiddleware) {
-    console.log(`  installing extra post-middleware for ${route.path}`);
+    logger.log(`  installing extra post-middleware for ${route.path}`);
     routeHandlers.push(...route.postMiddleware);
   }
 
@@ -143,7 +148,7 @@ ROUTES.forEach((route) => {
  * also kill it in redis.
  */
 WEBSOCKET_ROUTES.forEach((route) => {
-  console.log(`configuring websocket routing for ${route.path}`);
+  logger.log(`configuring websocket routing for ${route.path}`);
   app.use(route.path, wsTokenAuthMiddleware);
 
   app.ws(route.path, async (req: Request, res: WSResponse) => {
@@ -165,7 +170,7 @@ WEBSOCKET_ROUTES.forEach((route) => {
           // @ts-ignore
           req.ws_message = route.requestSchema.cast(utfMessage);
         } catch (error) {
-          console.log(error);
+          logger.log(error);
           res.status(StatusCodes.BAD_REQUEST).send((error as ValidationError)?.errors?.join(" "));
           ws.close();
           return;
@@ -181,7 +186,7 @@ WEBSOCKET_ROUTES.forEach((route) => {
           await route.responseSchema.validate(data);
           broadcastData = route.responseSchema.cast(data);
         } catch (error) {
-          console.log(error);
+          logger.log(error);
           res.status(StatusCodes.INTERNAL_SERVER_ERROR).send((error as ValidationError)?.errors?.join(" "));
           ws.close();
           return;

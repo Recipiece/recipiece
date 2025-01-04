@@ -1,44 +1,76 @@
-import { Recipe } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
+import { RecipeShare as KRecipeShare, UserKitchenMembership as KUserKitchenMembership } from "../../database/kysely";
+import {
+  GetRecipeResponseSchema,
+  RecipeIngredientSchema,
+  RecipeShareSchema,
+  RecipeStepSchema,
+  UserKitchenMembershipSchema,
+} from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { sql } from "kysely";
 
-export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<Recipe> => {
+/**
+ * Get a recipe by id.
+ *
+ * This endpoint will return a recipe that you either own or has been shared to you.
+ * If neither of those conditions are met, the endpoint will 404.
+ */
+export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<GetRecipeResponseSchema> => {
   const recipeId = +req.params.id;
   const user = req.user;
 
-  const recipe = await prisma.recipe.findUnique({
-    where: {
-      id: recipeId,
-    },
-    include: {
-      steps: {
-        orderBy: {
-          order: "asc",
-        },
-      },
-      ingredients: {
-        orderBy: {
-          order: "asc",
-        },
-      },
-    },
-  });
+  const query = prisma.$kysely
+    .with("recipe_shares_and_memberships", (db) => {
+      return db
+        .selectFrom("recipe_shares")
+        .innerJoin(
+          "user_kitchen_memberships",
+          "user_kitchen_memberships.id",
+          "recipe_shares.user_kitchen_membership_id"
+        )
+        .where((eb) => {
+          return eb.and([
+            eb("user_kitchen_memberships.status", "=", "accepted"),
+            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+          ]);
+        })
+        .groupBy("recipe_shares.id")
+        .selectAll("recipe_shares")
+        .select(() => {
+          return [sql<string>`jsonb_agg(user_kitchen_memberships.*)`.as("user_kitchen_memberships")];
+        });
+    })
+    .selectFrom("recipes")
+    .leftJoin("recipe_ingredients", "recipe_ingredients.recipe_id", "recipes.id")
+    .leftJoin("recipe_steps", "recipe_steps.recipe_id", "recipes.id")
+    .leftJoin("recipe_shares_and_memberships", "recipe_shares_and_memberships.recipe_id", "recipes.id")
+    .where((eb) => {
+      return eb.or([
+        eb.and([eb("recipes.user_id", "=", user.id), eb("recipes.id", "=", recipeId)]),
+        eb("recipe_shares_and_memberships.recipe_id", "=", recipeId),
+      ]);
+    })
+    .selectAll("recipes")
+    .select(() => {
+      return [sql<RecipeIngredientSchema[]>`jsonb_agg(recipe_ingredients.* order by recipe_ingredients."order" asc)`.as("ingredients")];
+    })
+    .select(() => {
+      return [sql<RecipeStepSchema[]>`jsonb_agg(recipe_steps.* order by recipe_steps."order" asc)`.as("steps")];
+    })
+    .select(() => {
+      return [
+        sql<
+          (RecipeShareSchema & { user_kitchen_memberships: UserKitchenMembershipSchema[] })[]
+        >`jsonb_agg(recipe_shares_and_memberships.*)`.as("recipe_shares"),
+      ];
+    })
+    .groupBy("recipes.id");
+
+  const recipe = await query.executeTakeFirst();
 
   if (!recipe) {
-    return [
-      StatusCodes.NOT_FOUND,
-      {
-        message: `Recipe ${recipeId} not found`,
-      },
-    ];
-  }
-
-  /**
-   * You cannot get a recipe you do not own
-   */
-  if (recipe.user_id !== user.id) {
-    console.log(`user ${user.id} attempted to access recipe ${recipe.id} owned by user ${recipe.user_id}`);
     return [
       StatusCodes.NOT_FOUND,
       {

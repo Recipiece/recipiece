@@ -17,7 +17,7 @@ describe("Reset Password", () => {
   });
 
   it("should set the user credentials to the new password for a user", async () => {
-    const createdToken = await testPrisma.userValidationToken.create({
+    const createdToken = await prisma.userValidationToken.create({
       data: {
         user_id: user.id,
         purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
@@ -31,7 +31,7 @@ describe("Reset Password", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
-    const credentials = await testPrisma.userCredentials.findFirst({
+    const credentials = await prisma.userCredentials.findFirst({
       where: {
         user_id: user.id,
       },
@@ -50,7 +50,7 @@ describe("Reset Password", () => {
   });
 
   it("should not allow the same token to be used twice", async () => {
-    const createdToken = await testPrisma.userValidationToken.create({
+    const createdToken = await prisma.userValidationToken.create({
       data: {
         user_id: user.id,
         purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
@@ -73,7 +73,7 @@ describe("Reset Password", () => {
   });
 
   it("should delete any existing user sessions", async () => {
-    const createdToken = await testPrisma.userValidationToken.create({
+    const createdToken = await prisma.userValidationToken.create({
       data: {
         user_id: user.id,
         purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,

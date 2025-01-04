@@ -2,7 +2,7 @@ import { ShoppingList, ShoppingListItem, User } from "@prisma/client";
 import { randomUUID } from "crypto";
 import "jest-expect-message";
 import request from "superwstest";
-import { Redis } from "../../../src/database";
+import { prisma, Redis } from "../../../src/database";
 import { ModifyShoppingListResponse } from "../../../src/schema";
 
 const setShoppingListToken = async (shoppingListId: number): Promise<string> => {
@@ -35,7 +35,7 @@ describe("Modify Shopping List", () => {
   });
 
   beforeEach(async () => {
-    shoppingList = await testPrisma.shoppingList.create({
+    shoppingList = await prisma.shoppingList.create({
       data: {
         name: "Test List",
         user_id: user.id,
@@ -54,7 +54,7 @@ describe("Modify Shopping List", () => {
     it("should update an item's content", async () => {
       const shoppingListItems: ShoppingListItem[] = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i >= 5,
@@ -93,7 +93,7 @@ describe("Modify Shopping List", () => {
     it("should do nothing to an item not in the shopping list", async () => {
       const shoppingListItems: ShoppingListItem[] = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i >= 5,
@@ -136,7 +136,7 @@ describe("Modify Shopping List", () => {
     it("should remove an item from the list and realign the orders", async () => {
       const shoppingListItems: ShoppingListItem[] = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i < 5,
@@ -174,7 +174,7 @@ describe("Modify Shopping List", () => {
     it("should not do anything to an item that is not in the list", async () => {
       const shoppingListItems: ShoppingListItem[] = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i < 5,
@@ -203,7 +203,7 @@ describe("Modify Shopping List", () => {
     it("should move an item to not completed status and set its order to count + 1 of the incomplete items", async () => {
       const shoppingListItems = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i < 5,
@@ -256,7 +256,7 @@ describe("Modify Shopping List", () => {
     it("should not do anything to an already incomplete item", async () => {
       const shoppingListItems: ShoppingListItem[] = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i < 5,
@@ -294,7 +294,7 @@ describe("Modify Shopping List", () => {
     it("should move an item to completed status and set its order to count + 1 of the completed items", async () => {
       const shoppingListItems = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i < 5,
@@ -347,7 +347,7 @@ describe("Modify Shopping List", () => {
     it("should not do anything to an already completed item", async () => {
       const shoppingListItems: ShoppingListItem[] = [];
       for (let i = 0; i < 10; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             content: `item ${i}`,
             completed: i < 5,
@@ -407,7 +407,7 @@ describe("Modify Shopping List", () => {
 
     it("should set the item count to the max + 1 respective to the completed status", async () => {
       for (let i = 0; i < 5; i++) {
-        await testPrisma.shoppingListItem.create({
+        await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 1}`,
@@ -465,7 +465,7 @@ describe("Modify Shopping List", () => {
     it("should set the order of the item to the count of the items relative to completion status if the order is larger than the number of items", async () => {
       const items: ShoppingListItem[] = [];
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 1}`,
@@ -476,7 +476,7 @@ describe("Modify Shopping List", () => {
         items.push(item);
       }
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 6}`,
@@ -525,7 +525,7 @@ describe("Modify Shopping List", () => {
     it("should set the order of an item to 1 when the requested order is <= 0", async () => {
       const items: ShoppingListItem[] = [];
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 1}`,
@@ -536,7 +536,7 @@ describe("Modify Shopping List", () => {
         items.push(item);
       }
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 6}`,
@@ -585,7 +585,7 @@ describe("Modify Shopping List", () => {
     it("should allow a user to move the first item in a shopping list", async () => {
       const items: ShoppingListItem[] = [];
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 1}`,
@@ -596,7 +596,7 @@ describe("Modify Shopping List", () => {
         items.push(item);
       }
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 6}`,
@@ -645,7 +645,7 @@ describe("Modify Shopping List", () => {
     it("should allow a user to move the last item in a shopping list", async () => {
       const items: ShoppingListItem[] = [];
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 1}`,
@@ -656,7 +656,7 @@ describe("Modify Shopping List", () => {
         items.push(item);
       }
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 6}`,
@@ -705,7 +705,7 @@ describe("Modify Shopping List", () => {
     it("should allow a user to set the order of an item within the shopping list", async () => {
       const items: ShoppingListItem[] = [];
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 1}`,
@@ -716,7 +716,7 @@ describe("Modify Shopping List", () => {
         items.push(item);
       }
       for (let i = 0; i < 5; i++) {
-        const item = await testPrisma.shoppingListItem.create({
+        const item = await prisma.shoppingListItem.create({
           data: {
             shopping_list_id: shoppingList.id,
             content: `item ${i + 6}`,

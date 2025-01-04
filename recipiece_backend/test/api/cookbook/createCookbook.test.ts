@@ -3,6 +3,7 @@ import { User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { CookbookSchema, CreateCookbookRequestSchema } from "../../../src/schema";
+import { prisma } from "../../../src/database";
 
 describe("Create Cookbooks", () => {
   let user: User;
@@ -35,7 +36,7 @@ describe("Create Cookbooks", () => {
   });
 
   it("should not allow a cookbook with the same name to be created for a user", async () => {
-    const existingCookbook = await testPrisma.cookbook.create({
+    const existingCookbook = await prisma.cookbook.create({
       data: {
         name: "test",
         user_id: user.id,

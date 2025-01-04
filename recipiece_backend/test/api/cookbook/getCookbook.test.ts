@@ -2,6 +2,7 @@ import { User } from "@prisma/client";
 // @ts-ignore
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { prisma } from "../../../src/database";
 
 describe("Get Cookbooks", () => {
   let user: User;
@@ -14,7 +15,7 @@ describe("Get Cookbooks", () => {
   });
 
   it("should get a cookbook", async () => {
-    const cookbook = await testPrisma.cookbook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: user.id,
         name: "test cookbook",
@@ -32,7 +33,7 @@ describe("Get Cookbooks", () => {
 
   it("should not get a cookbook that you do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    const cookbook = await testPrisma.cookbook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",

@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { prisma } from "../../../src/database";
 
 describe("Add Recipe to Cookbook", () => {
   let user: User;
@@ -13,14 +14,14 @@ describe("Add Recipe to Cookbook", () => {
   });
 
   it("should allow a recipe to be attached to a cookbook", async () => {
-    const recipe = await testPrisma.recipe.create({
+    const recipe = await prisma.recipe.create({
       data: {
         name: "test recipe",
         user_id: user.id,
       },
     });
 
-    const cookbook = await testPrisma.cookbook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
@@ -38,7 +39,7 @@ describe("Add Recipe to Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.CREATED);
 
-    const attachments = await testPrisma.recipeCookbookAttachment.findMany({
+    const attachments = await prisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,
@@ -50,14 +51,14 @@ describe("Add Recipe to Cookbook", () => {
 
   it("should not allow another users recipe to be attached to a cookbook", async () => {
     const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    const otherRecipe = await testPrisma.recipe.create({
+    const otherRecipe = await prisma.recipe.create({
       data: {
         name: "other users recipe",
         user_id: otherUser.id,
       },
     });
 
-    const cookbook = await testPrisma.cookbook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
@@ -75,7 +76,7 @@ describe("Add Recipe to Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
-    const attachments = await testPrisma.recipeCookbookAttachment.findMany({
+    const attachments = await prisma.recipeCookbookAttachment.findMany({
       where: {
         recipe_id: otherRecipe.id,
         cookbook_id: cookbook.id,
@@ -86,21 +87,21 @@ describe("Add Recipe to Cookbook", () => {
   });
 
   it("should not allow duplicate attachments in the same cookbook", async () => {
-    const recipe = await testPrisma.recipe.create({
+    const recipe = await prisma.recipe.create({
       data: {
         name: "test recipe",
         user_id: user.id,
       },
     });
 
-    const cookbook = await testPrisma.cookbook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         name: "test cookbook",
         user_id: user.id,
       },
     });
 
-    await testPrisma.recipeCookbookAttachment.create({
+    await prisma.recipeCookbookAttachment.create({
       data: {
         recipe_id: recipe.id,
         cookbook_id: cookbook.id,

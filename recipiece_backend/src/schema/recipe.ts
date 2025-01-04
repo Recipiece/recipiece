@@ -138,6 +138,19 @@ export const YUpdateRecipeRequestSchema = object({
 export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecipeRequestSchema> {}
 
 /**
+ * Get recipe schema
+ */
+export const YGetRecipeResponseSchema = YRecipeSchema.shape({
+  recipe_shares: array(
+    YRecipeShareSchema.shape({
+      user_kitchen_memberships: array(YUserKitchenMembershipSchema),
+    })
+  ),
+}).strict().noUnknown();
+
+export interface GetRecipeResponseSchema extends InferType<typeof YGetRecipeResponseSchema> {}
+
+/**
  * List recipes schema
  */
 export const YListRecipesQuerySchema = YListQuerySchema.shape({

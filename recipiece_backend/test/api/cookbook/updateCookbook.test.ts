@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { prisma } from "../../../src/database";
 
 describe("Update Cookbooks", () => {
   let user: User;
@@ -13,7 +14,7 @@ describe("Update Cookbooks", () => {
   });
 
   it("should update a cookbook", async () => {
-    const cookbook = await testPrisma.cookbook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: user.id,
         name: "Test cookbook",
@@ -36,7 +37,7 @@ describe("Update Cookbooks", () => {
 
   it("should not allow you to update a cookbook you do not own", async () => {
     const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    const otherCookbook = await testPrisma.cookbook.create({
+    const otherCookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "other user cookbook",
@@ -55,7 +56,7 @@ describe("Update Cookbooks", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
-    const updatedCookbook = await testPrisma.cookbook.findUnique({ where: { id: otherCookbook.id } });
+    const updatedCookbook = await prisma.cookbook.findUnique({ where: { id: otherCookbook.id } });
     expect(updatedCookbook?.description).toEqual(otherCookbook.description);
   });
 

@@ -1,6 +1,7 @@
 import { ShoppingListItem, User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { prisma } from "../../../src/database";
 
 describe("Append Shopping List Items", () => {
   let user: User;
@@ -13,7 +14,7 @@ describe("Append Shopping List Items", () => {
   });
 
   it("should append the items to the end of the incomplete items", async () => {
-    const shoppingList = await testPrisma.shoppingList.create({
+    const shoppingList = await prisma.shoppingList.create({
       data: {
         name: "Test List",
         user_id: user.id,
@@ -22,7 +23,7 @@ describe("Append Shopping List Items", () => {
 
     const items: ShoppingListItem[] = [];
     for (let i = 0; i < 10; i++) {
-      const item = await testPrisma.shoppingListItem.create({
+      const item = await prisma.shoppingListItem.create({
         data: {
           content: `item ${i}`,
           order: (i % 5) + 1,

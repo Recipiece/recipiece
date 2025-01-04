@@ -9,10 +9,4 @@ export default {
   collectCoverageFrom: ["src/**/*.ts"], // Include only src files in coverage report
   globalSetup: "./jest.setup-global.ts",
   setupFilesAfterEnv: ["jest-expect-message", "./jest.setup.ts"],
-  testEnvironment: "@quramy/jest-prisma-node/environment",
-  testEnvironmentOptions: {
-    // Optional: Enable experimental rollback in transactions (for PostgreSQL)
-    enableExperimentalRollbackInTransaction: true,
-  },
-  // reporters: ["jest-silent-reporter"],
 };

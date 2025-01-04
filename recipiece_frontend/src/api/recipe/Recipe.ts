@@ -24,7 +24,16 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
 };
 
 export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs) => {
-  const path = `/recipe/list?page_number=0&search=${search}&page_size=5&exclude_cookbook_id=${cookbook_id}`;
+  const searchParams = new URLSearchParams();
+  if (search) {
+    searchParams.set("search", search);
+  }
+  searchParams.set("cookbook_id", cookbook_id.toString());
+  searchParams.set("cookbook_attachments", "exclude");
+  searchParams.set("page_number", "0");
+  searchParams.set("page_size", "5");
+
+  const path = `/recipe/list?${searchParams.toString()}`;
   const { getter } = useGet();
 
   const query = async () => {
@@ -90,6 +99,7 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
 
   if (filters.cookbook_id) {
     searchParams.append("cookbook_id", filters.cookbook_id.toString());
+    searchParams.append("cookbook_attachments", "include");
   }
 
   if (filters.search) {

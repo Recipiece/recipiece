@@ -1,6 +1,7 @@
 import { Cookbook, User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { prisma } from "../../../src/database";
 
 describe("List Cookbooks", () => {
   let user: User;
@@ -14,7 +15,7 @@ describe("List Cookbooks", () => {
 
   it("should list the cookbooks for the user associated with a token", async () => {
     for (let i = 0; i < 10; i++) {
-      await testPrisma.cookbook.create({
+      await prisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -38,7 +39,7 @@ describe("List Cookbooks", () => {
 
   it("should allow name filtering", async () => {
     for (let i = 0; i < 10; i++) {
-      await testPrisma.cookbook.create({
+      await prisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -47,7 +48,7 @@ describe("List Cookbooks", () => {
       });
     }
 
-    await testPrisma.cookbook.create({
+    await prisma.cookbook.create({
       data: {
         name: "NAME NAME NAME",
         description: "Test",
@@ -72,7 +73,7 @@ describe("List Cookbooks", () => {
 
   it("should page", async () => {
     for (let i = 0; i < 10; i++) {
-      await testPrisma.cookbook.create({
+      await prisma.cookbook.create({
         data: {
           name: `Test cookbook ${i}`,
           description: "Test",
@@ -96,28 +97,28 @@ describe("List Cookbooks", () => {
   });
 
   it("should exclude cookbooks containing a certain recipe when instructed", async () => {
-    const containingCookbook = await testPrisma.cookbook.create({
+    const containingCookbook = await prisma.cookbook.create({
       data: {
         name: "Containing",
         user_id: user.id,
       },
     });
 
-    const notContainingCookbook = await testPrisma.cookbook.create({
+    const notContainingCookbook = await prisma.cookbook.create({
       data: {
         name: "Not Containing",
         user_id: user.id,
       },
     });
 
-    const recipe = await testPrisma.recipe.create({
+    const recipe = await prisma.recipe.create({
       data: {
         name: "Test Recipe",
         user_id: user.id,
       },
     });
 
-    await testPrisma.recipeCookbookAttachment.create({
+    await prisma.recipeCookbookAttachment.create({
       data: {
         cookbook_id: containingCookbook.id,
         recipe_id: recipe.id,

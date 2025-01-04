@@ -15,7 +15,7 @@ describe("Create Shopping List", () => {
   it("should allow a shopping list to be created", async () => {
     const expectedBody = {
       name: "My Test List",
-    }
+    };
 
     const response = await request(server)
       .post("/shopping-list")

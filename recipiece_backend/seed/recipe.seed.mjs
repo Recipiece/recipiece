@@ -32,7 +32,6 @@ const seedRecipesForUser = async (user) => {
     const recipe = await prisma.recipe.create({
       data: {
         user_id: user.id,
-        private: i % 2 == 0,
         name: dishNames[i],
         description: faker.food.description(),
       },

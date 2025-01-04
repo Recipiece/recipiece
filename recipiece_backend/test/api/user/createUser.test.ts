@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { prisma } from "../../../src/database";
 
 describe("Create User", () => {
   it("should create a user, their credentials, and their access level", async () => {
@@ -18,7 +19,7 @@ describe("Create User", () => {
 
     expect(response.statusCode).toBe(StatusCodes.CREATED);
 
-    const matchingUser = await testPrisma.user.findUnique({
+    const matchingUser = await prisma.user.findUnique({
       where: {
         email: email,
       },
@@ -35,7 +36,7 @@ describe("Create User", () => {
   });
 
   it("should not allow an existing email to be used", async () => {
-    const existingUser = await testPrisma.user.create({
+    const existingUser = await prisma.user.create({
       data: {
         email: "existing@recipiece.org",
         username: "uniqueusername",
@@ -55,7 +56,7 @@ describe("Create User", () => {
   });
 
   it("should not allow an existing username to be used", async () => {
-    const existingUser = await testPrisma.user.create({
+    const existingUser = await prisma.user.create({
       data: {
         email: "existing@recipiece.org",
         username: "uniqueusername",

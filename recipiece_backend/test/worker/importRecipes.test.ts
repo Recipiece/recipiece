@@ -1,13 +1,14 @@
 import { User } from "@prisma/client";
 import archiver from "archiver";
-import { cpSync, createReadStream, createWriteStream, mkdirSync, rmSync } from "fs";
+import { createWriteStream, mkdirSync, rmSync } from "fs";
 import fetch from "jest-fetch-mock";
 import { DateTime } from "luxon";
+import path from "path";
+import { gzipSync } from "zlib";
+import { prisma } from "../../src/database";
 import { RecipeImportFiles } from "../../src/util/constant";
 import { generateRecipeImportWorker } from "../../src/worker";
 import { runner } from "../../src/worker/importRecipes";
-import path from "path";
-import { gzipSync } from "zlib";
 
 describe("Import Recipes", () => {
   describe("From Paprika", () => {
@@ -160,7 +161,7 @@ describe("Import Recipes", () => {
         });
       });
 
-      const job = await testPrisma.backgroundJob.create({
+      const job = await prisma.backgroundJob.create({
         data: {
           user_id: user.id,
           purpose: RecipeImportFiles.IMPORT_TOPIC,
@@ -175,7 +176,7 @@ describe("Import Recipes", () => {
 
       await runner(job.id);
 
-      const firstCreatedRecipe = await testPrisma.recipe.findFirst({
+      const firstCreatedRecipe = await prisma.recipe.findFirst({
         where: {
           name: rawPaprikaRecipe01.name,
         },
@@ -184,7 +185,7 @@ describe("Import Recipes", () => {
       expect(firstCreatedRecipe!.user_id).toBe(user.id);
       expect(firstCreatedRecipe!.description).toBe(rawPaprikaRecipe01.description);
 
-      const secondCreatedRecipe = await testPrisma.recipe.findFirst({
+      const secondCreatedRecipe = await prisma.recipe.findFirst({
         where: {
           name: rawPaprikaRecipe02.name,
         },
@@ -193,7 +194,7 @@ describe("Import Recipes", () => {
       expect(secondCreatedRecipe!.user_id).toBe(user.id);
       expect(secondCreatedRecipe!.description).toBe(rawPaprikaRecipe02.description);
 
-      const alteredJob = await testPrisma.backgroundJob.findFirst({
+      const alteredJob = await prisma.backgroundJob.findFirst({
         where: {
           id: job.id,
         },
