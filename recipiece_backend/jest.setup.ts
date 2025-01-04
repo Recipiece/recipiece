@@ -9,14 +9,14 @@
  */
 
 import { User } from "@prisma/client";
-import "@quramy/jest-prisma-node";
+// import "@quramy/jest-prisma-node";
 import { randomUUID } from "crypto";
-import { DateTime } from "luxon";
+import { enableFetchMocks } from "jest-fetch-mock";
 import app from "./src/app";
 import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
-import { enableFetchMocks } from "jest-fetch-mock";
+import { prisma } from "./src/database";
 
 interface CreateUserAndTokenArgs {
   readonly email?: string;
@@ -52,7 +52,7 @@ globalThis.fixtures = {
     const hashedPassword = await hashPassword(password);
 
     // create a user
-    const user = await jestPrisma.client.user.create({
+    const user = await prisma.user.create({
       data: {
         email: email,
         username: username,
@@ -71,7 +71,7 @@ globalThis.fixtures = {
     });
 
     // create a session and a token
-    const session = await jestPrisma.client.userSession.create({
+    const session = await prisma.userSession.create({
       data: {
         user_id: user.id,
         scope: UserSessions.REFRESH_TOKEN_SCOPE,
@@ -102,11 +102,11 @@ globalThis.fixtures = {
 // setup the jest prisma client and mock
 globalThis.testPrisma = jestPrisma.client;
 
-jest.mock("./src/database/prisma", () => {
-  return {
-    prisma: jestPrisma.client,
-  };
-});
+// jest.mock("./src/database/prisma", () => {
+//   return {
+//     prisma: jestPrisma.client,
+//   };
+// });
 
 jest.mock('bullmq', () => {
   return {

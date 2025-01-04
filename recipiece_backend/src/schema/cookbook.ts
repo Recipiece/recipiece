@@ -59,6 +59,7 @@ export interface RemoveRecipeFromCookbookRequestSchema extends InferType<typeof 
  */
 export const YListCookbooksQuerySchema = YListQuerySchema.shape({
   exclude_containing_recipe_id: number().notRequired(),
+  search: string().notRequired(),
 }).strict().noUnknown();
 
 export interface ListCookbooksQuerySchema extends InferType<typeof YListCookbooksQuerySchema> {}

@@ -57,4 +57,8 @@ describe("Get Recipes", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
+
+  it("should get a shared recipe", async () => {
+    expect(false).toBeTruthy();
+  });
 });
