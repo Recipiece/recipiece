@@ -1,8 +1,12 @@
+import Fraction from "fraction.js";
 import { MoreVertical } from "lucide-react";
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "react-router-dom";
-import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
+import { useGetRecipeByIdQuery, useGetSelfQuery, useGetUserKitchenMembershipQuery } from "../../api";
 import {
+  Avatar,
+  AvatarFallback,
   Button,
   Card,
   CardContent,
@@ -10,17 +14,19 @@ import {
   Checkbox,
   DropdownMenu,
   DropdownMenuTrigger,
+  H2,
   LoadingGroup,
   NotFound,
   RecipeContextMenu,
   RecipieceMenuBarContext,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "../../component";
 import { Recipe, RecipeIngredient } from "../../data";
+import { useLayout } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
 import { IngredientContextMenu } from "./IngredientContextMenu";
-import { useLayout } from "../../hooks";
-import { createPortal } from "react-dom";
-import Fraction from "fraction.js";
 
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
@@ -31,6 +37,12 @@ export const RecipeViewPage: FC = () => {
   } = useGetRecipeByIdQuery(+id!, {
     disabled: !id,
   });
+
+  const userKitchenMembershipId = (originalRecipe?.recipe_shares ?? [])[0]?.user_kitchen_membership_id;
+  const { data: userKitchenMembership } = useGetUserKitchenMembershipQuery(userKitchenMembershipId, {
+    disabled: !userKitchenMembershipId,
+  });
+
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { isMobile } = useLayout();
 
@@ -145,8 +157,8 @@ export const RecipeViewPage: FC = () => {
               canFork={recipe!.user_id !== currentUser?.id}
               canDelete={recipe!.user_id === currentUser?.id}
               canEdit={recipe!.user_id === currentUser?.id}
-              canShare={!recipe!.private}
-              canAddToShoppingList={recipe!.user_id === currentUser?.id}
+              canShare={recipe!.user_id === currentUser?.id}
+              canAddToShoppingList
               canAddToCookbook={recipe!.user_id === currentUser?.id}
               canScale
               onScale={onScaleIngredients}
@@ -164,12 +176,26 @@ export const RecipeViewPage: FC = () => {
       <div>
         <div className="grid gap-3">
           <LoadingGroup isLoading={isLoading} className="h-[40px] w-full">
-            <div className="flex flex-row">
-              <h1 className="text-4xl font-medium mr-auto">{recipe?.name}</h1>
+            <div className="flex flex-row items-center gap-2">
+              <H2 className="text-4xl font-medium">{recipe?.name}</H2>
+              {userKitchenMembership && (
+                <Tooltip>
+                  <div className="w-10 h-10">
+                    <TooltipTrigger asChild>
+                      <Avatar>
+                        <AvatarFallback className="w-10 h-10 cursor-pointer bg-primary text-white">
+                          {userKitchenMembership.source_user.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TooltipTrigger>
+                  </div>
+                  <TooltipContent>Shared to you by {userKitchenMembership.source_user.username}</TooltipContent>
+                </Tooltip>
+              )}
               {recipe && (
                 <>
                   {isMobile && mobileMenuPortalRef?.current && createPortal(dropdownMenuComponent, mobileMenuPortalRef.current)}
-                  {!isMobile && <>{dropdownMenuComponent}</>}
+                  {!isMobile && <span className="ml-auto">{dropdownMenuComponent}</span>}
                 </>
               )}
             </div>

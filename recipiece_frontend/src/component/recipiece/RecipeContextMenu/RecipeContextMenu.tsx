@@ -1,8 +1,21 @@
-import { Book, BookMinus, Edit, RefreshCw, Scaling, Share, ShoppingBasket, SignalHigh, SignalLow, SignalMedium, SignalZero, Trash, Utensils } from "lucide-react";
-import { FC, useCallback, useContext, useState } from "react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Book,
+  BookMinus,
+  Edit,
+  RefreshCw,
+  Scaling,
+  Share,
+  ShoppingBasket,
+  Trash,
+  Utensils
+} from "lucide-react";
+import { FC, Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useAttachRecipeToCookbookMutation,
+  useCreateRecipeShareMutation,
   useForkRecipeMutation,
   useGetCookbookByIdQuery,
   useListCookbooksQuery,
@@ -10,7 +23,7 @@ import {
   useRemoveRecipeFromCookbookMutation,
 } from "../../../api";
 import { DialogContext } from "../../../context";
-import { Cookbook, Recipe, ShoppingList } from "../../../data";
+import { Cookbook, Recipe, ShoppingList, UserKitchenMembership } from "../../../data";
 import { ScaleRecipeSubmit, useAddRecipeToShoppingListDialog, useDeleteRecipeDialog } from "../../../dialog";
 import { useLayout } from "../../../hooks";
 import {
@@ -89,6 +102,8 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const { data: cookbook } = useGetCookbookByIdQuery(cookbookId!, {
     disabled: !cookbookId,
   });
+
+  const { mutateAsync: shareRecipe } = useCreateRecipeShareMutation();
 
   const { mutateAsync: forkRecipe } = useForkRecipeMutation({
     onSuccess: (recipe) => {
@@ -193,37 +208,31 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   }, [removeRecipeFromCookbook, cookbook, recipe]);
 
   const onShareRecipe = useCallback(async () => {
-    let url: string = "";
-    if (window.location.href.includes("localhost:3000")) {
-      url = `http://localhost:3000/recipe/view/${recipe!.id}`;
-    } else {
-      url = `https://recipiece.org/recipe/view/${recipe!.id}`;
-    }
-
-    if ("navigator" in window) {
-      const data = {
-        title: recipe!.name,
-        text: `Here's a recipe for ${recipe!.name}. Enjoy!`,
-        url: url,
-      };
-
-      if (navigator.share) {
+    pushDialog("shareRecipe", {
+      recipe: recipe,
+      onClose: () => popDialog("shareRecipe"),
+      onSubmit: async (membership: UserKitchenMembership) => {
         try {
-          await navigator.share(data);
+          await shareRecipe({
+            user_kitchen_membership_id: membership.id,
+            recipe_id: recipe.id,
+          });
+          toast({
+            title: "Recipe Shared",
+            description: `Your recipe has been sent to ${membership.destination_user.username}`,
+          });
         } catch {
-          // noop
+          toast({
+            title: "Unable to Share Recipe",
+            description: `Your recipe could not be shared with ${membership.destination_user.username}. Try again later.`,
+            variant: "destructive",
+          });
+        } finally {
+          popDialog("shareRecipe");
         }
-      } else {
-        // sometimes we cannot share cause the api's just not there
-        // so copy the url to the clipboard and inform the user
-        navigator.clipboard.writeText(url);
-        toast({
-          title: "Link Copied",
-          description: `A link to this recipe was copied to your clipboard: ${url}`,
-        });
-      }
-    }
-  }, [recipe, toast]);
+      },
+    });
+  }, [popDialog, pushDialog, recipe, shareRecipe, toast]);
 
   const onForkRecipe = useCallback(async () => {
     try {
@@ -244,130 +253,221 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     });
   }, [onScale, popDialog, pushDialog]);
 
-  return (
-    <DropdownMenuContent>
-      {/* reset */}
-      {canReset && (
+  const resetOptions = useMemo(() => {
+    const items = [];
+
+    if (canReset) {
+      items.push(
         <DropdownMenuItem onClick={() => onReset?.()}>
           <RefreshCw /> Reset Changes
         </DropdownMenuItem>
-      )}
-      {canReset && <DropdownMenuSeparator />}
-      {/* scaling */}
-      {canScale && (
+      );
+    }
+
+    return items;
+  }, [canReset, onReset]);
+
+  const scalingOptions = useMemo(() => {
+    const items = [];
+    if (canScale) {
+      items.push(
         <DropdownMenuItem onClick={() => onScale?.(0.5)}>
-          <SignalZero />
+          <ArrowDownLeft />
           1/2 Recipe
         </DropdownMenuItem>
-      )}
-      {canScale && (
+      );
+      items.push(
         <DropdownMenuItem onClick={() => onScale?.(2)}>
-          <SignalLow />
+          <ArrowUpRight />
           2x Recipe
         </DropdownMenuItem>
-      )}
-      {canScale && (
-        <DropdownMenuItem onClick={() => onScale?.(3)}>
-          <SignalMedium />
-          3x Recipe
-        </DropdownMenuItem>
-      )}
-      {canScale && (
-        <DropdownMenuItem onClick={() => onScale?.(4)}>
-          <SignalHigh />
-          4x Recipe
-        </DropdownMenuItem>
-      )}
-      {canScale && (
+      );
+      items.push(
         <DropdownMenuItem onClick={onCustomScaleRecipe}>
           <Scaling />
           Scale Custom
         </DropdownMenuItem>
-      )}
-      {canScale && <DropdownMenuSeparator />}
-      {/* add to cookbook */}
-      {canAddToCookbook && !isMobile && (
-        <DropdownMenuSub onOpenChange={(open) => setIsCookbookContextMenuOpen(open)}>
-          <DropdownMenuSubTrigger>
+      );
+    }
+
+    return items;
+  }, [canScale, onCustomScaleRecipe, onScale]);
+
+  const addToOptions = useMemo(() => {
+    const items = [];
+
+    if (canAddToCookbook) {
+      if (isMobile) {
+        items.push(
+          <DropdownMenuItem onClick={mobileOnAddToCookbook}>
             <Book />
             Add to Cookbook
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingCookbook}>
-                {(cookbooks?.data || []).map((cookbook) => {
-                  return (
-                    <DropdownMenuItem onClick={() => onAddToCookbook(cookbook)} key={cookbook.id}>
-                      {cookbook.name}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </LoadingGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
-      )}
-      {canAddToCookbook && isMobile && (
-        <DropdownMenuItem onClick={mobileOnAddToCookbook}>
-          <Book />
-          Add to Cookbook
-        </DropdownMenuItem>
-      )}
-      {/* add to shopping list */}
-      {canAddToShoppingList && !isMobile && (
-        <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
-          <DropdownMenuSubTrigger>
-            <ShoppingBasket />
-            Add to Shopping List
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
-                {(shoppingLists?.data || []).map((list) => {
-                  return (
-                    <DropdownMenuItem key={list.id} onClick={() => onAddToShoppingList(list.id)}>
-                      {list.name}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </LoadingGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
-      )}
-      {canAddToShoppingList && isMobile && (
-        <DropdownMenuItem onClick={mobileOnAddToShoppingList}>
-          <ShoppingBasket /> Add to Shopping List
-        </DropdownMenuItem>
-      )}
-      {(canAddToShoppingList || canAddToCookbook) && canShare && <DropdownMenuSeparator />}
-      {canFork && (
+          </DropdownMenuItem>
+        );
+      } else {
+        items.push(
+          <DropdownMenuSub onOpenChange={(open) => setIsCookbookContextMenuOpen(open)}>
+            <DropdownMenuSubTrigger>
+              <Book />
+              Add to Cookbook
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingCookbook}>
+                  {(cookbooks?.data || []).map((cookbook) => {
+                    return (
+                      <DropdownMenuItem onClick={() => onAddToCookbook(cookbook)} key={cookbook.id}>
+                        {cookbook.name}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </LoadingGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        );
+      }
+    }
+
+    if (canAddToShoppingList) {
+      if (isMobile) {
+        items.push(
+          <DropdownMenuItem onClick={mobileOnAddToShoppingList}>
+            <ShoppingBasket /> Add to Shopping List
+          </DropdownMenuItem>
+        );
+      } else {
+        items.push(
+          <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
+            <DropdownMenuSubTrigger>
+              <ShoppingBasket />
+              Add to Shopping List
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
+                  {(shoppingLists?.data || []).map((list) => {
+                    return (
+                      <DropdownMenuItem key={list.id} onClick={() => onAddToShoppingList(list.id)}>
+                        {list.name}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </LoadingGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        );
+      }
+    }
+
+    return items;
+  }, [
+    canAddToCookbook,
+    canAddToShoppingList,
+    cookbooks,
+    isLoadingCookbook,
+    isLoadingShoppingLists,
+    isMobile,
+    mobileOnAddToCookbook,
+    mobileOnAddToShoppingList,
+    onAddToCookbook,
+    onAddToShoppingList,
+    shoppingLists,
+  ]);
+
+  const editOptions = useMemo(() => {
+    const items = [];
+    if (canFork) {
+      items.push(
         <DropdownMenuItem onClick={onForkRecipe}>
           <Utensils /> Fork This Recipe
         </DropdownMenuItem>
-      )}
-      {canEdit && (
+      );
+    }
+
+    if (canEdit) {
+      items.push(
         <DropdownMenuItem onClick={() => navigate(`/recipe/edit/${recipe!.id}`)}>
           <Edit /> Edit This Recipe
         </DropdownMenuItem>
-      )}
-      {(canFork || canEdit) && <DropdownMenuSeparator />}
-      {canShare && (
-        <DropdownMenuItem onClick={onShareRecipe} disabled={recipe?.private}>
+      );
+    }
+
+    if (canShare) {
+      items.push(
+        <DropdownMenuItem onClick={onShareRecipe}>
           <Share /> Share Recipe
         </DropdownMenuItem>
-      )}
-      <DropdownMenuSeparator />
-      {canRemoveFromCookbook && (
+      );
+    }
+
+    return items;
+  }, [canEdit, canFork, canShare, navigate, onForkRecipe, onShareRecipe, recipe]);
+
+  const removeItems = useMemo(() => {
+    const items = [];
+    if (canRemoveFromCookbook) {
+      items.push(
         <DropdownMenuItem onClick={onRemoveRecipeFromCookbook} className="text-destructive">
           <BookMinus /> Remove from Cookbook
         </DropdownMenuItem>
-      )}
-      {canDelete && (
+      );
+    }
+
+    if (canDelete) {
+      items.push(
         <DropdownMenuItem onClick={onDeleteRecipe} className="text-destructive">
           <Trash /> Delete Recipe
         </DropdownMenuItem>
-      )}
+      );
+    }
+
+    return items;
+  }, [canDelete, canRemoveFromCookbook, onDeleteRecipe, onRemoveRecipeFromCookbook]);
+
+  const allItems = useMemo(() => {
+    const items = [];
+    if (resetOptions.length > 0) {
+      items.push(...resetOptions);
+    }
+
+    if (scalingOptions.length > 0) {
+      if (items.length > 0) {
+        items.push(<DropdownMenuSeparator />);
+      }
+      items.push(...scalingOptions);
+    }
+
+    if (addToOptions.length > 0) {
+      if (items.length > 0) {
+        items.push(<DropdownMenuSeparator />);
+      }
+      items.push(...addToOptions);
+    }
+
+    if (editOptions.length > 0) {
+      if (items.length > 0) {
+        items.push(<DropdownMenuSeparator />);
+      }
+      items.push(...editOptions);
+    }
+
+    if (removeItems.length > 0) {
+      if (items.length > 0) {
+        items.push(<DropdownMenuSeparator />);
+      }
+      items.push(...removeItems);
+    }
+
+    return items;
+  }, [addToOptions, editOptions, removeItems, resetOptions, scalingOptions]);
+
+  return (
+    <DropdownMenuContent>
+      {allItems.map((opt, idx) => {
+        return <Fragment key={idx}>{opt}</Fragment>;
+      })}
     </DropdownMenuContent>
   );
 };

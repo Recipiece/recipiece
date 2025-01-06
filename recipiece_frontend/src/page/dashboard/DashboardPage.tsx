@@ -16,11 +16,13 @@ export const DashboardPage: FC = () => {
         page_number: 0,
         cookbook_id: +cookbookId,
         search: "",
+        shared_recipes: "include",
       };
     } else {
       return {
         page_number: 0,
         search: "",
+        shared_recipes: "include",
       };
     }
   }, [cookbookId]);
@@ -106,7 +108,7 @@ export const DashboardPage: FC = () => {
 
   return (
     <Stack>
-      {!cookbookId && <H2>All Your Recipes</H2>}
+      {!cookbookId && <H2>Your Recipes</H2>}
       {cookbookId && (
         <LoadingGroup className="h-8 w-[250px]" isLoading={isLoadingCookbook}>
           <Shelf>
@@ -118,7 +120,6 @@ export const DashboardPage: FC = () => {
           </Shelf>
         </LoadingGroup>
       )}
-      {!cookbookId && <p>See all of your recipes in one place.</p>}
       {cookbookId && (
         <LoadingGroup isLoading={isLoadingCookbook} className="h-4">
           <p>{cookbook?.description}</p>

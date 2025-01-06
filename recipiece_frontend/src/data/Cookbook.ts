@@ -3,7 +3,6 @@ export interface Cookbook {
   readonly name: string;
   readonly description?: string;
   readonly created_at: string;
-  readonly private?: boolean;
   readonly user_id: number;
 }
 

@@ -322,7 +322,7 @@ export const useDeleteSelfMutation = (args?: MutationArgs<void>) => {
   });
 };
 
-export const useListKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipFilters, args?: QueryArgs) => {
+export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipFilters, args?: QueryArgs) => {
   const { getter } = useGet();
   const queryClient = useQueryClient();
 
@@ -419,5 +419,25 @@ export const useUpdateKitchenMembershipMutation = () => {
         oldDataUpdater(membership)
       );
     },
+  });
+};
+
+export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs) => {
+  const { getter } = useGet();
+
+  const query = async () => {
+    return await getter<never, UserKitchenMembership>({
+      path: `/user/kitchen/membership/${id}`,
+      withAuth: "access_token",
+    });
+  };
+
+  return useQuery({
+    queryKey: UserQueryKeys.GET_KITCHEN_MEMBERSHIP(id),
+    queryFn: async () => {
+      const data = await query();
+      return data.data;
+    },
+    enabled: args?.disabled !== true,
   });
 };

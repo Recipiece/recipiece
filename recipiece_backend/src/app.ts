@@ -20,6 +20,7 @@ import {
 } from "./middleware";
 import { WebsocketRequest } from "./types";
 import { Logger } from "./util/logger";
+import { YEmptySchema } from "./schema";
 
 const app = new WebSocketExpress();
 const logger = Logger.getLogger({
@@ -29,7 +30,7 @@ const logger = Logger.getLogger({
 
 app.use(cors({}));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan(":method :url :status - :response-time ms"));
 
 if (process.env.APP_ENVIRONMENT === "dev") {
@@ -42,7 +43,7 @@ if (process.env.APP_ENVIRONMENT === "dev") {
 }
 
 app.get("/", (_, res) => {
-  res.status(StatusCodes.OK).send({version: process.env.APP_VERSION});
+  res.status(StatusCodes.OK).send({ version: process.env.APP_VERSION });
 });
 
 ROUTES.forEach((route) => {
@@ -65,20 +66,22 @@ ROUTES.forEach((route) => {
       break;
   }
 
-  if (route.requestSchema) {
-    switch (route.method) {
-      case "POST":
-      case "PUT":
-        routeHandlers.push(validateRequestBodySchema(route.requestSchema));
-        break;
-      case "GET":
-      case "DELETE":
-        routeHandlers.push(validateRequestQuerySchema(route.requestSchema));
-        break;
-    }
+  /**
+   * set up the request schema validation.
+   */
+  const requestSchema = route.requestSchema ?? YEmptySchema;
+  switch (route.method) {
+    case "POST":
+    case "PUT":
+      routeHandlers.push(validateRequestBodySchema(requestSchema));
+      break;
+    case "GET":
+    case "DELETE":
+      routeHandlers.push(validateRequestQuerySchema(requestSchema));
+      break;
   }
 
-  if(route.preMiddleware) {
+  if (route.preMiddleware) {
     logger.log(`  installing extra pre-middleware for ${route.path}`);
     routeHandlers.push(...route.preMiddleware);
   }
@@ -89,14 +92,16 @@ ROUTES.forEach((route) => {
     res.status(statusCode).send(responseBody);
   });
 
-  if(route.postMiddleware) {
+  if (route.postMiddleware) {
     logger.log(`  installing extra post-middleware for ${route.path}`);
     routeHandlers.push(...route.postMiddleware);
   }
 
-  if (route.responseSchema) {
-    routeHandlers.push(validateResponseSchema(route.responseSchema));
-  }
+  /**
+   * setup the response schema validation.
+   */
+  const responseSchema = route.responseSchema ?? YEmptySchema;
+  routeHandlers.push(validateResponseSchema(responseSchema));
 
   switch (route.method) {
     case "POST":
@@ -113,7 +118,6 @@ ROUTES.forEach((route) => {
       break;
   }
 });
-
 
 /**
  * Websocket flow is a little more complicated than regular requests.

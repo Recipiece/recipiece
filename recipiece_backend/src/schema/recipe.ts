@@ -141,12 +141,10 @@ export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecip
  * Get recipe schema
  */
 export const YGetRecipeResponseSchema = YRecipeSchema.shape({
-  recipe_shares: array(
-    YRecipeShareSchema.shape({
-      user_kitchen_memberships: array(YUserKitchenMembershipSchema),
-    })
-  ),
-}).strict().noUnknown();
+  recipe_shares: array(YRecipeShareSchema),
+})
+  .strict()
+  .noUnknown();
 
 export interface GetRecipeResponseSchema extends InferType<typeof YGetRecipeResponseSchema> {}
 
@@ -164,7 +162,11 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
 
 export interface ListRecipesQuerySchema extends InferType<typeof YListRecipesQuerySchema> {}
 
-export const YListRecipesResponseSchema = generateYListQuerySchema(YRecipeSchema);
+export const YListRecipesResponseSchema = generateYListQuerySchema(
+  YRecipeSchema.shape({
+    recipe_shares: array(YRecipeShareSchema).notRequired(),
+  })
+);
 
 export interface ListRecipesResponseSchema extends InferType<typeof YListRecipesResponseSchema> {}
 
@@ -197,6 +199,7 @@ export interface CreateRecipeShareRequestSchema extends InferType<typeof YCreate
 export const YListRecipeSharesQuerySchema = YListQuerySchema.shape({
   targeting_self: boolean().notRequired(),
   from_self: boolean().notRequired(),
+  user_kitchen_membership_id: number().notRequired(),
 })
   .test("onlyOneOfTargetingSelfOrFromSelf", "Must specify only one of targeting_self or from_self", (ctx) => {
     return !ctx.from_self || !ctx.targeting_self;

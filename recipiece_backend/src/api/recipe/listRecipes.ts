@@ -9,7 +9,7 @@ import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 export const listRecipes = async (
   request: AuthenticatedRequest<any, ListRecipesQuerySchema>
 ): ApiResponse<ListRecipesResponseSchema> => {
-  const { page_number, page_size, search, cookbook_id, cookbook_attachments, shared_recipes } = request.query;
+  const { page_number, page_size, shared_recipes } = request.query;
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
 
   let query = generateOwnedRecipesQuery(request.user, request.query);
@@ -43,6 +43,7 @@ const generateOwnedRecipesQuery = (user: User, filters: ListRecipesQuerySchema) 
     .selectFrom("recipes")
     .leftJoin("recipe_ingredients", "recipes.id", "recipe_ingredients.recipe_id")
     .leftJoin("recipe_steps", "recipes.id", "recipe_steps.recipe_id")
+    .leftJoin("recipe_shares", "recipe_shares.recipe_id", "recipes.id")
     .where("recipes.user_id", "=", user.id);
 
   if (search) {
@@ -73,6 +74,9 @@ const generateOwnedRecipesQuery = (user: User, filters: ListRecipesQuerySchema) 
     })
     .select(() => {
       return [sql<string>`jsonb_agg(recipe_steps.* order by recipe_steps."order" asc)`.as("steps")];
+    })
+    .select(() => {
+      return [sql<string>`jsonb_agg(distinct recipe_shares.*)`.as("recipe_shares")];
     });
 
   query = query.groupBy("recipes.id");
@@ -92,7 +96,7 @@ const generateSharedRecipesQuery = (user: User, filters: ListRecipesQuerySchema)
     .where((eb) => {
       return eb.and([
         eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-        eb("user_kitchen_memberships.status", "=", "accepted"),
+        eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
       ]);
     });
 
@@ -107,6 +111,9 @@ const generateSharedRecipesQuery = (user: User, filters: ListRecipesQuerySchema)
     })
     .select(() => {
       return [sql<string>`jsonb_agg(recipe_steps.* order by recipe_steps."order" asc)`.as("steps")];
+    })
+    .select(() => {
+      return [sql<string>`jsonb_agg(recipe_shares.*)`.as("recipe_shares")];
     });
 
   query = query.groupBy("recipes.id");

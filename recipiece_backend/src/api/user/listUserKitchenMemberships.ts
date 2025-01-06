@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, UserKitchenMembershipStatus } from "@prisma/client";
 import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema, UserKitchenMembershipSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE, UserKitchenInvitationStatus } from "../../util/constant";
@@ -37,7 +37,7 @@ export const listUserKitchenMemberships = async (
 
   if (status) {
     where.status = {
-      in: status as string[],
+      in: status as UserKitchenMembershipStatus[],
     };
   }
 
@@ -61,7 +61,7 @@ export const listUserKitchenMemberships = async (
   return [
     StatusCodes.OK,
     {
-      data: resultsData as UserKitchenMembershipSchema[],
+      data: resultsData,
       has_next_page: hasNextPage,
       page: page_number,
     },

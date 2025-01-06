@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
+import { sql } from "kysely";
 import { prisma } from "../../database";
-import { RecipeShare as KRecipeShare, UserKitchenMembership as KUserKitchenMembership } from "../../database/kysely";
 import {
   GetRecipeResponseSchema,
   RecipeIngredientSchema,
@@ -9,7 +9,6 @@ import {
   UserKitchenMembershipSchema,
 } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { sql } from "kysely";
 
 /**
  * Get a recipe by id.
@@ -32,15 +31,12 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<GetRecip
         )
         .where((eb) => {
           return eb.and([
-            eb("user_kitchen_memberships.status", "=", "accepted"),
+            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
             eb("user_kitchen_memberships.destination_user_id", "=", user.id),
           ]);
         })
         .groupBy("recipe_shares.id")
-        .selectAll("recipe_shares")
-        .select(() => {
-          return [sql<string>`jsonb_agg(user_kitchen_memberships.*)`.as("user_kitchen_memberships")];
-        });
+        .selectAll("recipe_shares");
     })
     .selectFrom("recipes")
     .leftJoin("recipe_ingredients", "recipe_ingredients.recipe_id", "recipes.id")
@@ -54,7 +50,11 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<GetRecip
     })
     .selectAll("recipes")
     .select(() => {
-      return [sql<RecipeIngredientSchema[]>`jsonb_agg(recipe_ingredients.* order by recipe_ingredients."order" asc)`.as("ingredients")];
+      return [
+        sql<RecipeIngredientSchema[]>`jsonb_agg(recipe_ingredients.* order by recipe_ingredients."order" asc)`.as(
+          "ingredients"
+        ),
+      ];
     })
     .select(() => {
       return [sql<RecipeStepSchema[]>`jsonb_agg(recipe_steps.* order by recipe_steps."order" asc)`.as("steps")];

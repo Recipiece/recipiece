@@ -1,7 +1,7 @@
 import { Ban, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
-import { useListKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
+import { useListUserKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
 import {
   Button,
   Collapsible,
@@ -26,7 +26,7 @@ export const PastTargetingMembershipsTable: FC = () => {
 
   const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } = useUpdateKitchenMembershipMutation();
 
-  const { data: kitchenMemberships, isLoading: isLoadingKitchenMemberships } = useListKitchenMembershipsQuery({
+  const { data: kitchenMemberships, isLoading: isLoadingKitchenMemberships } = useListUserKitchenMembershipsQuery({
     targeting_self: true,
     page_number: kitchenMembershipsPage,
     page_size: 10,

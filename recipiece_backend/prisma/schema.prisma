@@ -41,6 +41,12 @@ model User {
   destination_user_kitchen_memberships UserKitchenMembership[] @relation(name: "destination_user")
 }
 
+enum UserKitchenMembershipStatus {
+  accepted
+  denied
+  pending
+}
+
 model UserKitchenMembership {
   @@map("user_kitchen_memberships")
   
@@ -52,7 +58,7 @@ model UserKitchenMembership {
   destination_user_id Int
   destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  status String
+  status UserKitchenMembershipStatus
 
   recipe_shares RecipeShare[]
 

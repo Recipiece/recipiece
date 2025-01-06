@@ -22,6 +22,7 @@ import { ScaleRecipeDialog } from "./ScaleRecipe";
 import { SearchRecipesDialog } from "./SearchRecipes";
 import { SearchRecipesForCookbookDialog } from "./SearchRecipesForCookbook";
 import { SearchRecipesForMealPlanDialog } from "./SearchRecipesForMealPlan";
+import { ShareRecipeDialog } from "./ShareRecipe";
 
 export const Dialogs = {
   createCookbook: {
@@ -96,4 +97,7 @@ export const Dialogs = {
   extendKitchenInvitation: {
     component: ExtendKitchenInvitationDialog,
   },
+  shareRecipe: {
+    component: ShareRecipeDialog,
+  }
 };

@@ -109,7 +109,5 @@ describe("Get Recipe", () => {
 
     expect(responseData.recipe_shares?.length).toBe(1);
     expect(responseData.recipe_shares![0].id).toBe(share.id);
-    expect(responseData.recipe_shares![0].user_kitchen_memberships?.length).toBe(1);
-    expect(responseData.recipe_shares![0].user_kitchen_memberships![0].id).toBe(membership.id);
   });
 });

@@ -4,6 +4,12 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export const UserKitchenMembershipStatus = {
+    accepted: "accepted",
+    denied: "denied",
+    pending: "pending"
+} as const;
+export type UserKitchenMembershipStatus = (typeof UserKitchenMembershipStatus)[keyof typeof UserKitchenMembershipStatus];
 export type BackgroundJob = {
     id: Generated<string>;
     created_at: Generated<Timestamp>;
@@ -134,7 +140,7 @@ export type UserKitchenMembership = {
     created_at: Generated<Timestamp>;
     source_user_id: number;
     destination_user_id: number;
-    status: string;
+    status: UserKitchenMembershipStatus;
 };
 export type UserPushNotificationSubscription = {
     id: Generated<number>;

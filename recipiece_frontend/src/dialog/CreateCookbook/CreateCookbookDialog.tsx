@@ -10,7 +10,6 @@ import { useResponsiveDialogComponents } from "../../hooks";
 const CreateCookbookFormSchema = z.object({
   name: z.string().max(50).min(1, "A name is required"),
   description: z.string().max(1000).optional(),
-  private: z.boolean().default(false),
 });
 
 export type CreateCookbookForm = z.infer<typeof CreateCookbookFormSchema>;
@@ -49,7 +48,6 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
           <Stack>
             <FormInput placeholder="What do you want to call your cookbook?" name="name" type="text" label="Name" />
             <FormTextarea placeholder="What is this cookbook all about?" name="description" label="Description" />
-            <FormCheckbox name="private" label="Private" />
           </Stack>
 
           <ResponsiveFooter className="mt-4 flex-col-reverse">

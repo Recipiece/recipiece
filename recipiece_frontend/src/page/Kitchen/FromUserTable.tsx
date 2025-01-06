@@ -1,7 +1,7 @@
 import { FC, useCallback, useContext, useState } from "react";
 import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
 import { Ban, Handshake, SquareArrowOutUpRight } from "lucide-react";
-import { useCreateKitchenMembershipMutation, useListKitchenMembershipsQuery } from "../../api";
+import { useCreateKitchenMembershipMutation, useListUserKitchenMembershipsQuery } from "../../api";
 import { DateTime } from "luxon";
 import { DialogContext } from "../../context";
 import { ExtendKitchenInvitationForm } from "../../dialog";
@@ -16,7 +16,7 @@ export const FromUserTable: FC = () => {
 
   const [kitchenMembershipsPage, setKitchenMembershipsPage] = useState(0);
 
-  const { data: kitchenMemberships, isLoading: isLoadingKitchenMemberships } = useListKitchenMembershipsQuery({
+  const { data: kitchenMemberships, isLoading: isLoadingKitchenMemberships } = useListUserKitchenMembershipsQuery({
     from_self: true,
     page_number: kitchenMembershipsPage,
     page_size: 10,

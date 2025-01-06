@@ -4,7 +4,7 @@ import request from "supertest";
 import { RecipeSchema } from "../../../src/schema";
 import { prisma } from "../../../src/database";
 
-xdescribe("Fork Recipe", () => {
+describe("Fork Recipe", () => {
   let user: User;
   let bearerToken: string;
   let otherUser: User;
@@ -14,7 +14,7 @@ xdescribe("Fork Recipe", () => {
     [otherUser] = await fixtures.createUserAndToken();
   });
 
-  it("should allow a user to fork a recipe", async () => {
+  it("should clone the entire recipe", async () => {
     const originalRecipe = await prisma.recipe.create({
       data: {
         user_id: otherUser.id,
@@ -59,6 +59,21 @@ xdescribe("Fork Recipe", () => {
       include: {
         steps: true,
         ingredients: true,
+      },
+    });
+
+    const membership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: "accepted",
+      },
+    });
+
+    const share = await prisma.recipeShare.create({
+      data: {
+        recipe_id: originalRecipe.id,
+        user_kitchen_membership_id: membership.id,
       },
     });
 
@@ -140,7 +155,7 @@ xdescribe("Fork Recipe", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.OK);
+    expect(response.statusCode).toBe(StatusCodes.CREATED);
 
     const forkedRecipe = await prisma.recipe.findFirst({
       where: {
@@ -150,6 +165,40 @@ xdescribe("Fork Recipe", () => {
     });
 
     expect(forkedRecipe).toBeTruthy();
+  });
+
+  it("should not allow you to fork a recipe from a non-accepted membership", async () => {
+    const recipe = await prisma.recipe.create({
+      data: {
+        user_id: otherUser.id,
+        name: "test recipe",
+      },
+    });
+
+    const membership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: "denied",
+      },
+    });
+
+    const share = await prisma.recipeShare.create({
+      data: {
+        recipe_id: recipe.id,
+        user_kitchen_membership_id: membership.id,
+      },
+    });
+
+    const response = await request(server)
+      .post("/recipe/fork")
+      .send({
+        original_recipe_id: recipe.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 
   it("should not allow you to fork a recipe that does not exist", async () => {
@@ -220,6 +269,6 @@ xdescribe("Fork Recipe", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });

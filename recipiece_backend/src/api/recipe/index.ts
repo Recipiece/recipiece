@@ -4,11 +4,13 @@ import {
   YForkRecipeRequestSchema,
   YGetRecipeResponseSchema,
   YListCookbooksResponseSchema,
+  YListRecipeSharesQuerySchema,
+  YListRecipeSharesResponseSchema,
   YListRecipesQuerySchema,
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
   YRecipeShareSchema,
-  YUpdateRecipeRequestSchema,
+  YUpdateRecipeRequestSchema
 } from "../../schema";
 import { Route } from "../../types";
 import { createRecipe } from "./createRecipe";
@@ -18,6 +20,7 @@ import { deleteRecipeShare } from "./deleteRecipeShare";
 import { forkRecipe } from "./forkRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
+import { listRecipeShares } from "./listRecipeShares";
 import { parseRecipeFromUrl } from "./parseFromUrl";
 import { updateRecipe } from "./updateRecipe";
 
@@ -89,4 +92,12 @@ export const RECIPE_ROUTES: Route[] = [
     method: "DELETE",
     function: deleteRecipeShare,
   },
+  {
+    path: "/recipe/share/list",
+    authentication: "access_token",
+    method: "GET",
+    function: listRecipeShares,
+    requestSchema: YListRecipeSharesQuerySchema,
+    responseSchema: YListRecipeSharesResponseSchema,
+  }
 ];

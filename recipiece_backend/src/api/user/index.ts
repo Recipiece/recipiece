@@ -26,6 +26,7 @@ import { createUserKitchenMembership } from "./createUserKitchenMembership";
 import { deleteSelf } from "./deleteSelf";
 import { deleteUserKitchenMembership } from "./deleteUserKitchenMembership";
 import { getUserByToken } from "./getUserByToken";
+import { getUserKitchenMembership } from "./getUserKitchenMembership";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
 import { listUserKitchenMemberships } from "./listUserKitchenMemberships";
@@ -165,5 +166,12 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "access_token",
     requestSchema: YListUserKitchenMembershipsQuerySchema,
     responseSchema: YListUserKitchenMembershipsResponseSchema,
+  },
+  {
+    path: "/user/kitchen/membership/:id(\\d+)",
+    method: "GET",
+    function: getUserKitchenMembership,
+    authentication: "access_token",
+    responseSchema: YUserKitchenMembershipSchema,
   },
 ];

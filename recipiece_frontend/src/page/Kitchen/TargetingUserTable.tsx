@@ -1,7 +1,7 @@
 import { Ban, CheckCircle2 } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
-import { useListKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
+import { useListUserKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
 import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
 import { UserKitchenMembership } from "../../data";
 
@@ -9,7 +9,7 @@ export const TargetingUserTable: FC = () => {
   const { toast } = useToast();
   const [kitchenMembershipsPage, setKitchenMembershipsPage] = useState(0);
 
-  const { data: kitchenMembershipsTargetingUser, isLoading: isLoadingKitchenMembershipsTargetingUser } = useListKitchenMembershipsQuery({
+  const { data: kitchenMembershipsTargetingUser, isLoading: isLoadingKitchenMembershipsTargetingUser } = useListUserKitchenMembershipsQuery({
     targeting_self: true,
     page_number: kitchenMembershipsPage,
     page_size: 10,

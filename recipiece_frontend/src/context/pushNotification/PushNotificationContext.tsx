@@ -72,10 +72,10 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
         grantResult = await lazyRequestNotificationsPermissions(evenWhenDenied);
         if (grantResult === "granted") {
           const subscription = await generateServiceWorkerPushNotificationSubscription();
-          await optIntoPushNotifications({
-            device_id: deviceId,
-            subscription_data: subscription.toJSON(),
-          });
+          // await optIntoPushNotifications({
+          //   device_id: deviceId,
+          //   subscription_data: subscription.toJSON(),
+          // });
         }
       } catch {
         // noop
@@ -93,10 +93,10 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
       if (hasBeenGranted) {
         // go ahead and create a new subscription for this device id
         const subscription = await generateServiceWorkerPushNotificationSubscription();
-        await optIntoPushNotifications({
-          device_id: deviceId,
-          subscription_data: subscription.toJSON(),
-        });
+        // await optIntoPushNotifications({
+        //   device_id: deviceId,
+        //   subscription_data: subscription.toJSON(),
+        // });
       }
       setPushNotificationDeviceId(deviceId);
     }
