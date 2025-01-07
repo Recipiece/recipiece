@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from "react";
-import { UserKitchenMembership } from "../../data";
+import { RecipeShare, UserKitchenMembership } from "../../data";
 import { useDeleteRecipeShareMutation, useListRecipeSharesQuery } from "../../api";
 import { Button, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
 import { ExternalLink } from "lucide-react";
@@ -25,9 +25,9 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership 
   );
 
   const onUnshareRecipe = useCallback(
-    async (shareId: number) => {
+    async (share: RecipeShare) => {
       try {
-        await deleteRecipeShare(shareId);
+        await deleteRecipeShare(share);
         toast({
           title: "Recipe Un-Shared",
           description: "Your recipe has been un-shared.",
@@ -65,7 +65,7 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership 
                     </div>
                     <>{DateTime.fromISO(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                     <>
-                      <Button size="sm" variant="destructive" onClick={() => onUnshareRecipe(share.id)}>
+                      <Button size="sm" variant="destructive" onClick={() => onUnshareRecipe(share)}>
                         Un-Share
                       </Button>
                     </>

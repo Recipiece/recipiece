@@ -51,6 +51,9 @@ export const createRecipeShare = async (
         recipe_id: recipe.id,
         user_kitchen_membership_id: user_kitchen_membership_id,
       },
+      include: {
+        recipe: true,
+      }
     });
     return [StatusCodes.OK, share];
   } catch (err) {

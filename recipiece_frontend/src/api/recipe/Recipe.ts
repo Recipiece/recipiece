@@ -101,7 +101,7 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
     searchParams.append("cookbook_id", filters.cookbook_id.toString());
   }
 
-  if(filters.cookbook_attachments) {
+  if (filters.cookbook_attachments) {
     searchParams.append("cookbook_attachments", filters.cookbook_attachments);
   }
 
@@ -315,8 +315,50 @@ export const useCreateRecipeShareMutation = () => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE_SHARES(), oldDataCreator(data.data));
+      /**
+       * When we create a share, we will update the query client's cache of recipe shares
+       * and then also update the query client's cache of recipes to append the shares to the list.
+       */
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+        },
+        oldDataCreator(data.data)
+      );
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPE(),
+        },
+        (oldData: ListRecipesResponse | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: oldData.data.map((recipe) => {
+                if (recipe.id === data.data.recipe_id) {
+                  return {
+                    ...recipe,
+                    shares: [...(recipe.shares ?? []), data.data],
+                  };
+                } else {
+                  return { ...recipe };
+                }
+              }),
+            };
+          }
+          return undefined;
+        }
+      );
+
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE_SHARE(data.data.id), data.data);
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.recipe_id), (oldRecipe: Recipe | undefined) => {
+        if (oldRecipe) {
+          return {
+            ...oldRecipe,
+            shares: [...(oldRecipe.shares ?? []), data.data],
+          };
+        }
+        return undefined;
+      });
     },
   });
 };
@@ -325,10 +367,10 @@ export const useDeleteRecipeShareMutation = () => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (id: number) => {
+  const mutation = async (share: RecipeShare) => {
     return await deleter({
       path: "/recipe/share",
-      id: id,
+      id: share.id,
       withAuth: "access_token",
     });
   };
@@ -336,8 +378,54 @@ export const useDeleteRecipeShareMutation = () => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (_, params) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE_SHARES(), oldDataDeleter({ id: params }));
-      queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE_SHARE(params) });
+      /**
+       * When we delete a share, we need to purge the share from the query client's cache of
+       * recipe shares, and also from the affected recipe
+       */
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+        },
+        oldDataDeleter({ id: params.id })
+      );
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPE(),
+        },
+        (oldData: ListRecipesResponse | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: oldData.data.map((recipe) => {
+                if (recipe.id === params.recipe_id) {
+                  return {
+                    ...recipe,
+                    shares: (recipe.shares ?? []).filter((share) => {
+                      return share.id !== params.id;
+                    }),
+                  };
+                } else {
+                  return { ...recipe };
+                }
+              }),
+            };
+          }
+          return undefined;
+        }
+      );
+
+      queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE_SHARE(params.id) });
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(params.recipe_id), (oldData: Recipe | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            shares: (oldData.shares ?? []).filter((share) => {
+              return share.id !== params.id;
+            }),
+          };
+        }
+        return undefined;
+      });
     },
   });
 };

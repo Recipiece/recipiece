@@ -144,6 +144,112 @@ describe("List Recipes", () => {
     expect(responseRecipes.length).toBe(11);
   });
 
+  it("should not list shared recipes", async () => {
+    const [otherUser] = await fixtures.createUserAndToken();
+    // allow otherUser to share a recipe to user
+    const membership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: "accepted",
+      },
+    });
+
+    const otherRecipe = await prisma.recipe.create({
+      data: {
+        name: "Other Recipe",
+        user_id: otherUser.id,
+      },
+    });
+
+    await prisma.recipeShare.create({
+      data: {
+        user_kitchen_membership_id: membership.id,
+        recipe_id: otherRecipe.id,
+      },
+    });
+
+    for (let i = 0; i < 10; i++) {
+      await prisma.recipe.create({
+        data: {
+          name: `Test recipe ${i}`,
+          description: "Test",
+          user_id: user.id,
+        },
+      });
+    }
+
+    const response = await request(server)
+      .get("/recipe/list")
+      .query(<ListRecipesQuerySchema>{
+        page_number: 0,
+        shared_recipes: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseRecipes: RecipeSchema[] = response.body.data;
+
+    expect(responseRecipes.length).toBe(10);
+    responseRecipes.forEach((rcp) => {
+      expect(rcp.id).not.toBe(otherRecipe.id);
+    });
+  });
+
+  it("should not list shared recipes belonging to a non-accepted membership", async () => {
+    const [otherUser] = await fixtures.createUserAndToken();
+    // allow otherUser to share a recipe to user
+    const membership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: "denied",
+      },
+    });
+
+    const otherRecipe = await prisma.recipe.create({
+      data: {
+        name: "Other Recipe",
+        user_id: otherUser.id,
+      },
+    });
+
+    await prisma.recipeShare.create({
+      data: {
+        user_kitchen_membership_id: membership.id,
+        recipe_id: otherRecipe.id,
+      },
+    });
+
+    for (let i = 0; i < 10; i++) {
+      await prisma.recipe.create({
+        data: {
+          name: `Test recipe ${i}`,
+          description: "Test",
+          user_id: user.id,
+        },
+      });
+    }
+
+    const response = await request(server)
+      .get("/recipe/list")
+      .query(<ListRecipesQuerySchema>{
+        page_number: 0,
+        shared_recipes: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseRecipes: RecipeSchema[] = response.body.data;
+
+    expect(responseRecipes.length).toBe(10);
+    responseRecipes.forEach((rcp) => {
+      expect(rcp.id).not.toBe(otherRecipe.id);
+    });
+  });
+
   it("should list recipes in a cookbook", async () => {
     for (let i = 0; i < 10; i++) {
       await prisma.recipe.create({
