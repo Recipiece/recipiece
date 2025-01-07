@@ -1,11 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
+import { prisma } from "../../../database";
 import {
   SetUserKitchenMembershipStatusRequestSchema,
   SetUserKitchenMembershipStatusResponseSchema,
-} from "../../schema";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { UserKitchenInvitationStatus } from "../../util/constant";
+} from "../../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { UserKitchenInvitationStatus } from "../../../util/constant";
 
 /**
  * Allow the currently authenticated user to set the status of a membership that is targeting them.

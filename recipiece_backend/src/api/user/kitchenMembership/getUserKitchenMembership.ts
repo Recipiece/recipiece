@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { UserKitchenMembershipSchema } from "../../schema";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { prisma } from "../../../database";
+import { UserKitchenMembershipSchema } from "../../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const getUserKitchenMembership = async (
   request: AuthenticatedRequest

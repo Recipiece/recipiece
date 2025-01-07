@@ -1,26 +1,20 @@
 import {
   YCreateRecipeRequestSchema,
-  YCreateRecipeShareRequestSchema,
   YForkRecipeRequestSchema,
   YListCookbooksResponseSchema,
-  YListRecipeSharesQuerySchema,
-  YListRecipeSharesResponseSchema,
   YListRecipesQuerySchema,
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
-  YRecipeShareSchema,
-  YUpdateRecipeRequestSchema,
+  YUpdateRecipeRequestSchema
 } from "../../schema";
 import { Route } from "../../types";
 import { createRecipe } from "./createRecipe";
-import { createRecipeShare } from "./createRecipeShare";
 import { deleteRecipe } from "./deleteRecipe";
-import { deleteRecipeShare } from "./deleteRecipeShare";
 import { forkRecipe } from "./forkRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
-import { listRecipeShares } from "./listRecipeShares";
 import { parseRecipeFromUrl } from "./parseFromUrl";
+import { RECIPE_SHARE_ROUTES } from "./share";
 import { updateRecipe } from "./updateRecipe";
 
 export const RECIPE_ROUTES: Route[] = [
@@ -77,26 +71,5 @@ export const RECIPE_ROUTES: Route[] = [
     requestSchema: YForkRecipeRequestSchema,
     responseSchema: YRecipeSchema,
   },
-  {
-    path: "/recipe/share",
-    authentication: "access_token",
-    method: "POST",
-    function: createRecipeShare,
-    requestSchema: YCreateRecipeShareRequestSchema,
-    responseSchema: YRecipeShareSchema,
-  },
-  {
-    path: "/recipe/share/:id(\\d+)",
-    authentication: "access_token",
-    method: "DELETE",
-    function: deleteRecipeShare,
-  },
-  {
-    path: "/recipe/share/list",
-    authentication: "access_token",
-    method: "GET",
-    function: listRecipeShares,
-    requestSchema: YListRecipeSharesQuerySchema,
-    responseSchema: YListRecipeSharesResponseSchema,
-  },
+  ...RECIPE_SHARE_ROUTES,
 ];

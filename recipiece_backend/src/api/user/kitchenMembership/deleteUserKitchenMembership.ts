@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { prisma } from "../../../database";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 /**
  * Allow a user who has been targeted by a membership to delete it.

@@ -2,19 +2,13 @@ import { recipeImportUploader } from "../../middleware";
 import {
   YChangePasswordRequestSchema,
   YCreatePushNotificationRequestSchema,
-  YCreateUserKitchenMembershipRequestSchema,
   YCreateUserRequestSchema,
   YCreateUserResponseSchema,
   YIssueForgotPasswordTokenRequestSchema,
-  YListUserKitchenMembershipsQuerySchema,
-  YListUserKitchenMembershipsResponseSchema,
   YLoginResponseSchema,
   YRefreshTokenResponseSchema,
   YResetPasswordRequestSchema,
-  YSetUserKitchenMembershipStatusRequestSchema,
-  YSetUserKitchenMembershipStatusResponseSchema,
   YUpdateUserRequestSchema,
-  YUserKitchenMembershipSchema,
   YUserSchema,
   YValidateUserRequestSchema,
   YValidateUserResponseSchema,
@@ -23,20 +17,16 @@ import { Route } from "../../types";
 import { changePassword } from "./changePassword";
 import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
 import { createUser } from "./createUser";
-import { createUserKitchenMembership } from "./createUserKitchenMembership";
 import { deleteSelf } from "./deleteSelf";
-import { deleteUserKitchenMembership } from "./deleteUserKitchenMembership";
 import { getUserByToken } from "./getUserByToken";
-import { getUserKitchenMembership } from "./getUserKitchenMembership";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
-import { listUserKitchenMemberships } from "./listUserKitchenMemberships";
+import { USER_KITCHEN_MEMBERSHIP_ROUTES } from "./kitchenMembership";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
 import { refreshToken } from "./refreshToken";
 import { requestImportRecipes } from "./requestImportRecipes";
 import { resetPassword } from "./resetPassword";
-import { setUserKitchenMembershipStatus } from "./setUserKitchenMembershipStatus";
 import { updateUser } from "./updateUser";
 import { validateUser } from "./validateUser";
 
@@ -139,41 +129,5 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "access_token",
     requestSchema: YCreatePushNotificationRequestSchema,
   },
-  {
-    path: "/user/kitchen/membership",
-    method: "POST",
-    function: createUserKitchenMembership,
-    requestSchema: YCreateUserKitchenMembershipRequestSchema,
-    responseSchema: YUserKitchenMembershipSchema,
-    authentication: "access_token",
-  },
-  {
-    path: "/user/kitchen/membership",
-    method: "PUT",
-    function: setUserKitchenMembershipStatus,
-    authentication: "access_token",
-    requestSchema: YSetUserKitchenMembershipStatusRequestSchema,
-    responseSchema: YSetUserKitchenMembershipStatusResponseSchema,
-  },
-  {
-    path: "/user/kitchen/membership/:id(\\d+)",
-    method: "DELETE",
-    function: deleteUserKitchenMembership,
-    authentication: "access_token",
-  },
-  {
-    path: "/user/kitchen/membership/list",
-    method: "GET",
-    function: listUserKitchenMemberships,
-    authentication: "access_token",
-    requestSchema: YListUserKitchenMembershipsQuerySchema,
-    responseSchema: YListUserKitchenMembershipsResponseSchema,
-  },
-  {
-    path: "/user/kitchen/membership/:id(\\d+)",
-    method: "GET",
-    function: getUserKitchenMembership,
-    authentication: "access_token",
-    responseSchema: YUserKitchenMembershipSchema,
-  },
+  ...USER_KITCHEN_MEMBERSHIP_ROUTES,
 ];

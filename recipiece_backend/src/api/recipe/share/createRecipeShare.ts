@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "../../schema";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { prisma } from "../../../database";
+import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "../../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 /**
  * Allow a user to share a recipe they own with another user.

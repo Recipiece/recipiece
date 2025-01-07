@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { prisma } from "../../../database";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const deleteRecipeShare = async (request: AuthenticatedRequest): ApiResponse<{}> => {
   const shareId = +request.params.id;

@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "../../schema";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { UserKitchenInvitationStatus } from "../../util/constant";
+import { prisma } from "../../../database";
+import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "../../../schema";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { UserKitchenInvitationStatus } from "../../../util/constant";
 
 /**
  * Allows a user to invite another user to their kitchen, which opens up the gates for
