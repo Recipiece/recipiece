@@ -1,4 +1,4 @@
-import { createContext, FC, PropsWithChildren, useCallback, useEffect } from "react";
+import { createContext, FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import { TokenManager, useOptIntoPushNotificationsMutation } from "../../api";
 import { useLocalStorage } from "../../hooks";
@@ -63,6 +63,7 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
   const [pushNotificationDeviceId, setPushNotificationDeviceId] = useLocalStorage<string | undefined>(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID, undefined);
   const { mutateAsync: optIntoPushNotifications } = useOptIntoPushNotificationsMutation();
   const tokenManager = TokenManager.getInstance();
+  const promiseQueue: Promise<any>[] = [];
 
   const requestAndSaveNotificationPermissions = useCallback(
     async (evenWhenDenied = false) => {
@@ -72,10 +73,10 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
         grantResult = await lazyRequestNotificationsPermissions(evenWhenDenied);
         if (grantResult === "granted") {
           const subscription = await generateServiceWorkerPushNotificationSubscription();
-          // await optIntoPushNotifications({
-          //   device_id: deviceId,
-          //   subscription_data: subscription.toJSON(),
-          // });
+          await optIntoPushNotifications({
+            device_id: deviceId,
+            subscription_data: subscription.toJSON(),
+          });
         }
       } catch {
         // noop
@@ -93,21 +94,25 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
       if (hasBeenGranted) {
         // go ahead and create a new subscription for this device id
         const subscription = await generateServiceWorkerPushNotificationSubscription();
-        // await optIntoPushNotifications({
-        //   device_id: deviceId,
-        //   subscription_data: subscription.toJSON(),
-        // });
+        try {
+         await optIntoPushNotifications({
+            device_id: deviceId,
+            subscription_data: subscription.toJSON(),
+          });
+        } catch {
+          // noop
+        }
       }
       setPushNotificationDeviceId(deviceId);
     }
-  }, [pushNotificationDeviceId, optIntoPushNotifications, setPushNotificationDeviceId]);
+  }, [pushNotificationDeviceId, setPushNotificationDeviceId, optIntoPushNotifications]);
 
   /**
    * When we load in, create a push notification subscription
    */
   useEffect(() => {
-    if (tokenManager.isLoggedIn) {
-      initialize();
+    if (tokenManager.isLoggedIn && promiseQueue.length === 0) {
+      promiseQueue.push(initialize());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenManager.isLoggedIn]);

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListRecipeFilters, ListRecipeSharesFilters, ListRecipesResponse, Recipe, RecipeShare } from "../../data";
+import { ListRecipeFilters, ListRecipeSharesFilters, ListRecipeSharesResponse, ListRecipesResponse, Recipe, RecipeShare } from "../../data";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
@@ -280,8 +280,8 @@ export const useListRecipeSharesQuery = (filters: ListRecipeSharesFilters, args?
   }
 
   const query = async () => {
-    const recipe = await getter<never, ListRecipesResponse>({
-      path: `/recipe/list?${searchParams.toString()}`,
+    const recipe = await getter<never, ListRecipeSharesResponse>({
+      path: `/recipe/share/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
     return recipe;
@@ -327,7 +327,7 @@ export const useDeleteRecipeShareMutation = () => {
 
   const mutation = async (id: number) => {
     return await deleter({
-      path: "/recipe/share/",
+      path: "/recipe/share",
       id: id,
       withAuth: "access_token",
     });

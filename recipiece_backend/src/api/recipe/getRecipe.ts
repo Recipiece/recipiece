@@ -1,14 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import { sql } from "kysely";
 import { prisma } from "../../database";
-import {
-  GetRecipeResponseSchema,
-  RecipeIngredientSchema,
-  RecipeShareSchema,
-  RecipeStepSchema,
-  UserKitchenMembershipSchema,
-} from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { ingredientsSubquery, sharesSubquery, sharesWithMemberships, stepsSubquery } from "./util";
+import { RecipeSchema } from "../../schema";
 
 /**
  * Get a recipe by id.
@@ -16,57 +10,29 @@ import { ApiResponse, AuthenticatedRequest } from "../../types";
  * This endpoint will return a recipe that you either own or has been shared to you.
  * If neither of those conditions are met, the endpoint will 404.
  */
-export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<GetRecipeResponseSchema> => {
+export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSchema> => {
   const recipeId = +req.params.id;
   const user = req.user;
 
   const query = prisma.$kysely
-    .with("recipe_shares_and_memberships", (db) => {
-      return db
-        .selectFrom("recipe_shares")
-        .innerJoin(
-          "user_kitchen_memberships",
-          "user_kitchen_memberships.id",
-          "recipe_shares.user_kitchen_membership_id"
-        )
-        .where((eb) => {
-          return eb.and([
-            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-          ]);
-        })
-        .groupBy("recipe_shares.id")
-        .selectAll("recipe_shares");
-    })
     .selectFrom("recipes")
-    .leftJoin("recipe_ingredients", "recipe_ingredients.recipe_id", "recipes.id")
-    .leftJoin("recipe_steps", "recipe_steps.recipe_id", "recipes.id")
-    .leftJoin("recipe_shares_and_memberships", "recipe_shares_and_memberships.recipe_id", "recipes.id")
-    .where((eb) => {
-      return eb.or([
-        eb.and([eb("recipes.user_id", "=", user.id), eb("recipes.id", "=", recipeId)]),
-        eb("recipe_shares_and_memberships.recipe_id", "=", recipeId),
-      ]);
-    })
     .selectAll("recipes")
-    .select(() => {
+    .select((eb) => {
       return [
-        sql<RecipeIngredientSchema[]>`jsonb_agg(recipe_ingredients.* order by recipe_ingredients."order" asc)`.as(
-          "ingredients"
-        ),
+        stepsSubquery(eb).as("steps"),
+        ingredientsSubquery(eb).as("ingredients"),
+        sharesSubquery(eb, user.id).as("shares"),
       ];
     })
-    .select(() => {
-      return [sql<RecipeStepSchema[]>`jsonb_agg(recipe_steps.* order by recipe_steps."order" asc)`.as("steps")];
-    })
-    .select(() => {
-      return [
-        sql<
-          (RecipeShareSchema & { user_kitchen_memberships: UserKitchenMembershipSchema[] })[]
-        >`jsonb_agg(recipe_shares_and_memberships.*)`.as("recipe_shares"),
-      ];
-    })
-    .groupBy("recipes.id");
+    .where((eb) => {
+      return eb.and([
+        eb("recipes.id", "=", recipeId),
+        eb.or([
+          eb("recipes.user_id", "=", user.id),
+          eb.exists(sharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1)),
+        ]),
+      ]);
+    });
 
   const recipe = await query.executeTakeFirst();
 

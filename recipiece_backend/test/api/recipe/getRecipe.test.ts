@@ -1,8 +1,8 @@
 import { User } from "@prisma/client";
-import request from "supertest";
 import { StatusCodes } from "http-status-codes";
-import { GetRecipeResponseSchema, RecipeSchema } from "../../../src/schema";
+import request from "supertest";
 import { prisma } from "../../../src/database";
+import { RecipeSchema } from "../../../src/schema";
 
 describe("Get Recipe", () => {
   let user: User;
@@ -105,9 +105,41 @@ describe("Get Recipe", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: GetRecipeResponseSchema = response.body;
+    const responseData: RecipeSchema = response.body;
 
-    expect(responseData.recipe_shares?.length).toBe(1);
-    expect(responseData.recipe_shares![0].id).toBe(share.id);
+    expect(responseData.shares?.length).toBe(1);
+    expect(responseData.shares![0].id).toBe(share.id);
   });
+
+  it("should not get a shared recipe where the membership is not accepted", async () => {
+    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
+    const othersRecipe = await prisma.recipe.create({
+      data: {
+        name: "Test Recipe",
+        description: "asdfqwer",
+        user_id: otherUser.id,
+      },
+    });
+
+    const membership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: "denied",
+      },
+    });
+
+    const share = await prisma.recipeShare.create({
+      data: {
+        recipe_id: othersRecipe.id,
+        user_kitchen_membership_id: membership.id,
+      },
+    });
+
+    const response = await request(server)
+      .get(`/recipe/${othersRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+  })
 });

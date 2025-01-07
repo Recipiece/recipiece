@@ -3,10 +3,8 @@ import { MoreVertical } from "lucide-react";
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useParams } from "react-router-dom";
-import { useGetRecipeByIdQuery, useGetSelfQuery, useGetUserKitchenMembershipQuery } from "../../api";
+import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
 import {
-  Avatar,
-  AvatarFallback,
   Button,
   Card,
   CardContent,
@@ -19,9 +17,7 @@ import {
   NotFound,
   RecipeContextMenu,
   RecipieceMenuBarContext,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
+  SharedAvatar
 } from "../../component";
 import { Recipe, RecipeIngredient } from "../../data";
 import { useLayout } from "../../hooks";
@@ -38,10 +34,7 @@ export const RecipeViewPage: FC = () => {
     disabled: !id,
   });
 
-  const userKitchenMembershipId = (originalRecipe?.recipe_shares ?? [])[0]?.user_kitchen_membership_id;
-  const { data: userKitchenMembership } = useGetUserKitchenMembershipQuery(userKitchenMembershipId, {
-    disabled: !userKitchenMembershipId,
-  });
+  const userKitchenMembershipId = (originalRecipe?.shares ?? [])[0]?.user_kitchen_membership_id;
 
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { isMobile } = useLayout();
@@ -178,20 +171,7 @@ export const RecipeViewPage: FC = () => {
           <LoadingGroup isLoading={isLoading} className="h-[40px] w-full">
             <div className="flex flex-row items-center gap-2">
               <H2 className="text-4xl font-medium">{recipe?.name}</H2>
-              {userKitchenMembership && (
-                <Tooltip>
-                  <div className="w-10 h-10">
-                    <TooltipTrigger asChild>
-                      <Avatar>
-                        <AvatarFallback className="w-10 h-10 cursor-pointer bg-primary text-white">
-                          {userKitchenMembership.source_user.username.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </TooltipTrigger>
-                  </div>
-                  <TooltipContent>Shared to you by {userKitchenMembership.source_user.username}</TooltipContent>
-                </Tooltip>
-              )}
+              <SharedAvatar userKitchenMembershipId={userKitchenMembershipId} />
               {recipe && (
                 <>
                   {isMobile && mobileMenuPortalRef?.current && createPortal(dropdownMenuComponent, mobileMenuPortalRef.current)}

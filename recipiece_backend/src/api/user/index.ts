@@ -1,6 +1,7 @@
 import { recipeImportUploader } from "../../middleware";
 import {
   YChangePasswordRequestSchema,
+  YCreatePushNotificationRequestSchema,
   YCreateUserKitchenMembershipRequestSchema,
   YCreateUserRequestSchema,
   YCreateUserResponseSchema,
@@ -136,6 +137,7 @@ export const LOGIN_ROUTES: Route[] = [
     method: "POST",
     function: createPushNotificationSubscription,
     authentication: "access_token",
+    requestSchema: YCreatePushNotificationRequestSchema,
   },
   {
     path: "/user/kitchen/membership",

@@ -26,7 +26,7 @@ export interface Recipe {
   readonly steps: RecipeStep[];
   readonly duration_ms?: number;
   readonly servings?: number;
-  readonly recipe_shares?: RecipeShare[];
+  readonly shares?: RecipeShare[];
 }
 
 export interface ListRecipeFilters {

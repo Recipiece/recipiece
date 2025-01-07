@@ -2,7 +2,6 @@ import {
   YCreateRecipeRequestSchema,
   YCreateRecipeShareRequestSchema,
   YForkRecipeRequestSchema,
-  YGetRecipeResponseSchema,
   YListCookbooksResponseSchema,
   YListRecipeSharesQuerySchema,
   YListRecipeSharesResponseSchema,
@@ -10,7 +9,7 @@ import {
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
   YRecipeShareSchema,
-  YUpdateRecipeRequestSchema
+  YUpdateRecipeRequestSchema,
 } from "../../schema";
 import { Route } from "../../types";
 import { createRecipe } from "./createRecipe";
@@ -62,7 +61,7 @@ export const RECIPE_ROUTES: Route[] = [
     authentication: "access_token",
     method: "GET",
     function: getRecipe,
-    responseSchema: YGetRecipeResponseSchema,
+    responseSchema: YRecipeSchema,
   },
   {
     path: "/recipe/:id(\\d+)",
@@ -99,5 +98,5 @@ export const RECIPE_ROUTES: Route[] = [
     function: listRecipeShares,
     requestSchema: YListRecipeSharesQuerySchema,
     responseSchema: YListRecipeSharesResponseSchema,
-  }
+  },
 ];
