@@ -1,15 +1,15 @@
 import { FC, useCallback } from "react";
-import { BaseDialogProps } from "../BaseDialogProps";
-import { useResponsiveDialogComponents } from "../../hooks";
 import { useListUserKitchenMembershipsQuery } from "../../api";
 import { Avatar, AvatarFallback, Button, LoadingGroup, ScrollArea, ScrollBar } from "../../component";
-import { Recipe, UserKitchenMembership } from "../../data";
+import { UserKitchenMembership } from "../../data";
+import { useResponsiveDialogComponents } from "../../hooks";
+import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface ShareRecipeDialogProps extends BaseDialogProps<UserKitchenMembership> {
-  readonly recipe: Recipe;
+export interface ShareDialogProps extends BaseDialogProps<UserKitchenMembership> {
+  readonly displayName: string;
 }
 
-export const ShareRecipeDialog: FC<ShareRecipeDialogProps> = ({ recipe, onClose, onSubmit }) => {
+export const ShareDialog: FC<ShareDialogProps> = ({ displayName, onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } = useListUserKitchenMembershipsQuery({
     from_self: true,
@@ -26,8 +26,8 @@ export const ShareRecipeDialog: FC<ShareRecipeDialogProps> = ({ recipe, onClose,
   return (
     <ResponsiveContent className="p-6">
       <ResponsiveHeader>
-        <ResponsiveTitle>Share {recipe.name}</ResponsiveTitle>
-        <ResponsiveDescription>Share {recipe.name} to another user.</ResponsiveDescription>
+        <ResponsiveTitle>Share {displayName}</ResponsiveTitle>
+        <ResponsiveDescription>Share {displayName} to another user.</ResponsiveDescription>
       </ResponsiveHeader>
       <LoadingGroup isLoading={isLoadingUserKitchenMemberships} className="w-full h-9">
         {userKitchenMemberships && (

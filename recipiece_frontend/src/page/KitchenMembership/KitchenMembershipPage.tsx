@@ -1,8 +1,9 @@
 import { FC } from "react";
 import { useParams } from "react-router-dom";
 import { useGetUserKitchenMembershipQuery } from "../../api";
-import { H2, H3, LoadingGroup, Stack } from "../../component";
+import { H2, LoadingGroup, Stack } from "../../component";
 import { RecipeSharesTable } from "./RecipeSharesTable";
+import { ShoppingListSharesTable } from "./ShoppingListSharesTable";
 
 export const KitchenMembershipPage: FC = () => {
   const { kitchenMembershipId } = useParams();
@@ -16,9 +17,8 @@ export const KitchenMembershipPage: FC = () => {
         <Stack>
           <H2>Shared with {membership.destination_user.username}</H2>
           <p className="text-sm">Below are all of the things you&apos;ve shared with {membership.destination_user.username}.</p>
-
-          <H3>Recipes</H3>
           <RecipeSharesTable membership={membership} />
+          <ShoppingListSharesTable membership={membership} />
         </Stack>
       )}
     </LoadingGroup>

@@ -190,9 +190,9 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   }, [removeRecipeFromCookbook, recipe, cookbook, toast]);
 
   const onShareRecipe = useCallback(async () => {
-    pushDialog("shareRecipe", {
-      recipe: recipe,
-      onClose: () => popDialog("shareRecipe"),
+    pushDialog("share", {
+      displayName: recipe.name,
+      onClose: () => popDialog("share"),
       onSubmit: async (membership: UserKitchenMembership) => {
         try {
           await shareRecipe({
@@ -210,7 +210,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
             variant: "destructive",
           });
         } finally {
-          popDialog("shareRecipe");
+          popDialog("share");
         }
       },
     });

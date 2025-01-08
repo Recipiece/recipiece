@@ -31,6 +31,7 @@ import {
 } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
+import { ShoppingListMenuItem } from "./ShoppingListMenuItem";
 
 export const RecipieceMenuBarContext = createContext<{
   readonly mobileMenuPortalRef: undefined | RefObject<HTMLSpanElement>;
@@ -351,9 +352,10 @@ export const RecipieceMenubar: FC = () => {
                 {!!shoppingLists?.data?.length && <Separator />}
                 {(shoppingLists?.data || []).map((shoppingList) => {
                   return (
-                    <MenubarItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}>
-                      {shoppingList.name}
-                    </MenubarItem>
+                    <ShoppingListMenuItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)} shoppingList={shoppingList} />
+                    // <MenubarItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}>
+                    //   {shoppingList.name}
+                    // </MenubarItem>
                   );
                 })}
                 {/* {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />} */}

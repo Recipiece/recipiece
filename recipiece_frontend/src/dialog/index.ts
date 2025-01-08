@@ -24,4 +24,4 @@ export * from "./ScaleRecipe";
 export * from "./SearchRecipes";
 export * from "./SearchRecipesForCookbook";
 export * from "./SearchRecipesForMealPlan";
-export * from "./ShareRecipe";
+export * from "./Share";
