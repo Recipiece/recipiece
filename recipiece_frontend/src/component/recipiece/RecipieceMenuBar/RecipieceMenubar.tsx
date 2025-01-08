@@ -10,9 +10,9 @@ import {
   useListShoppingListsQuery,
   useLogoutUserMutation,
 } from "../../../api";
-import { DialogContext, TimerContext } from "../../../context";
+import { DialogContext } from "../../../context";
 import { Cookbook, ShoppingList } from "../../../data";
-import { CreateCookbookForm, CreateShoppingListForm, CreateTimerForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
+import { CreateCookbookForm, CreateShoppingListForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
 import {
   Button,
   DropdownMenu,
@@ -57,19 +57,10 @@ export const RecipieceMenubar: FC = () => {
   const { toast } = useToast();
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
-  const { activeTimers, createTimer } = useContext(TimerContext);
+  // const { activeTimers, createTimer } = useContext(TimerContext);
   const [cookbooksPage, setCookbooksPage] = useState(0);
   const [shoppingListsPage, setShoppingListsPage] = useState(0);
   const [mealPlansPage, setMealPlansPage] = useState(0);
-
-  const { mutateAsync: logout } = useLogoutUserMutation({
-    onSuccess: () => {
-      navigate("/login");
-    },
-    onFailure: () => {
-      navigate("/login");
-    },
-  });
 
   const onGoHome = useCallback(() => {
     navigate("/dashboard");
@@ -90,6 +81,17 @@ export const RecipieceMenubar: FC = () => {
   const { mutateAsync: createMealPlan } = useCreateMealPlanMutation();
   const { mutateAsync: createCookbook } = useCreateCookbookMutation();
   const { mutateAsync: createShoppingList } = useCreateShoppingListMutation();
+  const { mutateAsync: logoutUser } = useLogoutUserMutation();
+
+  const onLogout = useCallback(async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // noop
+    } finally {
+      navigate("/login");
+    }
+  }, [logoutUser, navigate]);
 
   const onStartCreateCookbook = useCallback(() => {
     pushDialog("createCookbook", {
@@ -100,7 +102,7 @@ export const RecipieceMenubar: FC = () => {
             title: "Cookbook Created",
             description: "Your cookbook has been successfully created!",
           });
-          navigate(`/cookbook/${createdCookbook.data.id}`);
+          navigate(`/cookbook/${createdCookbook.id}`);
         } catch {
           toast({
             title: "Could not Create Cookbook",
@@ -124,7 +126,7 @@ export const RecipieceMenubar: FC = () => {
             title: "Shopping List Created",
             description: "Your shopping list has been successfully created!",
           });
-          navigate(`/shopping-list/${createdList.data.id}`);
+          navigate(`/shopping-list/${createdList.id}`);
         } catch {
           toast({
             title: "Could not Create Shopping List",
@@ -141,33 +143,33 @@ export const RecipieceMenubar: FC = () => {
     });
   }, [pushDialog, popDialog, createShoppingList, navigate, toast]);
 
-  const onStartCreateTimer = useCallback(() => {
-    pushDialog("createTimer", {
-      onSubmit: async (timerData: CreateTimerForm) => {
-        const hoursMs = timerData.hours * 60 * 60 * 1000;
-        const minutesMs = timerData.minutes * 60 * 1000;
-        const secondsMs = timerData.seconds * 1000;
-        try {
-          await createTimer({
-            duration_ms: hoursMs + minutesMs + secondsMs,
-          });
-          toast({
-            title: "Timer Created",
-            description: "Your timer has been created",
-          });
-        } catch {
-          toast({
-            title: "Could Not Create Timer",
-            description: "This timer couldn't be created. Try again later.",
-            variant: "destructive",
-          });
-        } finally {
-          popDialog("createTimer");
-        }
-      },
-      onClose: () => popDialog("createTimer"),
-    });
-  }, [createTimer, popDialog, pushDialog, toast]);
+  // const onStartCreateTimer = useCallback(() => {
+  //   pushDialog("createTimer", {
+  //     onSubmit: async (timerData: CreateTimerForm) => {
+  //       const hoursMs = timerData.hours * 60 * 60 * 1000;
+  //       const minutesMs = timerData.minutes * 60 * 1000;
+  //       const secondsMs = timerData.seconds * 1000;
+  //       try {
+  //         await createTimer({
+  //           duration_ms: hoursMs + minutesMs + secondsMs,
+  //         });
+  //         toast({
+  //           title: "Timer Created",
+  //           description: "Your timer has been created",
+  //         });
+  //       } catch {
+  //         toast({
+  //           title: "Could Not Create Timer",
+  //           description: "This timer couldn't be created. Try again later.",
+  //           variant: "destructive",
+  //         });
+  //       } finally {
+  //         popDialog("createTimer");
+  //       }
+  //     },
+  //     onClose: () => popDialog("createTimer"),
+  //   });
+  // }, [createTimer, popDialog, pushDialog, toast]);
 
   const onStartCreateMealPlan = useCallback(() => {
     pushDialog("modifyMealPlan", {
@@ -177,7 +179,7 @@ export const RecipieceMenubar: FC = () => {
           const createdMealPlan = await createMealPlan({
             ...data,
           });
-          navigate(`/meal-plan/view/${createdMealPlan.data.id}`);
+          navigate(`/meal-plan/view/${createdMealPlan.id}`);
           toast({
             title: "Meal Plan Created",
             description: "Your meal plan was created!",
@@ -213,16 +215,16 @@ export const RecipieceMenubar: FC = () => {
           case "shopping_list":
             onStartCreateShoppingList();
             break;
-          case "timer":
-            onStartCreateTimer();
-            break;
+          // case "timer":
+          //   onStartCreateTimer();
+          //   break;
           case "meal_plan":
             onStartCreateMealPlan();
             break;
         }
       },
     });
-  }, [pushDialog, popDialog, navigate, onStartCreateCookbook, onStartCreateMealPlan, onStartCreateShoppingList, onStartCreateTimer]);
+  }, [pushDialog, popDialog, navigate, onStartCreateCookbook, onStartCreateMealPlan, onStartCreateShoppingList]);
 
   const onMobileViewShoppingLists = useCallback(() => {
     pushDialog("mobileShoppingLists", {
@@ -273,7 +275,7 @@ export const RecipieceMenubar: FC = () => {
                 My Account
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => logout()}>Sign Out</DropdownMenuItem>
+              <DropdownMenuItem onClick={onLogout}>Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </span>
@@ -387,7 +389,7 @@ export const RecipieceMenubar: FC = () => {
               <MenubarItem onClick={() => navigate("/kitchen")}>My Kitchen</MenubarItem>
               <MenubarItem onClick={() => navigate("/account")}>My Account</MenubarItem>
               <MenubarSeparator />
-              <MenubarItem onClick={() => logout()}>Sign Out</MenubarItem>
+              <MenubarItem onClick={onLogout}>Sign Out</MenubarItem>
             </MenubarContent>
           </MenubarMenu>
         </span>

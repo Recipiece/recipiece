@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import request from "supertest";
-import { prisma } from "../../../src/database";
+import { prisma } from "../../../../src/database";
 import { StatusCodes } from "http-status-codes";
 
 describe("Delete Recipe Share", () => {

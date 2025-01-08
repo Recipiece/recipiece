@@ -50,21 +50,7 @@ export const ShoppingListViewPage: FC = () => {
     setItemNotes,
   } = useShoppingListItemsSubscription(+shoppingListId!);
 
-  const { mutateAsync: deleteShoppingList } = useDeleteShoppingListMutation({
-    onSuccess: () => {
-      toast({
-        title: "Shopping List Deleted",
-        description: "Your shopping list has been deleted.",
-      });
-    },
-    onFailure: () => {
-      toast({
-        title: "Error Deleting Shopping List",
-        description: "The shopping list could not be deleted. Try again later.",
-        variant: "destructive",
-      });
-    },
-  });
+  const { mutateAsync: deleteShoppingList } = useDeleteShoppingListMutation();
 
   const [newestShoppingListItem, setNewestShoppingListItem] = useState("");
   const [isAutoCompleteOpen, setIsAutoCompleteOpen] = useState(false);
@@ -224,17 +210,25 @@ export const ShoppingListViewPage: FC = () => {
       onClose: () => popDialog("deleteShoppingList"),
       onSubmit: async (list: ShoppingList) => {
         try {
-          await deleteShoppingList(list.id);
+          await deleteShoppingList(list);
+          toast({
+            title: "Shopping List Deleted",
+            description: "Your shopping list has been deleted.",
+          });
           navigate("/");
         } catch {
-          // noop
+          toast({
+            title: "Error Deleting Shopping List",
+            description: "The shopping list could not be deleted. Try again later.",
+            variant: "destructive",
+          });
         } finally {
           popDialog("deleteShoppingList");
         }
       },
       shoppingList: shoppingList,
     });
-  }, [pushDialog, popDialog, deleteShoppingList, navigate, shoppingList]);
+  }, [pushDialog, shoppingList, popDialog, deleteShoppingList, toast, navigate]);
 
   const contextMenu = useMemo(() => {
     return (
@@ -272,7 +266,7 @@ export const ShoppingListViewPage: FC = () => {
             <ShelfSpacer />
             {shoppingList && (
               <>
-                {(isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current) && createPortal(contextMenu, mobileMenuPortalRef.current)}
+                {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(contextMenu, mobileMenuPortalRef.current)}
                 {!isMobile && <>{contextMenu}</>}
               </>
             )}

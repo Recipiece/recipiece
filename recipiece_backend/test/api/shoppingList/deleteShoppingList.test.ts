@@ -60,9 +60,9 @@ describe("Delete Shopping List", () => {
     expect(deletedShoppingList).toBeTruthy();
   });
 
-  it(`should ${StatusCodes.NOT_FOUND} when the recipe does not exist`, async () => {
+  it("should not delete a non-existent shopping list", async () => {
     const response = await request(server)
-      .delete("/shopping-list/5000")
+      .delete("/shopping-list/500000")
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);

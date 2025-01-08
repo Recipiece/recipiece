@@ -18,16 +18,16 @@ export class RecipeQueryKeys {
         base.push({ page_number });
       }
 
-      if (shared_recipes) {
-        base.push({ shared_recipes });
-      }
-
       if (cookbook_id) {
         base.push({ cookbook_id });
       }
 
       if (cookbook_attachments) {
         base.push({ cookbook_attachments });
+      }
+
+      if (shared_recipes) {
+        base.push({ shared_recipes });
       }
 
       if (search) {

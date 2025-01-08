@@ -1,3 +1,4 @@
+import { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosHeaders, AxiosResponse } from "axios";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,15 +12,19 @@ export const getWebsocketUrl = (): string => {
   return process.env.REACT_APP_WEBSOCKET_URL!;
 };
 
-export interface MutationArgs<SuccessType> {
-  readonly onSuccess?: (data: SuccessType) => void;
-  readonly onFailure?: (err?: Error) => void;
-}
+export const filtersToSearchParams = (filters: Record<string, any>) => {
+  const searchParams = new URLSearchParams();
+  Object.keys(filters).forEach((filterKey) => {
+    if (filters[filterKey] !== null && filters[filterKey] !== undefined) {
+      searchParams.append(filterKey, filters[filterKey].toString());
+    }
+  });
+  return searchParams;
+};
 
-export interface QueryArgs {
-  readonly disabled?: boolean;
-  readonly xQueryKey?: string[];
-}
+export type MutationArgs<Result = unknown, Input = void> = Omit<UseMutationOptions<Result, AxiosError, Input>, "mutationFn" | "mutationKey">;
+
+export type QueryArgs<T> = Omit<UseQueryOptions<T, AxiosError>, "queryFn" | "queryKey">;
 
 export interface HookArgs {
   readonly autoLogoutOnCodes?: number[];

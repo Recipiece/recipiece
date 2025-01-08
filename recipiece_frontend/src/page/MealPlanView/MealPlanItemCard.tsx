@@ -37,7 +37,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
           notes: "",
           label: `Meal ${currentValues.length + 1}`,
         });
-        setCurrentValues((prev) => [...prev, { ...createdItem.data }]);
+        setCurrentValues((prev) => [...prev, { ...createdItem }]);
         popDialog("searchRecipesForMealPlan");
       },
     });
@@ -51,18 +51,15 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
       notes: "",
       label: `Meal ${currentValues.length + 1}`,
     });
-    setCurrentValues((prev) => [...prev, { ...createdItem.data }]);
+    setCurrentValues((prev) => [...prev, { ...createdItem }]);
   }, [createMealPlanItem, mealPlan.id, startDate, currentValues]);
 
   const onRemoveItem = useCallback(
-    async (mealPlanItemId: number) => {
-      await deleteMealPlanItem({
-        meal_plan_id: mealPlan.id,
-        meal_plan_item_id: mealPlanItemId,
-      });
-      setCurrentValues((prev) => [...prev.filter((cv) => cv.id !== mealPlanItemId)]);
+    async (mealPlanItem: MealPlanItem) => {
+      await deleteMealPlanItem(mealPlanItem);
+      setCurrentValues((prev) => [...prev.filter((cv) => cv.id !== mealPlanItem.id)]);
     },
-    [deleteMealPlanItem, mealPlan.id]
+    [deleteMealPlanItem]
   );
 
   const onUpdateNotes = useCallback(
@@ -212,7 +209,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
               </div>
               {isEditing && (
                 <div className="col-span-12 flex flex-row">
-                  <Button variant="ghost" onClick={() => onRemoveItem(id!)} className="text-destructive ml-auto">
+                  <Button variant="ghost" onClick={() => onRemoveItem(value as MealPlanItem)} className="text-destructive ml-auto">
                     <Minus />
                   </Button>
                 </div>

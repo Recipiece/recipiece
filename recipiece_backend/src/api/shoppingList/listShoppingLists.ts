@@ -1,45 +1,47 @@
 import { StatusCodes } from "http-status-codes";
-import { AuthenticatedRequest } from "../../types";
-import { ListShoppingListsQuerySchema } from "../../schema";
-import { Prisma } from "@prisma/client";
 import { prisma } from "../../database";
+import { ListShoppingListsQuerySchema } from "../../schema";
+import { AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
+import { itemsSubquery, sharesSubquery, sharesWithMemberships } from "./util";
 
 export const listShoppingLists = async (request: AuthenticatedRequest<any, ListShoppingListsQuerySchema>) => {
-  const query = request.query;
+  const { shared_shopping_lists, page_number, page_size } = request.query;
+  const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
   const user = request.user;
 
-  const userId = query.user_id ?? user.id;
-  const pageSize = query.page_size || DEFAULT_PAGE_SIZE;
-  const page = query.page_number;
+  let query = prisma.$kysely
+    .selectFrom("shopping_lists")
+    .selectAll("shopping_lists")
+    .select((eb) => {
+      return [
+        itemsSubquery(eb).as("items"),
+        sharesSubquery(eb, user.id).as("shares"),
+      ];
+    })
+    .where((eb) => {
+      if (shared_shopping_lists === "include") {
+        return eb.or([
+          eb("shopping_lists.user_id", "=", user.id),
+          eb.exists(sharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
+        ]);
+      } else {
+        return eb("shopping_lists.user_id", "=", user.id);
+      }
+    });
 
-  let where: Prisma.ShoppingListWhereInput = {
-    user_id: userId,
-  };
+  query = query.offset(page_number * actualPageSize).limit(actualPageSize + 1);
+  const shoppingLists = await query.execute();
 
-  const offset = page * pageSize;
-
-  const shoppingLists = await prisma.shoppingList.findMany({
-    where: where,
-    skip: offset,
-    take: pageSize + 1,
-    orderBy: {
-      created_at: "desc",
-    },
-    include: {
-      shopping_list_items: true,
-    },
-  });
-
-  const hasNextPage = shoppingLists.length > pageSize;
-  const resultsData = shoppingLists.splice(0, pageSize);
+  const hasNextPage = shoppingLists.length > actualPageSize;
+  const resultsData = shoppingLists.splice(0, actualPageSize);
 
   return [
     StatusCodes.OK,
     {
       data: resultsData,
       has_next_page: hasNextPage,
-      page: page,
+      page: page_number,
     },
   ];
 };

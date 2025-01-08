@@ -10,7 +10,7 @@ export interface SharedAvatarProps {
 export const SharedAvatar: FC<SharedAvatarProps> = ({ userKitchenMembershipId }) => {
   const { data: user } = useGetSelfQuery();
   const { data: membership } = useGetUserKitchenMembershipQuery(userKitchenMembershipId as number, {
-    disabled: !userKitchenMembershipId || !user,
+    enabled: !!userKitchenMembershipId && !!user,
   });
 
   const isMembershipTargetingSource = !!membership && !!user && membership.source_user.id === user.id;

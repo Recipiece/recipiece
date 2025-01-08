@@ -1,4 +1,4 @@
-import { createContext, FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { createContext, FC, PropsWithChildren, useCallback, useEffect } from "react";
 import { v4 } from "uuid";
 import { TokenManager, useOptIntoPushNotificationsMutation } from "../../api";
 import { useLocalStorage } from "../../hooks";

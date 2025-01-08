@@ -20,7 +20,7 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership 
       page_number: recipeSharesPage,
     },
     {
-      disabled: !membership,
+      enabled: !!membership,
     }
   );
 

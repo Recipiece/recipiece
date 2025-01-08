@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListRecipeFilters, ListRecipeSharesFilters, ListRecipeSharesResponse, ListRecipesResponse, Recipe, RecipeShare } from "../../data";
-import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
-import { RecipeQueryKeys } from "./RecipeQueryKeys";
+import { ListRecipeFilters, ListRecipesResponse, Recipe } from "../../data";
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { RecipeQueryKeys } from "./RecipeQueryKeys";
 
-export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
+export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<Recipe>) => {
   const { getter } = useGet();
 
   const query = async () => {
@@ -18,20 +18,29 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs) => {
   return useQuery({
     queryKey: RecipeQueryKeys.GET_RECIPE(recipeId),
     queryFn: query,
-    enabled: args?.disabled !== true,
-    retry: 0,
+    ...(args ?? {}),
   });
 };
 
-export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs) => {
-  const searchParams = new URLSearchParams();
+export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponse>) => {
+  // const searchParams = new URLSearchParams();
+  // if (search) {
+  //   searchParams.set("search", search);
+  // }
+  // searchParams.set("cookbook_id", cookbook_id.toString());
+  // searchParams.set("cookbook_attachments", "exclude");
+  // searchParams.set("page_number", "0");
+  // searchParams.set("page_size", "5");
+  let filters: ListRecipeFilters = {
+    cookbook_id: cookbook_id,
+    cookbook_attachments: "exclude",
+    page_number: 0,
+    page_size: 5,
+  };
   if (search) {
-    searchParams.set("search", search);
+    filters = { ...filters, search };
   }
-  searchParams.set("cookbook_id", cookbook_id.toString());
-  searchParams.set("cookbook_attachments", "exclude");
-  searchParams.set("page_number", "0");
-  searchParams.set("page_size", "5");
+  const searchParams = filtersToSearchParams(filters);
 
   const path = `/recipe/list?${searchParams.toString()}`;
   const { getter } = useGet();
@@ -41,24 +50,17 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
       path: path,
       withAuth: "access_token",
     });
-    return recipe;
+    return recipe.data;
   };
 
   return useQuery({
     queryKey: RecipeQueryKeys.LIST_RECIPES_AVAILABLE_TO_COOKBOOK({ search, cookbook_id }),
-    queryFn: async () => {
-      try {
-        const results = await query();
-        return results.data;
-      } catch (err) {
-        throw err;
-      }
-    },
-    enabled: args?.disabled !== true,
+    queryFn: query,
+    ...(args ?? {}),
   });
 };
 
-export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?: QueryArgs) => {
+export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?: QueryArgs<ListRecipesResponse>) => {
   const { getter } = useGet();
 
   const searchParams = new URLSearchParams();
@@ -69,28 +71,21 @@ export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?
   }
 
   const query = async () => {
-    const recipe = await getter<never, ListRecipesResponse>({
+    const recipes = await getter<never, ListRecipesResponse>({
       path: `/recipe/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return recipe;
+    return recipes.data;
   };
 
   return useQuery({
     queryKey: RecipeQueryKeys.LIST_RECIPES_FOR_MEAL_PLAN(filters),
-    queryFn: async () => {
-      try {
-        const results = await query();
-        return results.data;
-      } catch (err) {
-        throw err;
-      }
-    },
-    enabled: args?.disabled !== true,
+    queryFn: query,
+    ...(args ?? {}),
   });
 };
 
-export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs) => {
+export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs<ListRecipesResponse>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -114,318 +109,146 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   }
 
   const query = async () => {
-    const recipe = await getter<never, ListRecipesResponse>({
+    const recipes = await getter<never, ListRecipesResponse>({
       path: `/recipe/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return recipe;
+    return recipes.data;
   };
 
   return useQuery({
     queryKey: RecipeQueryKeys.LIST_RECIPE(filters),
     queryFn: async () => {
-      try {
-        const results = await query();
-        results.data.data.forEach((recipe) => {
-          queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(recipe.id), recipe);
-        });
-        return results.data;
-      } catch (err) {
-        throw err;
-      }
+      const results = await query();
+      results.data.forEach((recipe) => {
+        queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(recipe.id), recipe);
+      });
+      return results;
     },
-    enabled: args?.disabled !== true,
+    ...(args ?? {}),
   });
 };
 
-export const useCreateRecipeMutation = (args?: MutationArgs<Recipe>) => {
+export const useCreateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Recipe>>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
   const mutation = async (data: Partial<Recipe>) => {
-    return await poster<Partial<Recipe>, Recipe>({
+    const response = await poster<Partial<Recipe>, Recipe>({
       path: "/recipe",
       body: data,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data.data));
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
-      args?.onSuccess?.(data.data);
+    onSuccess: (data, variables, context) => {
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data));
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      onSuccess?.(data, variables, context);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe>) => {
+export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Recipe>>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
   const mutation = async (data: Partial<Recipe>) => {
-    return await putter<Partial<Recipe>, Recipe>({
+    const response = await putter<Partial<Recipe>, Recipe>({
       path: `/recipe`,
       body: data,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataUpdater(data.data));
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
-      args?.onSuccess?.(data.data);
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataUpdater(data));
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      onSuccess?.(data, vars, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useDeleteRecipeMutation = (args?: MutationArgs<void>) => {
+export const useDeleteRecipeMutation = (args?: MutationArgs<{}, Recipe>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (recipeId: number) => {
-    return await deleter({
+  const mutation = async (recipe: Recipe) => {
+    const response = await deleter({
       path: "/recipe",
-      id: recipeId,
+      id: recipe.id,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (_, recipeId) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataDeleter({ id: recipeId }));
-      queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE(recipeId) });
-      args?.onSuccess?.();
+    onSuccess: (data, recipe, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataDeleter({ id: recipe.id }));
+      queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE(recipe.id) });
+      onSuccess?.(data, recipe, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useParseRecipeFromURLMutation = (args?: MutationArgs<void>) => {
+export const useParseRecipeFromURLMutation = (args?: MutationArgs<Recipe, string>) => {
   const { poster } = usePost();
 
   const mutation = async (url: string) => {
-    return await poster<{ readonly source_url: string }, Recipe>({
+    const response = await poster<{ readonly source_url: string }, Recipe>({
       path: "/recipe/parse/url",
       body: {
         source_url: url,
       },
       withAuth: "access_token",
     });
+    return response.data;
   };
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
-    },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...(args ?? {}),
   });
 };
 
-export const useForkRecipeMutation = (args?: MutationArgs<Recipe>) => {
+export const useForkRecipeMutation = (args?: MutationArgs<Recipe, { readonly original_recipe_id: number }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
   const mutation = async (body: { readonly original_recipe_id: number }) => {
-    return await poster<typeof body, Recipe>({
+    const response = await poster<typeof body, Recipe>({
       path: "/recipe/fork",
       body: { ...body },
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.id), data.data);
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data.data));
-      args?.onSuccess?.(data.data);
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data));
+      onSuccess?.(data, vars, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
-  });
-};
-
-export const useListRecipeSharesQuery = (filters: ListRecipeSharesFilters, args?: QueryArgs) => {
-  const queryClient = useQueryClient();
-  const { getter } = useGet();
-
-  const searchParams = new URLSearchParams();
-  searchParams.append("page_number", filters.page_number.toString());
-
-  if (filters.from_self) {
-    searchParams.set("from_self", "true");
-  }
-  if (filters.targeting_self) {
-    searchParams.set("targeting_self", "true");
-  }
-  if (filters.user_kitchen_membership_id) {
-    searchParams.set("user_kitchen_membership_id", filters.user_kitchen_membership_id.toString());
-  }
-
-  const query = async () => {
-    const recipe = await getter<never, ListRecipeSharesResponse>({
-      path: `/recipe/share/list?${searchParams.toString()}`,
-      withAuth: "access_token",
-    });
-    return recipe;
-  };
-
-  return useQuery({
-    queryFn: async () => {
-      const response = await query();
-      response.data.data.forEach((rs) => {
-        queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE_SHARE(rs.id), rs);
-      });
-      return response.data;
-    },
-    queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(filters),
-    enabled: args?.disabled !== true,
-  });
-};
-
-export const useCreateRecipeShareMutation = () => {
-  const queryClient = useQueryClient();
-  const { poster } = usePost();
-
-  const mutation = async (body: { readonly user_kitchen_membership_id: number; readonly recipe_id: number }) => {
-    return await poster<typeof body, RecipeShare>({
-      path: "/recipe/share",
-      body: { ...body },
-      withAuth: "access_token",
-    });
-  };
-
-  return useMutation({
-    mutationFn: mutation,
-    onSuccess: (data) => {
-      /**
-       * When we create a share, we will update the query client's cache of recipe shares
-       * and then also update the query client's cache of recipes to append the shares to the list.
-       */
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
-        },
-        oldDataCreator(data.data)
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.LIST_RECIPE(),
-        },
-        (oldData: ListRecipesResponse | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              data: oldData.data.map((recipe) => {
-                if (recipe.id === data.data.recipe_id) {
-                  return {
-                    ...recipe,
-                    shares: [...(recipe.shares ?? []), data.data],
-                  };
-                } else {
-                  return { ...recipe };
-                }
-              }),
-            };
-          }
-          return undefined;
-        }
-      );
-
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE_SHARE(data.data.id), data.data);
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.data.recipe_id), (oldRecipe: Recipe | undefined) => {
-        if (oldRecipe) {
-          return {
-            ...oldRecipe,
-            shares: [...(oldRecipe.shares ?? []), data.data],
-          };
-        }
-        return undefined;
-      });
-    },
-  });
-};
-
-export const useDeleteRecipeShareMutation = () => {
-  const queryClient = useQueryClient();
-  const { deleter } = useDelete();
-
-  const mutation = async (share: RecipeShare) => {
-    return await deleter({
-      path: "/recipe/share",
-      id: share.id,
-      withAuth: "access_token",
-    });
-  };
-
-  return useMutation({
-    mutationFn: mutation,
-    onSuccess: (_, params) => {
-      /**
-       * When we delete a share, we need to purge the share from the query client's cache of
-       * recipe shares, and also from the affected recipe
-       */
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
-        },
-        oldDataDeleter({ id: params.id })
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.LIST_RECIPE(),
-        },
-        (oldData: ListRecipesResponse | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              data: oldData.data.map((recipe) => {
-                if (recipe.id === params.recipe_id) {
-                  return {
-                    ...recipe,
-                    shares: (recipe.shares ?? []).filter((share) => {
-                      return share.id !== params.id;
-                    }),
-                  };
-                } else {
-                  return { ...recipe };
-                }
-              }),
-            };
-          }
-          return undefined;
-        }
-      );
-
-      queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE_SHARE(params.id) });
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(params.recipe_id), (oldData: Recipe | undefined) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            shares: (oldData.shares ?? []).filter((share) => {
-              return share.id !== params.id;
-            }),
-          };
-        }
-        return undefined;
-      });
-    },
+    ...restArgs,
   });
 };

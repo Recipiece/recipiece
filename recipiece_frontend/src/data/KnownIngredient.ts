@@ -7,3 +7,7 @@ export interface KnownIngredient {
   readonly unitless_amount?: number;
   readonly preferred_measure?: string;
 }
+
+export interface ListKnownIngredientsResponse {
+  readonly data: KnownIngredient[];
+}

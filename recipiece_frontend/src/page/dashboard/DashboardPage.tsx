@@ -17,6 +17,7 @@ export const DashboardPage: FC = () => {
         cookbook_id: +cookbookId,
         search: "",
         shared_recipes: "include",
+        cookbook_attachments: "include",
       };
     } else {
       return {
@@ -68,43 +69,36 @@ export const DashboardPage: FC = () => {
   }, []);
 
   const { data: recipeData, isLoading: isLoadingRecipes, isFetching: isFetchingRecipes } = useListRecipesQuery(filters);
-  const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { disabled: !cookbookId });
-  const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation({
-    onSuccess: () => {
-      toast({
-        title: "Recipe Added to Cookbook",
-        description: "The recipe was added to your cookbook.",
-      });
-      popDialog("searchRecipesForCookbook");
-    },
-    onFailure: () => {
-      toast({
-        title: "Cannot add recipe to cookbook",
-        description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
-        variant: "destructive",
-      });
-      popDialog("searchRecipesForCookbook");
-    },
-  });
+  const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { enabled: !!cookbookId });
+  const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
 
   const recipes = useMemo(() => {
     return recipeData?.data || [];
   }, [recipeData]);
 
-  const onFindRecipe = () => {
+  const onFindRecipe = useCallback(() => {
     pushDialog("searchRecipesForCookbook", {
       cookbookId: +cookbookId!,
-      onSubmit: onSubmitFindRecipe,
+      onSubmit: async (recipe: Recipe) => {
+        try {
+          await addRecipeToCookbook({ recipe: recipe, cookbook: cookbook! });
+          toast({
+            title: "Recipe Added to Cookbook",
+            description: "The recipe was added to your cookbook.",
+          });
+        } catch {
+          toast({
+            title: "Cannot add recipe to cookbook",
+            description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
+            variant: "destructive",
+          });
+        } finally {
+          popDialog("searchRecipesForCookbook");
+        }
+      },
       onClose: () => popDialog("searchRecipesForCookbook"),
     });
-  };
-
-  const onSubmitFindRecipe = useCallback(
-    async (recipe: Recipe) => {
-      await addRecipeToCookbook({ recipe: recipe, cookbook: cookbook! });
-    },
-    [cookbook, addRecipeToCookbook]
-  );
+  }, [addRecipeToCookbook, cookbook, cookbookId, popDialog, pushDialog, toast]);
 
   return (
     <Stack>

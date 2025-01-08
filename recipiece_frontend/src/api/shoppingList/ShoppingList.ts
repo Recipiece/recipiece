@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { ListShoppingListFilters, ListShoppingListResponse, ShoppingList, ShoppingListItem } from "../../data";
+import { ListShoppingListFilters, ListShoppingListResponse, ListShoppingListSharesResponse, ShoppingList, ShoppingListItem } from "../../data";
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
-import { getWebsocketUrl, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { filtersToSearchParams, getWebsocketUrl, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
 
 export const useShoppingListItemsSubscription = (shoppingListId: number) => {
+  const queryClient = useQueryClient();
   const { data: wsSession, isLoading: isLoadingWsSession, isFetching: isFetchingWsSession } = useRequestShoppingListSessionQuery(+shoppingListId!);
 
   const [isWebsocketLoading, setIsWebsocketLoading] = useState(true);
@@ -32,6 +33,38 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
       onMessage: (event) => {
         const { responding_to_action, items } = JSON.parse(event.data);
         if (responding_to_action !== "__ping__" && !!items) {
+          queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(shoppingListId), (oldData: ShoppingList | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                items: [...items],
+              };
+            }
+            return undefined;
+          });
+          queryClient.setQueriesData(
+            {
+              queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+            },
+            (oldData: ListShoppingListResponse | undefined) => {
+              if (oldData) {
+                return {
+                  ...oldData,
+                  data: (oldData.data ?? []).map((list) => {
+                    if (list.id === shoppingListId) {
+                      return {
+                        ...list,
+                        items: [...items],
+                      };
+                    } else {
+                      return { ...list };
+                    }
+                  }),
+                };
+              }
+              return undefined;
+            }
+          );
           setShoppingListItems(items as ShoppingListItem[]);
         }
         setIsPerformingAction(false);
@@ -77,8 +110,8 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
         })
       );
     },
-    [sendMessage],
-  )
+    [sendMessage]
+  );
 
   const clearItems = useCallback(() => {
     setIsPerformingAction(true);
@@ -190,7 +223,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
   };
 };
 
-export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryArgs) => {
+export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryArgs<{ readonly token: string }>) => {
   const { getter } = useGet();
 
   const query = async () => {
@@ -204,14 +237,14 @@ export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryA
   return useQuery({
     queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST_SESSION(listId),
     queryFn: query,
-    enabled: args?.disabled !== true,
     staleTime: 1000,
     refetchOnMount: "always",
     refetchOnReconnect: "always",
+    ...(args ?? {}),
   });
 };
 
-export const useGetShoppingListByIdQuery = (listId: number, args?: QueryArgs) => {
+export const useGetShoppingListByIdQuery = (listId: number, args?: QueryArgs<ShoppingList>) => {
   const { getter } = useGet();
 
   const query = async () => {
@@ -225,148 +258,201 @@ export const useGetShoppingListByIdQuery = (listId: number, args?: QueryArgs) =>
   return useQuery({
     queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST(listId),
     queryFn: query,
-    enabled: args?.disabled !== true,
-    retry: 0,
+    ...(args ?? {}),
   });
 };
 
-export const useListShoppingListsQuery = (filters: ListShoppingListFilters, args?: QueryArgs) => {
+export const useListShoppingListsQuery = (filters: ListShoppingListFilters, args?: QueryArgs<ListShoppingListResponse>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
-  const searchParams = new URLSearchParams();
-  searchParams.append("page_number", filters.page_number.toString());
+  // const searchParams = new URLSearchParams();
+  // searchParams.append("page_number", filters.page_number.toString());
 
-  if (filters.search) {
-    searchParams.append("search", filters.search);
-  }
+  // if (filters.search) {
+  //   searchParams.append("search", filters.search);
+  // }
 
+  const searchParams = filtersToSearchParams(filters);
   const query = async () => {
     const shoppingLists = await getter<never, ListShoppingListResponse>({
       path: `/shopping-list/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return shoppingLists;
+    return shoppingLists.data;
   };
 
   return useQuery({
     queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(filters),
     queryFn: async () => {
-      try {
-        const results = await query();
-        results.data.data.forEach((shoppingList) => {
-          queryClient.setQueryData(["shoppingList", shoppingList.id], shoppingList);
-        });
-        return results.data;
-      } catch (err) {
-        throw err;
-      }
+      const results = await query();
+      results.data.forEach((shoppingList) => {
+        queryClient.setQueryData(["shoppingList", shoppingList.id], shoppingList);
+      });
+      return results;
     },
-    enabled: args?.disabled !== true,
+    ...(args ?? {}),
   });
 };
 
-export const useCreateShoppingListMutation = (args?: MutationArgs<ShoppingList>) => {
+export const useCreateShoppingListMutation = (args?: MutationArgs<ShoppingList, Partial<ShoppingList>>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
   const mutation = async (data: Partial<ShoppingList>) => {
-    return await poster<Partial<ShoppingList>, ShoppingList>({
+    const response = await poster<Partial<ShoppingList>, ShoppingList>({
       path: "/shopping-list",
       body: data,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
-      queryClient.setQueryData(ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), oldDataCreator(data.data));
-      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(data.data.id), data.data);
-      args?.onSuccess?.(data.data);
+    onSuccess: (data, variables, context) => {
+      queryClient.setQueriesData(
+        {
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+        },
+        oldDataCreator(data)
+      );
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(data.id), data);
+      onSuccess?.(data, variables, context);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useUpdateShoppingListMutation = (args?: MutationArgs<ShoppingList>) => {
+export const useUpdateShoppingListMutation = (args?: MutationArgs<ShoppingList, Partial<ShoppingList>>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
   const mutation = async (data: Partial<ShoppingList>) => {
-    return await putter<Partial<ShoppingList>, ShoppingList>({
+    const response = await putter<Partial<ShoppingList>, ShoppingList>({
       path: `/shopping-list`,
       body: data,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
-      queryClient.setQueryData(ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), oldDataUpdater(data.data));
-      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(data.data.id), data.data);
-      args?.onSuccess?.(data.data);
+    onSuccess: (data, variables, context) => {
+      queryClient.setQueriesData(
+        {
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+        },
+        oldDataUpdater(data)
+      );
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(data.id), data);
+      onSuccess?.(data, variables, context);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useDeleteShoppingListMutation = (args?: MutationArgs<void>) => {
+export const useDeleteShoppingListMutation = (args?: MutationArgs<{}, ShoppingList>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (shoppingListId: number) => {
+  const mutation = async (shoppingList: ShoppingList) => {
     return await deleter({
       path: "/shopping-list",
-      id: shoppingListId,
+      id: shoppingList.id,
       withAuth: "access_token",
     });
   };
 
+  const { onSuccess, ...restArgs } = args ?? {};
+
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (_, shoppingListId) => {
-      queryClient.invalidateQueries({ queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST(shoppingListId) });
-      queryClient.setQueryData(ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), oldDataDeleter({ id: shoppingListId }));
-      args?.onSuccess?.();
+    onSuccess: (data, shoppingList, context) => {
+      queryClient.invalidateQueries({ queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST(shoppingList.id) });
+      queryClient.setQueriesData(
+        {
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+        },
+        oldDataDeleter({ id: shoppingList.id })
+      );
+      queryClient.setQueriesData(
+        {
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+        },
+        (oldData: ListShoppingListSharesResponse | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: (oldData.data ?? []).filter((share) => share.shopping_list_id !== shoppingList.id),
+            };
+          }
+          return undefined;
+        }
+      );
+      onSuccess?.(data, shoppingList, context);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useAppendShoppingListItemsMutation = (args?: MutationArgs<ShoppingListItem[]>) => {
+export const useAppendShoppingListItemsMutation = (args?: MutationArgs<ShoppingListItem[], { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItem>[] }>) => {
+  const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItem>[] }) => {
-    return await poster<typeof data, ShoppingListItem[]>({
+  const mutation = async (body: { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItem>[] }) => {
+    const response = await poster<typeof body, ShoppingListItem[]>({
       path: "/shopping-list/append-items",
-      body: data,
+      body: body,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
-      // queryClient.invalidateQueries({
-      //   queryKey: ["shoppingListList"],
-      //   refetchType: "all",
-      // });
-      // queryClient.invalidateQueries({
-      //   queryKey: ["shoppingList", vars.shopping_list_id],
-      //   refetchType: "all",
-      // });
-      args?.onSuccess?.(data.data);
+    onSuccess: (data, params, ctx) => {
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingList | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            items: [...data],
+          };
+        }
+        return undefined;
+      });
+      queryClient.setQueriesData(
+        {
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+        },
+        (oldData: ListShoppingListResponse | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: oldData.data.map((list) => {
+                if (list.id === params.shopping_list_id) {
+                  return {
+                    ...list,
+                    items: [...data],
+                  };
+                } else {
+                  return { ...list };
+                }
+              }),
+            };
+          }
+          return undefined;
+        }
+      );
+      onSuccess?.(data, params, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };

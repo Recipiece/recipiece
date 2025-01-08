@@ -16,17 +16,7 @@ export const ForgotPasswordPage: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [hasRequested, setHasRequested] = useState(false);
-  const { mutateAsync: requestForgotPasswordToken } = useRequestForgotPasswordMutation({
-    onSuccess: () => {
-      setHasRequested(true);
-    },
-    onFailure: () => {
-      toast({
-        title: "Failed to request password reset token",
-        variant: "destructive",
-      });
-    },
-  });
+  const { mutateAsync: requestForgotPasswordToken } = useRequestForgotPasswordMutation();
 
   const form = useForm<ForgotPasswordForm>({
     resolver: zodResolver(ForgotPasswordFormSchema),
@@ -38,7 +28,13 @@ export const ForgotPasswordPage: FC = () => {
   const onSubmit = async (formData: ForgotPasswordForm) => {
     try {
       await requestForgotPasswordToken({ ...formData });
-    } catch {}
+      setHasRequested(true);
+    } catch {
+      toast({
+        title: "Failed to request password reset token",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

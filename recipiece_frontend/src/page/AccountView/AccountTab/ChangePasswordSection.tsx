@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useChangePasswordMutation, useGetSelfQuery } from "../../../api";
-import { Button, Card, Form, FormInput, H3, Stack, SubmitButton, useToast } from "../../../component";
+import { Button, Form, FormInput, H3, SubmitButton, useToast } from "../../../component";
 
 const ChangePasswordFormSchema = z
   .object({

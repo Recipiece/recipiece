@@ -54,7 +54,7 @@ export const RecipeEditPage: FC = () => {
     isLoading: isLoadingRecipe,
     isError: isRecipeGetErrorFromRequest,
   } = useGetRecipeByIdQuery(recipeId as number, {
-    disabled: isCreatingNewRecipe,
+    enabled: !isCreatingNewRecipe,
   });
 
   const { data: currentUser, isLoading: isLoadingCurrentUser } = useGetSelfQuery();
@@ -99,9 +99,9 @@ export const RecipeEditPage: FC = () => {
     try {
       let response: Recipe;
       if (isCreatingNewRecipe) {
-        response = (await createRecipe(sanitizedFormData)).data;
+        response = await createRecipe(sanitizedFormData);
       } else {
-        response = (await updateRecipe(sanitizedFormData)).data;
+        response = await updateRecipe(sanitizedFormData);
       }
       navigate(`/recipe/view/${response.id}`);
     } catch (err) {
@@ -160,7 +160,7 @@ export const RecipeEditPage: FC = () => {
   const onParseRecipeDialogSubmit = async (data: ParseRecipeFromURLForm) => {
     try {
       const response = await parseRecipe(data.url);
-      form.reset({ ...response.data });
+      form.reset({ ...response });
       popDialog("parseRecipeFromURL");
       toast({
         title: "Recipe Parsed",

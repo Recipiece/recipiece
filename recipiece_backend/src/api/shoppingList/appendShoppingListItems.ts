@@ -2,20 +2,28 @@ import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
 import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { collapseOrders, MAX_NUM_ITEMS } from "./util";
+import { collapseOrders, MAX_NUM_ITEMS, sharesWithMemberships } from "./util";
 import { broadcastMessageViaEntityId } from "../../middleware";
 
 export const appendShoppingListItems = async (
   request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>
 ): ApiResponse<AppendShoppingListItemsResponseSchema> => {
   const shoppingListId = request.body.shopping_list_id;
+  const user = request.user;
 
-  const shoppingList = await prisma.shoppingList.findFirst({
-    where: {
-      id: shoppingListId,
-      user_id: request.user.id,
-    },
-  });
+  const shoppingList = await prisma.$kysely
+    .selectFrom("shopping_lists")
+    .selectAll("shopping_lists")
+    .where((eb) => {
+      return eb.and([
+        eb("shopping_lists.id", "=", shoppingListId),
+        eb.or([
+          eb("shopping_lists.user_id", "=", user.id),
+          eb.exists(sharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
+        ]),
+      ]);
+    })
+    .executeTakeFirst();
 
   if (!shoppingList) {
     return [
@@ -43,7 +51,7 @@ export const appendShoppingListItems = async (
   const websocketMessage = {
     responding_to_action: "append_from_recipe",
     items: collapsed,
-  }
+  };
 
   // broadcast the message to any listening
   await broadcastMessageViaEntityId("modifyShoppingListSession", shoppingList.id, websocketMessage);

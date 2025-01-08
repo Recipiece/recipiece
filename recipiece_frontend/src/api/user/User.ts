@@ -1,20 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Buffer } from "buffer";
-import { ListUserKitchenMembershipFilters, ListUserKitchenMembershipsResponse, UserAccount, UserKitchenMembership, UserKitchenMembershipStatus } from "../../data";
-import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { UserAccount } from "../../data";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { TokenManager } from "../TokenManager";
 import { UserQueryKeys } from "./UserQueryKeys";
 
-export const useGetSelfQuery = (args?: QueryArgs) => {
+export const useGetSelfQuery = (args?: QueryArgs<UserAccount>) => {
   const { getter } = useGet();
 
-  const query = async (): Promise<UserAccount> => {
-    const data = await getter({
+  const query = async () => {
+    const data = await getter<never, UserAccount>({
       path: "/user/self",
       withAuth: "access_token",
     });
-    return data.data as UserAccount;
+    return data.data;
   };
 
   return useQuery({
@@ -23,138 +23,134 @@ export const useGetSelfQuery = (args?: QueryArgs) => {
     refetchInterval: false,
     refetchOnMount: false,
     refetchOnReconnect: true,
-    enabled: args?.disabled !== true,
+    ...(args ?? {}),
   });
 };
 
-export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }>) => {
+export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }, any>) => {
   const { poster } = usePost();
 
   const mutation = async (data: { readonly username: string; readonly password: string }) => {
     const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
-    return await poster<{}, { readonly access_token: string; readonly refresh_token: string }>({
+    const response = await poster<{}, { readonly access_token: string; readonly refresh_token: string }>({
       path: "/user/login",
       body: {},
       extraHeaders: {
         Authorization: `Basic ${encoded}`,
       },
     });
+    return response.data;
   };
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (response) => {
-      args?.onSuccess?.(response.data);
-    },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...(args ?? {}),
   });
 };
 
-export const useChangePasswordMutation = (args?: MutationArgs<void>) => {
+export const useChangePasswordMutation = (args?: MutationArgs<void, any>) => {
   const { poster } = usePost({
     autoLogoutOnCodes: [],
   });
 
   const mutation = async (data: { readonly username: string; readonly password: string; readonly new_password: string }) => {
     const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
-    return await poster<{}, never>({
+    const response = await poster<{}, never>({
       path: "/user/change-password",
       body: { new_password: data.new_password },
       extraHeaders: {
         Authorization: `Basic ${encoded}`,
       },
     });
+    return response.data;
   };
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
-    },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...(args ?? {}),
   });
 };
 
-export const useLogoutUserMutation = (args?: MutationArgs<void>) => {
+export const useLogoutUserMutation = (args?: MutationArgs<void, void>) => {
   const { poster } = usePost();
   const tokenResolver = TokenManager.getInstance();
+  const queryClient = useQueryClient();
 
   const mutation = async () => {
-    return await poster<never, never>({
+    const response = await poster<{}, never>({
       path: "/user/logout",
-      body: {} as never,
+      body: {},
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, onError, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
+    onSuccess: (data, vars, ctx) => {
       tokenResolver.clear();
-      args?.onSuccess?.();
+      queryClient.clear();
+      onSuccess?.(data, vars, ctx);
     },
-    onError: (err) => {
+    onError: (err, _, ctx) => {
       tokenResolver.clear();
-      args?.onFailure?.(err);
+      queryClient.clear();
+      onError?.(err as AxiosError, undefined, ctx);
     },
+    ...restArgs,
   });
 };
 
-export const useCreateUserMutation = (args?: MutationArgs<void>) => {
+export const useCreateUserMutation = (args?: MutationArgs<void, any>) => {
   const { poster } = usePost();
 
   const mutation = async (args: { readonly username: string; readonly password: string; readonly email: string }) => {
-    return await poster<typeof args, never>({
+    const response = await poster<typeof args, never>({
       path: "/user",
       body: args,
     });
+    return response.data;
   };
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
-    },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...(args ?? {}),
   });
 };
 
-export const useUpdateUserMutation = (args?: MutationArgs<void>) => {
+export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, { readonly id: number; readonly username?: string; readonly email?: string }>) => {
   const { putter } = usePut();
   const queryClient = useQueryClient();
 
   const mutation = async (args: { readonly id: number; readonly username?: string; readonly email?: string }) => {
-    return await putter<typeof args, UserAccount>({
+    const response = await putter<typeof args, UserAccount>({
       path: "/user",
       body: args,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data) => {
+    onSuccess: (data, vars, ctx) => {
       queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
         if (old) {
-          return { ...old, username: data.data.username };
+          return { ...old, username: data.username, email: data.email };
         }
         return undefined;
       });
-      args?.onSuccess?.();
+      onSuccess?.(data, vars, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
+export const useVerifyAccountMutation = (args?: MutationArgs<{}, {}>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
@@ -166,88 +162,78 @@ export const useVerifyAccountMutation = (args?: MutationArgs<void>) => {
     });
   };
 
+  const { onSuccess, ...restArgs } = args ?? {};
+
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
+    onSuccess: (_, __, ctx) => {
       queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
         if (old) {
           return { ...old, validated: true };
         }
         return undefined;
       });
-      args?.onSuccess?.();
+      onSuccess?.({}, {}, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useRequestVerifyAccountMutation = (args?: MutationArgs<void>) => {
+export const useRequestVerifyAccountMutation = (args?: MutationArgs) => {
   const { poster } = usePost();
 
   const mutation = async () => {
-    return await poster<never, never>({
+    const response = await poster<never, never>({
       path: "/user/request-token/verify-email",
       body: {} as never,
       withAuth: "access_token",
     });
+    return response.data;
   };
+
+  const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
-    },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useRequestForgotPasswordMutation = (args?: MutationArgs<void>) => {
+export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, any>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly username: string }) => {
-    return await poster<typeof body, never>({
+    const response = await poster<typeof body, never>({
       path: "/user/request-token/forgot-password",
       body: { ...body },
     });
+    return response.data;
   };
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
-    },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...(args ?? {}),
   });
 };
 
-export const useResetPasswordMutation = (args?: MutationArgs<void>) => {
+export const useResetPasswordMutation = (args?: MutationArgs<void, any>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly token: string; readonly password: string }) => {
-    return await poster<typeof body, never>({
+    const response = await poster<typeof body, never>({
       path: "/user/reset-password",
       body: { ...body },
     });
+    return response.data;
   };
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
-    },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...(args ?? {}),
   });
 };
 
-export const useRequestRecipeImportMutation = (args?: MutationArgs<void>) => {
+export const useRequestRecipeImportMutation = (args?: MutationArgs<unknown, { readonly file: File; readonly source: string }>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly file: File; readonly source: string }) => {
@@ -265,18 +251,18 @@ export const useRequestRecipeImportMutation = (args?: MutationArgs<void>) => {
     });
   };
 
+  const { onSuccess, ...restArgs } = args ?? {};
+
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
+    onSuccess: (_, vars, ctx) => {
+      onSuccess?.({}, vars, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
+    ...restArgs,
   });
 };
 
-export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<void>) => {
+export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<unknown, { readonly subscription_data: PushSubscriptionJSON; readonly device_id: string }>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly subscription_data: PushSubscriptionJSON; readonly device_id: string }) => {
@@ -287,19 +273,18 @@ export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<void>) =
     });
   };
 
+  const { onSuccess, ...restArgs } = args ?? {};
+
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
-      args?.onSuccess?.();
+    onSuccess: (_, params, ctx) => {
+      onSuccess?.({}, params, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
-    mutationKey: ["pushNotificationOptIn"],
+    ...restArgs,
   });
 };
 
-export const useDeleteSelfMutation = (args?: MutationArgs<void>) => {
+export const useDeleteSelfMutation = (args?: MutationArgs) => {
   const { deleter } = useDelete();
   const queryClient = useQueryClient();
 
@@ -310,134 +295,14 @@ export const useDeleteSelfMutation = (args?: MutationArgs<void>) => {
     });
   };
 
+  const { onSuccess, ...restArgs } = args ?? {};
+
   return useMutation({
     mutationFn: mutation,
-    onSuccess: () => {
+    onSuccess: (_, __, ctx) => {
       queryClient.clear();
-      args?.onSuccess?.();
+      onSuccess?.({}, undefined, ctx);
     },
-    onError: (err) => {
-      args?.onFailure?.(err);
-    },
-  });
-};
-
-export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipFilters, args?: QueryArgs) => {
-  const { getter } = useGet();
-  const queryClient = useQueryClient();
-
-  const query = async () => {
-    return await getter<ListUserKitchenMembershipFilters, ListUserKitchenMembershipsResponse>({
-      path: "/user/kitchen/membership/list",
-      withAuth: "access_token",
-      query: {
-        ...(filters ?? { page_number: 0 }),
-      },
-    });
-  };
-
-  return useQuery({
-    queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS(filters),
-    queryFn: async () => {
-      const results = await query();
-      results.data.data.forEach((membership) => {
-        queryClient.setQueryData(UserQueryKeys.GET_KITCHEN_MEMBERSHIP(membership.id), membership);
-      });
-      return results.data;
-    },
-    enabled: args?.disabled !== true,
-  });
-};
-
-export const useCreateKitchenMembershipMutation = () => {
-  const { poster } = usePost();
-  const queryClient = useQueryClient();
-
-  const mutation = async (body: { readonly username: string }) => {
-    return await poster<typeof body, UserKitchenMembership>({
-      withAuth: "access_token",
-      path: "/user/kitchen/membership",
-      body: { ...body },
-    });
-  };
-
-  return useMutation({
-    mutationFn: mutation,
-    onSuccess: (response) => {
-      const membership = response.data;
-      queryClient.setQueryData(UserQueryKeys.GET_KITCHEN_MEMBERSHIP(membership.id), response);
-      queryClient.setQueriesData(
-        {
-          queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS({
-            from_self: true,
-          }),
-        },
-        oldDataCreator(membership)
-      );
-    },
-  });
-};
-
-export const useUpdateKitchenMembershipMutation = () => {
-  const { putter } = usePut();
-  const queryClient = useQueryClient();
-
-  const mutation = async (body: { readonly id: number; readonly status: UserKitchenMembershipStatus }) => {
-    return await putter<typeof body, UserKitchenMembership>({
-      path: "/user/kitchen/membership",
-      body: {
-        ...body,
-      },
-      withAuth: "access_token",
-    });
-  };
-
-  return useMutation({
-    mutationFn: mutation,
-    onSuccess: (response, params) => {
-      const membership = response.data;
-      queryClient.setQueryData(UserQueryKeys.GET_KITCHEN_MEMBERSHIP(membership.id), response);
-
-      // if (params.status === "pending") {
-      queryClient.setQueriesData(
-        {
-          queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS({
-            targeting_self: true,
-            status: ["pending"],
-          }),
-        },
-        oldDataDeleter(membership)
-      );
-      // }
-      queryClient.setQueriesData(
-        {
-          queryKey: UserQueryKeys.LIST_KITCHEN_MEMBERSHIPS({
-            targeting_self: true,
-            status: ["accepted", "denied"],
-          }),
-        },
-        oldDataUpdater(membership)
-      );
-    },
-  });
-};
-
-export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs) => {
-  const { getter } = useGet();
-
-  const query = async () => {
-    return await getter<never, UserKitchenMembership>({
-      path: `/user/kitchen/membership/${id}`,
-      withAuth: "access_token",
-    });
-  };
-
-  return useQuery({
-    queryKey: UserQueryKeys.GET_KITCHEN_MEMBERSHIP(id),
-    queryFn: async () => {
-      const data = await query();
-      return data.data;
-    },
-    enabled: args?.disabled !== true,
+    ...restArgs,
   });
 };

@@ -18,11 +18,6 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
   const { data: user } = useGetSelfQuery();
   const userKitchenMembershipId = (recipe.shares ?? [])[0]?.user_kitchen_membership_id;
 
-  // const { data: userKitchenMembership } = useGetUserKitchenMembershipQuery(userKitchenMembershipId, {
-  //   disabled: !userKitchenMembershipId,
-  // });
-  // const isSharedToUser = !!userKitchenMembershipId && userKitchenMembership?.source_user?.id !== user?.id;
-
   const onView = useCallback(() => {
     navigate(`/recipe/view/${recipe.id}`);
   }, [recipe, navigate]);

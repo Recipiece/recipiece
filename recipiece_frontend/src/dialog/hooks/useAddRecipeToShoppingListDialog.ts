@@ -9,22 +9,7 @@ export const useAddRecipeToShoppingListDialog = (recipe: Recipe) => {
   const { pushDialog, popDialog } = useContext(DialogContext);
   const { toast } = useToast();
 
-  const { mutateAsync: appendToShoppingList } = useAppendShoppingListItemsMutation({
-    onSuccess: () => {
-      toast({
-        title: "Shopping List Updated",
-        description: "The ingredients were added to you shopping list",
-        variant: "default",
-      });
-    },
-    onFailure: () => {
-      toast({
-        title: "Error Adding Ingredients",
-        description: "There was an issue adding the ingredients to the shopping list. Try again later.",
-        variant: "destructive",
-      });
-    },
-  });
+  const { mutateAsync: appendToShoppingList } = useAppendShoppingListItemsMutation();
 
   const onAddToShoppingList = useCallback(
     async (listId: number) => {
@@ -45,8 +30,17 @@ export const useAddRecipeToShoppingListDialog = (recipe: Recipe) => {
                 shopping_list_id: listId,
                 items: itemsToAdd,
               });
+              toast({
+                title: "Shopping List Updated",
+                description: "The ingredients were added to you shopping list",
+                variant: "default",
+              });
             } catch {
-              // noop
+              toast({
+                title: "Error Adding Ingredients",
+                description: "There was an issue adding the ingredients to the shopping list. Try again later.",
+                variant: "destructive",
+              });
             }
           }
           popDialog("addRecipeToShoppingList");
@@ -54,8 +48,8 @@ export const useAddRecipeToShoppingListDialog = (recipe: Recipe) => {
         recipe: recipe,
       });
     },
-    [appendToShoppingList, pushDialog, popDialog, recipe]
+    [pushDialog, recipe, popDialog, appendToShoppingList, toast]
   );
 
   return { onAddToShoppingList };
-}
+};

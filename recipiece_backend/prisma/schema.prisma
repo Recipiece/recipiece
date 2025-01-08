@@ -61,8 +61,11 @@ model UserKitchenMembership {
   status UserKitchenMembershipStatus
 
   recipe_shares RecipeShare[]
+  shopping_list_shares ShoppingListShare[]
 
-  @@index([destination_user_id, status])
+  @@index([status, destination_user_id])
+  @@index([status, source_user_id])
+
   @@unique([source_user_id, destination_user_id])
 }
 
@@ -228,8 +231,24 @@ model ShoppingList {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   shopping_list_items ShoppingListItem[]
+  shopping_list_shares ShoppingListShare[]
 
   @@unique([user_id, name])
+}
+
+model ShoppingListShare {
+  @@map("shopping_list_shares")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  shopping_list_id Int
+  shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([shopping_list_id, user_kitchen_membership_id])
 }
 
 model ShoppingListItem {

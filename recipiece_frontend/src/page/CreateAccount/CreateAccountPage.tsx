@@ -28,15 +28,7 @@ type CreateAccountForm = z.infer<typeof CreateAccountFormSchema>;
 export const CreateAccountPage: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { mutateAsync: createAccount } = useCreateUserMutation({
-    onSuccess: () => {
-      toast({
-        title: "Account Created!",
-        description: "You can now log into Recipiece with the email and password you provided",
-      });
-      navigate("/login");
-    },
-  });
+  const { mutateAsync: createAccount } = useCreateUserMutation();
 
   const form = useForm<CreateAccountForm>({
     resolver: zodResolver(CreateAccountFormSchema),
@@ -54,6 +46,11 @@ export const CreateAccountPage: FC = () => {
         email: formData.email,
         password: formData.password,
       });
+      toast({
+        title: "Account Created!",
+        description: "You can now log into Recipiece with the email and password you provided",
+      });
+      navigate("/login");
     } catch {
       toast({
         title: "Unable to create account",

@@ -108,6 +108,12 @@ export type ShoppingListItem = {
     content: string;
     notes: string | null;
 };
+export type ShoppingListShare = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    shopping_list_id: number;
+    user_kitchen_membership_id: number;
+};
 export type Timer = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
@@ -174,6 +180,7 @@ export type DB = {
     recipes: Recipe;
     scheduled_notifications: ScheduledNotification;
     shopping_list_items: ShoppingListItem;
+    shopping_list_shares: ShoppingListShare;
     shopping_lists: ShoppingList;
     timers: Timer;
     user_access_records: UserAccessRecord;

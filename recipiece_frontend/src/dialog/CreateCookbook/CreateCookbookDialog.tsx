@@ -2,10 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button, Form, FormCheckbox, FormInput, FormTextarea, Stack, SubmitButton } from "../../component";
+import { Button, Form, FormInput, FormTextarea, Stack, SubmitButton } from "../../component";
 import { DialogContext } from "../../context";
-import { BaseDialogProps } from "../BaseDialogProps";
 import { useResponsiveDialogComponents } from "../../hooks";
+import { BaseDialogProps } from "../BaseDialogProps";
 
 const CreateCookbookFormSchema = z.object({
   name: z.string().max(50).min(1, "A name is required"),

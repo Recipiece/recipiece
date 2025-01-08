@@ -24,7 +24,7 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
   } = useListRecipesToAddToCookbook(filters.search!, cookbookId, {
-    disabled: (filters.search || "").length < 2,
+    enabled: (filters.search || "").length >= 2,
   });
 
   useEffect(() => {

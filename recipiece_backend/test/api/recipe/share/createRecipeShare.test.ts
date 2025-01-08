@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import request from "supertest";
-import { prisma } from "../../../src/database";
-import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "../../../src/schema";
+import { prisma } from "../../../../src/database";
+import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "../../../../src/schema";
 import { StatusCodes } from "http-status-codes";
 
 describe("Create Recipe Share", () => {

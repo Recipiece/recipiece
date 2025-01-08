@@ -18,20 +18,8 @@ export const VerifyAccountSection: FC = () => {
   const [hasRequestedToken, setHasRequestedToken] = useState(false);
 
   const { data: account, isLoading: isLoadingAccount } = useGetSelfQuery();
-  const { mutateAsync: requestNewToken } = useRequestVerifyAccountMutation({
-    onSuccess: () => {
-      toast({
-        description: `A verification token was sent to ${account?.email}.`,
-      });
-    },
-  });
-  const { mutateAsync: verifyAccount } = useVerifyAccountMutation({
-    onSuccess: () => {
-      toast({
-        description: "Your account has been verified!",
-      });
-    },
-  });
+  const { mutateAsync: requestNewToken } = useRequestVerifyAccountMutation();
+  const { mutateAsync: verifyAccount } = useVerifyAccountMutation();
 
   const form = useForm<VerifyAccountForm>({
     resolver: zodResolver(VerifyAccountFormSchema),
@@ -44,6 +32,9 @@ export const VerifyAccountSection: FC = () => {
     try {
       await requestNewToken();
       setHasRequestedToken(true);
+      toast({
+        description: `A verification token was sent to ${account?.email}.`,
+      });
     } catch (error) {
       if ((error as AxiosError)?.status === 429) {
         toast({
@@ -64,6 +55,9 @@ export const VerifyAccountSection: FC = () => {
       await verifyAccount({
         token: formData.token,
       });
+      toast({
+        description: "Your account has been verified!",
+      });
     } catch {
       toast({
         description: "We were unable to verify your account. Please try again later.",
@@ -76,7 +70,7 @@ export const VerifyAccountSection: FC = () => {
     <LoadingGroup isLoading={isLoadingAccount} variant="spinner" className="w-8 h-8">
       <H3>
         <div className="flex flex-row items-center gap-2">
-        Account Status <Badge variant={account?.validated ? "default" : "secondary"}>{account?.validated ? "Verified" : "Not Verified"}</Badge>
+          Account Status <Badge variant={account?.validated ? "default" : "secondary"}>{account?.validated ? "Verified" : "Not Verified"}</Badge>
         </div>
       </H3>
       {!account?.validated && (
@@ -103,11 +97,7 @@ export const VerifyAccountSection: FC = () => {
           )}
         </Stack>
       )}
-      {account?.validated && (
-        <p className="text-sm">
-          Your account has been verified. You now have access to all the features of Recipiece.
-        </p>
-      )}
+      {account?.validated && <p className="text-sm">Your account has been verified. You now have access to all the features of Recipiece.</p>}
     </LoadingGroup>
   );
 };

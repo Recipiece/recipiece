@@ -85,7 +85,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
       page_number: 0,
     },
     {
-      disabled: !canAddToShoppingList || !isShoppingListContextMenuOpen,
+      enabled: canAddToShoppingList && isShoppingListContextMenuOpen,
     }
   );
 
@@ -95,63 +95,18 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
       exclude_containing_recipe_id: recipe.id,
     },
     {
-      disabled: !canAddToCookbook || !isCookbookListContextMenuOpen,
+      enabled: canAddToCookbook && isCookbookListContextMenuOpen,
     }
   );
 
   const { data: cookbook } = useGetCookbookByIdQuery(cookbookId!, {
-    disabled: !cookbookId,
+    enabled: !!cookbookId,
   });
 
   const { mutateAsync: shareRecipe } = useCreateRecipeShareMutation();
-
-  const { mutateAsync: forkRecipe } = useForkRecipeMutation({
-    onSuccess: (recipe) => {
-      toast({
-        title: "Recipe Forked!",
-        description: `${recipe.name} was forked into your recipe collection.`,
-      });
-    },
-    onFailure: () => {
-      toast({
-        title: "Failed to Fork Recipe",
-        description: `${recipe!.name} could not be forked. Try again later.`,
-      });
-    },
-  });
-
-  const { mutateAsync: removeRecipeFromCookbook } = useRemoveRecipeFromCookbookMutation({
-    onFailure: () => {
-      toast({
-        title: "Cannot remove recipe from cookbook",
-        description: "There was an issue trying to remove your recipe from this cookbook. Try again later.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Recipe removed",
-        description: "The recipe was removed from the cookbook.",
-      });
-    },
-  });
-
-  const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation({
-    onFailure: (err) => {
-      console.error(err);
-      toast({
-        title: "Cannot add recipe to cookbook",
-        description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Recipe Added",
-        description: "The recipe was added to your cookbook.",
-      });
-    },
-  });
+  const { mutateAsync: forkRecipe } = useForkRecipeMutation();
+  const { mutateAsync: removeRecipeFromCookbook } = useRemoveRecipeFromCookbookMutation();
+  const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
 
   const { onAddToShoppingList } = useAddRecipeToShoppingListDialog(recipe);
   const { onDeleteRecipe } = useDeleteRecipeDialog(recipe);
@@ -176,13 +131,22 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
             recipe: recipe,
             cookbook: cookbook,
           });
+          toast({
+            title: "Recipe Added",
+            description: "The recipe was added to your cookbook.",
+          });
         } catch {
+          toast({
+            title: "Cannot add recipe to cookbook",
+            description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
+            variant: "destructive",
+          });
         } finally {
           popDialog("mobileCookbooks");
         }
       },
     });
-  }, [pushDialog, popDialog, addRecipeToCookbook, recipe]);
+  }, [pushDialog, recipe, popDialog, addRecipeToCookbook, toast]);
 
   const onAddToCookbook = useCallback(
     async (cookbook: Cookbook) => {
@@ -191,9 +155,19 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
           recipe: recipe,
           cookbook: cookbook,
         });
-      } catch {}
+        toast({
+          title: "Recipe Added",
+          description: "The recipe was added to your cookbook.",
+        });
+      } catch {
+        toast({
+          title: "Cannot add recipe to cookbook",
+          description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
+          variant: "destructive",
+        });
+      }
     },
-    [addRecipeToCookbook, recipe]
+    [addRecipeToCookbook, recipe, toast]
   );
 
   const onRemoveRecipeFromCookbook = useCallback(async () => {
@@ -202,10 +176,18 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
         recipe: recipe,
         cookbook: cookbook!,
       });
+      toast({
+        title: "Recipe removed",
+        description: "The recipe was removed from the cookbook.",
+      });
     } catch {
-      // noop
+      toast({
+        title: "Cannot remove recipe from cookbook",
+        description: "There was an issue trying to remove your recipe from this cookbook. Try again later.",
+        variant: "destructive",
+      });
     }
-  }, [removeRecipeFromCookbook, cookbook, recipe]);
+  }, [removeRecipeFromCookbook, recipe, cookbook, toast]);
 
   const onShareRecipe = useCallback(async () => {
     pushDialog("shareRecipe", {
@@ -237,11 +219,19 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const onForkRecipe = useCallback(async () => {
     try {
       const forkedRecipe = await forkRecipe({ original_recipe_id: recipe!.id });
-      navigate(`/recipe/view/${forkedRecipe.data.id}`);
+      toast({
+        title: "Recipe Forked!",
+        description: `${recipe.name} was forked into your recipe collection.`,
+      });
+      navigate(`/recipe/view/${forkedRecipe.id}`);
     } catch {
-      // noop
+      toast({
+        title: "Failed to Fork Recipe",
+        description: `${recipe!.name} could not be forked. Try again later.`,
+        variant: "destructive",
+      });
     }
-  }, [recipe, forkRecipe, navigate]);
+  }, [forkRecipe, recipe, toast, navigate]);
 
   const onCustomScaleRecipe = useCallback(() => {
     pushDialog("scaleRecipe", {

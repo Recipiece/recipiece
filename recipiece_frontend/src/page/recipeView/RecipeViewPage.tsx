@@ -31,7 +31,7 @@ export const RecipeViewPage: FC = () => {
     isLoading: isLoadingRecipe,
     error: recipeError,
   } = useGetRecipeByIdQuery(+id!, {
-    disabled: !id,
+    enabled: !!id,
   });
 
   const userKitchenMembershipId = (originalRecipe?.shares ?? [])[0]?.user_kitchen_membership_id;

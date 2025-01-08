@@ -19,7 +19,7 @@ export const SearchRecipesDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSu
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesQuery({ search: filters.search!, page_number: 0 }, { disabled: (filters.search || "").length < 2 });
+  } = useListRecipesQuery({ search: filters.search!, page_number: 0 }, { enabled: (filters.search || "").length >= 2 });
 
   useEffect(() => {
     const handler = setTimeout(() => {

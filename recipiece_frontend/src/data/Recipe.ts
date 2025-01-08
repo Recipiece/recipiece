@@ -31,6 +31,7 @@ export interface Recipe {
 
 export interface ListRecipeFilters {
   readonly page_number: number;
+  readonly page_size?: number;
   readonly cookbook_id?: number;
   readonly search?: string;
   readonly shared_recipes?: "include" | "exclude";

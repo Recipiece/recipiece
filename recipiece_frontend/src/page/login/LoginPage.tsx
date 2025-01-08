@@ -45,9 +45,9 @@ export const LoginPage: FC = () => {
           password: formData.password,
         });
         const tokenResolver = TokenManager.getInstance();
-        tokenResolver.accessToken = response.data.access_token;
+        tokenResolver.accessToken = response.access_token;
         if (formData.remember) {
-          tokenResolver.refreshToken = response.data.refresh_token;
+          tokenResolver.refreshToken = response.refresh_token;
         }
         navigate("/dashboard");
       } catch (error) {
