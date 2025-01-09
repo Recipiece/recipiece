@@ -58,7 +58,7 @@ export const AppRoutes: FC = () => {
           </TooltipProvider>
         </PushNotificationContextProvider>
       </AuthContextProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 };

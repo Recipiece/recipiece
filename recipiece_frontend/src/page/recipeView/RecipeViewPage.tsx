@@ -217,7 +217,7 @@ export const RecipeViewPage: FC = () => {
                   {(recipe?.ingredients ?? []).map((ing) => {
                     return (
                       <div key={ing.id} className="flex flex-row gap-2 items-center">
-                        <Checkbox checked={checkedOffIngredients.includes(ing.id)} />
+                        <Checkbox checked={checkedOffIngredients.includes(ing.id)} onClick={() => onIngredientChecked(ing.id)} />
                         <span
                           className={`text-black inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}
                           onClick={() => onIngredientChecked(ing.id)}

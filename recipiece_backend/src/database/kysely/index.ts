@@ -123,9 +123,9 @@ export type Timer = {
 export type User = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
-    email: string;
     validated: Generated<boolean>;
     username: string;
+    email: string;
 };
 export type UserAccessRecord = {
     id: Generated<number>;

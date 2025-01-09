@@ -10,10 +10,11 @@ if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
 const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
   try {
     if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
-      return webpush.sendNotification(
+      await webpush.sendNotification(
         subscription.subscription_data as unknown as PushSubscription,
         JSON.stringify(payload)
       );
+      return Promise.resolve();
     } else {
       console.log(
         `APP_ENABLE_PUSH_NOTIFICATIONS is set to ${process.env.APP_ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`

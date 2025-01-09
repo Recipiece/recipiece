@@ -10,7 +10,7 @@ export const seedRecipes = async () => {
     },
   });
 
-  await seedRecipesForUser(user);
+  await seedRecipesForUser(user, 150);
 
   const otherUser = await prisma.user.findUnique({
     where: {
@@ -21,14 +21,14 @@ export const seedRecipes = async () => {
   await seedRecipesForUser(otherUser);
 };
 
-const seedRecipesForUser = async (user) => {
+const seedRecipesForUser = async (user, count = 45) => {
   const getRandomUnit = () => {
     return UNITS[Math.floor(Math.random() * UNITS.length)];
   };
 
-  const dishNames = faker.helpers.uniqueArray(faker.food.dish, 45);
+  const dishNames = faker.helpers.uniqueArray(faker.food.dish, count);
 
-  for (let i = 0; i < 45; i++) {
+  for (let i = 0; i < count; i++) {
     const recipe = await prisma.recipe.create({
       data: {
         user_id: user.id,
@@ -37,7 +37,7 @@ const seedRecipesForUser = async (user) => {
       },
     });
 
-    for (let j = 0; j < i; j++) {
+    for (let j = 0; j < i + 1; j++) {
       await prisma.recipeIngredient.create({
         data: {
           name: faker.food.ingredient(),
@@ -49,10 +49,10 @@ const seedRecipesForUser = async (user) => {
       });
     }
 
-    for (let j = 0; j < i; j++) {
+    for (let j = 0; j < i + 1; j++) {
       await prisma.recipeStep.create({
         data: {
-          content: faker.word.words({ count: { min: 20, max: 500 } }),
+          content: faker.word.words({ count: { min: 20, max: 100 } }),
           recipe_id: recipe.id,
           order: j,
         },

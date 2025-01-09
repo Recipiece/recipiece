@@ -67,7 +67,7 @@ export const LoginPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput required name="username" type="text" label="Username or Email" />
+          <FormInput required autoCapitalize="none" name="username" type="text" label="Username or Email" />
           <FormInput required name="password" type="password" label="Password" />
           <FormCheckbox className="mt-1 mb-1" name="remember" label="Remember Me" />
           <SubmitButton type="submit">Login</SubmitButton>

@@ -42,11 +42,23 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("notificationclick", (event) => {
+  const { tag, data } = event.notification;
+
+  let destinationUrl = "";
+  if (tag.startsWith("recipeShare")) {
+    destinationUrl = `/recipe/view/${data.id}`;
+  } else if (tag.startsWith("shoppingListShare")) {
+    destinationUrl = `/shopping-list/${data.id}`;
+  }
+
+  if (destinationUrl.length > 0) {
+    event.waitUntil(self.clients.openWindow(destinationUrl));
+  }
+
   event.notification.close();
 });
 
 self.addEventListener("push", (event) => {
-  console.log("Push notification", event.data?.json());
   const eventJson = event.data?.json();
   if (eventJson) {
     const { title, ...restNotificationOptions } = eventJson;
@@ -57,6 +69,4 @@ self.addEventListener("push", (event) => {
   }
 });
 
-self.addEventListener("pushsubscriptionchange", (event) => {
-
-});
+self.addEventListener("pushsubscriptionchange", (event) => {});
