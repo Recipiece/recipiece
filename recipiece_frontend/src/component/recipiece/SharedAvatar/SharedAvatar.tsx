@@ -49,7 +49,7 @@ export const SharedAvatar: FC<SharedAvatarProps> = ({ userKitchenMembershipId, s
         </TooltipTrigger>
       )}
       <TooltipContent>
-        {isMembershipTargetingSource && "This is shared with other users"}
+        {isMembershipTargetingSource && "Shared with other users"}
         {isMembershipTargetingDestination && <>Shared to you by {membership.source_user.username}</>}
       </TooltipContent>
     </Tooltip>

@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../../database";
 import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "../../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { sendShoppingListSharedPushNotification } from "../../../util/pushNotification";
 
 /**
  * Allow a user to share a shopping list they own with another user.
@@ -17,6 +18,10 @@ export const createShoppingListShare = async (
       id: user_kitchen_membership_id,
       source_user_id: user.id,
       status: "accepted",
+    },
+    include: {
+      source_user: true,
+      destination_user: true,
     },
   });
 
@@ -55,6 +60,18 @@ export const createShoppingListShare = async (
         shopping_list: true,
       },
     });
+
+    const subscriptions = await prisma.userPushNotificationSubscription.findMany({
+      where: {
+        user_id: membership.destination_user_id,
+      },
+    });
+    if (subscriptions.length > 0) {
+      subscriptions.forEach(async (sub) => {
+        await sendShoppingListSharedPushNotification(sub, membership.source_user, shoppingList);
+      });
+    }
+
     return [StatusCodes.OK, share];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {

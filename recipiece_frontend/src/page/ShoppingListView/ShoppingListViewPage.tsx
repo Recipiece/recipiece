@@ -300,8 +300,8 @@ export const ShoppingListViewPage: FC = () => {
         <LoadingGroup isLoading={isLoadingShoppingList} className="w-[200px] h-6">
           <Shelf>
             <div className="flex flex-row items-center gap-2">
-              {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
               <H2>{shoppingList?.name}</H2>
+              {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
             </div>
             <ShelfSpacer />
             {shoppingList && (

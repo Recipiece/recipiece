@@ -9,8 +9,8 @@ export const ShoppingListMenuItem: FC<{ readonly shoppingList: ShoppingList } & 
   return (
     <MenubarItem {...restProps}>
       <div className="flex flex-row gap-2 items-center">
-      {membershipId && <SharedAvatar size="small" userKitchenMembershipId={membershipId}></SharedAvatar>}
-      {shoppingList.name}
+        {membershipId && <SharedAvatar size="small" userKitchenMembershipId={membershipId}></SharedAvatar>}
+        {shoppingList.name}
       </div>
     </MenubarItem>
   );

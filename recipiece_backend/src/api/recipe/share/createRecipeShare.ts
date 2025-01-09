@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../../database";
 import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "../../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { sendRecipeSharedPushNotification } from "../../../util/pushNotification";
 
 /**
  * Allow a user to share a recipe they own with another user.
@@ -17,6 +18,10 @@ export const createRecipeShare = async (
       id: user_kitchen_membership_id,
       source_user_id: user.id,
       status: "accepted",
+    },
+    include: {
+      source_user: true,
+      destination_user: true,
     },
   });
 
@@ -53,8 +58,20 @@ export const createRecipeShare = async (
       },
       include: {
         recipe: true,
-      }
+      },
     });
+
+    const subscriptions = await prisma.userPushNotificationSubscription.findMany({
+      where: {
+        user_id: membership.destination_user_id,
+      },
+    });
+    if (subscriptions) {
+      subscriptions.forEach(async (sub) => {
+        await sendRecipeSharedPushNotification(sub, membership.source_user, recipe);
+      });
+    }
+
     return [StatusCodes.OK, share];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {

@@ -1,4 +1,4 @@
-import { Timer, UserPushNotificationSubscription } from "@prisma/client";
+import { Recipe, ShoppingList, Timer, User, UserPushNotificationSubscription } from "@prisma/client";
 import webpush, { PushSubscription, WebPushError } from "web-push";
 import { prisma } from "../database";
 
@@ -37,6 +37,38 @@ const sendPushNotification = async (subscription: UserPushNotificationSubscripti
   }
 };
 
+export const sendShoppingListSharedPushNotification = async (
+  subscription: UserPushNotificationSubscription,
+  sourceUser: User,
+  shoppingList: ShoppingList,
+) => {
+  const message = {
+    title: "Shopping List Shared",
+    body: `${sourceUser.username} shared their shopping list ${shoppingList.name} with you`,
+    type: "shoppingListShare",
+    data: { ...shoppingList },
+    requiresInteraction: true,
+    tag: `shoppingListShare${shoppingList.id}`,
+  };
+  await sendPushNotification(subscription, message);
+}
+
+export const sendRecipeSharedPushNotification = async (
+  subscription: UserPushNotificationSubscription,
+  sourceUser: User,
+  recipe: Recipe,
+) => {
+  const message = {
+    title: "Recipe Shared",
+    body: `${sourceUser.username} shared their recipe ${recipe.name} with you`,
+    type: "recipeShare",
+    data: { ...recipe },
+    requiresInteraction: true,
+    tag: `recipeShare${recipe.id}`,
+  };
+  await sendPushNotification(subscription, message);
+}
+
 export const sendTimerFinishedPushNotification = async (
   subscription: UserPushNotificationSubscription,
   timer: Timer
@@ -51,5 +83,4 @@ export const sendTimerFinishedPushNotification = async (
     vibrate: [200, 100, 200, 100, 200, 100, 200],
   };
   await sendPushNotification(subscription, message);
-  console.log("SENT NOTIF");
 };
