@@ -94,7 +94,7 @@ export const MealPlanViewPage: FC = () => {
       end_date: currentEndDate.toUTC().toISO()!,
     },
     {
-      disabled: !mealPlan,
+      enabled: !!mealPlan,
     }
   );
 
@@ -103,7 +103,7 @@ export const MealPlanViewPage: FC = () => {
       page_number: 0,
     },
     {
-      disabled: !isShoppingListContextMenuOpen,
+      enabled: !!isShoppingListContextMenuOpen,
     }
   );
 
@@ -187,7 +187,7 @@ export const MealPlanViewPage: FC = () => {
       onSubmit: async (mealPlanToDelete: MealPlan) => {
         popDialog("deleteMealPlan");
         try {
-          await deleteMealPlan(mealPlanToDelete.id);
+          await deleteMealPlan(mealPlanToDelete);
           navigate("/");
           toast({
             title: "Meal Plan Deleted",

@@ -5,7 +5,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
 import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
-import { AuthContextProvider, DialogContextProvider, PushNotificationContextProvider, TimerContextProvider } from "./context";
+import { AuthContextProvider, DialogContextProvider, PushNotificationContextProvider } from "./context";
 import { useLayout } from "./hooks";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
 
@@ -36,20 +36,20 @@ export const AppRoutes: FC = () => {
             <ToastProvider>
               <DndProvider backend={dndBackend}>
                 <DialogContextProvider>
-                  <TimerContextProvider>
-                    <Routes>
-                      <Route element={<UnauthenticatedLayout />}>
-                        {unauthenticatedRoutes.map((r) => {
-                          return <Route key={r.path} path={r.path} element={<r.element />} />;
-                        })}
-                      </Route>
-                      <Route element={<AuthenticatedLayout />}>
-                        {authenticatedRoutes.map((r) => {
-                          return <Route key={r.path} path={r.path} element={<r.element />} />;
-                        })}
-                      </Route>
-                    </Routes>
-                  </TimerContextProvider>
+                  {/* <TimerContextProvider> */}
+                  <Routes>
+                    <Route element={<UnauthenticatedLayout />}>
+                      {unauthenticatedRoutes.map((r) => {
+                        return <Route key={r.path} path={r.path} element={<r.element />} />;
+                      })}
+                    </Route>
+                    <Route element={<AuthenticatedLayout />}>
+                      {authenticatedRoutes.map((r) => {
+                        return <Route key={r.path} path={r.path} element={<r.element />} />;
+                      })}
+                    </Route>
+                  </Routes>
+                  {/* </TimerContextProvider> */}
                 </DialogContextProvider>
               </DndProvider>
               <Toaster />
@@ -57,6 +57,7 @@ export const AppRoutes: FC = () => {
           </TooltipProvider>
         </PushNotificationContextProvider>
       </AuthContextProvider>
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 };

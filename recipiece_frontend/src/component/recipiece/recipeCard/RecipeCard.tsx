@@ -1,10 +1,12 @@
 import { MoreVertical } from "lucide-react";
 import { FC, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useGetSelfQuery } from "../../../api";
 import { Recipe } from "../../../data";
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, DropdownMenu, DropdownMenuTrigger } from "../../shadcn";
 import { Shelf, ShelfSpacer } from "../Layout";
 import { RecipeContextMenu } from "../RecipeContextMenu";
+import { SharedAvatar } from "../SharedAvatar";
 
 export interface RecipeCardProps {
   readonly recipe: Recipe;
@@ -13,6 +15,8 @@ export interface RecipeCardProps {
 
 export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
   const navigate = useNavigate();
+  const { data: user } = useGetSelfQuery();
+  const userKitchenMembershipId = (recipe.shares ?? [])[0]?.user_kitchen_membership_id;
 
   const onView = useCallback(() => {
     navigate(`/recipe/view/${recipe.id}`);
@@ -31,7 +35,8 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
           <p className="max-h-32 overflow-hidden line-clamp-3">{recipe.description}</p>
         </CardContent>
         <CardFooter>
-          <div className="flex flex-row w-full">
+          <div className="flex flex-row w-full items-center">
+            <SharedAvatar userKitchenMembershipId={userKitchenMembershipId} />
             <DropdownMenuTrigger asChild className="ml-auto">
               <Button variant="ghost">
                 <MoreVertical />
@@ -41,10 +46,11 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
               recipe={recipe}
               cookbookId={cookbookId}
               canRemoveFromCookbook={!!cookbookId}
-              canDelete
-              canEdit
-              canShare={!recipe.private}
-              canAddToCookbook
+              canDelete={recipe.user_id === user?.id}
+              canEdit={recipe.user_id === user?.id}
+              canShare={recipe.user_id === user?.id}
+              canFork={recipe.user_id !== user?.id}
+              canAddToCookbook={recipe.user_id === user?.id}
               canAddToShoppingList
             />
           </div>

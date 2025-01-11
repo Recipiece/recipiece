@@ -1,29 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import { KnownIngredient } from "../../data";
+import { ListKnownIngredientsResponse } from "../../data";
 import { QueryArgs, useGet } from "../Request";
 import { KnownIngredientQueryKeys } from "./KnownIngredientQueryKeys";
 
-export const useListKnownIngredientsQuery = (args?: QueryArgs) => {
+export const useListKnownIngredientsQuery = (args?: QueryArgs<ListKnownIngredientsResponse>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const cookbooks = await getter<never, { readonly data: KnownIngredient[] }>({
+    const response = await getter<never, ListKnownIngredientsResponse>({
       path: "/known-ingredient/list",
       withAuth: "access_token",
     });
-    return cookbooks;
+    return response.data;
   };
 
   return useQuery({
     queryKey: KnownIngredientQueryKeys.LIST_KNOWN_INGREDIENTS(),
-    queryFn: async () => {
-      try {
-        const results = await query();
-        return results.data;
-      } catch (err) {
-        throw err;
-      }
-    },
-    enabled: args?.disabled !== true,
+    queryFn: query,
+    ...(args ?? {}),
   });
 };

@@ -5,7 +5,7 @@ export class StorageKeys {
 }
 
 export class Environment {
-  public static get IS_CAST_IRON_SKILLET () {
+  public static get IS_CAST_IRON_SKILLET() {
     return Environment.RECIPIECE_VERSION === Environment.VERSION_CAST_IRON_SKILLET;
   }
 
@@ -16,3 +16,9 @@ export class Environment {
 export class Timers {
   public static readonly MAX_TIME_MS = 24 * 60 * 60 * 1000;
 }
+
+export const KitchenMembershipStatusMap = {
+  pending: "Pending",
+  accepted: "Accepted",
+  denied: "Denied",
+};

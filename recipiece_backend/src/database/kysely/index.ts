@@ -4,6 +4,12 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export const UserKitchenMembershipStatus = {
+    accepted: "accepted",
+    denied: "denied",
+    pending: "pending"
+} as const;
+export type UserKitchenMembershipStatus = (typeof UserKitchenMembershipStatus)[keyof typeof UserKitchenMembershipStatus];
 export type BackgroundJob = {
     id: Generated<string>;
     created_at: Generated<Timestamp>;
@@ -18,7 +24,6 @@ export type Cookbook = {
     user_id: number;
     name: string;
     description: string | null;
-    private: Generated<boolean>;
     created_at: Generated<Timestamp>;
 };
 export type KnownIngredient = {
@@ -53,7 +58,6 @@ export type Recipe = {
     description: string | null;
     duration_ms: number | null;
     servings: number | null;
-    private: Generated<boolean>;
     metadata: unknown | null;
     user_id: number;
 };
@@ -68,6 +72,12 @@ export type RecipeIngredient = {
     amount: string | null;
     order: number;
     recipe_id: number;
+};
+export type RecipeShare = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    recipe_id: number;
+    user_kitchen_membership_id: number;
 };
 export type RecipeStep = {
     id: Generated<number>;
@@ -98,6 +108,12 @@ export type ShoppingListItem = {
     content: string;
     notes: string | null;
 };
+export type ShoppingListShare = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    shopping_list_id: number;
+    user_kitchen_membership_id: number;
+};
 export type Timer = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
@@ -107,8 +123,9 @@ export type Timer = {
 export type User = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
-    email: string;
     validated: Generated<boolean>;
+    username: string;
+    email: string;
 };
 export type UserAccessRecord = {
     id: Generated<number>;
@@ -123,6 +140,13 @@ export type UserCredentials = {
     created_at: Generated<Timestamp>;
     password_hash: string;
     user_id: number;
+};
+export type UserKitchenMembership = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    source_user_id: number;
+    destination_user_id: number;
+    status: UserKitchenMembershipStatus;
 };
 export type UserPushNotificationSubscription = {
     id: Generated<number>;
@@ -151,14 +175,17 @@ export type DB = {
     meal_plans: MealPlan;
     recipe_cookbook_attachments: RecipeCookbookAttachment;
     recipe_ingredients: RecipeIngredient;
+    recipe_shares: RecipeShare;
     recipe_steps: RecipeStep;
     recipes: Recipe;
     scheduled_notifications: ScheduledNotification;
     shopping_list_items: ShoppingListItem;
+    shopping_list_shares: ShoppingListShare;
     shopping_lists: ShoppingList;
     timers: Timer;
     user_access_records: UserAccessRecord;
     user_credentials: UserCredentials;
+    user_kitchen_memberships: UserKitchenMembership;
     user_push_notification_subscriptions: UserPushNotificationSubscription;
     user_sessions: UserSession;
     user_validation_tokens: UserValidationToken;

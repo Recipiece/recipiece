@@ -1,3 +1,4 @@
+import { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosHeaders, AxiosResponse } from "axios";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,15 +12,19 @@ export const getWebsocketUrl = (): string => {
   return process.env.REACT_APP_WEBSOCKET_URL!;
 };
 
-export interface MutationArgs<SuccessType> {
-  readonly onSuccess?: (data: SuccessType) => void;
-  readonly onFailure?: (err?: Error) => void;
-}
+export const filtersToSearchParams = (filters: Record<string, any>) => {
+  const searchParams = new URLSearchParams();
+  Object.keys(filters).forEach((filterKey) => {
+    if (filters[filterKey] !== null && filters[filterKey] !== undefined) {
+      searchParams.append(filterKey, filters[filterKey].toString());
+    }
+  });
+  return searchParams;
+};
 
-export interface QueryArgs {
-  readonly disabled?: boolean;
-  readonly xQueryKey?: string[];
-}
+export type MutationArgs<Result = unknown, Input = void> = Omit<UseMutationOptions<Result, AxiosError, Input>, "mutationFn" | "mutationKey">;
+
+export type QueryArgs<T> = Omit<UseQueryOptions<T, AxiosError>, "queryFn" | "queryKey">;
 
 export interface HookArgs {
   readonly autoLogoutOnCodes?: number[];
@@ -40,7 +45,7 @@ export interface PutRequest<T> {
 
 export interface DeleteRequest {
   readonly path: string;
-  readonly id: number;
+  readonly id?: number;
   readonly withAuth?: "access_token" | "refresh_token";
 }
 
@@ -55,10 +60,10 @@ export const usePut = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 
@@ -102,10 +107,10 @@ export const usePost = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 
@@ -155,10 +160,10 @@ export const useGet = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 
@@ -174,7 +179,7 @@ export const useGet = (args?: HookArgs) => {
 
     let url = `${getUrl()}${getRequest.path}`;
     if (queryString) {
-      url = `?${queryString}`;
+      url += `?${queryString}`;
     }
 
     try {
@@ -208,10 +213,10 @@ export const useDelete = (args?: HookArgs) => {
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
-    if (args?.autoLogoutOnCodes) {
+    if (args?.autoLogoutOnCodes !== undefined) {
       return args.autoLogoutOnCodes;
     } else {
-      return [401];
+      return [403];
     }
   }, [args]);
 
@@ -224,7 +229,11 @@ export const useDelete = (args?: HookArgs) => {
     }
 
     try {
-      const response = await axios.delete(`${getUrl()}${deleteRequest.path}/${deleteRequest.id}`, {
+      let path = `${getUrl()}${deleteRequest.path}`;
+      if (deleteRequest.id) {
+        path += `/${deleteRequest.id}`;
+      }
+      const response = await axios.delete(path, {
         headers: headers,
       });
 

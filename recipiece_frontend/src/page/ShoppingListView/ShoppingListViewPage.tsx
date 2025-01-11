@@ -1,7 +1,8 @@
 import { Edit, Eraser, Minus, MoreVertical, Share, Trash } from "lucide-react";
 import React, { createRef, FC, KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDeleteShoppingListMutation, useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
+import { useCreateShoppingListShareMutation, useDeleteShoppingListMutation, useGetSelfQuery, useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
 import {
   Button,
   DropdownMenu,
@@ -9,22 +10,23 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  H2,
   Input,
   LoadingGroup,
   Popover,
   PopoverContent,
   PopoverTrigger,
   RecipieceMenuBarContext,
+  SharedAvatar,
   Shelf,
   ShelfSpacer,
   Stack,
   useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
-import { ShoppingList, ShoppingListItem } from "../../data";
-import { CheckableShoppingListItemInput } from "./ShoppingListItemInput";
+import { ShoppingList, ShoppingListItem, UserKitchenMembership } from "../../data";
 import { useLayout } from "../../hooks";
-import { createPortal } from "react-dom";
+import { CheckableShoppingListItemInput } from "./ShoppingListItemInput";
 
 export const ShoppingListViewPage: FC = () => {
   const { shoppingListId } = useParams();
@@ -34,6 +36,7 @@ export const ShoppingListViewPage: FC = () => {
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
 
+  const { data: user } = useGetSelfQuery();
   const { data: shoppingList, isLoading: isLoadingShoppingList } = useGetShoppingListByIdQuery(+shoppingListId!);
   const {
     shoppingListItems,
@@ -49,21 +52,10 @@ export const ShoppingListViewPage: FC = () => {
     setItemNotes,
   } = useShoppingListItemsSubscription(+shoppingListId!);
 
-  const { mutateAsync: deleteShoppingList } = useDeleteShoppingListMutation({
-    onSuccess: () => {
-      toast({
-        title: "Shopping List Deleted",
-        description: "Your shopping list has been deleted.",
-      });
-    },
-    onFailure: () => {
-      toast({
-        title: "Error Deleting Shopping List",
-        description: "The shopping list could not be deleted. Try again later.",
-        variant: "destructive",
-      });
-    },
-  });
+  const sharedMembershipId = shoppingList?.shares?.[0]?.user_kitchen_membership_id;
+
+  const { mutateAsync: deleteShoppingList } = useDeleteShoppingListMutation();
+  const { mutateAsync: createShoppingListShare } = useCreateShoppingListShareMutation();
 
   const [newestShoppingListItem, setNewestShoppingListItem] = useState("");
   const [isAutoCompleteOpen, setIsAutoCompleteOpen] = useState(false);
@@ -223,17 +215,53 @@ export const ShoppingListViewPage: FC = () => {
       onClose: () => popDialog("deleteShoppingList"),
       onSubmit: async (list: ShoppingList) => {
         try {
-          await deleteShoppingList(list.id);
+          await deleteShoppingList(list);
+          toast({
+            title: "Shopping List Deleted",
+            description: "Your shopping list has been deleted.",
+          });
           navigate("/");
         } catch {
-          // noop
+          toast({
+            title: "Error Deleting Shopping List",
+            description: "The shopping list could not be deleted. Try again later.",
+            variant: "destructive",
+          });
         } finally {
           popDialog("deleteShoppingList");
         }
       },
       shoppingList: shoppingList,
     });
-  }, [pushDialog, popDialog, deleteShoppingList, navigate, shoppingList]);
+  }, [pushDialog, shoppingList, popDialog, deleteShoppingList, toast, navigate]);
+
+  const onShareList = useCallback(() => {
+    pushDialog("share", {
+      displayName: shoppingList!.name,
+      entity_id: shoppingList!.id,
+      entity_type: "shopping_list",
+      onClose: () => popDialog("share"),
+      onSubmit: async (membership: UserKitchenMembership) => {
+        try {
+          await createShoppingListShare({
+            shopping_list_id: shoppingList!.id,
+            user_kitchen_membership_id: membership.id,
+          });
+          toast({
+            title: "Shopping List Shared",
+            description: `Your shopping list has been shared with ${membership.destination_user.username}`,
+          });
+        } catch {
+          toast({
+            title: "Unable to Share Shopping List",
+            description: "Your shopping list could not be shared. Try again later.",
+          });
+        } finally {
+          popDialog("share");
+        }
+      },
+    });
+  }, [createShoppingListShare, popDialog, pushDialog, shoppingList, toast]);
 
   const contextMenu = useMemo(() => {
     return (
@@ -244,34 +272,43 @@ export const ShoppingListViewPage: FC = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>
-            <Edit /> Edit List Name
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Share /> Share List
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          {shoppingList?.user_id === user?.id && (
+            <DropdownMenuItem>
+              <Edit /> Edit List Name
+            </DropdownMenuItem>
+          )}
+          {shoppingList?.user_id === user?.id && (
+            <DropdownMenuItem onClick={onShareList}>
+              <Share /> Share List
+            </DropdownMenuItem>
+          )}
+          {shoppingList?.user_id === user?.id && <DropdownMenuSeparator />}
           <DropdownMenuItem onClick={clearItems} className="text-destructive">
             <Eraser /> Clear All Items
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onRequestShoppingListDelete} className="text-destructive">
-            <Trash /> Delete List
-          </DropdownMenuItem>
+          {shoppingList?.user_id === user?.id && (
+            <DropdownMenuItem onClick={onRequestShoppingListDelete} className="text-destructive">
+              <Trash /> Delete List
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     );
-  }, [clearItems, onRequestShoppingListDelete]);
+  }, [clearItems, onRequestShoppingListDelete, onShareList, shoppingList, user]);
 
   return (
     <Popover open={isAutoCompleteOpen}>
       <Stack>
         <LoadingGroup isLoading={isLoadingShoppingList} className="w-[200px] h-6">
           <Shelf>
-            <h1 className="text-2xl">{shoppingList?.name}</h1>
+            <div className="flex flex-row items-center gap-2">
+              <H2>{shoppingList?.name}</H2>
+              {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
+            </div>
             <ShelfSpacer />
             {shoppingList && (
               <>
-                {(isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current) && createPortal(contextMenu, mobileMenuPortalRef.current)}
+                {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(contextMenu, mobileMenuPortalRef.current)}
                 {!isMobile && <>{contextMenu}</>}
               </>
             )}

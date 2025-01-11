@@ -4,6 +4,7 @@
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 generator kysely {
@@ -13,8 +14,9 @@ generator kysely {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [citext]
 }
 
 model User {
@@ -22,8 +24,9 @@ model User {
 
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
-  email String @unique
   validated Boolean @default(false)
+  username String @unique @db.Citext
+  email String @unique @db.Citext
 
   recipes Recipe[]
   cookbooks Cookbook[]
@@ -36,6 +39,36 @@ model User {
   timers Timer[]
   meal_plans MealPlan[]
   user_push_notification_subscriptions UserPushNotificationSubscription[]
+  source_user_kitchen_memberships UserKitchenMembership[] @relation(name: "source_user")
+  destination_user_kitchen_memberships UserKitchenMembership[] @relation(name: "destination_user")
+}
+
+enum UserKitchenMembershipStatus {
+  accepted
+  denied
+  pending
+}
+
+model UserKitchenMembership {
+  @@map("user_kitchen_memberships")
+  
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  source_user_id Int
+  source_user User @relation(name: "source_user", fields: [source_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  destination_user_id Int
+  destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  status UserKitchenMembershipStatus
+
+  recipe_shares RecipeShare[]
+  shopping_list_shares ShoppingListShare[]
+
+  @@index([status, destination_user_id])
+  @@index([status, source_user_id])
+
+  @@unique([source_user_id, destination_user_id])
 }
 
 model UserAccessRecord {
@@ -98,6 +131,21 @@ model UserValidationToken {
   user_id Int
 }
 
+model RecipeShare {
+  @@map("recipe_shares")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  recipe_id Int
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([recipe_id, user_kitchen_membership_id])
+}
+
 model Recipe {
   @@map("recipes")
 
@@ -107,7 +155,6 @@ model Recipe {
   description String?
   duration_ms Int?
   servings Int?
-  private Boolean @default(false)
   metadata Json?
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -118,6 +165,7 @@ model Recipe {
   recipe_cookbook_attachments RecipeCookbookAttachment[]
   meal_plan_items MealPlanItem[]
   scheduled_notifications ScheduledNotification[]
+  recipe_shares RecipeShare[]
 
   @@index([user_id, name])
 }
@@ -156,7 +204,6 @@ model Cookbook {
 
   name String
   description String?
-  private Boolean @default(false)
   created_at DateTime @default(now())
 
   recipe_cookbook_attachments RecipeCookbookAttachment[]
@@ -186,8 +233,24 @@ model ShoppingList {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   shopping_list_items ShoppingListItem[]
+  shopping_list_shares ShoppingListShare[]
 
   @@unique([user_id, name])
+}
+
+model ShoppingListShare {
+  @@map("shopping_list_shares")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  shopping_list_id Int
+  shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([shopping_list_id, user_kitchen_membership_id])
 }
 
 model ShoppingListItem {

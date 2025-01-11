@@ -1,12 +1,13 @@
 import { ListMealPlanFilters, ListMealPlanItemsFilters } from "../../data";
+import { RcpQueryKey } from "../QueryKeys";
 
 export class MealPlanQueryKeys {
-  public static readonly GET_MEAL_PLAN = (mealPlanId: number) => {
+  public static readonly GET_MEAL_PLAN = (mealPlanId: number): RcpQueryKey => {
     return ["mealPlan", { id: mealPlanId }];
   };
 
-  public static readonly LIST_MEAL_PLANS = (filters?: ListMealPlanFilters) => {
-    const base: any[] = ["listMealPlans"];
+  public static readonly LIST_MEAL_PLANS = (filters?: ListMealPlanFilters): RcpQueryKey => {
+    const base: RcpQueryKey = ["listMealPlans"];
 
     if (filters) {
       const { page_number, search } = filters;
@@ -21,8 +22,8 @@ export class MealPlanQueryKeys {
     return base;
   };
 
-  public static readonly LIST_MEAL_PLAN_ITEMS = (mealPlanId: number, filters?: ListMealPlanItemsFilters) => {
-    const base: any[] = ["listMealPlanItems", {
+  public static readonly LIST_MEAL_PLAN_ITEMS = (mealPlanId: number, filters?: ListMealPlanItemsFilters): RcpQueryKey => {
+    const base: RcpQueryKey = ["listMealPlanItems", {
       meal_plan_id: mealPlanId,
     }];
 

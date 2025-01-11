@@ -781,6 +781,11 @@ body {
   margin-bottom: 0.25rem;
 }
 
+.my-6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .-ml-4 {
   margin-left: -1rem;
 }
@@ -815,6 +820,10 @@ body {
 
 .ml-4 {
   margin-left: 1rem;
+}
+
+.ml-6 {
+  margin-left: 1.5rem;
 }
 
 .ml-auto {
@@ -853,6 +862,10 @@ body {
   margin-top: 1rem;
 }
 
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
 .mt-auto {
   margin-top: auto;
 }
@@ -878,6 +891,10 @@ body {
 
 .inline-flex {
   display: inline-flex;
+}
+
+.table {
+  display: table;
 }
 
 .grid {
@@ -991,6 +1008,10 @@ body {
 
 .h-auto {
   height: auto;
+}
+
+.h-fit {
+  height: fit-content;
 }
 
 .h-full {
@@ -1123,6 +1144,10 @@ body {
 
 .w-auto {
   width: auto;
+}
+
+.w-fit {
+  width: fit-content;
 }
 
 .w-full {
@@ -1285,6 +1310,10 @@ body {
   scroll-margin: 5rem;
 }
 
+.list-disc {
+  list-style-type: disc;
+}
+
 .grid-flow-row {
   grid-auto-flow: row;
 }
@@ -1415,6 +1444,10 @@ body {
   white-space: nowrap;
 }
 
+.rounded {
+  border-radius: 0.25rem;
+}
+
 .rounded-\[inherit\] {
   border-radius: inherit;
 }
@@ -1484,6 +1517,10 @@ body {
 
 .border-l {
   border-left-width: 1px;
+}
+
+.border-l-2 {
+  border-left-width: 2px;
 }
 
 .border-l-\[1px\] {
@@ -1643,11 +1680,6 @@ body {
   padding: 1px;
 }
 
-.px-0 {
-  padding-left: 0px;
-  padding-right: 0px;
-}
-
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
@@ -1678,9 +1710,9 @@ body {
   padding-right: 2rem;
 }
 
-.py-0 {
-  padding-top: 0px;
-  padding-bottom: 0px;
+.px-\[0\.3rem\] {
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
 }
 
 .py-0\.5 {
@@ -1718,6 +1750,15 @@ body {
   padding-bottom: 1.5rem;
 }
 
+.py-\[0\.2rem\] {
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
 .pb-3 {
   padding-bottom: 0.75rem;
 }
@@ -1732,6 +1773,10 @@ body {
 
 .pl-4 {
   padding-left: 1rem;
+}
+
+.pl-6 {
+  padding-left: 1.5rem;
 }
 
 .pl-8 {
@@ -1778,9 +1823,18 @@ body {
   text-align: start;
 }
 
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
 .text-4xl {
@@ -1812,6 +1866,10 @@ body {
   font-weight: 700;
 }
 
+.font-extrabold {
+  font-weight: 800;
+}
+
 .font-medium {
   font-weight: 500;
 }
@@ -1824,6 +1882,10 @@ body {
   font-weight: 600;
 }
 
+.italic {
+  font-style: italic;
+}
+
 .tabular-nums {
   --tw-numeric-spacing: tabular-nums;
   font-variant-numeric: var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction);
@@ -1831,6 +1893,10 @@ body {
 
 .leading-6 {
   line-height: 1.5rem;
+}
+
+.leading-7 {
+  line-height: 1.75rem;
 }
 
 .leading-none {
@@ -2170,6 +2236,38 @@ body {
   width: 2px;
 }
 
+.first\:mt-0:first-child {
+  margin-top: 0px;
+}
+
+.even\:bg-muted:nth-child(even) {
+  background-color: hsl(var(--muted));
+}
+
+.even\:bg-muted-foreground:nth-child(even) {
+  background-color: hsl(var(--muted-foreground));
+}
+
+.even\:bg-slate-100:nth-child(even) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 245 249 / var(--tw-bg-opacity));
+}
+
+.even\:bg-slate-50:nth-child(even) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(248 250 252 / var(--tw-bg-opacity));
+}
+
+.even\:bg-gray-50:nth-child(even) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity));
+}
+
+.even\:bg-white:nth-child(even) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
 .focus-within\:outline-none:focus-within {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -2483,6 +2581,10 @@ body {
   background-color: hsl(var(--accent));
 }
 
+.data-\[state\=active\]\:bg-background[data-state="active"] {
+  background-color: hsl(var(--background));
+}
+
 .data-\[state\=checked\]\:bg-primary[data-state="checked"] {
   background-color: var(--primary);
 }
@@ -2507,6 +2609,10 @@ body {
   color: hsl(var(--accent-foreground));
 }
 
+.data-\[state\=active\]\:text-foreground[data-state="active"] {
+  color: hsl(var(--foreground));
+}
+
 .data-\[state\=checked\]\:text-primary-foreground[data-state="checked"] {
   color: hsl(var(--primary-foreground));
 }
@@ -2529,6 +2635,12 @@ body {
 
 .data-\[state\=open\]\:opacity-100[data-state="open"] {
   opacity: 1;
+}
+
+.data-\[state\=active\]\:shadow-sm[data-state="active"] {
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 .data-\[swipe\=move\]\:transition-none[data-swipe="move"] {
@@ -2844,12 +2956,12 @@ body {
     margin-left: auto;
   }
 
-  .sm\:block {
-    display: block;
+  .sm\:mr-2 {
+    margin-right: 0.5rem;
   }
 
-  .sm\:inline-block {
-    display: inline-block;
+  .sm\:block {
+    display: block;
   }
 
   .sm\:inline {
@@ -2886,10 +2998,6 @@ body {
 
   .sm\:max-w-sm {
     max-width: 24rem;
-  }
-
-  .sm\:basis-1\/2 {
-    flex-basis: 50%;
   }
 
   .sm\:basis-4\/12 {
@@ -2944,6 +3052,10 @@ body {
 
   .sm\:p-4 {
     padding: 1rem;
+  }
+
+  .sm\:pr-\[50\%\] {
+    padding-right: 50%;
   }
 
   .sm\:pt-12 {
@@ -3046,6 +3158,14 @@ body {
     grid-column: span 6 / span 6;
   }
 
+  .lg\:inline-block {
+    display: inline-block;
+  }
+
+  .lg\:basis-1\/2 {
+    flex-basis: 50%;
+  }
+
   .lg\:grid-cols-12 {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
@@ -3053,10 +3173,23 @@ body {
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+
+  .lg\:text-5xl {
+    font-size: 3rem;
+    line-height: 1;
+  }
+}
+
+.\[\&\:not\(\:first-child\)\]\:mt-6:not(:first-child) {
+  margin-top: 1.5rem;
 }
 
 .\[\&\>button\]\:hidden>button {
   display: none;
+}
+
+.\[\&\>li\]\:mt-2>li {
+  margin-top: 0.5rem;
 }
 
 .\[\&\>span\:last-child\]\:truncate>span:last-child {
@@ -3083,6 +3216,14 @@ body {
 
 .\[\&\>svg\]\:text-sidebar-accent-foreground>svg {
   color: hsl(var(--sidebar-accent-foreground));
+}
+
+.\[\&\[align\=center\]\]\:text-center[align=center] {
+  text-align: center;
+}
+
+.\[\&\[align\=right\]\]\:text-right[align=right] {
+  text-align: right;
 }
 
 .\[\&\[data-state\=open\]\>svg\]\:rotate-180[data-state=open]>svg {

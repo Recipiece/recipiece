@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { TokenPayload } from "../../../src/types";
 import { DateTime } from "luxon";
 import { UserSessions } from "../../../src/util/constant";
+import { prisma } from "../../../src/database";
 
 describe("Refresh Token", () => {
   let user: User;
@@ -37,7 +38,7 @@ describe("Refresh Token", () => {
     const decodedRefreshToken = jwt.verify(refreshToken, process.env.APP_SECRET!);
     const sessionId = (decodedRefreshToken as TokenPayload).session;
 
-    const matchingSession = await testPrisma.userSession.findFirst({
+    const matchingSession = await prisma.userSession.findFirst({
       where: {
         id: sessionId,
       },
@@ -53,7 +54,7 @@ describe("Refresh Token", () => {
       .plus({ milliseconds: UserSessions.REFRESH_CLOSE_TO_EXPIRY_THRESHOLD_MS })
       .toJSDate();
 
-    await testPrisma.userSession.update({
+    await prisma.userSession.update({
       where: {
         id: sessionId,
       },
@@ -80,6 +81,6 @@ describe("Refresh Token", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+    expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
   });
 });

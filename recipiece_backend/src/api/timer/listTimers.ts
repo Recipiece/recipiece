@@ -14,7 +14,6 @@ export const listTimers = async (
   const userId = query.user_id ?? user.id;
   const pageSize = query.page_size || DEFAULT_PAGE_SIZE;
   const page = query.page_number;
-  const search = query.search;
 
   let where: Prisma.TimerWhereInput = {
     user_id: userId,

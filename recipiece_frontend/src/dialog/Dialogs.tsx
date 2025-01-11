@@ -5,9 +5,12 @@ import { ConvertIngredientDialog } from "./ConvertIngredient";
 import { CreateCookbookDialog } from "./CreateCookbook";
 import { CreateShoppingListDialog } from "./CreateShoppingList";
 import { CreateTimerDialog } from "./CreateTimer";
+import { DeleteAccountDialog } from "./DeleteAccount";
 import { DeleteMealPlanDialog } from "./DeleteMealPlan";
 import { DeleteRecipeDialog } from "./DeleteRecipe";
 import { DeleteShoppingListDialog } from "./DeleteShoppingList";
+import { DeleteUserKitchenMembershipDialog } from "./DeleteUserKitchenMembership";
+import { ExtendKitchenInvitationDialog } from "./ExtendKitchenInvitation";
 import { ImportRecipesDialog } from "./ImportRecipes";
 import { MobileCreateMenuDialog } from "./MobileCreateMenu";
 import { MobileListCookbooksDialog } from "./MobileListCookbooks";
@@ -20,6 +23,7 @@ import { ScaleRecipeDialog } from "./ScaleRecipe";
 import { SearchRecipesDialog } from "./SearchRecipes";
 import { SearchRecipesForCookbookDialog } from "./SearchRecipesForCookbook";
 import { SearchRecipesForMealPlanDialog } from "./SearchRecipesForMealPlan";
+import { ShareDialog } from "./Share";
 
 export const Dialogs = {
   createCookbook: {
@@ -87,5 +91,17 @@ export const Dialogs = {
   },
   scaleRecipe: {
     component: ScaleRecipeDialog,
+  },
+  deleteAccount: {
+    component: DeleteAccountDialog,
+  },
+  extendKitchenInvitation: {
+    component: ExtendKitchenInvitationDialog,
+  },
+  share: {
+    component: ShareDialog,
+  },
+  deleteUserKitchenMembership: {
+    component: DeleteUserKitchenMembershipDialog,
   },
 };

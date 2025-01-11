@@ -1,4 +1,4 @@
-import { boolean, InferType, number, object, string } from "yup";
+import { InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YCookbookSchema = object({
@@ -6,7 +6,6 @@ export const YCookbookSchema = object({
   user_id: number().required(),
   name: string().required(),
   description: string().notRequired(),
-  private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
 export interface CookbookSchema extends InferType<typeof YCookbookSchema> {}
@@ -18,7 +17,6 @@ export interface CookbookSchema extends InferType<typeof YCookbookSchema> {}
 export const YCreateCookbookRequestSchema = object({
   name: string().required(),
   description: string().notRequired(),
-  private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
 export interface CreateCookbookRequestSchema extends InferType<typeof YCreateCookbookRequestSchema> {}
@@ -30,7 +28,6 @@ export const YUpdateCookbookRequestSchema = object({
   id: number().required(),
   name: string().notRequired(),
   description: string().notRequired(),
-  private: boolean().notRequired().default(false),
 }).strict().noUnknown();
 
 export interface UpdateCookbookRequestSchema extends InferType<typeof YUpdateCookbookRequestSchema> {}
@@ -61,8 +58,8 @@ export interface RemoveRecipeFromCookbookRequestSchema extends InferType<typeof 
  * List cookbooks schema
  */
 export const YListCookbooksQuerySchema = YListQuerySchema.shape({
-  user_id: number().notRequired(),
   exclude_containing_recipe_id: number().notRequired(),
+  search: string().notRequired(),
 }).strict().noUnknown();
 
 export interface ListCookbooksQuerySchema extends InferType<typeof YListCookbooksQuerySchema> {}

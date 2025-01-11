@@ -1,4 +1,3 @@
-import { CONVERT_ROUTES } from "./convert";
 import { COOKBOOK_ROUTES } from "./cookbook";
 import { KNOWN_INGREDIENT_ROUTES } from "./knownIngredient";
 import { MEAL_PLAN_ROUTES } from "./mealPlan";
@@ -11,7 +10,6 @@ export const ROUTES = [
   ...LOGIN_ROUTES,
   ...RECIPE_ROUTES,
   ...COOKBOOK_ROUTES,
-  ...CONVERT_ROUTES,
   ...SHOPPING_LIST_ROUTES,
   ...TIMER_ROUTES,
   ...MEAL_PLAN_ROUTES,

@@ -6,11 +6,11 @@ import {
   YListShoppingListsResponseSchema,
   YModifyShoppingListMessage,
   YModifyShoppingListResponse,
+  YRequestShoppingListSessionResponseSchema,
   YShoppingListSchema,
   YUpdateShoppingListSchema,
 } from "../../schema";
 import { Route, WebsocketRoute } from "../../types";
-import { Versions } from "../../util/constant";
 import { appendShoppingListItems } from "./appendShoppingListItems";
 import { createShoppingList } from "./createShoppingList";
 import { deleteShoppingList } from "./deleteShoppingList";
@@ -18,6 +18,7 @@ import { getShoppingList } from "./getShoppingList";
 import { listShoppingLists } from "./listShoppingLists";
 import { modifyShoppingListItems } from "./modifyShoppingListItems";
 import { requestShoppingListSession } from "./requestShoppingListSession";
+import { SHOPPING_LIST_SHARE_ROUTES } from "./share";
 import { updateShoppingList } from "./updateShoppingList";
 
 export const SHOPPING_LIST_ROUTES: Route[] = [
@@ -28,7 +29,7 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: createShoppingList,
     requestSchema: YCreateShoppingListSchema,
     responseSchema: YShoppingListSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/shopping-list",
@@ -37,7 +38,7 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: updateShoppingList,
     requestSchema: YUpdateShoppingListSchema,
     responseSchema: YShoppingListSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/shopping-list/list",
@@ -46,28 +47,28 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: listShoppingLists,
     requestSchema: YListShoppingListsQuerySchema,
     responseSchema: YListShoppingListsResponseSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/shopping-list/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
     function: getShoppingList,
-    version: Versions.ALL,
+    
   },
   {
     path: "/shopping-list/:id(\\d+)",
     authentication: "access_token",
     method: "DELETE",
     function: deleteShoppingList,
-    version: Versions.ALL,
+    
   },
   {
     path: "/shopping-list/:id(\\d+)/session",
     authentication: "access_token",
     method: "GET",
     function: requestShoppingListSession,
-    version: Versions.ALL,
+    responseSchema: YRequestShoppingListSessionResponseSchema,
   },
   {
     path: "/shopping-list/append-items",
@@ -76,8 +77,9 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: appendShoppingListItems,
     requestSchema: YAppendShoppingListItemsRequestSchema,
     responseSchema: YAppendShoppingListItemsResponseSchema,
-    version: Versions.ALL,
+    
   },
+  ...SHOPPING_LIST_SHARE_ROUTES,
 ];
 
 export const SHOPPING_LIST_WEBSOCKET_ROUTES: WebsocketRoute[] = [
@@ -87,6 +89,5 @@ export const SHOPPING_LIST_WEBSOCKET_ROUTES: WebsocketRoute[] = [
     function: modifyShoppingListItems,
     requestSchema: YModifyShoppingListMessage,
     responseSchema: YModifyShoppingListResponse,
-    version: Versions.ALL,
   },
 ];

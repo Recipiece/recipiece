@@ -11,20 +11,19 @@ export const listMealPlans = async (
   const query = request.query;
   const { id: userId } = request.user;
 
-  const pageSize = query.page_size || DEFAULT_PAGE_SIZE;
+  const pageSize = query.page_size ?? DEFAULT_PAGE_SIZE;
   const page = query.page_number;
-  const search = query.search;
 
   let where: Prisma.MealPlanWhereInput = {
     user_id: userId,
   };
 
-  if (search) {
-    where.name = {
-      contains: search,
-      mode: "insensitive",
-    };
-  }
+  // if (search) {
+  //   where.name = {
+  //     contains: search,
+  //     mode: "insensitive",
+  //   };
+  // }
 
   const offset = page * pageSize;
 

@@ -1,14 +1,6 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
-
-export const YShoppingListSchema = object({
-  id: number().required(),
-  name: string().required(),
-  created_at: date().required(),
-  user_id: number().required(),
-})
-  .strict()
-  .noUnknown();
+import { YUserKitchenMembershipSchema } from "./user";
 
 export const YShoppingListItemSchema = object({
   id: number().required(),
@@ -21,9 +13,29 @@ export const YShoppingListItemSchema = object({
   .strict()
   .noUnknown();
 
+export const YShoppingListShareSchema = object({
+  id: number().required(),
+  created_at: date().required(),
+  shopping_list_id: number().required(),
+  user_kitchen_membership_id: number().required(),
+});
+
+export const YShoppingListSchema = object({
+  id: number().required(),
+  name: string().required(),
+  created_at: date().required(),
+  user_id: number().required(),
+  items: array(YShoppingListItemSchema).notRequired(),
+  shares: array(YShoppingListShareSchema).notRequired(),
+})
+  .strict()
+  .noUnknown();
+
 export interface ShoppingListSchema extends InferType<typeof YShoppingListSchema> {}
 
 export interface ShoppingListItemSchema extends InferType<typeof YShoppingListItemSchema> {}
+
+export interface ShoppingListShareSchema extends InferType<typeof YShoppingListShareSchema> {}
 
 /**
  * Create shopping list
@@ -52,7 +64,7 @@ export interface UpdateShoppingListSchema extends InferType<typeof YUpdateShoppi
  * List shopping lists schema
  */
 export const YListShoppingListsQuerySchema = YListQuerySchema.shape({
-  user_id: number().notRequired(),
+  shared_shopping_lists: string().oneOf(["include", "exclude"]).notRequired().default("include"),
 })
   .strict()
   .noUnknown();
@@ -62,6 +74,15 @@ export interface ListShoppingListsQuerySchema extends InferType<typeof YListShop
 export const YListShoppingListsResponseSchema = generateYListQuerySchema(YShoppingListSchema);
 
 export interface ListShoppingListsResponseSchema extends InferType<typeof YListShoppingListsResponseSchema> {}
+
+/**
+ * Request shopping list session
+ */
+export const YRequestShoppingListSessionResponseSchema = object({
+  token: string().uuid().required(),
+}).strict().noUnknown();
+
+export interface RequestShoppingListSessionResponseSchema extends InferType<typeof YRequestShoppingListSessionResponseSchema>{}
 
 /**
  * Modify Shopping List
@@ -112,3 +133,45 @@ export const YAppendShoppingListItemsResponseSchema = array(YShoppingListItemSch
 
 export interface AppendShoppingListItemsResponseSchema
   extends InferType<typeof YAppendShoppingListItemsResponseSchema> {}
+
+/**
+ * Create ShoppingList Share
+ */
+export const YCreateShoppingListShareRequestSchema = object({
+  user_kitchen_membership_id: number().required(),
+  shopping_list_id: number().required(),
+})
+  .strict()
+  .noUnknown();
+
+export interface CreateShoppingListShareRequestSchema extends InferType<typeof YCreateShoppingListShareRequestSchema> {}
+
+/**
+ * List ShoppingList Shares
+ */
+export const YListShoppingListSharesQuerySchema = YListQuerySchema.shape({
+  targeting_self: boolean().notRequired(),
+  from_self: boolean().notRequired(),
+  user_kitchen_membership_id: number().notRequired(),
+})
+  .test("onlyOneOfTargetingSelfOrFromSelf", "Must specify only one of targeting_self or from_self", (ctx) => {
+    return !ctx.from_self || !ctx.targeting_self;
+  })
+  .strict()
+  .noUnknown();
+
+export interface ListShoppingListSharesQuerySchema extends InferType<typeof YListShoppingListSharesQuerySchema> {}
+
+export const YListShoppingListSharesResponseSchema = generateYListQuerySchema(
+  YShoppingListShareSchema.shape({
+    shopping_list: object({
+      id: number().required(),
+      name: string().required(),
+    }).required(),
+    user_kitchen_membership: YUserKitchenMembershipSchema.required(),
+  })
+)
+  .strict()
+  .noUnknown();
+
+export interface ListShoppingListSharesResponseSchema extends InferType<typeof YListShoppingListSharesResponseSchema> {}

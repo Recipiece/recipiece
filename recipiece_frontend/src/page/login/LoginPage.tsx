@@ -9,7 +9,7 @@ import { TokenManager, useLoginUserMutation } from "../../api";
 import { Button, Form, FormCheckbox, FormInput, Stack, SubmitButton, useToast } from "../../component";
 
 const LoginFormSchema = z.object({
-  username: z.string().email("Enter your email address."),
+  username: z.string(),
   password: z.string().min(1, "Enter your password."),
   remember: z.boolean().optional().default(false),
 });
@@ -45,13 +45,14 @@ export const LoginPage: FC = () => {
           password: formData.password,
         });
         const tokenResolver = TokenManager.getInstance();
-        tokenResolver.accessToken = response.data.access_token;
+        tokenResolver.accessToken = response.access_token;
         if (formData.remember) {
-          tokenResolver.refreshToken = response.data.refresh_token;
+          tokenResolver.refreshToken = response.refresh_token;
         }
         navigate("/dashboard");
       } catch (error) {
-        if ((error as AxiosError)?.status === 404) {
+        console.error(error);
+        if ((error as AxiosError)?.status === 403) {
           toast({
             description: "Incorrect username or password",
             variant: "destructive",
@@ -66,8 +67,8 @@ export const LoginPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput name="username" type="email" label="Username" />
-          <FormInput name="password" type="password" label="Password" />
+          <FormInput required autoCapitalize="none" name="username" type="text" label="Username or Email" />
+          <FormInput required name="password" type="password" label="Password" />
           <FormCheckbox className="mt-1 mb-1" name="remember" label="Remember Me" />
           <SubmitButton type="submit">Login</SubmitButton>
           <Button onClick={() => navigate("/create-account")} variant="link">

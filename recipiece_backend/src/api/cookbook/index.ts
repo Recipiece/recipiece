@@ -17,7 +17,7 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: createCookbook,
     requestSchema: YCreateCookbookRequestSchema,
     responseSchema: YCookbookSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/cookbook/recipe/add",
@@ -25,21 +25,21 @@ export const COOKBOOK_ROUTES: Route[] = [
     method: "POST",
     function: addRecipeToCookbook,
     requestSchema: YAddRecipeToCookbookRequestSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "access_token",
     method: "DELETE",
     function: deleteCookbook,
-    version: Versions.ALL,
+    
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
     function: getCookbook,
-    version: Versions.ALL,
+    
   },
   {
     path: "/cookbook/list",
@@ -48,7 +48,7 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: listCookbooks,
     requestSchema: YListCookbooksQuerySchema,
     responseSchema: YListCookbooksResponseSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/cookbook/recipe/remove",
@@ -56,7 +56,7 @@ export const COOKBOOK_ROUTES: Route[] = [
     method: "POST",
     function: removeRecipeFromCookbook,
     requestSchema: YRemoveRecipeFromCookbookRequestSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/cookbook",
@@ -65,6 +65,6 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: updateCookbook,
     requestSchema: YUpdateCookbookRequestSchema,
     responseSchema: YCookbookSchema,
-    version: Versions.ALL,
+    
   },
 ];

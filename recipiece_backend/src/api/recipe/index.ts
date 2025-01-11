@@ -5,16 +5,16 @@ import {
   YListRecipesQuerySchema,
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
-  YUpdateRecipeRequestSchema,
+  YUpdateRecipeRequestSchema
 } from "../../schema";
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
 import { createRecipe } from "./createRecipe";
 import { deleteRecipe } from "./deleteRecipe";
 import { forkRecipe } from "./forkRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
 import { parseRecipeFromUrl } from "./parseFromUrl";
+import { RECIPE_SHARE_ROUTES } from "./share";
 import { updateRecipe } from "./updateRecipe";
 
 export const RECIPE_ROUTES: Route[] = [
@@ -25,7 +25,6 @@ export const RECIPE_ROUTES: Route[] = [
     function: createRecipe,
     requestSchema: YCreateRecipeRequestSchema,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
   },
   {
     path: "/recipe",
@@ -34,7 +33,6 @@ export const RECIPE_ROUTES: Route[] = [
     function: updateRecipe,
     requestSchema: YUpdateRecipeRequestSchema,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
   },
   {
     path: "/recipe/parse/url",
@@ -43,7 +41,6 @@ export const RECIPE_ROUTES: Route[] = [
     function: parseRecipeFromUrl,
     requestSchema: YParseRecipeFromURLRequestSchema,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
   },
   {
     path: "/recipe/list",
@@ -52,7 +49,6 @@ export const RECIPE_ROUTES: Route[] = [
     function: listRecipes,
     requestSchema: YListRecipesQuerySchema,
     responseSchema: YListCookbooksResponseSchema,
-    version: Versions.ALL,
   },
   {
     path: "/recipe/:id(\\d+)",
@@ -60,22 +56,20 @@ export const RECIPE_ROUTES: Route[] = [
     method: "GET",
     function: getRecipe,
     responseSchema: YRecipeSchema,
-    version: Versions.ALL,
   },
   {
     path: "/recipe/:id(\\d+)",
     authentication: "access_token",
     method: "DELETE",
     function: deleteRecipe,
-    version: Versions.ALL,
   },
   {
     path: "/recipe/fork",
     authentication: "access_token",
     method: "POST",
     function: forkRecipe,
-    version: Versions.ALL,
     requestSchema: YForkRecipeRequestSchema,
     responseSchema: YRecipeSchema,
   },
+  ...RECIPE_SHARE_ROUTES,
 ];

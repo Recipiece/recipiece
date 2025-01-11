@@ -27,7 +27,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     function: createMealPlan,
     requestSchema: YCreateMealPlanRequestSchema,
     responseSchema: YMealPlanSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/meal-plan",
@@ -36,7 +36,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     function: updateMealPlan,
     requestSchema: YUpdateMealPlanRequestSchema,
     responseSchema: YMealPlanSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/meal-plan/list",
@@ -45,14 +45,14 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     function: listMealPlans,
     requestSchema: YListMealPlanQuerySchema,
     responseSchema: YListMealPlanResponseSchema,
-    version: Versions.ALL,
+    
   },
   {
     path: "/meal-plan/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
     function: getMealPlanById,
-    version: Versions.ALL,
+    
     responseSchema: YMealPlanSchema,
   },
   {
@@ -60,14 +60,14 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "DELETE",
     function: deleteMealPlan,
-    version: Versions.ALL,
+    
   },
   {
     path: "/meal-plan/:id(\\d+)/item/list",
     authentication: "access_token",
     method: "GET",
     function: listItemsForMealPlan,
-    version: Versions.ALL,
+    
     requestSchema: YListItemsForMealPlanQuerySchema,
     responseSchema: YListItemsForMealPlanResponseSchema,
   },
@@ -76,7 +76,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "POST",
     function: createItemForMealPlan,
-    version: Versions.ALL,
+    
     requestSchema: YCreateMealPlanItemRequestSchema,
     responseSchema: YMealPlanItemSchema,
   },
@@ -85,7 +85,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "PUT",
     function: updateItemForMealPlan,
-    version: Versions.ALL,
+    
     requestSchema: YUpdateMealPlanItemRequestSchema,
     responseSchema: YMealPlanItemSchema,
   },
@@ -94,6 +94,6 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "DELETE",
     function: deleteItemForMealPlan,
-    version: Versions.ALL,
+    
   },
 ];

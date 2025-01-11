@@ -9,11 +9,11 @@ import { VERSION_ACCESS_LEVELS, Versions } from "../../util/constant";
 import { hashPassword } from "../../util/password";
 
 export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<User> => {
-  const { username, password } = request.body;
+  const { username, email, password } = request.body;
 
   try {
     const hashedPassword = await hashPassword(password);
-    if (!hashPassword) {
+    if (!hashedPassword) {
       return [
         StatusCodes.INTERNAL_SERVER_ERROR,
         {
@@ -25,7 +25,8 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
     const insertedUser = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          email: username,
+          email: email,
+          username: username,
           credentials: {
             create: {
               password_hash: hashedPassword!,

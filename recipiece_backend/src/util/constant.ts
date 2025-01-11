@@ -1,3 +1,4 @@
+
 export const DEFAULT_PAGE_SIZE = 100;
 
 export class RecipeImportFiles {
@@ -45,4 +46,16 @@ export class UserValidationTokenTypes {
 export class Versions {
   public static readonly ALL = "*";
   public static readonly CAST_IRON_SKILLET = "cast_iron_skillet";
+}
+
+export class UserKitchenInvitationStatus {
+  public static readonly PENDING = "pending";
+  public static readonly DENIED = "denied";
+  public static readonly ACCEPTED = "accepted";
+
+  public static readonly ALL_STATUSES: [typeof UserKitchenInvitationStatus.PENDING, typeof UserKitchenInvitationStatus.DENIED, typeof UserKitchenInvitationStatus.ACCEPTED] = [
+    UserKitchenInvitationStatus.PENDING,
+    UserKitchenInvitationStatus.DENIED,
+    UserKitchenInvitationStatus.ACCEPTED,
+  ];
 }

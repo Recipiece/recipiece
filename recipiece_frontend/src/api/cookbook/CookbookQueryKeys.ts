@@ -1,12 +1,13 @@
 import { ListCookbookFilters } from "../../data";
+import { RcpQueryKey } from "../QueryKeys";
 
 export class CookbookQueryKeys {
-  public static readonly GET_COOKBOOK = (cookbookId: number) => {
+  public static readonly GET_COOKBOOK = (cookbookId: number): RcpQueryKey => {
     return ["cookbook", { id: cookbookId }];
   };
 
-  public static readonly LIST_COOKBOOK = (filters?: Partial<ListCookbookFilters>) => {
-    const base: any[] = ["listCookbook"];
+  public static readonly LIST_COOKBOOK = (filters?: Partial<ListCookbookFilters>): RcpQueryKey => {
+    const base: RcpQueryKey = ["listCookbook"];
     if (filters) {
       const { page_number, search, exclude_containing_recipe_id } = filters;
 
