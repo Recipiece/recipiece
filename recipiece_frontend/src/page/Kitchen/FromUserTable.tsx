@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { Ban, Handshake, SquareArrowOutUpRight, Trash } from "lucide-react";
+import { Handshake, SquareArrowOutUpRight, Trash } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +23,7 @@ export const FromUserTable: FC = () => {
     page_size: 10,
   });
   const { mutateAsync: createKitchenMembership, isPending: isCreatingKitchenMembership } = useCreateKitchenMembershipMutation();
-  const { deleteUserKitchenMembership, isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipDialog();
+  const { deleteUserKitchenMembership, isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipDialog("source_user");
 
   const onExtendInvitation = useCallback(() => {
     pushDialog("extendKitchenInvitation", {

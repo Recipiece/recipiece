@@ -1,6 +1,6 @@
 import { Query } from "@tanstack/react-query";
 
-export type RcpQueryKey = [string, ...{readonly [key: string]: any}[]];
+export type RcpQueryKey = [string, ...{ readonly [key: string]: any }[]];
 
 export function oldDataUpdater<DataArrayType extends { id: number }>(updatedItem: DataArrayType) {
   return (oldData: { data: DataArrayType[] } | undefined) => {
@@ -47,17 +47,25 @@ export const generatePartialMatchPredicate = (partialQueryKey: RcpQueryKey) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [__, ...restQueryKeys] = query.queryKey as RcpQueryKey;
 
-    for(let i = 0; i < restPartialKeys.length; i++) {
+    for (let i = 0; i < restPartialKeys.length; i++) {
       const partialKeyObject = restPartialKeys[i];
-      const partialKey = Object.keys(partialKeyObject)[0]
+      const partialKey = Object.keys(partialKeyObject)[0];
       const partialVal = Object.values(partialKeyObject)[0];
       const presentInRestQueryKeys = restQueryKeys.find((val) => {
-        return partialKey in val && val[partialKey] === partialVal; 
+        if(partialKey in val) {
+          const valAtKey = val[partialKey];
+          if(Array.isArray(valAtKey) && Array.isArray(partialVal)) {
+            return valAtKey.every((v) => partialVal.includes(v));
+          } else {
+            return val[partialKey] === partialVal;
+          }
+        }
+        return false;
       });
-      if(!presentInRestQueryKeys) {
+      if (!presentInRestQueryKeys) {
         return false;
       }
     }
     return true;
-  }
-}
+  };
+};

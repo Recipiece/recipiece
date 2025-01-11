@@ -18,7 +18,7 @@ type LoginForm = z.infer<typeof LoginFormSchema>;
 
 export const LoginPage: FC = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast, dismiss: dismissToast } = useToast();
   const queryClient = useQueryClient();
 
   const form = useForm<LoginForm>({
@@ -30,8 +30,13 @@ export const LoginPage: FC = () => {
     },
   });
 
+  /**
+   * Clear all data from the query client
+   * Clear any toasts that exist
+   */
   useEffect(() => {
     queryClient.clear();
+    dismissToast();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

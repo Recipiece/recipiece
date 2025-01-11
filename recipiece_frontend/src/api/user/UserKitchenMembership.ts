@@ -1,22 +1,158 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ListRecipeSharesResponse,
   ListRecipesResponse,
   ListShoppingListResponse,
-  ListShoppingListSharesResponse,
   ListUserKitchenMembershipFilters,
   ListUserKitchenMembershipsResponse,
-  Recipe,
-  ShoppingList,
-  ShoppingListShare,
   UserKitchenMembership,
-  UserKitchenMembershipStatus,
+  UserKitchenMembershipStatus
 } from "../../data";
-import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
-import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
-import { UserQueryKeys } from "./UserQueryKeys";
-import { ShoppingListQueryKeys } from "../shoppingList";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater, RcpQueryKey } from "../QueryKeys";
 import { RecipeQueryKeys } from "../recipe";
+import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { ShoppingListQueryKeys } from "../shoppingList";
+import { UserQueryKeys } from "./UserQueryKeys";
+
+interface ShareableEntityData {
+  readonly user_id: number;
+  readonly id: number;
+  readonly shares?: { readonly user_kitchen_membership_id: number }[];
+}
+interface ShareableEntityListData {
+  readonly data: ShareableEntityData[];
+}
+
+interface ShareEntityData {
+  readonly user_kitchen_membership_id: number;
+  readonly source_user: {
+    readonly id: number;
+  };
+  readonly destination_user: {
+    readonly id: number;
+  };
+}
+
+interface ShareEntityListData {
+  readonly data: ShareEntityData[];
+}
+
+const usePurgeSharedQueries = () => {
+  const queryClient = useQueryClient();
+
+  const purgeParentEntityList = <OldDataType extends ShareableEntityListData>(
+    membership: UserKitchenMembership,
+    queryKey: RcpQueryKey,
+    enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
+    queryClient.setQueriesData(
+      {
+        queryKey: queryKey,
+      },
+      (oldData: OldDataType | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            data: (oldData.data ?? [])
+              .map((entry) => {
+                if (enforceMembershipUser === "source_user" && entry.user_id !== membership.source_user.id) {
+                  return undefined;
+                }
+                if (enforceMembershipUser === "destination_user" && entry.user_id !== membership.destination_user.id) {
+                  return undefined;
+                }
+                if (entry.shares) {
+                  return {
+                    ...entry,
+                    shares: entry.shares.filter((share) => share.user_kitchen_membership_id !== membership.id),
+                  };
+                } else {
+                  return { ...entry };
+                }
+              })
+              .filter((result) => !!result) as OldDataType["data"],
+          };
+        }
+        return undefined;
+      }
+    );
+  };
+
+  const purgeShareEntitiesList = <OldDataType extends ShareEntityListData>(membership: UserKitchenMembership, queryKey: RcpQueryKey) => {
+    queryClient.setQueriesData(
+      {
+        queryKey: queryKey,
+      },
+      (oldData: OldDataType | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            data: (oldData.data ?? []).filter((share) => share.user_kitchen_membership_id !== membership.id),
+          };
+        }
+        return undefined;
+      }
+    );
+  };
+
+  const purgeParentEntity = <OldDataType extends ShareableEntityData>(
+    membership: UserKitchenMembership,
+    queryKey: RcpQueryKey,
+    enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
+    queryClient.setQueriesData(
+      {
+        queryKey: queryKey,
+      },
+      (oldData: OldDataType | undefined) => {
+        if (oldData) {
+          if (enforceMembershipUser === "source_user" && oldData.user_id !== membership.source_user.id) {
+            return undefined;
+          }
+          if (enforceMembershipUser === "destination_user" && oldData.user_id !== membership.destination_user.id) {
+            return undefined;
+          }
+          return {
+            ...oldData,
+            shares: (oldData.shares ?? []).filter((share) => share.user_kitchen_membership_id !== membership.id),
+          };
+        }
+        return undefined;
+      }
+    );
+  };
+
+  const purgeShareEntity = <OldDataType extends ShareEntityData>(membership: UserKitchenMembership, queryKey: RcpQueryKey) => {
+    queryClient.setQueriesData(
+      {
+        queryKey: queryKey,
+      },
+      (oldData: OldDataType | undefined) => {
+        if (oldData) {
+          if (oldData.user_kitchen_membership_id !== membership.id) {
+            return { ...oldData };
+          }
+        }
+        return undefined;
+      }
+    );
+  };
+
+  const purgeShoppingLists = (membership: UserKitchenMembership, enforceMembershipUser?: "source_user" | "destination_user") => {
+    purgeParentEntityList(membership, ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), enforceMembershipUser);
+    purgeParentEntity(membership, ShoppingListQueryKeys.GET_SHOPPING_LIST(), enforceMembershipUser);
+    purgeShareEntitiesList(membership, ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES());
+    purgeShareEntity(membership, ShoppingListQueryKeys.GET_SHOPPING_LIST_SHARE());
+  };
+
+  const purgeRecipes = (membership: UserKitchenMembership, enforceMembershipUser?: "source_user" | "destination_user") => {
+    purgeParentEntityList(membership, RecipeQueryKeys.LIST_RECIPES(), enforceMembershipUser);
+    purgeParentEntity(membership, RecipeQueryKeys.GET_RECIPE(), enforceMembershipUser);
+    purgeShareEntitiesList(membership, RecipeQueryKeys.LIST_RECIPE_SHARES());
+    purgeShareEntity(membership, RecipeQueryKeys.GET_RECIPE_SHARE());
+  };
+
+  return { purgeRecipes, purgeShoppingLists };
+};
 
 export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipFilters, args?: QueryArgs<ListUserKitchenMembershipsResponse>) => {
   const { getter } = useGet();
@@ -81,8 +217,158 @@ export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitch
   });
 };
 
-export const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembership, { readonly id: number; readonly status: UserKitchenMembershipStatus }>) => {
+export const useUpdatePendingUserKitchenMembershipMutation = (
+  args?: MutationArgs<UserKitchenMembership, { readonly id: number; readonly status: UserKitchenMembershipStatus }>
+) => {
+  const queryClient = useQueryClient();
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  const mutation = useUpdateKitchenMembershipMutation({
+    onSuccess: (data, vars, ctx) => {
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+        predicate: generatePartialMatchPredicate(
+          UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+            targeting_self: true,
+            status: ["pending"],
+          })
+        ),
+      });
+
+      queryClient.setQueriesData(
+        {
+          queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+          predicate: generatePartialMatchPredicate(
+            UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+              targeting_self: true,
+              status: ["accepted", "denied"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
+
+      if (data.status === "accepted") {
+        queryClient.invalidateQueries({
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          refetchType: "inactive",
+        });
+      }
+
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+
+  return mutation;
+};
+
+export const useUpdatedNonPendingUserKitchenMembershipMutation = (
+  args?: MutationArgs<UserKitchenMembership, { readonly id: number; readonly status: UserKitchenMembershipStatus }>
+) => {
+  const queryClient = useQueryClient();
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  const mutation = useUpdateKitchenMembershipMutation({
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueriesData(
+        {
+          queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+          predicate: generatePartialMatchPredicate(
+            UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+              targeting_self: true,
+              status: ["accepted", "denied"],
+            })
+          ),
+        },
+        oldDataUpdater(data)
+      );
+
+      if (data.status !== "accepted") {
+        queryClient.setQueriesData(
+          {
+            queryKey: RecipeQueryKeys.LIST_RECIPES(),
+            predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+          },
+          (oldData: ListRecipesResponse | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: (oldData.data ?? []).filter((r) => r.user_id === data.destination_user.id),
+              };
+            }
+            return undefined;
+          }
+        );
+        queryClient.invalidateQueries({
+          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+          refetchType: "inactive",
+        });
+
+        queryClient.setQueriesData(
+          {
+            queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+            predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LISTS()),
+          },
+          (oldData: ListShoppingListResponse | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: (oldData.data ?? []).filter((r) => r.user_id === data.destination_user.id),
+              };
+            }
+            return undefined;
+          }
+        );
+        queryClient.invalidateQueries({
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          refetchType: "inactive",
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          refetchType: "inactive",
+        });
+      }
+
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+
+  return mutation;
+};
+
+const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembership, { readonly id: number; readonly status: UserKitchenMembershipStatus }>) => {
   const { putter } = usePut();
+
   const queryClient = useQueryClient();
 
   const mutation = async (body: { readonly id: number; readonly status: UserKitchenMembershipStatus }) => {
@@ -102,26 +388,6 @@ export const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitch
     mutationFn: mutation,
     onSuccess: (data, params, ctx) => {
       queryClient.setQueryData(UserQueryKeys.GET_USER_KITCHEN_MEMBERSHIP(data.id), data);
-
-      queryClient.setQueriesData(
-        {
-          queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            targeting_self: true,
-            status: ["pending"],
-          }),
-        },
-        oldDataDeleter(data)
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            targeting_self: true,
-            status: ["accepted", "denied"],
-          }),
-        },
-        oldDataUpdater(data)
-      );
-
       onSuccess?.(data, params, ctx);
     },
     ...restArgs,
@@ -146,9 +412,10 @@ export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<Us
   });
 };
 
-export const useDeleteUserKitchenMembershipMutation = (args?: MutationArgs<any, UserKitchenMembership>) => {
+export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_user" | "destination_user", args?: MutationArgs<any, UserKitchenMembership>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
+  const { purgeRecipes, purgeShoppingLists } = usePurgeSharedQueries();
 
   const mutation = async (membership: UserKitchenMembership) => {
     return await deleter({
@@ -173,145 +440,8 @@ export const useDeleteUserKitchenMembershipMutation = (args?: MutationArgs<any, 
       queryClient.invalidateQueries({
         queryKey: UserQueryKeys.GET_USER_KITCHEN_MEMBERSHIP(params.id),
       });
-
-      /**
-       * We need to clear out the records of the shares from all the associated entities.
-       * This means we need to sanitize
-       * 1. Shopping Lists
-       * 2. Shopping List Shares
-       * 3. Recipes
-       * 4. Recipe Shares
-       */
-
-      // shopping lists
-      queryClient.setQueriesData(
-        {
-          queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST(),
-        },
-        (oldData: ShoppingList | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              shares: (oldData.shares ?? []).filter((share) => share.user_kitchen_membership_id !== params.id),
-            };
-          }
-          return undefined;
-        }
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
-        },
-        (oldData: ListShoppingListResponse | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              data: (oldData.data ?? []).map((shoppingList) => {
-                if (shoppingList.shares) {
-                  return {
-                    ...shoppingList,
-                    shares: shoppingList.shares.filter((share) => share.user_kitchen_membership_id !== params.id),
-                  };
-                }
-                return { ...shoppingList };
-              }),
-            };
-          }
-          return undefined;
-        }
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
-        },
-        (oldData: ListShoppingListSharesResponse | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              data: (oldData.data ?? []).filter((share) => share.user_kitchen_membership_id !== params.id),
-            };
-          }
-          return undefined;
-        }
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: ShoppingListQueryKeys.GET_SHOPPING_LIST_SHARE(),
-        },
-        (oldData: ShoppingListShare | undefined) => {
-          if (oldData) {
-            if (oldData.user_kitchen_membership_id !== params.id) {
-              return { ...oldData };
-            }
-          }
-          return undefined;
-        }
-      );
-
-      // recipes
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.GET_RECIPE(),
-        },
-        (oldData: Recipe | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              shares: (oldData.shares ?? []).filter((share) => share.user_kitchen_membership_id !== params.id),
-            };
-          }
-          return undefined;
-        }
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.LIST_RECIPES(),
-        },
-        (oldData: ListRecipesResponse | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              data: (oldData.data ?? []).map((recipe) => {
-                if (recipe.shares) {
-                  return {
-                    ...recipe,
-                    shares: recipe.shares.filter((share) => share.user_kitchen_membership_id !== params.id),
-                  };
-                }
-                return { ...recipe };
-              }),
-            };
-          }
-          return undefined;
-        }
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
-        },
-        (oldData: ListRecipeSharesResponse | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              data: (oldData.data ?? []).filter((share) => share.user_kitchen_membership_id !== params.id),
-            };
-          }
-          return undefined;
-        }
-      );
-      queryClient.setQueriesData(
-        {
-          queryKey: RecipeQueryKeys.GET_RECIPE_SHARE(),
-        },
-        (oldData: ShoppingListShare | undefined) => {
-          if (oldData) {
-            if (oldData.user_kitchen_membership_id !== params.id) {
-              return { ...oldData };
-            }
-          }
-          return undefined;
-        }
-      );
+      purgeRecipes(params, deletionContext);
+      purgeShoppingLists(params, deletionContext);
       onSuccess?.(data, params, ctx);
     },
     ...restArgs,

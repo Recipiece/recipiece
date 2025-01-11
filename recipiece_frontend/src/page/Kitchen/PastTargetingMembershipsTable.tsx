@@ -1,7 +1,7 @@
 import { Ban, CheckCircle2, ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
-import { useListUserKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
+import { useListUserKitchenMembershipsQuery, useUpdatedNonPendingUserKitchenMembershipMutation } from "../../api";
 import {
   Button,
   Collapsible,
@@ -25,7 +25,7 @@ export const PastTargetingMembershipsTable: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [kitchenMembershipsPage, setKitchenMembershipsPage] = useState(0);
 
-  const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } = useUpdateKitchenMembershipMutation();
+  const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } = useUpdatedNonPendingUserKitchenMembershipMutation();
   const { data: kitchenMemberships, isLoading: isLoadingKitchenMemberships } = useListUserKitchenMembershipsQuery({
     targeting_self: true,
     page_number: kitchenMembershipsPage,
@@ -33,7 +33,7 @@ export const PastTargetingMembershipsTable: FC = () => {
     status: ["accepted", "denied"],
   });
 
-  const { deleteUserKitchenMembership, isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipDialog();
+  const { deleteUserKitchenMembership, isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipDialog("destination_user");
 
   const hasAnyRequests = !!kitchenMemberships?.data?.length;
 
@@ -126,7 +126,11 @@ export const PastTargetingMembershipsTable: FC = () => {
                               <p className="hidden sm:block">Deny</p>
                             </Button>
                           )}
-                          <Button variant="destructive" disabled={isDeletingUserKitchenMembership || isUpdatingKitchenMembership} onClick={() => deleteUserKitchenMembership(membership)}>
+                          <Button
+                            variant="destructive"
+                            disabled={isDeletingUserKitchenMembership || isUpdatingKitchenMembership}
+                            onClick={() => deleteUserKitchenMembership(membership)}
+                          >
                             <Trash className="sm:mr-2" /> <p className="hidden sm:block">Delete</p>
                           </Button>
                         </div>
