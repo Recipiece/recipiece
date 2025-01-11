@@ -1,20 +1,39 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { useListUserKitchenMembershipsQuery } from "../../api";
 import { Avatar, AvatarFallback, Button, LoadingGroup, ScrollArea, ScrollBar } from "../../component";
-import { UserKitchenMembership } from "../../data";
+import { ListUserKitchenMembershipFilters, UserKitchenMembership } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface ShareDialogProps extends BaseDialogProps<UserKitchenMembership> {
   readonly displayName: string;
+  readonly entity_id?: number;
+  readonly entity_type?: ListUserKitchenMembershipFilters["entity_type"];
 }
 
-export const ShareDialog: FC<ShareDialogProps> = ({ displayName, onClose, onSubmit }) => {
+export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, entity_type, onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
-  const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } = useListUserKitchenMembershipsQuery({
-    from_self: true,
-    page_number: 0,
-  });
+
+  const filters: ListUserKitchenMembershipFilters = useMemo(() => {
+    let base: ListUserKitchenMembershipFilters = {
+      from_self: true,
+      page_number: 0,
+      status: ["accepted"],
+    };
+
+    if (!!entity_id && !!entity_type) {
+      base = {
+        ...base,
+        entity_id,
+        entity_type,
+        entity: "exclude",
+      };
+    }
+
+    return base;
+  }, [entity_id, entity_type]);
+
+  const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } = useListUserKitchenMembershipsQuery({ ...filters });
 
   const onSelectUser = useCallback(
     (membership: UserKitchenMembership) => {

@@ -8,7 +8,6 @@ import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, Unauthent
 import { AuthContextProvider, DialogContextProvider, PushNotificationContextProvider } from "./context";
 import { useLayout } from "./hooks";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient({
   defaultOptions: {

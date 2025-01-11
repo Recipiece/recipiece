@@ -172,7 +172,7 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { re
         refetchType: "all",
       });
       queryClient.setQueriesData(
-        { queryKey: RecipeQueryKeys.LIST_RECIPE({ cookbook_id: params.cookbook.id, cookbook_attachments: "include" }) },
+        { queryKey: RecipeQueryKeys.LIST_RECIPES({ cookbook_id: params.cookbook.id, cookbook_attachments: "include" }) },
         (oldData: ListRecipesResponse | undefined) => {
           if (oldData) {
             return {
@@ -237,7 +237,7 @@ export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<{}, { re
       });
       queryClient.setQueriesData(
         {
-          queryKey: RecipeQueryKeys.LIST_RECIPE({ cookbook_id: params.cookbook.id, cookbook_attachments: "include" }),
+          queryKey: RecipeQueryKeys.LIST_RECIPES({ cookbook_id: params.cookbook.id, cookbook_attachments: "include" }),
         },
         (oldData: ListRecipesResponse | undefined) => {
           if (oldData) {

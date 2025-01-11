@@ -11,7 +11,7 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership 
   const { toast } = useToast();
   const [recipeSharesPage, setRecipeSharesPage] = useState(0);
 
-  const { mutateAsync: deleteRecipeShare } = useDeleteRecipeShareMutation();
+  const { mutateAsync: deleteRecipeShare, isPending: isDeletingRecipeShare } = useDeleteRecipeShareMutation();
 
   const { data: recipeShares, isLoading: isLoadingRecipeShares } = useListRecipeSharesQuery(
     {
@@ -67,7 +67,7 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership 
                       </div>
                       <>{DateTime.fromISO(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                       <>
-                        <Button size="sm" variant="destructive" onClick={() => onUnshareRecipe(share)}>
+                        <Button size="sm" variant="destructive" onClick={() => onUnshareRecipe(share)} disabled={isDeletingRecipeShare}>
                           Un-Share
                         </Button>
                       </>

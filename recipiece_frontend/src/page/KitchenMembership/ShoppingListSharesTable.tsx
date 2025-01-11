@@ -11,7 +11,7 @@ export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembe
   const { toast } = useToast();
   const [shoppingListSharesPage, setShoppingListSharesPage] = useState(0);
 
-  const { mutateAsync: deleteShoppingListShare } = useDeleteShoppingListShareMutation();
+  const { mutateAsync: deleteShoppingListShare, isPending: isDeletingShoppingListShare } = useDeleteShoppingListShareMutation();
 
   const { data: shoppingListShares, isLoading: isLoadingShoppingListShares } = useListShoppingListSharesQuery(
     {
@@ -67,7 +67,7 @@ export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembe
                       </div>
                       <>{DateTime.fromISO(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                       <>
-                        <Button size="sm" variant="destructive" onClick={() => onUnshareShoppingList(share)}>
+                        <Button size="sm" variant="destructive" onClick={() => onUnshareShoppingList(share)} disabled={isDeletingShoppingListShare}>
                           Un-Share
                         </Button>
                       </>

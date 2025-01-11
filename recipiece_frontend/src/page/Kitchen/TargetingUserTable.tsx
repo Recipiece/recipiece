@@ -4,6 +4,7 @@ import { FC, useCallback, useState } from "react";
 import { useListUserKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
 import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
 import { UserKitchenMembership } from "../../data";
+import { useDeleteUserKitchenMembershipDialog } from "./hook";
 
 export const TargetingUserTable: FC = () => {
   const { toast } = useToast();
@@ -84,12 +85,12 @@ export const TargetingUserTable: FC = () => {
                     <>{membership.source_user.username}</>
                     <>{DateTime.fromISO(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                     <div className="flex flex-row gap-2">
-                      <Button disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)} className="grow">
+                      <Button disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)}>
                         <CheckCircle2 className="sm:mr-2" />
                         <p className="hidden sm:block">Accept</p>
                       </Button>
 
-                      <Button disabled={isUpdatingKitchenMembership} variant="destructive" onClick={() => onDeny(membership)} className="grow">
+                      <Button disabled={isUpdatingKitchenMembership} variant="destructive" onClick={() => onDeny(membership)}>
                         <Ban className="sm:mr-2" />
                         <p className="hidden sm:block">Deny</p>
                       </Button>

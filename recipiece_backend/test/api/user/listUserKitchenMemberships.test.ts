@@ -140,7 +140,7 @@ describe("List User Kitchen Memberships", () => {
   });
 
   it("should list memberships with a subset of statuses", async () => {
-    for (let i = 0; i < (UserKitchenInvitationStatus.ALL_STATUSES.length * 4); i++) {
+    for (let i = 0; i < UserKitchenInvitationStatus.ALL_STATUSES.length * 4; i++) {
       const [tmpUser] = await fixtures.createUserAndToken();
       await prisma.userKitchenMembership.create({
         data: {
@@ -151,7 +151,7 @@ describe("List User Kitchen Memberships", () => {
       });
     }
 
-    for (let i = 0; i < (UserKitchenInvitationStatus.ALL_STATUSES.length * 4); i++) {
+    for (let i = 0; i < UserKitchenInvitationStatus.ALL_STATUSES.length * 4; i++) {
       const [tmpUser] = await fixtures.createUserAndToken();
       await prisma.userKitchenMembership.create({
         data: {
@@ -218,5 +218,105 @@ describe("List User Kitchen Memberships", () => {
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData = (response.body as ListUserKitchenMembershipsResponseSchema).data;
     expect(responseData.length).toBe(5);
+  });
+
+  it("should exclude a provided shared entity", async () => {
+    const membership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: user.id,
+        destination_user_id: otherUser.id,
+        status: "accepted",
+      },
+    });
+
+    const recipe = await prisma.recipe.create({
+      data: {
+        name: "test recipe",
+        user_id: user.id,
+      },
+    });
+
+    const recipeShare = await prisma.recipeShare.create({
+      data: {
+        user_kitchen_membership_id: membership.id,
+        recipe_id: recipe.id,
+      },
+    });
+
+    const [thirdUser] = await fixtures.createUserAndToken();
+    const thirdMembership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: user.id,
+        destination_user_id: thirdUser.id,
+        status: "accepted",
+      },
+    });
+
+    const response = await request(server)
+      .get("/user/kitchen/membership/list")
+      .query(<ListUserKitchenMembershipsQuerySchema>{
+        entity: "exclude",
+        entity_id: recipe.id,
+        entity_type: "recipe",
+        page_number: 0,
+        from_self: true,
+      })
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData = (response.body as ListUserKitchenMembershipsResponseSchema).data;
+    expect(responseData.length).toBe(1);
+    expect(responseData[0].id).toBe(thirdMembership.id);
+  });
+
+  it("should include only a provided shared entity", async () => {
+    const membership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: user.id,
+        destination_user_id: otherUser.id,
+        status: "accepted",
+      },
+    });
+
+    const recipe = await prisma.recipe.create({
+      data: {
+        name: "test recipe",
+        user_id: user.id,
+      },
+    });
+
+    const recipeShare = await prisma.recipeShare.create({
+      data: {
+        user_kitchen_membership_id: membership.id,
+        recipe_id: recipe.id,
+      },
+    });
+
+    const [thirdUser] = await fixtures.createUserAndToken();
+    const thirdMembership = await prisma.userKitchenMembership.create({
+      data: {
+        source_user_id: user.id,
+        destination_user_id: thirdUser.id,
+        status: "accepted",
+      },
+    });
+
+    const response = await request(server)
+      .get("/user/kitchen/membership/list")
+      .query(<ListUserKitchenMembershipsQuerySchema>{
+        entity: "include",
+        entity_id: recipe.id,
+        entity_type: "recipe",
+        from_self: true,
+        page_number: 0,
+      })
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData = (response.body as ListUserKitchenMembershipsResponseSchema).data;
+    expect(responseData.length).toBe(1);
+    expect(responseData[0].id).toBe(membership.id);
   });
 });

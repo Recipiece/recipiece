@@ -234,9 +234,18 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
   ).notRequired().transform((val) => {
     return val.split(",");
   }),
+  entity_id: number().notRequired(),
+  entity: string().oneOf(["include", "exclude"]).notRequired(),
+  entity_type: string().oneOf(["shopping_list", "recipe"]).notRequired(),
 })
   .test("oneOfTargetingSelfOrFromSelf", "Must specify at least one of targeting_self or from_self", (ctx) => {
     return !!ctx.from_self || !!ctx.targeting_self;
+  })
+  .test("entityHasProperContext", "Must specify entity_id, entity, and entity_type together", (ctx) => {
+    if(!!ctx.entity_id || !!ctx.entity || !!ctx.entity_type) {
+      return !!ctx.entity_id && !!ctx.entity && !!ctx.entity_type;
+    }
+    return true;
   })
   .strict()
   .noUnknown();

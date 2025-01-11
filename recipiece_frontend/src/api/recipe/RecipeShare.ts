@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
 import { ListRecipeSharesFilters, ListRecipeSharesResponse, ListRecipesResponse, Recipe, RecipeShare } from "../../data";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
-import { oldDataCreator, oldDataDeleter } from "../QueryKeys";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
+import { UserQueryKeys } from "../user";
 
 export const useListRecipeSharesQuery = (filters: ListRecipeSharesFilters, args?: QueryArgs<ListRecipeSharesResponse>) => {
   const queryClient = useQueryClient();
@@ -70,9 +71,22 @@ export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShare, { 
         },
         oldDataCreator(data)
       );
+
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+        predicate: generatePartialMatchPredicate(
+          UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+            entity: "exclude",
+            entity_id: data.recipe_id,
+            entity_type: "recipe",
+          })
+        ),
+        refetchType: "all",
+      });
+
       queryClient.setQueriesData(
         {
-          queryKey: RecipeQueryKeys.LIST_RECIPE(),
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
         },
         (oldData: ListRecipesResponse | undefined) => {
           if (oldData) {
@@ -138,9 +152,22 @@ export const useDeleteRecipeShareMutation = (args?: MutationArgs<{}, RecipeShare
         },
         oldDataDeleter({ id: params.id })
       );
+
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+        predicate: generatePartialMatchPredicate(
+          UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+            entity: "exclude",
+            entity_id: params.recipe_id,
+            entity_type: "recipe",
+          })
+        ),
+        refetchType: "all",
+      });
+
       queryClient.setQueriesData(
         {
-          queryKey: RecipeQueryKeys.LIST_RECIPE(),
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
         },
         (oldData: ListRecipesResponse | undefined) => {
           if (oldData) {

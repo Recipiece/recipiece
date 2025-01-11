@@ -33,6 +33,9 @@ export interface ListUserKitchenMembershipFilters {
   readonly targeting_self?: boolean;
   readonly from_self?: boolean;
   readonly status?: UserKitchenMembershipStatus[];
+  readonly entity_id?: number;
+  readonly entity?: "include" | "exclude";
+  readonly entity_type?: "shopping_list" | "recipe";
 }
 
 export interface ListUserKitchenMembershipsResponse {

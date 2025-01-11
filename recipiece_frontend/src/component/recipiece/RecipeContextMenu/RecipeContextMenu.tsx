@@ -192,6 +192,8 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const onShareRecipe = useCallback(async () => {
     pushDialog("share", {
       displayName: recipe.name,
+      entity_id: recipe.id,
+      entity_type: "recipe",
       onClose: () => popDialog("share"),
       onSubmit: async (membership: UserKitchenMembership) => {
         try {

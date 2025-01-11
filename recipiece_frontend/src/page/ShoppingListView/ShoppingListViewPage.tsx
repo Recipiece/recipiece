@@ -238,6 +238,8 @@ export const ShoppingListViewPage: FC = () => {
   const onShareList = useCallback(() => {
     pushDialog("share", {
       displayName: shoppingList!.name,
+      entity_id: shoppingList!.id,
+      entity_type: "shopping_list",
       onClose: () => popDialog("share"),
       onSubmit: async (membership: UserKitchenMembership) => {
         try {

@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
 import { ListShoppingListResponse, ListShoppingListSharesFilters, ListShoppingListSharesResponse, ShoppingList, ShoppingListShare } from "../../data";
 import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
-import { oldDataCreator, oldDataDeleter } from "../QueryKeys";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
+import { UserQueryKeys } from "../user";
 
 export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingListShare, { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }>) => {
   const { poster } = usePost();
@@ -29,6 +30,18 @@ export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingL
         oldDataCreator(data)
       );
       queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST_SHARE(data.id), data);
+
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+        predicate: generatePartialMatchPredicate(
+          UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+            entity: "exclude",
+            entity_id: data.shopping_list_id,
+            entity_type: "shopping_list",
+          })
+        ),
+        refetchType: "all",
+      });
 
       queryClient.setQueriesData(
         {
@@ -96,6 +109,18 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
         oldDataDeleter(params)
       );
 
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+        predicate: generatePartialMatchPredicate(
+          UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+            entity: "exclude",
+            entity_id: params.shopping_list_id,
+            entity_type: "shopping_list",
+          })
+        ),
+        refetchType: "all",
+      });
+
       queryClient.setQueriesData(
         {
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
@@ -149,7 +174,7 @@ export const useListShoppingListSharesQuery = (filters: ListShoppingListSharesFi
   };
 
   return useQuery({
-    queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+    queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
     queryFn: query,
     ...(args ?? {}),
   });

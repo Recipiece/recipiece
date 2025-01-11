@@ -3,14 +3,13 @@ import { prisma } from "../../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 /**
- * Allow a user who has been targeted by a membership to delete it.
- * We don't allow the source user to delete it to avoid them just spamming another user.
+ * Allow a user to delete a membership
  */
 export const deleteUserKitchenMembership = async (request: AuthenticatedRequest): ApiResponse<{}> => {
   const entityId = +request.params.id;
   const existingInvitation = await prisma.userKitchenMembership.findFirst({
     where: {
-      destination_user_id: request.user.id,
+      OR: [{ destination_user_id: request.user.id }, { source_user_id: request.user.id }],
       id: entityId,
     },
   });
@@ -27,8 +26,7 @@ export const deleteUserKitchenMembership = async (request: AuthenticatedRequest)
   try {
     await prisma.userKitchenMembership.delete({
       where: {
-        id: entityId,
-        destination_user_id: request.user.id,
+        id: existingInvitation.id,
       },
     });
     return [StatusCodes.OK, {}];

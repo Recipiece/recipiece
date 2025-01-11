@@ -14,6 +14,9 @@ export const listUserKitchenMemberships = async (
     page_number,
     page_size,
     status = UserKitchenInvitationStatus.ALL_STATUSES,
+    entity,
+    entity_id,
+    entity_type,
   } = request.query;
 
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
@@ -39,6 +42,48 @@ export const listUserKitchenMemberships = async (
     where.status = {
       in: status as UserKitchenMembershipStatus[],
     };
+  }
+
+  if (entity && entity_id && entity_type) {
+    switch (entity_type) {
+      case "shopping_list":
+        if (entity === "include") {
+          where.shopping_list_shares = {
+            some: {
+              shopping_list_id: entity_id,
+            },
+          };
+        } else if (entity === "exclude") {
+          where.shopping_list_shares = {
+            none: {
+              shopping_list_id: entity_id,
+            },
+          };
+        }
+        break;
+      case "recipe":
+        if (entity === "include") {
+          where.recipe_shares = {
+            some: {
+              recipe_id: entity_id,
+            },
+          };
+        } else if(entity === "exclude") {
+          where.recipe_shares = {
+            none: {
+              recipe_id: entity_id,
+            },
+          };
+        }
+        break;
+      default:
+        return [
+          StatusCodes.BAD_REQUEST,
+          {
+            message: "Unknown entity type",
+          },
+        ];
+    }
   }
 
   const offset = page_number * actualPageSize;

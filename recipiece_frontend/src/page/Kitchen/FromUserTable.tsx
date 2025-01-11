@@ -1,13 +1,14 @@
-import { FC, useCallback, useContext, useState } from "react";
-import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
-import { Ban, Handshake, SquareArrowOutUpRight } from "lucide-react";
-import { useCreateKitchenMembershipMutation, useListUserKitchenMembershipsQuery } from "../../api";
+import { AxiosError } from "axios";
+import { Ban, Handshake, SquareArrowOutUpRight, Trash } from "lucide-react";
 import { DateTime } from "luxon";
+import { FC, useCallback, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCreateKitchenMembershipMutation, useListUserKitchenMembershipsQuery } from "../../api";
+import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ExtendKitchenInvitationForm } from "../../dialog";
-import { AxiosError } from "axios";
 import { KitchenMembershipStatusMap } from "../../util";
-import { useNavigate } from "react-router-dom";
+import { useDeleteUserKitchenMembershipDialog } from "./hook";
 
 export const FromUserTable: FC = () => {
   const { pushDialog, popDialog } = useContext(DialogContext);
@@ -21,8 +22,8 @@ export const FromUserTable: FC = () => {
     page_number: kitchenMembershipsPage,
     page_size: 10,
   });
-
   const { mutateAsync: createKitchenMembership, isPending: isCreatingKitchenMembership } = useCreateKitchenMembershipMutation();
+  const { deleteUserKitchenMembership, isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipDialog();
 
   const onExtendInvitation = useCallback(() => {
     pushDialog("extendKitchenInvitation", {
@@ -35,8 +36,8 @@ export const FromUserTable: FC = () => {
           toast({
             title: "Invitation Sent",
           });
-        } catch(err) {
-          if((err as AxiosError)?.status === 429) {
+        } catch (err) {
+          if ((err as AxiosError)?.status === 429) {
             toast({
               title: "Invitation Already Sent",
               description: "You have already sent an invitation to this user.",
@@ -86,15 +87,13 @@ export const FromUserTable: FC = () => {
                     <>{KitchenMembershipStatusMap[membership.status]}</>
                     <div className="flex flex-row gap-2">
                       {membership.status === "accepted" && (
-                        <Button variant="secondary" className="grow" onClick={() => navigate(`/kitchen/${membership.id}`)}>
+                        <Button variant="secondary" onClick={() => navigate(`/kitchen/${membership.id}`)} disabled={isDeletingUserKitchenMembership}>
                           <SquareArrowOutUpRight className="mr-2" /> Manage
                         </Button>
                       )}
-                      {membership.status === "accepted" && (
-                        <Button className="grow" variant="destructive">
-                          <Ban className="mr-2" /> Delete
-                        </Button>
-                      )}
+                      <Button variant="destructive" onClick={() => deleteUserKitchenMembership(membership)} disabled={isDeletingUserKitchenMembership}>
+                        <Trash className="mr-2" /> Delete
+                      </Button>
                     </div>
                   </StaticTableRow>
                 );

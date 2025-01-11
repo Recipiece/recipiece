@@ -1,4 +1,4 @@
-import { Ban, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { Ban, CheckCircle2, ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
 import { useListUserKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
@@ -18,6 +18,7 @@ import {
 } from "../../component";
 import { UserKitchenMembership } from "../../data";
 import { KitchenMembershipStatusMap } from "../../util";
+import { useDeleteUserKitchenMembershipDialog } from "./hook";
 
 export const PastTargetingMembershipsTable: FC = () => {
   const { toast } = useToast();
@@ -25,13 +26,14 @@ export const PastTargetingMembershipsTable: FC = () => {
   const [kitchenMembershipsPage, setKitchenMembershipsPage] = useState(0);
 
   const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } = useUpdateKitchenMembershipMutation();
-
   const { data: kitchenMemberships, isLoading: isLoadingKitchenMemberships } = useListUserKitchenMembershipsQuery({
     targeting_self: true,
     page_number: kitchenMembershipsPage,
     page_size: 10,
     status: ["accepted", "denied"],
   });
+
+  const { deleteUserKitchenMembership, isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipDialog();
 
   const hasAnyRequests = !!kitchenMemberships?.data?.length;
 
@@ -113,17 +115,20 @@ export const PastTargetingMembershipsTable: FC = () => {
                         <>{KitchenMembershipStatusMap[membership.status]}</>
                         <div className="flex flex-row gap-2">
                           {membership.status !== "accepted" && (
-                            <Button disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)} className="grow">
+                            <Button disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)}>
                               <CheckCircle2 className="sm:mr-2" />
                               <p className="hidden sm:block">Accept</p>
                             </Button>
                           )}
                           {membership.status !== "denied" && (
-                            <Button disabled={isUpdatingKitchenMembership} variant="destructive" onClick={() => onDeny(membership)} className="grow">
+                            <Button disabled={isUpdatingKitchenMembership} variant="secondary" onClick={() => onDeny(membership)}>
                               <Ban className="sm:mr-2" />
                               <p className="hidden sm:block">Deny</p>
                             </Button>
                           )}
+                          <Button variant="destructive" disabled={isDeletingUserKitchenMembership || isUpdatingKitchenMembership} onClick={() => deleteUserKitchenMembership(membership)}>
+                            <Trash className="sm:mr-2" /> <p className="hidden sm:block">Delete</p>
+                          </Button>
                         </div>
                       </StaticTableRow>
                     );

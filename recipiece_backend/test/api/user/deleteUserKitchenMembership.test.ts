@@ -40,7 +40,7 @@ describe("Delete User Kitchen Membership", () => {
     expect(deletedMembership).toBeFalsy();
   });
 
-  it("should not allow the source user to delete the membership", async () => {
+  it("should allow the source user to delete the membership", async () => {
     const membership = await prisma.userKitchenMembership.create({
       data: {
         source_user_id: user.id,
@@ -54,6 +54,14 @@ describe("Delete User Kitchen Membership", () => {
       .set("Authorization", `Bearer ${bearerToken}`)
       .send();
 
-    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+    expect(response.statusCode).toBe(StatusCodes.OK);
+
+    const deletedMembership = await prisma.userKitchenMembership.findFirst({
+      where: {
+        source_user_id: user.id,
+        destination_user_id: otherUser.id,
+      },
+    });
+    expect(deletedMembership).toBeFalsy();
   });
 });

@@ -117,7 +117,7 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   };
 
   return useQuery({
-    queryKey: RecipeQueryKeys.LIST_RECIPE(filters),
+    queryKey: RecipeQueryKeys.LIST_RECIPES(filters),
     queryFn: async () => {
       const results = await query();
       results.data.forEach((recipe) => {
@@ -147,7 +147,7 @@ export const useCreateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Reci
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, variables, context) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data));
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataCreator(data));
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
       onSuccess?.(data, variables, context);
     },
@@ -173,7 +173,7 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Reci
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataUpdater(data));
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataUpdater(data));
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
       onSuccess?.(data, vars, ctx);
     },
@@ -199,7 +199,7 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<{}, Recipe>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, recipe, ctx) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataDeleter({ id: recipe.id }));
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataDeleter({ id: recipe.id }));
       queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE(recipe.id) });
       onSuccess?.(data, recipe, ctx);
     },
@@ -246,7 +246,7 @@ export const useForkRecipeMutation = (args?: MutationArgs<Recipe, { readonly ori
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPE(), oldDataCreator(data));
+      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataCreator(data));
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,
