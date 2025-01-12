@@ -16,7 +16,6 @@ generator kysely {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [citext]
 }
 
 model User {
@@ -25,8 +24,8 @@ model User {
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
   validated Boolean @default(false)
-  username String @unique @db.Citext
-  email String @unique @db.Citext
+  username String @unique
+  email String @unique
 
   recipes Recipe[]
   cookbooks Cookbook[]

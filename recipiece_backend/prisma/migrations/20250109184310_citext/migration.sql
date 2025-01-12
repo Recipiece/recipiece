@@ -1,6 +1,6 @@
 -- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "citext";
+-- CREATE EXTENSION IF NOT EXISTS "citext";
 
 -- AlterTable
-ALTER TABLE "users" ALTER COLUMN "email" SET DATA TYPE CITEXT using email::citext,
-ALTER COLUMN "username" SET DATA TYPE CITEXT using email::citext;
+-- ALTER TABLE "users" ALTER COLUMN "email" SET DATA TYPE CITEXT;
+-- ALTER TABLE "users" ALTER COLUMN "username" SET DATA TYPE CITEXT;

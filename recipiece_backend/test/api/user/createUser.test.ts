@@ -47,15 +47,15 @@ describe("Create User", () => {
       .post("/user")
       .send({
         username: "ajsdhfjkashdklf",
-        email: existingUser.email,
+        email: existingUser.email.toUpperCase(),
         password: "anythingGoes",
       })
       .set("Content-Type", "application/json");
 
-    expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+    expect(response.statusCode).toBe(StatusCodes.CONFLICT);
   });
 
-  it("should not allow an existing username to be used", async () => {
+  it("should not allow an existing username to be used, case insensitive", async () => {
     const existingUser = await prisma.user.create({
       data: {
         email: "existing@recipiece.org",
@@ -67,11 +67,11 @@ describe("Create User", () => {
       .post("/user")
       .send({
         email: "yeet@asdf.qwer",
-        username: existingUser.username,
+        username: existingUser.username.toUpperCase(),
         password: "anythingGoes",
       })
       .set("Content-Type", "application/json");
 
-    expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+    expect(response.statusCode).toBe(StatusCodes.CONFLICT);
   });
 });

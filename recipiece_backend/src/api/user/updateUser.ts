@@ -19,9 +19,41 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
 
   const updateBody: Prisma.UserUpdateInput = {};
   if ("username" in restBody) {
+    const matchingUser = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: restBody.username,
+          mode: "insensitive",
+        },
+      },
+    });
+    if (matchingUser) {
+      return [
+        StatusCodes.CONFLICT,
+        {
+          message: "Username already in use",
+        },
+      ];
+    }
     updateBody.username = restBody.username;
   }
   if ("email" in restBody) {
+    const matchingUser = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: restBody.email,
+          mode: "insensitive",
+        },
+      },
+    });
+    if (matchingUser) {
+      return [
+        StatusCodes.CONFLICT,
+        {
+          message: "Email already in use",
+        },
+      ];
+    }
     updateBody.email = restBody.email;
   }
 
