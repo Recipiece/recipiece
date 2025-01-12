@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { verifyToken } from "../../../src/util/token";
 import { TokenPayload } from "../../../src/types";
+import { prisma } from "../../../src/database";
 
 describe("Logout User", () => {
   let user: User;
@@ -28,7 +29,7 @@ describe("Logout User", () => {
     expect(decodedRefreshToken).toBeTruthy();
 
     const {session: sessionId} = decodedRefreshToken;
-    const matchingSession = await testPrisma.userSession.findFirst({
+    const matchingSession = await prisma.userSession.findFirst({
       where: {
         id: sessionId,
       }

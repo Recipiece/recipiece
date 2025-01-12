@@ -9,6 +9,7 @@ node_modules
 dist
 prod_dist
 recipiece_infrastructure
+test_data
 
 .venv
 __pycache__

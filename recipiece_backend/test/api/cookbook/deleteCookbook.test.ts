@@ -2,6 +2,7 @@ import { User } from "@prisma/client";
 // @ts-ignore
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { prisma } from "../../../src/database";
 
 describe("Delete Cookbooks", () => {
   let user: User;
@@ -14,7 +15,7 @@ describe("Delete Cookbooks", () => {
   });
 
   it("should delete a cookbook", async () => {
-    const cookbook = await testPrisma.cookbook.create({
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: user.id,
         name: "test cookbook",
@@ -28,7 +29,7 @@ describe("Delete Cookbooks", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     
-    const deletedCookbook = await testPrisma.cookbook.findFirst({
+    const deletedCookbook = await prisma.cookbook.findFirst({
       where: {
         id: cookbook.id,
       }
@@ -37,8 +38,8 @@ describe("Delete Cookbooks", () => {
   });
 
   it("should not delete a cookbook the user does not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-    const cookbook = await testPrisma.cookbook.create({
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
+    const cookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",
@@ -52,7 +53,7 @@ describe("Delete Cookbooks", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   
-    const deletedCookbook = await testPrisma.cookbook.findFirst({
+    const deletedCookbook = await prisma.cookbook.findFirst({
       where: {
         id: cookbook.id,
       }

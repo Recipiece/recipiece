@@ -11,7 +11,7 @@ export interface FormInputProps extends InputProps {
   readonly isLoading?: boolean;
 }
 
-export const FormInput: FC<FormInputProps> = ({ isLoading, name, className, label, instructions, ...restInputProps }) => {
+export const FormInput: FC<FormInputProps> = ({ isLoading, name, className, label, instructions, onBlur, ...restInputProps }) => {
   const form = useFormContext();
   const { isSubmitting } = form.formState;
 
@@ -29,7 +29,18 @@ export const FormInput: FC<FormInputProps> = ({ isLoading, name, className, labe
           <FormItem className={fullClassName}>
             {label && <FormLabel>{label}</FormLabel>}
             <FormControl>
-              <Input {...restInputProps} {...field} />
+              <Input
+                {...restInputProps}
+                {...field}
+                onBlur={(event) => {
+                  event.preventDefault();
+                  if (onBlur) {
+                    onBlur?.(event);
+                  } else {
+                    field.onBlur();
+                  }
+                }}
+              />
             </FormControl>
             <FormMessage />
             {instructions && <FormDescription>{instructions}</FormDescription>}

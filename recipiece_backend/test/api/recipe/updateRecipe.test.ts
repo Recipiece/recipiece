@@ -2,6 +2,7 @@ import { User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { RecipeSchema } from "../../../src/schema";
+import { prisma } from "../../../src/database";
 
 describe("Update Recipes", () => {
   let user: User;
@@ -14,7 +15,7 @@ describe("Update Recipes", () => {
   });
 
   it("should update a recipe", async () => {
-    const existingRecipe = await testPrisma.recipe.create({
+    const existingRecipe = await prisma.recipe.create({
       data: {
         name: "My Cool Recipe",
         description: "A recipe",
@@ -92,7 +93,7 @@ describe("Update Recipes", () => {
     expect(step.content).toEqual("yeet");
     expect(step.order).toEqual(0);
 
-    const allIngredients = await testPrisma.recipeIngredient.findMany({
+    const allIngredients = await prisma.recipeIngredient.findMany({
       where: {
         recipe_id: existingRecipe.id,
       },
@@ -100,7 +101,7 @@ describe("Update Recipes", () => {
     expect(allIngredients.length).toEqual(1);
     expect(allIngredients[0].id).toEqual(ing.id);
 
-    const allSteps = await testPrisma.recipeStep.findMany({
+    const allSteps = await prisma.recipeStep.findMany({
       where: {
         recipe_id: existingRecipe.id,
       },
@@ -121,9 +122,9 @@ describe("Update Recipes", () => {
   });
 
   it(`should ${StatusCodes.NOT_FOUND} when trying to update a recipe you don't own`, async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
+    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
 
-    const existingRecipe = await testPrisma.recipe.create({
+    const existingRecipe = await prisma.recipe.create({
       data: {
         name: "My Cool Recipe",
         description: "A recipe",
@@ -163,89 +164,5 @@ describe("Update Recipes", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
-  });
-
-  it("should remove any recipe cookbook attachments in cookbooks the user does not own when making the recipe private", async () => {
-    const [otherUser] = await fixtures.createUserAndToken("otheruser@recipiece.org");
-
-    const usersCookbook = await testPrisma.cookbook.create({
-      data: {
-        name: "users cookbook",
-        user_id: user.id,
-      }
-    });
-
-    const otherUsersCookbook = await testPrisma.cookbook.create({
-      data: {
-        name: "other users cookbook",
-        user_id: otherUser.id,
-      }
-    });
-
-    const usersRecipe = await testPrisma.recipe.create({
-      data: {
-        name: "My Cool Recipe",
-        description: "A recipe",
-        user_id: user.id,
-        private: false,
-        ingredients: {
-          createMany: {
-            data: [
-              {
-                name: "old ingredient 01",
-                order: 0,
-              },
-              {
-                name: "old ingredient 02",
-                order: 1,
-              },
-            ],
-          },
-        },
-        steps: {
-          createMany: {
-            data: [
-              {
-                content: "asdfqwer",
-                order: 0,
-              },
-            ],
-          },
-        },
-      },
-    });
-
-    await testPrisma.recipeCookbookAttachment.createMany({
-      data: [
-        {
-          recipe_id: usersRecipe.id,
-          cookbook_id: usersCookbook.id,
-        },
-        {
-          recipe_id: usersRecipe.id,
-          cookbook_id: otherUsersCookbook.id,
-        }
-      ]
-    });
-
-    const response = await request(server)
-      .put("/recipe")
-      .send({
-        id: usersRecipe.id,
-        private: true,
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toEqual(StatusCodes.OK);
-
-    const attachmentsForUser = await testPrisma.recipeCookbookAttachment.findMany({
-      where: {
-        recipe_id: usersRecipe.id,
-      }
-    });
-
-    expect(attachmentsForUser.length).toEqual(1);
-    expect(attachmentsForUser[0].cookbook_id).toEqual(usersCookbook.id);
   });
 });

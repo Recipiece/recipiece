@@ -33,7 +33,6 @@ const seedCookbooksForUser = async (user) => {
         name: titles[i],
         user_id: user.id,
         description: faker.lorem.paragraph(),
-        private: i % 2 === 0,
       },
     });
 

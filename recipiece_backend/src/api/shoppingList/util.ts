@@ -1,5 +1,7 @@
-import { Prisma, ShoppingListItem } from "@prisma/client";
-import { prisma } from "../../database";
+import { ShoppingListItem } from "@prisma/client";
+import { ExpressionBuilder, sql } from "kysely";
+import { DB, prisma } from "../../database";
+import { ShoppingListItemSchema, ShoppingListShareSchema } from "../../schema";
 
 export const MAX_NUM_ITEMS = 100000;
 
@@ -12,7 +14,7 @@ export const MAX_NUM_ITEMS = 100000;
  */
 export const collapseOrders = async (
   shoppingListId: number,
-  tx?: Prisma.TransactionClient
+  tx?: any
 ): Promise<ShoppingListItem[]> => {
   return (await (tx ?? prisma).$queryRaw`
     with updated as (
@@ -44,4 +46,46 @@ export const collapseOrders = async (
       "order" asc
     ;
   `) as unknown as ShoppingListItem[];
+};
+
+
+export const sharesWithMemberships = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
+  return eb
+    .selectFrom("shopping_list_shares")
+    .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "shopping_list_shares.user_kitchen_membership_id")
+    .whereRef("shopping_list_shares.shopping_list_id", "=", "shopping_lists.id")
+    .where((eb) => {
+      return eb.and([
+        eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
+        eb.or([
+          eb("user_kitchen_memberships.destination_user_id", "=", userId),
+          eb("user_kitchen_memberships.source_user_id", "=", userId),
+        ]),
+      ]);
+    });
+};
+
+export const sharesSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
+  return sharesWithMemberships(eb, userId).select(
+    sql<ShoppingListShareSchema[]>`
+      coalesce(
+        jsonb_agg(shopping_list_shares.*),
+        '[]'
+      )
+      `.as("shares_aggregate")
+  );
+};
+
+export const itemsSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">) => {
+  return eb
+    .selectFrom("shopping_list_items")
+    .whereRef("shopping_list_items.shopping_list_id", "=", "shopping_lists.id")
+    .select(
+      sql<ShoppingListItemSchema[]>`
+      coalesce(
+        jsonb_agg(shopping_list_items.* order by shopping_list_items."order" asc),
+        '[]'
+      )  
+      `.as("items_aggregate")
+    );
 };

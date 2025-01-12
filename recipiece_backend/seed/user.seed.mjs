@@ -1,5 +1,5 @@
-import { prisma } from "./prisma.mjs";
 import argon2 from "argon2";
+import { prisma } from "./prisma.mjs";
 
 const hashPassword = async (plainPassword) => {
   try {
@@ -21,6 +21,7 @@ export const seedUsers = async () => {
     const user = await tx.user.create({
       data: {
         email: "dev@recipiece.org",
+        username: "dev29",
         validated: true,
       },
     });
@@ -34,6 +35,7 @@ export const seedUsers = async () => {
     const otherUser = await tx.user.create({
       data: {
         email: "other@recipiece.org",
+        username: "other92",
         validated: true,
       },
     });
@@ -41,6 +43,75 @@ export const seedUsers = async () => {
       data: {
         user_id: otherUser.id,
         password_hash: await hashPassword("password"),
+      },
+    });
+
+    const emptyUser = await tx.user.create({
+      data: {
+        email: "empty@recipiece.org",
+        username: "empty1234",
+        validated: false,
+      },
+    });
+    await tx.userCredentials.create({
+      data: {
+        user_id: emptyUser.id,
+        password_hash: await hashPassword("password"),
+      },
+    });
+  });
+
+};
+
+export const seedUserKitchenMemberships = async () => {
+  await prisma.$transaction(async (tx) => {
+    const devUser = await tx.user.findFirst({
+      where: {
+        username: "dev29",
+      },
+    });
+
+    const otherUser = await tx.user.findFirst({
+      where: {
+        username: "other92",
+      },
+    });
+
+    const emptyUser = await tx.user.findFirst({
+      where: {
+        username: "empty1234",
+      }
+    });
+
+    await tx.userKitchenMembership.create({
+      data: {
+        source_user_id: devUser.id,
+        destination_user_id: otherUser.id,
+        status: "accepted",
+      },
+    });
+
+    await tx.userKitchenMembership.create({
+      data: {
+        source_user_id: devUser.id,
+        destination_user_id: emptyUser.id,
+        status: "accepted",
+      },
+    });
+
+    await tx.userKitchenMembership.create({
+      data: {
+        source_user_id: otherUser.id,
+        destination_user_id: devUser.id,
+        status: "pending",
+      },
+    });
+
+    await tx.userKitchenMembership.create({
+      data: {
+        source_user_id: otherUser.id,
+        destination_user_id: emptyUser.id,
+        status: "denied",
       },
     });
   });

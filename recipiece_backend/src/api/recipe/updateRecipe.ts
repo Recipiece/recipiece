@@ -39,26 +39,6 @@ export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequest
 
   try {
     const transaction = await prisma.$transaction(async (tx) => {
-      const isCurrentlyPrivate = recipe.private === true;
-      const willBePrivate = recipeBody.private === true;
-
-      /**
-       * If a user is making their recipe private, remove it from any cookbooks that
-       * the recipe owner doesn't own
-       */
-      if (!isCurrentlyPrivate && willBePrivate) {
-        await tx.recipeCookbookAttachment.deleteMany({
-          where: {
-            recipe_id: recipe.id,
-            cookbook: {
-              user_id: {
-                not: user.id,
-              },
-            },
-          },
-        });
-      }
-
       await tx.recipeIngredient.deleteMany({
         where: {
           recipe_id: recipeBody.id,
@@ -96,8 +76,8 @@ export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequest
       if (recipeBody.description) {
         recipeUpdateData.description = recipeBody.description;
       }
-      if (recipeBody.private) {
-        recipeUpdateData.private = recipeBody.private;
+      if(recipeBody.servings) {
+        recipeUpdateData.servings = recipeBody.servings;
       }
 
       const updatedRecipe = await tx.recipe.update({

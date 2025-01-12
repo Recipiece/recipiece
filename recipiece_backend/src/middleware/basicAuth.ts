@@ -1,14 +1,12 @@
-import { Prisma, PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../database";
-import { ApiResponse, ErrorResponse } from "../types";
+import { ApiResponse } from "../types";
 import { verifyPassword } from "../util/password";
 
 export const basicAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  const username = req.body.username;
-  const providedPassword = req.body.password;
-  const [responseCode, response] = await runBasicAuth(username, providedPassword);
+  const [responseCode, response] = await runBasicAuth(req.headers.authorization);
 
   if (responseCode !== StatusCodes.OK) {
     res.status(responseCode).send(response);
@@ -19,26 +17,56 @@ export const basicAuthMiddleware = async (req: Request, res: Response, next: Nex
   }
 };
 
-const runBasicAuth = async (username?: string, password?: string): ApiResponse<User> => {
-  if (!username || !password) {
+const runBasicAuth = async (authHeader: string | undefined): ApiResponse<User> => {
+  if (!authHeader) {
     return [
-      StatusCodes.BAD_REQUEST,
+      StatusCodes.FORBIDDEN,
       {
-        message: "Username and Password must be provided",
+        message: "Missing authorization header",
       },
     ];
   }
 
-  const user = await prisma.user.findUnique({
+  const stripped = authHeader.replace("Basic", "").trim();
+  let username: string;
+  let password: string;
+  try {
+    [username, password] = Buffer.from(stripped, "base64").toString().split(":");
+  } catch {
+    return [
+      StatusCodes.FORBIDDEN,
+      {
+        message: "Malformed basic auth header",
+      },
+    ];
+  }
+
+  if (!username || !password) {
+    return [
+      StatusCodes.FORBIDDEN,
+      {
+        message: "Username and password must be provided",
+      },
+    ];
+  }
+
+  const user = await prisma.user.findFirst({
     where: {
-      email: username,
+      OR: [
+        {
+          email: username,
+        },
+        {
+          username: username,
+        },
+      ],
     },
   });
 
   if (!user) {
     console.log(`could not find user with username ${username}`);
     return [
-      StatusCodes.NOT_FOUND,
+      StatusCodes.FORBIDDEN,
       {
         message: "Username or password is incorrect",
       },
@@ -54,7 +82,7 @@ const runBasicAuth = async (username?: string, password?: string): ApiResponse<U
   if (!credentials) {
     console.warn(`could not find user credentials for ${username}`);
     return [
-      StatusCodes.NOT_FOUND,
+      StatusCodes.FORBIDDEN,
       {
         message: "Username or password is incorrect",
       },
@@ -65,7 +93,7 @@ const runBasicAuth = async (username?: string, password?: string): ApiResponse<U
   if (!isPasswordValid) {
     console.log(`password provided for ${username} does not match stored password hash`);
     return [
-      StatusCodes.NOT_FOUND,
+      StatusCodes.FORBIDDEN,
       {
         message: "Username or password is incorrect",
       },

@@ -1,8 +1,8 @@
 import { ShoppingListItem } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { ModifyShoppingListMessage, ShoppingListItemSchema } from "../../schema";
-import { WebsocketMethod, WebsocketRequest } from "../../types";
+import { ModifyShoppingListMessage, ModifyShoppingListResponse, ShoppingListItemSchema } from "../../schema";
+import { ErrorResponse, WebsocketMethod, WebsocketRequest } from "../../types";
 import { collapseOrders, MAX_NUM_ITEMS } from "./util";
 
 const getCurrentItems: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
@@ -257,6 +257,60 @@ const setItemContent: WebsocketMethod<ModifyShoppingListMessage, ShoppingListIte
   return [StatusCodes.OK, items];
 };
 
+const setItemNotes: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
+  req: WebsocketRequest<ModifyShoppingListMessage>
+) => {
+  const shoppingListId = +req.ws_token_payload.entity_id;
+  const message = req.ws_message;
+  const itemToSet = message.item as ShoppingListItemSchema;
+
+  const items = await prisma.$transaction(async (tx) => {
+    await tx.shoppingListItem.updateMany({
+      where: {
+        shopping_list_id: shoppingListId,
+        id: itemToSet.id,
+      },
+      data: {
+        notes: itemToSet.notes,
+      },
+    });
+
+    return await tx.shoppingListItem.findMany({
+      where: {
+        shopping_list_id: shoppingListId,
+      },
+      orderBy: [
+        {
+          completed: "asc",
+        },
+        {
+          order: "asc",
+        },
+      ],
+    });
+  });
+
+  return [StatusCodes.OK, items];
+};
+
+const clearItems: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
+  req: WebsocketRequest<ModifyShoppingListMessage>
+) => {
+  const shoppingListId = +req.ws_token_payload.entity_id;
+  await prisma.shoppingListItem.deleteMany({
+    where: {
+      shopping_list_id: shoppingListId,
+    }
+  });
+  return [StatusCodes.OK, []];
+};
+
+const __ping__: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
+  _: WebsocketRequest<ModifyShoppingListMessage>
+) => {
+  return [StatusCodes.OK, []];
+};
+
 const MESSAGE_ACTION_MAP: { readonly [k: string]: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> } = {
   current_items: getCurrentItems,
   add_item: addItem,
@@ -265,16 +319,28 @@ const MESSAGE_ACTION_MAP: { readonly [k: string]: WebsocketMethod<ModifyShopping
   delete_item: deleteItem,
   set_item_order: setItemOrder,
   set_item_content: setItemContent,
+  set_item_notes: setItemNotes,
+  clear_items: clearItems,
+  __ping__: __ping__,
 };
 
-export const modifyShoppingListItems: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
+export const modifyShoppingListItems: WebsocketMethod<ModifyShoppingListMessage, ModifyShoppingListResponse> = async (
   req: WebsocketRequest<ModifyShoppingListMessage>
 ) => {
   const message = req.ws_message;
 
   const handler = MESSAGE_ACTION_MAP[message.action!];
   if (handler) {
-    return await handler(req);
+    const [statusCode, responseData] = await handler(req);
+    if(statusCode === StatusCodes.OK) {
+      return [statusCode, {
+        responding_to_action: message.action!,
+        items: responseData,
+      } as ModifyShoppingListResponse]
+    }
+    else {
+      return [statusCode, responseData as ErrorResponse];
+    }
   } else {
     return [StatusCodes.BAD_REQUEST, { message: `Unknown action: ${message.action}` }];
   }

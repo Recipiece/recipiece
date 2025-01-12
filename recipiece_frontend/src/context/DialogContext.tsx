@@ -3,8 +3,10 @@ import { Dialog, Drawer } from "../component";
 import { Dialogs } from "../dialog";
 import { useLayout } from "../hooks";
 
+type DrawerDirection = "bottom" | "left" | "top" | "right" | undefined;
+
 export const DialogContext = createContext<{
-  readonly pushDialog: (dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]>) => void;
+  readonly pushDialog: (dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]> & {readonly direction?: DrawerDirection}) => void;
   readonly popDialog: (dialogId?: keyof typeof Dialogs) => void;
 }>({
   popDialog: () => {},
@@ -13,6 +15,7 @@ export const DialogContext = createContext<{
 
 export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { isMobile } = useLayout();
+  const [direction, setDirection] = useState<DrawerDirection>("bottom");
 
   const [dialogStack, setDialogStack] = useState<
     {
@@ -22,7 +25,10 @@ export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
     }[]
   >([]);
 
-  const pushDialog = useCallback((dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]>) => {
+  const pushDialog = useCallback((dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]> & {readonly direction?: DrawerDirection}) => {
+    if(props.direction) {
+      setDirection(props.direction);
+    }
     // @ts-ignore
     setDialogStack((prev) => {
       return [
@@ -48,6 +54,7 @@ export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
         return [...rest];
       });
     }
+    setDirection("bottom");
   }, []);
 
   const onOpenChange = (value: boolean) => {
@@ -78,7 +85,7 @@ export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
       )}
       {isMobile && (
         // On mobile views, we use the drawer for all "dialogs"
-        <Drawer open={dialogStack.length > 0} onOpenChange={onOpenChange}>
+        <Drawer direction={direction} open={dialogStack.length > 0} onOpenChange={onOpenChange}>
           {children}
           {dialogStack.length > 0 && dialog}
         </Drawer>

@@ -3,7 +3,10 @@ import {
   CreateAccountPage,
   DashboardPage,
   ForgotPasswordPage,
+  KitchenMembershipPage,
+  KitchenPage,
   LoginPage,
+  MealPlanViewPage,
   RecipeEditPage,
   RecipeViewPage,
   RegisterPage,
@@ -58,6 +61,18 @@ export const authenticatedRoutes = [
   {
     path: "/shopping-list/:shoppingListId",
     element: ShoppingListViewPage,
+  },
+  {
+    path: "/meal-plan/view/:id",
+    element: MealPlanViewPage,
+  },
+  {
+    path: "/kitchen",
+    element: KitchenPage,
+  },
+  {
+    path: "/kitchen/:kitchenMembershipId",
+    element: KitchenMembershipPage,
   },
 ];
 

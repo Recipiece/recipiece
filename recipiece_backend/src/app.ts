@@ -19,11 +19,18 @@ import {
   refreshTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
+import { Logger } from "./util/logger";
+import { YEmptySchema } from "./schema";
 
 const app = new WebSocketExpress();
+const logger = Logger.getLogger({
+  name: "app.ts",
+  disabledEnvs: ["test"],
+});
 
 app.use(cors({}));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan(":method :url :status - :response-time ms"));
 
 if (process.env.APP_ENVIRONMENT === "dev") {
@@ -36,14 +43,14 @@ if (process.env.APP_ENVIRONMENT === "dev") {
 }
 
 app.get("/", (_, res) => {
-  res.status(StatusCodes.OK).send({version: process.env.APP_VERSION});
+  res.status(StatusCodes.OK).send({ version: process.env.APP_VERSION });
 });
 
 ROUTES.forEach((route) => {
   const routeHandlers: any[] = [];
 
   // set up authentication first
-  console.log(`configuring routing for ${route.path}`);
+  logger.log(`configuring routing for ${route.method} ${route.path}`);
   switch (route.authentication) {
     case "access_token":
       routeHandlers.push(accessTokenAuthMiddleware);
@@ -55,21 +62,28 @@ ROUTES.forEach((route) => {
       routeHandlers.push(basicAuthMiddleware);
       break;
     case "none":
-      console.warn(`  no auth specified for ${route.path}!`);
+      logger.warn(`  no auth specified for ${route.path}!`);
       break;
   }
 
-  if (route.requestSchema) {
-    switch (route.method) {
-      case "POST":
-      case "PUT":
-        routeHandlers.push(validateRequestBodySchema(route.requestSchema));
-        break;
-      case "GET":
-      case "DELETE":
-        routeHandlers.push(validateRequestQuerySchema(route.requestSchema));
-        break;
-    }
+  /**
+   * set up the request schema validation.
+   */
+  const requestSchema = route.requestSchema ?? YEmptySchema;
+  switch (route.method) {
+    case "POST":
+    case "PUT":
+      routeHandlers.push(validateRequestBodySchema(requestSchema));
+      break;
+    case "GET":
+    case "DELETE":
+      routeHandlers.push(validateRequestQuerySchema(requestSchema));
+      break;
+  }
+
+  if (route.preMiddleware) {
+    logger.log(`  installing extra pre-middleware for ${route.path}`);
+    routeHandlers.push(...route.preMiddleware);
   }
 
   routeHandlers.push(async (req: Request, res: Response) => {
@@ -78,9 +92,16 @@ ROUTES.forEach((route) => {
     res.status(statusCode).send(responseBody);
   });
 
-  if (route.responseSchema) {
-    routeHandlers.push(validateResponseSchema(route.responseSchema));
+  if (route.postMiddleware) {
+    logger.log(`  installing extra post-middleware for ${route.path}`);
+    routeHandlers.push(...route.postMiddleware);
   }
+
+  /**
+   * setup the response schema validation.
+   */
+  const responseSchema = route.responseSchema ?? YEmptySchema;
+  routeHandlers.push(validateResponseSchema(responseSchema));
 
   switch (route.method) {
     case "POST":
@@ -131,7 +152,7 @@ ROUTES.forEach((route) => {
  * also kill it in redis.
  */
 WEBSOCKET_ROUTES.forEach((route) => {
-  console.log(`configuring websocket routing for ${route.path}`);
+  logger.log(`configuring websocket routing for ${route.path}`);
   app.use(route.path, wsTokenAuthMiddleware);
 
   app.ws(route.path, async (req: Request, res: WSResponse) => {
@@ -153,7 +174,7 @@ WEBSOCKET_ROUTES.forEach((route) => {
           // @ts-ignore
           req.ws_message = route.requestSchema.cast(utfMessage);
         } catch (error) {
-          console.log(error);
+          logger.log(error);
           res.status(StatusCodes.BAD_REQUEST).send((error as ValidationError)?.errors?.join(" "));
           ws.close();
           return;
@@ -169,7 +190,7 @@ WEBSOCKET_ROUTES.forEach((route) => {
           await route.responseSchema.validate(data);
           broadcastData = route.responseSchema.cast(data);
         } catch (error) {
-          console.log(error);
+          logger.log(error);
           res.status(StatusCodes.INTERNAL_SERVER_ERROR).send((error as ValidationError)?.errors?.join(" "));
           ws.close();
           return;

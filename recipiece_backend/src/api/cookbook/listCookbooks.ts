@@ -5,20 +5,26 @@ import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "../../sch
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
-export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooksQuerySchema>): ApiResponse<ListCookbooksResponseSchema> => {
+export const listCookbooks = async (
+  req: AuthenticatedRequest<any, ListCookbooksQuerySchema>
+): ApiResponse<ListCookbooksResponseSchema> => {
   const user = req.user;
 
   const page = req.query.page_number;
   const pageSize = req.query.page_size || DEFAULT_PAGE_SIZE;
-  const userId = req.query.user_id ?? user.id;
+  const excludeContainingRecipeId = req.query.exclude_containing_recipe_id;
   const search = req.query.search;
 
   let where: Prisma.CookbookWhereInput = {
-    user_id: userId,
+    user_id: user.id,
   };
 
-  if (userId && userId !== user.id) {
-    where.private = false;
+  if (excludeContainingRecipeId) {
+    where.recipe_cookbook_attachments = {
+      none: {
+        recipe_id: excludeContainingRecipeId,
+      },
+    };
   }
 
   if (search) {

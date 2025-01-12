@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
-import { Button, Grid, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
+import { Button, Grid, H2, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ListRecipeFilters, Recipe } from "../../data";
 
@@ -16,11 +16,14 @@ export const DashboardPage: FC = () => {
         page_number: 0,
         cookbook_id: +cookbookId,
         search: "",
+        shared_recipes: "include",
+        cookbook_attachments: "include",
       };
     } else {
       return {
         page_number: 0,
         search: "",
+        shared_recipes: "include",
       };
     }
   }, [cookbookId]);
@@ -66,51 +69,44 @@ export const DashboardPage: FC = () => {
   }, []);
 
   const { data: recipeData, isLoading: isLoadingRecipes, isFetching: isFetchingRecipes } = useListRecipesQuery(filters);
-  const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { disabled: !cookbookId });
-  const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation({
-    onSuccess: () => {
-      toast({
-        title: "Recipe Added to Cookbook",
-        description: "The recipe was added to your cookbook.",
-      });
-      popDialog("searchRecipes");
-    },
-    onFailure: () => {
-      toast({
-        title: "Cannot add recipe to cookbook",
-        description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
-        variant: "destructive",
-      });
-      popDialog("searchRecipes");
-    },
-  });
+  const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { enabled: !!cookbookId });
+  const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
 
   const recipes = useMemo(() => {
     return recipeData?.data || [];
   }, [recipeData]);
 
-  const onFindRecipe = () => {
-    pushDialog("searchRecipes", {
+  const onFindRecipe = useCallback(() => {
+    pushDialog("searchRecipesForCookbook", {
       cookbookId: +cookbookId!,
-      onSubmit: onSubmitFindRecipe,
-      onClose: () => popDialog("searchRecipes"),
+      onSubmit: async (recipe: Recipe) => {
+        try {
+          await addRecipeToCookbook({ recipe: recipe, cookbook: cookbook! });
+          toast({
+            title: "Recipe Added to Cookbook",
+            description: "The recipe was added to your cookbook.",
+          });
+        } catch {
+          toast({
+            title: "Cannot add recipe to cookbook",
+            description: "There was an issue trying to add your recipe to this cookbook. Try again later.",
+            variant: "destructive",
+          });
+        } finally {
+          popDialog("searchRecipesForCookbook");
+        }
+      },
+      onClose: () => popDialog("searchRecipesForCookbook"),
     });
-  };
-
-  const onSubmitFindRecipe = useCallback(
-    async (recipe: Recipe) => {
-      await addRecipeToCookbook({ recipe_id: recipe.id, cookbook_id: +cookbookId! });
-    },
-    [cookbookId, addRecipeToCookbook]
-  );
+  }, [addRecipeToCookbook, cookbook, cookbookId, popDialog, pushDialog, toast]);
 
   return (
     <Stack>
-      {!cookbookId && <h1 className="text-xl">All Your Recipes</h1>}
+      {!cookbookId && <H2>Your Recipes</H2>}
       {cookbookId && (
         <LoadingGroup className="h-8 w-[250px]" isLoading={isLoadingCookbook}>
           <Shelf>
-            <h1 className="text-xl">{cookbook?.name}</h1>
+            <H2>{cookbook?.name}</H2>
             <ShelfSpacer />
             <Button onClick={onFindRecipe} variant="outline">
               <Plus size={20} className="mr-1" /> Add a recipe
@@ -118,7 +114,6 @@ export const DashboardPage: FC = () => {
           </Shelf>
         </LoadingGroup>
       )}
-      {!cookbookId && <p>See all of your recipes in one place.</p>}
       {cookbookId && (
         <LoadingGroup isLoading={isLoadingCookbook} className="h-4">
           <p>{cookbook?.description}</p>

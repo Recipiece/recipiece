@@ -1,24 +1,33 @@
+import { recipeImportUploader } from "../../middleware";
 import {
+  YChangePasswordRequestSchema,
+  YCreatePushNotificationRequestSchema,
   YCreateUserRequestSchema,
   YCreateUserResponseSchema,
   YIssueForgotPasswordTokenRequestSchema,
   YLoginResponseSchema,
   YRefreshTokenResponseSchema,
   YResetPasswordRequestSchema,
+  YUpdateUserRequestSchema,
   YUserSchema,
   YValidateUserRequestSchema,
   YValidateUserResponseSchema,
 } from "../../schema";
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
+import { changePassword } from "./changePassword";
+import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
 import { createUser } from "./createUser";
+import { deleteSelf } from "./deleteSelf";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
+import { USER_KITCHEN_MEMBERSHIP_ROUTES } from "./kitchenMembership";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
 import { refreshToken } from "./refreshToken";
+import { requestImportRecipes } from "./requestImportRecipes";
 import { resetPassword } from "./resetPassword";
+import { updateUser } from "./updateUser";
 import { validateUser } from "./validateUser";
 
 export const LOGIN_ROUTES: Route[] = [
@@ -28,14 +37,12 @@ export const LOGIN_ROUTES: Route[] = [
     function: loginUser,
     authentication: "basic",
     responseSchema: YLoginResponseSchema,
-    version: Versions.ALL,
   },
   {
     path: "/user/logout",
     method: "POST",
     function: logoutUser,
     authentication: "access_token",
-    version: Versions.ALL,
   },
   {
     path: "/user/self",
@@ -43,7 +50,28 @@ export const LOGIN_ROUTES: Route[] = [
     function: getUserByToken,
     authentication: "access_token",
     responseSchema: YUserSchema,
-    version: Versions.ALL,
+  },
+  {
+    path: "/user/self",
+    method: "DELETE",
+    function: deleteSelf,
+    authentication: "access_token",
+  },
+  {
+    path: "/user",
+    method: "PUT",
+    function: updateUser,
+    authentication: "access_token",
+    requestSchema: YUpdateUserRequestSchema,
+    responseSchema: YUserSchema,
+  },
+  {
+    path: "/user",
+    method: "POST",
+    function: createUser,
+    authentication: "none",
+    requestSchema: YCreateUserRequestSchema,
+    responseSchema: YCreateUserResponseSchema,
   },
   {
     path: "/user/verify-email",
@@ -52,14 +80,12 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "access_token",
     requestSchema: YValidateUserRequestSchema,
     responseSchema: YValidateUserResponseSchema,
-    version: Versions.ALL,
   },
   {
     path: "/user/request-token/verify-email",
     method: "POST",
     function: issueEmailVerificationToken,
     authentication: "access_token",
-    version: Versions.ALL,
   },
   {
     path: "/user/request-token/forgot-password",
@@ -67,7 +93,6 @@ export const LOGIN_ROUTES: Route[] = [
     function: issueForgotPasswordToken,
     authentication: "none",
     requestSchema: YIssueForgotPasswordTokenRequestSchema,
-    version: Versions.ALL,
   },
   {
     path: "/user/reset-password",
@@ -75,7 +100,13 @@ export const LOGIN_ROUTES: Route[] = [
     function: resetPassword,
     authentication: "none",
     requestSchema: YResetPasswordRequestSchema,
-    version: Versions.ALL,
+  },
+  {
+    path: "/user/change-password",
+    method: "POST",
+    function: changePassword,
+    authentication: "basic",
+    requestSchema: YChangePasswordRequestSchema,
   },
   {
     path: "/user/refresh-token",
@@ -83,18 +114,20 @@ export const LOGIN_ROUTES: Route[] = [
     function: refreshToken,
     authentication: "refresh_token",
     responseSchema: YRefreshTokenResponseSchema,
-    version: Versions.ALL,
   },
-];
-
-if (process.env.APP_VERSION! !== Versions.CAST_IRON_SKILLET) {
-  LOGIN_ROUTES.push({
-    path: "/user/create",
+  {
+    path: "/user/import-recipes",
     method: "POST",
-    function: createUser,
-    authentication: "none",
-    requestSchema: YCreateUserRequestSchema,
-    responseSchema: YCreateUserResponseSchema,
-    version: Versions.ALL,
-  });
-}
+    function: requestImportRecipes,
+    authentication: "access_token",
+    preMiddleware: [recipeImportUploader.single("file")],
+  },
+  {
+    path: "/user/push-notifications/opt-in",
+    method: "POST",
+    function: createPushNotificationSubscription,
+    authentication: "access_token",
+    requestSchema: YCreatePushNotificationRequestSchema,
+  },
+  ...USER_KITCHEN_MEMBERSHIP_ROUTES,
+];

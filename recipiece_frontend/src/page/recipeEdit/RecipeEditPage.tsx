@@ -10,10 +10,12 @@ import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
 import { ParseRecipeFromURLForm } from "../../dialog";
 import { IngredientsForm } from "./IngredientsForm";
 import { StepsForm } from "./StepsForm";
+import { formatIngredientAmount } from "../../util";
 
 const RecipeFormSchema = z.object({
   name: z.string().min(3).max(100),
-  description: z.string().min(3).max(1000),
+  description: z.string().max(1000).optional(),
+  servings: z.coerce.number().min(0).optional(),
   steps: z.array(
     z.object({
       content: z.string().min(3),
@@ -52,7 +54,7 @@ export const RecipeEditPage: FC = () => {
     isLoading: isLoadingRecipe,
     isError: isRecipeGetErrorFromRequest,
   } = useGetRecipeByIdQuery(recipeId as number, {
-    disabled: isCreatingNewRecipe,
+    enabled: !isCreatingNewRecipe,
   });
 
   const { data: currentUser, isLoading: isLoadingCurrentUser } = useGetSelfQuery();
@@ -79,6 +81,7 @@ export const RecipeEditPage: FC = () => {
       id: isCreatingNewRecipe ? undefined : recipeId,
       name: formData.name,
       description: formData.description,
+      servings: formData.servings,
       ingredients: formData.ingredients.map((ing, index) => {
         return {
           ...ing,
@@ -96,9 +99,9 @@ export const RecipeEditPage: FC = () => {
     try {
       let response: Recipe;
       if (isCreatingNewRecipe) {
-        response = (await createRecipe(sanitizedFormData)).data;
+        response = await createRecipe(sanitizedFormData);
       } else {
-        response = (await updateRecipe(sanitizedFormData)).data;
+        response = await updateRecipe(sanitizedFormData);
       }
       navigate(`/recipe/view/${response.id}`);
     } catch (err) {
@@ -123,12 +126,20 @@ export const RecipeEditPage: FC = () => {
         name: recipe.name,
         description: recipe.description,
         steps: recipe.steps,
-        ingredients: recipe.ingredients,
+        ingredients: (recipe.ingredients ?? []).map((ing) => {
+          return {
+            ...ing,
+            amount: !!ing.amount ? formatIngredientAmount(ing.amount) : undefined,
+            unit: ing.unit === null ? undefined : ing.unit,
+          };
+        }),
+        servings: recipe.servings,
       };
     } else {
       return {
         name: "",
         description: "",
+        servings: 1,
         steps: [],
         ingredients: [],
       };
@@ -149,7 +160,7 @@ export const RecipeEditPage: FC = () => {
   const onParseRecipeDialogSubmit = async (data: ParseRecipeFromURLForm) => {
     try {
       const response = await parseRecipe(data.url);
-      form.reset({ ...response.data });
+      form.reset({ ...response });
       popDialog("parseRecipeFromURL");
       toast({
         title: "Recipe Parsed",
@@ -179,7 +190,7 @@ export const RecipeEditPage: FC = () => {
         return prev;
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   return (
@@ -188,13 +199,18 @@ export const RecipeEditPage: FC = () => {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Stack>
             <FormInput name="name" label="Recipe Name" placeholder="What do you want to call this recipe?" />
-            <FormTextarea maxLength={1000} name="description" placeholder="What is this recipe all about?" label="Description" instructions={
-              <>{(recipeDescription || "").length} / 1000</>
-            }>
-            </FormTextarea>
+            <FormInput min={1} step={1} name="servings" type="number" label="Servings" placeholder="How many servings does this recipe make?" />
+            <FormTextarea
+              maxLength={1000}
+              name="description"
+              placeholder="What is this recipe all about?"
+              label="Description"
+              instructions={<>{(recipeDescription || "").length} / 1000</>}
+            ></FormTextarea>
 
             {(isCreatingNewRecipe || !!recipe) && (
               <div className="grid gap-4 grid-cols-1">
+                <hr />
                 <IngredientsForm isLoading={isLoading} />
                 <hr />
                 <StepsForm isLoading={isLoading} />

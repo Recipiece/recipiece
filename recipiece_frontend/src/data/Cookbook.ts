@@ -3,11 +3,17 @@ export interface Cookbook {
   readonly name: string;
   readonly description?: string;
   readonly created_at: string;
-  readonly private?: boolean;
   readonly user_id: number;
 }
 
 export interface ListCookbookFilters {
   readonly page_number: number;
   readonly search?: string;
+  readonly exclude_containing_recipe_id?: number;
+}
+
+export interface ListCookbooksResponse {
+  readonly data: Cookbook[];
+  readonly has_next_page?: boolean;
+  readonly page: number;
 }

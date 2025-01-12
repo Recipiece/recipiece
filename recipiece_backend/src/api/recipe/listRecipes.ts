@@ -1,74 +1,78 @@
-import { Prisma } from "@prisma/client";
+import { Recipe } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
+import {
+  ingredientsSubquery,
+  sharesSubquery,
+  sharesWithMemberships,
+  stepsSubquery
+} from "./util";
 
-export const listRecipes = async (req: AuthenticatedRequest<any, ListRecipesQuerySchema>): ApiResponse<ListRecipesResponseSchema> => {
-  const query = req.query;
-  const user = req.user;
+export const listRecipes = async (
+  request: AuthenticatedRequest<any, ListRecipesQuerySchema>
+): ApiResponse<ListRecipesResponseSchema> => {
+  const { page_number, page_size, shared_recipes, search, cookbook_id, cookbook_attachments } = request.query;
+  const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
+  const user = request.user;
 
-  const userId = query.user_id ?? user.id;
-  const pageSize = query.page_size || DEFAULT_PAGE_SIZE;
-  const page = query.page_number;
-  const search = query.search;
-  const cookbookId = query.cookbook_id;
-  const excludeCookbookId = query.exclude_cookbook_id;
-
-  let where: Prisma.RecipeWhereInput = {
-    user_id: userId,
-  };
-
-  if (userId && userId !== user.id) {
-    where.private = false;
-  }
+  let query = prisma.$kysely
+    .selectFrom("recipes")
+    .selectAll("recipes")
+    .select((eb) => {
+      return [
+        stepsSubquery(eb).as("steps"),
+        ingredientsSubquery(eb).as("ingredients"),
+        sharesSubquery(eb, user.id).as("shares"),
+      ];
+    })
+    .where((eb) => {
+      if (shared_recipes === "include") {
+        return eb.or([
+          eb("recipes.user_id", "=", user.id),
+          eb.exists(sharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1)),
+        ]);
+      } else {
+        return eb("recipes.user_id", "=", user.id);
+      }
+    });
 
   if (search) {
-    where.name = {
-      contains: search,
-      mode: "insensitive",
-    };
+    query = query.where("recipes.name", "ilike", `%${search}%`);
   }
 
-  if (cookbookId) {
-    where.recipe_cookbook_attachments = {
-      some: {
-        cookbook_id: +cookbookId,
-      },
-    };
-  } else if (excludeCookbookId) {
-    where.recipe_cookbook_attachments = {
-      none: {
-        cookbook_id: +excludeCookbookId,
-      },
-    };
+  if (cookbook_id && cookbook_attachments === "include") {
+    query = query
+      .innerJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "recipes.id")
+      .where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id);
+  } else if (cookbook_id && cookbook_attachments === "exclude") {
+    query = query
+      .leftJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "recipes.id")
+      .where((eb) => {
+        return eb
+          .case()
+          .when("recipe_cookbook_attachments.recipe_id", "is not", null)
+          .then(eb("recipe_cookbook_attachments.cookbook_id", "!=", cookbook_id))
+          .else(true)
+          .end();
+      });
   }
 
-  const offset = page * pageSize;
+  query = query.offset(page_number * actualPageSize).limit(actualPageSize + 1);
 
-  const recipes = await prisma.recipe.findMany({
-    where: where,
-    include: {
-      steps: true,
-      ingredients: true,
-    },
-    skip: offset,
-    take: pageSize + 1,
-    orderBy: {
-      created_at: "desc",
-    },
-  });
+  const recipes = await query.execute();
 
-  const hasNextPage = recipes.length > pageSize;
-  const resultsData = recipes.splice(0, pageSize);
+  const hasNextPage = recipes.length > actualPageSize;
+  const resultsData = recipes.splice(0, actualPageSize) as Recipe[];
 
   return [
     StatusCodes.OK,
     {
       data: resultsData,
       has_next_page: hasNextPage,
-      page: page,
+      page: page_number,
     },
   ];
 };

@@ -8,3 +8,23 @@ root.render(
     <App />
   </StrictMode>
 )
+
+// const registerServiceWorker = async () => {
+//   if ("serviceWorker" in navigator) {
+//     try {
+//       const registration = await navigator.serviceWorker.register(
+//         "serviceWorker.js",
+//         {
+//           scope: "./",
+//         }
+//       );
+//       return registration;
+//     } catch (error) {
+//       console.error(`Registration failed with ${error}`);
+//     }
+//   }
+// };
+
+
+
+// serviceWorker.register();

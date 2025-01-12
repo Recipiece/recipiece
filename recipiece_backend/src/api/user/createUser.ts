@@ -5,15 +5,43 @@ import { DateTime } from "luxon";
 import { prisma } from "../../database";
 import { CreateUserRequestSchema } from "../../schema";
 import { ApiResponse } from "../../types";
-import { VERSION_ACCESS_LEVELS, Versions } from "../../util/constant";
+import { VERSION_ACCESS_LEVELS } from "../../util/constant";
 import { hashPassword } from "../../util/password";
 
 export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<User> => {
-  const { username, password } = request.body;
+  const { username, email, password } = request.body;
+
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        {
+          username: {
+            equals: username,
+            mode: "insensitive",
+          },
+        },
+        {
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+  });
+
+  if (existingUser) {
+    return [
+      StatusCodes.CONFLICT,
+      {
+        message: "Username or Email already in use.",
+      },
+    ];
+  }
 
   try {
     const hashedPassword = await hashPassword(password);
-    if (!hashPassword) {
+    if (!hashedPassword) {
       return [
         StatusCodes.INTERNAL_SERVER_ERROR,
         {
@@ -25,7 +53,8 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
     const insertedUser = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          email: username,
+          email: email,
+          username: username,
           credentials: {
             create: {
               password_hash: hashedPassword!,

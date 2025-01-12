@@ -32,6 +32,110 @@ export const sendEmail = async (options: SendMailOptions) => {
   }
 };
 
+export const sendFinishedImportJobSuccessEmail = async (user: User, jobId: string) => {
+  const textEmail = `
+Recipiece has finished importing your file! Your recipes should now be available within Recipiece. Happy Cooking!.
+For troubleshooting and reference, the import is associated with the job id ${jobId}.
+  `;
+
+  const htmlEmail = `
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+        <style>
+            html, body {
+                padding: 16px;
+                margin: 0;
+            }
+            .header {
+                color: white;
+                background-color: #395144;
+                width: 100%;
+                font-family: "Handlee", cursive;
+                font-weight: 400;
+                font-style: normal;
+                text-align: center;
+            }
+
+            .content {
+                font-family: sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Recipiece</h1>
+        </div>
+        <div class="content">
+            Recipiece has finished importing your file! Your recipes should now be available within Recipiece. Happy Cooking!
+            <br />
+            For troubleshooting and reference, the import is associated with the job id ${jobId}.
+        </div>
+    </body>
+</html>
+  `;
+
+  await sendEmail({
+    from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
+    to: user.email,
+    subject: "Recipiece - Recipe Import",
+    text: textEmail,
+    html: htmlEmail,
+  });
+};
+
+export const sendFinishedImportJobFailedEmail = async (user: User, jobId: string) => {
+  const textEmail = `
+Recipiece was unable to import your recipes from your recent file upload.
+For troubleshooting and reference, the import was associated with the job id ${jobId}.
+  `;
+
+  const htmlEmail = `
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+        <style>
+            html, body {
+                padding: 16px;
+                margin: 0;
+            }
+            .header {
+                color: white;
+                background-color: #395144;
+                width: 100%;
+                font-family: "Handlee", cursive;
+                font-weight: 400;
+                font-style: normal;
+                text-align: center;
+            }
+
+            .content {
+                font-family: sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Recipiece</h1>
+        </div>
+        <div class="content">
+            Recipiece was unable to import your recipes from your recent file upload.
+            <br/>
+            For troubleshooting and reference, the import was associated with the job id ${jobId}.
+        </div>
+    </body>
+</html>
+  `;
+
+  await sendEmail({
+    from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
+    to: user.email,
+    subject: "Recipiece - Recipe Import",
+    text: textEmail,
+    html: htmlEmail,
+  });
+};
+
 export const sendAccountVerificationEmail = async (user: User, token: UserValidationToken) => {
   const textEmail = `
 Welcome to Recipiece! Please use the following code to verify your account:
@@ -50,7 +154,7 @@ This token will expire in one hour.
             }
             .header {
                 color: white;
-                background-color: #B43F3F;
+                background-color: #395144;
                 width: 100%;
                 font-family: "Handlee", cursive;
                 font-weight: 400;
@@ -106,7 +210,7 @@ This token will expire in one hour.
             }
             .header {
                 color: white;
-                background-color: #B43F3F;
+                background-color: #395144;
                 width: 100%;
                 font-family: "Handlee", cursive;
                 font-weight: 400;

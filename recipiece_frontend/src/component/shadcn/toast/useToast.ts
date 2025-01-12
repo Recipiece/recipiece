@@ -5,7 +5,7 @@ import * as React from "react";
 
 import type { ToastActionElement, ToastProps } from "./Toast";
 
-const TOAST_LIMIT = 1;
+const TOAST_LIMIT = 5;
 const TOAST_REMOVE_DELAY = 1000000;
 
 type ToasterToast = ToastProps & {
@@ -141,6 +141,7 @@ type Toast = Omit<ToasterToast, "id">;
 
 function toast({ ...props }: Toast) {
   const id = genId();
+  const { duration, ...restProps} = props;
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -152,11 +153,13 @@ function toast({ ...props }: Toast) {
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
+      ...restProps,
+      duration: duration ?? 3000,
       id,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss();
+        props?.onOpenChange?.(open);
       },
     },
   });

@@ -25,3 +25,11 @@ class ParseRecipeResponse(BaseModel):
     instructions_list: Optional[List[str]] = []
     title: Optional[str] = None
     total_time: Optional[Union[str, int]] = None
+
+
+class ParseIngredientsRequest(BaseModel):
+    ingredients: List[str] = []
+
+
+class ParseIngredientsResponse(BaseModel):
+    ingredients: List[ParsedIngredient] = []

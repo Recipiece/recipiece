@@ -1,10 +1,10 @@
-import { BookPlus, Link, Pencil, ShoppingBasket } from "lucide-react";
+import { BookPlus, Link, Pencil, ShoppingBasket, SquareKanban, Watch } from "lucide-react";
 import { FC } from "react";
 import { Button } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export type MobileCreateMenuDialogOption = "recipe_from_url" | "recipe" | "cookbook" | "shopping_list";
+export type MobileCreateMenuDialogOption = "recipe_from_url" | "recipe" | "cookbook" | "shopping_list" | "timer" | "meal_plan";
 
 export const MobileCreateMenuDialog: FC<BaseDialogProps<MobileCreateMenuDialogOption>> = ({ onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle } = useResponsiveDialogComponents();
@@ -24,9 +24,17 @@ export const MobileCreateMenuDialog: FC<BaseDialogProps<MobileCreateMenuDialogOp
           <Pencil className="mr-2" />
           Recipe from Scratch
         </Button>
+        <Button onClick={() => onSubmit?.("timer")}>
+          <Watch className="mr-2"/>
+          Timer
+        </Button>
         <Button onClick={() => onSubmit?.("cookbook")}>
           <BookPlus className="mr-2" />
           Cookbook
+        </Button>
+        <Button onClick={() => onSubmit?.("meal_plan")}>
+          <SquareKanban className="mr-2" />
+          Meal Plan
         </Button>
         <Button onClick={() => onSubmit?.("shopping_list")}>
           <ShoppingBasket className="mr-2" />
