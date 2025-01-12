@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { H2, Stack } from "../../component";
 import { FromUserTable } from "./FromUserTable";
-import { TargetingUserTable } from "./TargetingUserTable";
 import { PastTargetingMembershipsTable } from "./PastTargetingMembershipsTable";
+import { TargetingUserTable } from "./TargetingUserTable";
 
 export const KitchenPage: FC = () => {
   return (

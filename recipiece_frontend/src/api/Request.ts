@@ -72,7 +72,11 @@ export const usePut = (args?: HookArgs) => {
     headers.set("Content-Type", "application/json");
     if (putRequest.withAuth === "access_token") {
       const tokens = await tokenResolver.resolveTokens();
-      headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      if (tokens.access_token) {
+        headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      } else {
+        return Promise.reject();
+      }
     }
 
     try {
@@ -119,7 +123,11 @@ export const usePost = (args?: HookArgs) => {
     headers.set("Content-Type", "application/json");
     if (postRequest.withAuth === "access_token") {
       const tokens = await tokenResolver.resolveTokens();
-      headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      if (tokens.access_token) {
+        headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      } else {
+        return Promise.reject();
+      }
     }
 
     if (postRequest.extraHeaders) {
@@ -172,7 +180,11 @@ export const useGet = (args?: HookArgs) => {
     headers.set("Content-Type", "application/json");
     if (getRequest.withAuth === "access_token") {
       const tokens = await tokenResolver.resolveTokens();
-      headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      if (tokens.access_token) {
+        headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      } else {
+        return Promise.reject();
+      }
     }
 
     const queryString = getRequest.query ? new URLSearchParams(getRequest.query).toString() : "";
@@ -225,7 +237,11 @@ export const useDelete = (args?: HookArgs) => {
     headers.set("Content-Type", "application/json");
     if (deleteRequest.withAuth === "access_token") {
       const tokens = await tokenResolver.resolveTokens();
-      headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      if (tokens.access_token) {
+        headers.set("Authorization", `Bearer ${tokens.access_token}`);
+      } else {
+        return Promise.reject();
+      }
     }
 
     try {

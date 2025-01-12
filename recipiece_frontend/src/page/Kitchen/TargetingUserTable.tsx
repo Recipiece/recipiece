@@ -1,10 +1,9 @@
 import { Ban, CheckCircle2 } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
-import { useListUserKitchenMembershipsQuery, useUpdateKitchenMembershipMutation } from "../../api";
+import { useListUserKitchenMembershipsQuery, useUpdatePendingUserKitchenMembershipMutation } from "../../api";
 import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
 import { UserKitchenMembership } from "../../data";
-import { useDeleteUserKitchenMembershipDialog } from "./hook";
 
 export const TargetingUserTable: FC = () => {
   const { toast } = useToast();
@@ -17,7 +16,7 @@ export const TargetingUserTable: FC = () => {
     status: ["pending"],
   });
 
-  const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } = useUpdateKitchenMembershipMutation();
+  const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } = useUpdatePendingUserKitchenMembershipMutation();
 
   const isLoadingTargetingUser = isLoadingKitchenMembershipsTargetingUser;
   const hasAnyTargetingRequests = !!kitchenMembershipsTargetingUser?.data?.length;

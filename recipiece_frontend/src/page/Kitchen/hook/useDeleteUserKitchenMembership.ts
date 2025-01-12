@@ -4,12 +4,12 @@ import { DialogContext } from "../../../context";
 import { UserKitchenMembership } from "../../../data";
 import { useToast } from "../../../component";
 
-export const useDeleteUserKitchenMembershipDialog = () => {
+export const useDeleteUserKitchenMembershipDialog = (deletionContext: "source_user" | "destination_user") => {
   const { toast } = useToast();
   const { pushDialog, popDialog } = useContext(DialogContext);
 
   const { data: user } = useGetSelfQuery();
-  const { mutateAsync: deleteMembershipMutation, isPending: isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipMutation();
+  const { mutateAsync: deleteMembershipMutation, isPending: isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipMutation(deletionContext);
 
   const deleteUserKitchenMembership = useCallback(async (userKitchenMembership: UserKitchenMembership) => {
     const runDelete = async () => {

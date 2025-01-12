@@ -8,7 +8,7 @@ import {
   useListCookbooksQuery,
   useListMealPlansQuery,
   useListShoppingListsQuery,
-  useLogoutUserMutation,
+  useLogoutUserMutation
 } from "../../../api";
 import { DialogContext } from "../../../context";
 import { Cookbook, ShoppingList } from "../../../data";
@@ -55,6 +55,7 @@ export const RecipieceMenuBarContextProvider: FC<PropsWithChildren> = ({ childre
  */
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
+  
   const { toast } = useToast();
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
@@ -89,7 +90,7 @@ export const RecipieceMenubar: FC = () => {
       await logoutUser();
     } catch {
       // noop
-    } finally {
+    } finally { 
       navigate("/login");
     }
   }, [logoutUser, navigate]);

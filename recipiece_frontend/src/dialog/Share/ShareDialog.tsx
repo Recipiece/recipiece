@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useListUserKitchenMembershipsQuery } from "../../api";
 import { Avatar, AvatarFallback, Button, LoadingGroup, ScrollArea, ScrollBar } from "../../component";
 import { ListUserKitchenMembershipFilters, UserKitchenMembership } from "../../data";
@@ -13,6 +13,7 @@ export interface ShareDialogProps extends BaseDialogProps<UserKitchenMembership>
 
 export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, entity_type, onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const filters: ListUserKitchenMembershipFilters = useMemo(() => {
     let base: ListUserKitchenMembershipFilters = {
@@ -36,8 +37,14 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
   const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } = useListUserKitchenMembershipsQuery({ ...filters });
 
   const onSelectUser = useCallback(
-    (membership: UserKitchenMembership) => {
-      onSubmit?.(membership);
+    async (membership: UserKitchenMembership) => {
+      setIsDisabled(true);
+      try {
+        onSubmit && (await onSubmit?.(membership));
+      } catch {
+        // noop
+      }
+      setIsDisabled(false);
     },
     [onSubmit]
   );
@@ -55,7 +62,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
               <div className="flex flex-row gap-2">
                 {userKitchenMemberships!.data.map((membership) => {
                   return (
-                    <Button onClick={() => onSelectUser(membership)} key={membership.id} variant="ghost" className="w-fit h-fit">
+                    <Button disabled={isDisabled} onClick={() => onSelectUser(membership)} key={membership.id} variant="ghost" className="w-fit h-fit">
                       <div className="flex flex-col gap-1 justify-center items-center">
                         <Avatar>
                           <AvatarFallback className="bg-primary text-white">{membership.destination_user.username.charAt(0).toUpperCase()}</AvatarFallback>
@@ -73,7 +80,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
         {userKitchenMemberships?.data.length === 0 && <>There&apos;s no one in your kitchen!</>}
       </LoadingGroup>
       <ResponsiveFooter>
-        <Button onClick={() => onClose?.()} variant="secondary">
+        <Button disabled={isDisabled} onClick={() => onClose?.()} variant="secondary">
           Cancel
         </Button>
       </ResponsiveFooter>

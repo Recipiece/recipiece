@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { useParams } from "react-router-dom";
 import { useGetUserKitchenMembershipQuery } from "../../api";
-import { H2, LoadingGroup, Stack } from "../../component";
+import { H2, LoadingGroup, NotFound, Stack } from "../../component";
 import { RecipeSharesTable } from "./RecipeSharesTable";
 import { ShoppingListSharesTable } from "./ShoppingListSharesTable";
 
@@ -21,6 +21,7 @@ export const KitchenMembershipPage: FC = () => {
           <ShoppingListSharesTable membership={membership} />
         </Stack>
       )}
+      {isMembershipError && <NotFound backNav="/dashboard" />}
     </LoadingGroup>
   );
 };
