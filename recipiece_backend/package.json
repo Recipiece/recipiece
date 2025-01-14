@@ -4,12 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "dotenvx run -f .env.dev -- nodemon -L ./src/index.ts",
+    "start": "dotenvx run -f .env.dev -- concurrently \"yarn ts-watch\" \"yarn dist-watch\"",
+    "ts-watch": "tsc -b ../recipiece_common/recipiece_database/tsconfig.json ../recipiece_common/recipiece_types/tsconfig.json ./tsconfig.json",
+    "dist-watch": "nodemon dist/index.js",
     "test": "dotenvx run -f .env.test -- jest --runInBand --forceExit",
     "prisma-dev": "dotenvx run -f .env.dev -- prisma migrate dev",
     "prisma-test": "dotenvx run -f .env.test -- prisma migrate dev",
     "seed": "dotenvx run -f .env.dev -- node seed/index.mjs",
-    "build": "tsc --project tsconfig.prod.json"
+    "build": "tsc --project -b tsconfig.prod.json"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",
@@ -34,6 +36,7 @@
     "@types/web-push": "^3.6.4",
     "@types/ws": "^8.5.13",
     "@types/yup": "^0.32.0",
+    "concurrently": "^9.1.2",
     "jabber": "^1.5.3",
     "jest": "^29.7.0",
     "jest-environment-node": "^29.7.0",
@@ -52,6 +55,8 @@
   },
   "dependencies": {
     "@prisma/client": "5.20.0",
+    "@recipiece/database": "file:../recipiece_common/recipiece_database",
+    "@recipiece/types": "file:../recipiece_common/recipiece_types",
     "archiver": "^7.0.1",
     "argon2": "^0.41.1",
     "body-parser": "^1.20.3",

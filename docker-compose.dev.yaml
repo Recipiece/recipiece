@@ -11,6 +11,7 @@ services:
       - recipiece_backend
     volumes:
       - ./recipiece_frontend:/home
+      - ./recipiece_common:/recipiece_common
   recipiece_database:
     image: postgres
     restart: always
@@ -38,8 +39,8 @@ services:
       - "5433:5432"
   recipiece_backend:
     build:
-      context: ./recipiece_backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./recipiece_backend/Dockerfile
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -49,6 +50,7 @@ services:
       - recipiece_recipe_importer
     volumes:
       - ./recipiece_backend:/home
+      - ./recipiece_common:/recipiece_common
   recipiece_recipe_importer:
     build:
       context: ./recipiece_recipe_importer

@@ -70,16 +70,16 @@ export const LoginPage: FC = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form data-testid="form-login" onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput required autoCapitalize="none" name="username" type="text" label="Username or Email" />
-          <FormInput required name="password" type="password" label="Password" />
-          <FormCheckbox className="mt-1 mb-1" name="remember" label="Remember Me" />
-          <SubmitButton type="submit">Login</SubmitButton>
-          <Button onClick={() => navigate("/create-account")} variant="link">
+          <FormInput data-testid="input-username" required autoCapitalize="none" name="username" type="text" label="Username or Email" />
+          <FormInput data-testid="input-password" required name="password" type="password" label="Password" />
+          <FormCheckbox data-testid="input-checkbox" className="mt-1 mb-1" name="remember" label="Remember Me" />
+          <SubmitButton data-testid="button-login" type="submit">Login</SubmitButton>
+          <Button data-testid="button-register" onClick={() => navigate("/create-account")} variant="link">
             Register Now
           </Button>
-          <Button onClick={() => navigate("/forgot-password")} variant="link">
+          <Button data-testid="button-forgot-password" onClick={() => navigate("/forgot-password")} variant="link">
             Forgot Password?
           </Button>
         </Stack>

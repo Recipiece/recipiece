@@ -1,0 +1,13 @@
+{
+  "name": "recipiece_test",
+  "version": "1.0.0",
+  "description": "test helpers for recipiece",
+  "main": "index.js",
+  "author": "sjyn",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "prisma": "^6.2.1",
+    "typescript": "^5.7.3"
+  }
+}

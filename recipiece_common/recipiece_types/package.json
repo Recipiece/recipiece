@@ -1,0 +1,19 @@
+{
+  "name": "@recipiece/types",
+  "version": "1.0.0",
+  "description": "Common Schemas and Types for Recipiece",
+  "main": "./dist/src/index.js",
+  "types": "./src/index.ts",
+  "author": "sjyn",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "yup": "^1.6.1"
+  }
+}

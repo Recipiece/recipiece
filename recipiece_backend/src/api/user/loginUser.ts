@@ -1,10 +1,14 @@
+import { prisma, prismaNoop } from "@recipiece/database";
+import { LoginResponseSchema } from "@recipiece/types";
 import { randomUUID } from "crypto";
-import { prisma } from "../../database";
-import { LoginResponseSchema } from "../../schema";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserSessions } from "../../util/constant";
-import { StatusCodes } from "http-status-codes";
 import { generateToken } from "../../util/token";
+
+prismaNoop();
+
+// noop();
 
 /**
  * Login the user who has authenticated through basic auth.
