@@ -398,7 +398,7 @@ export const RecipieceMenubar: FC = () => {
         </span>
       </Menubar>
 
-      <footer className="visible sm:invisible w-full fixed bottom-0 left-0 h-16 bg-primary text-white">
+      <footer className="visible sm:invisible w-full fixed bottom-0 left-0 h-16 z-50 bg-primary text-white">
         <div className="h-full flex flex-row justify-center items-center">
           <Button onClick={() => navigate("/")} variant="link" className="text-white grow">
             <Home />

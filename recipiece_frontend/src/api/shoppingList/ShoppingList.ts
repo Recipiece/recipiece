@@ -5,6 +5,7 @@ import { ListShoppingListFilters, ListShoppingListResponse, ListShoppingListShar
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, getWebsocketUrl, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
+import { useLayout } from "../../hooks";
 
 export const useShoppingListItemsSubscription = (shoppingListId: number) => {
   const queryClient = useQueryClient();
@@ -73,9 +74,10 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
         setIsWebsocketLoading(false);
       },
       onClose: () => {
-        setShoppingListItems([]);
         setIsWebsocketLoading(true);
       },
+      reconnectAttempts: 2,
+      reconnectInterval: 1000,
     },
     !!wsSession?.token && !isFetchingWsSession && !isLoadingWsSession
   );
@@ -200,6 +202,9 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
     [sendMessage]
   );
 
+  /**
+   * When we first connect, send a current items action to get the most up to date list
+   */
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
       sendMessage(JSON.stringify({ action: "current_items" }));
@@ -225,6 +230,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
 
 export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryArgs<{ readonly token: string }>) => {
   const { getter } = useGet();
+  const { isMobile } = useLayout();
 
   const query = async () => {
     const response = await getter<never, { readonly token: string }>({
@@ -240,6 +246,7 @@ export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryA
     staleTime: 1000,
     refetchOnMount: "always",
     refetchOnReconnect: "always",
+    refetchOnWindowFocus: isMobile,
     ...(args ?? {}),
   });
 };
@@ -265,13 +272,6 @@ export const useGetShoppingListByIdQuery = (listId: number, args?: QueryArgs<Sho
 export const useListShoppingListsQuery = (filters: ListShoppingListFilters, args?: QueryArgs<ListShoppingListResponse>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
-
-  // const searchParams = new URLSearchParams();
-  // searchParams.append("page_number", filters.page_number.toString());
-
-  // if (filters.search) {
-  //   searchParams.append("search", filters.search);
-  // }
 
   const searchParams = filtersToSearchParams(filters);
   const query = async () => {

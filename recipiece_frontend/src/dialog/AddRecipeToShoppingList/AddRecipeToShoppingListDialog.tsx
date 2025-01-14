@@ -16,7 +16,7 @@ const AddRecipeToShoppingListFormSchema = z.object({
     z.object({
       name: z.string(),
       selected: z.boolean(),
-      notes: z.string(),
+      notes: z.string().nullable().optional(),
     })
   ),
 });
@@ -32,10 +32,10 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
       items: recipe.ingredients.map((ing) => {
         let notesString = `${recipe.name} - `;
         if(ing.amount) {
-          notesString += `${ing.unit} `
+          notesString += `${ing.amount} `
         }
-        if(ing.amount) {
-          notesString += `${ing.amount}`
+        if(ing.unit) {
+          notesString += `${ing.unit} `
         }
         return {
           name: ing.name,
@@ -84,6 +84,7 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
     <ResponsiveContent className="p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onAddToShoppingList)}>
+          <>{JSON.stringify(form.formState.errors)}</>
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>Add {recipe.name} to your shopping list</ResponsiveTitle>
             <ResponsiveDescription>Add the ingredients from {recipe.name} to your shopping list.</ResponsiveDescription>
