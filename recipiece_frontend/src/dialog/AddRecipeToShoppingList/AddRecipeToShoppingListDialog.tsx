@@ -84,7 +84,6 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
     <ResponsiveContent className="p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onAddToShoppingList)}>
-          <>{JSON.stringify(form.formState.errors)}</>
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>Add {recipe.name} to your shopping list</ResponsiveTitle>
             <ResponsiveDescription>Add the ingredients from {recipe.name} to your shopping list.</ResponsiveDescription>

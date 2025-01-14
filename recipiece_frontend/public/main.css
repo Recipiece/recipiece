@@ -664,6 +664,10 @@ body {
   bottom: 0px;
 }
 
+.bottom-16 {
+  bottom: 4rem;
+}
+
 .left-0 {
   left: 0px;
 }
@@ -726,38 +730,6 @@ body {
 
 .top-\[50\%\] {
   top: 50%;
-}
-
-.bottom-8 {
-  bottom: 2rem;
-}
-
-.bottom-10 {
-  bottom: 2.5rem;
-}
-
-.bottom-12 {
-  bottom: 3rem;
-}
-
-.bottom-14 {
-  bottom: 3.5rem;
-}
-
-.bottom-16 {
-  bottom: 4rem;
-}
-
-.bottom-\[70px\[\]\] {
-  bottom: 70px[];
-}
-
-.bottom-\[70px\] {
-  bottom: 70px;
-}
-
-.bottom-\[-70px\] {
-  bottom: -70px;
 }
 
 .z-10 {
@@ -2947,10 +2919,6 @@ body {
 
   .sm\:top-auto {
     top: auto;
-  }
-
-  .sm\:bottom-2 {
-    bottom: 0.5rem;
   }
 
   .sm\:col-span-2 {
