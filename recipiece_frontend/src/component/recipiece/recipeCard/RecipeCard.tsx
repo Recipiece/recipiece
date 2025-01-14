@@ -1,5 +1,5 @@
 import { MoreVertical } from "lucide-react";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetSelfQuery } from "../../../api";
 import { Recipe } from "../../../data";
@@ -17,13 +17,14 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
   const navigate = useNavigate();
   const { data: user } = useGetSelfQuery();
   const userKitchenMembershipId = (recipe.shares ?? [])[0]?.user_kitchen_membership_id;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const onView = useCallback(() => {
     navigate(`/recipe/view/${recipe.id}`);
   }, [recipe, navigate]);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
       <Card className="h-full flex flex-col hover:drop-shadow-md">
         <CardHeader onClick={onView} className="hover:cursor-pointer">
           <Shelf>
@@ -37,8 +38,8 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
         <CardFooter>
           <div className="flex flex-row w-full items-center">
             <SharedAvatar userKitchenMembershipId={userKitchenMembershipId} />
-            <DropdownMenuTrigger asChild className="ml-auto">
-              <Button variant="ghost">
+            <DropdownMenuTrigger className="ml-auto">
+              <Button variant="ghost" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                 <MoreVertical />
               </Button>
             </DropdownMenuTrigger>

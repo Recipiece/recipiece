@@ -13,6 +13,7 @@ import {
   H2,
   Input,
   LoadingGroup,
+  LoadingSpinner,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -314,91 +315,94 @@ export const ShoppingListViewPage: FC = () => {
             )}
           </Shelf>
         </LoadingGroup>
-        <LoadingGroup variant="spinner" isLoading={isLoadingShoppingList || isLoadingShoppingListItems || isLoadingShoppingListItems} className="w-9 h-9">
-          <div className="p-2">
-            <Stack>
-              <div className="flex-col">
-                <div className="w-full inline-flex flex-row gap-4">
-                  <Input
-                    ref={newItemRef}
-                    disabled={isPerformingAction}
-                    className="border-y-0 border-b-[1px] border-l-[1px] border-r-0 w-full p-1 rounded-none ring-0 outline-none focus-visible:ring-0 focus-visible:outline-none rounded-bl-md"
-                    placeholder="Add an item..."
-                    value={newestShoppingListItem}
-                    onChange={onNewestItemTextChange}
-                    onKeyDown={onNewItemKeyDown}
-                    onBlur={() => setIsAutoCompleteOpen(false)}
-                    onFocus={() => setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)}
-                  />
-                  <Button variant="outline" onClick={onAddItem}>
-                    Add Item
-                  </Button>
-                </div>
-                <div className="ml-4 h-0 w-0">
-                  <PopoverTrigger className="h-0 w-0" />
-                  <PopoverContent
-                    alignOffset={-16}
-                    align="start"
-                    className="p-1 min-w-[200px]"
-                    side="bottom"
-                    sideOffset={-14}
-                    onOpenAutoFocus={(event) => event.preventDefault()}
-                    onCloseAutoFocus={(event) => event.preventDefault()}
-                    avoidCollisions={false}
-                  >
-                    <div className="grid grid-cols-1">
-                      {autocompleteSuggestions.map((item) => {
-                        return (
-                          <Button className="justify-start p-1 h-auto" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
-                            {item.content}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </PopoverContent>
-                </div>
+        <div className="p-2">
+          <Stack>
+            <div className="flex-col">
+              <div className="w-full inline-flex flex-row gap-4">
+                <Input
+                  ref={newItemRef}
+                  disabled={isPerformingAction}
+                  className="border-y-0 border-b-[1px] border-l-[1px] border-r-0 w-full p-1 rounded-none ring-0 outline-none focus-visible:ring-0 focus-visible:outline-none rounded-bl-md"
+                  placeholder="Add an item..."
+                  value={newestShoppingListItem}
+                  onChange={onNewestItemTextChange}
+                  onKeyDown={onNewItemKeyDown}
+                  onBlur={() => setIsAutoCompleteOpen(false)}
+                  onFocus={() => setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)}
+                />
+                <Button variant="outline" onClick={onAddItem}>
+                  Add Item
+                </Button>
               </div>
-              <div className="grid grid-cols-1 gap-4">
-                {sortedIncompleteItems.map((item) => {
-                  return (
-                    <div className="inline-flex flex-row gap-2 w-full items-center" key={item.id}>
-                      <CheckableShoppingListItemInput
-                        className="flex-grow"
-                        isDraggable
-                        shoppingListItem={item}
-                        disabled={isPerformingAction}
-                        onCheck={markItemComplete}
-                        onContentBlurred={() => onChangeItemContent(item)}
-                        onContentKeyDown={(event) => onChangeItemContentKeyDown(event, item)}
-                        onContentChanged={(event) => onChangeItemValue(event, item.id)}
-                        onItemDropped={onShoppingListItemDropped}
-                        onNotesBlurred={() => onChangeItemNotes(item)}
-                        onNotesChanged={(event) => onChangeNotesValue(event, item.id)}
-                        onNotesKeyDown={(event) => onChangeItemNotesKeyDown(event, item)}
-                      />
-                      <Button onClick={() => onDeleteItem(item)} variant="ghost">
-                        <Minus className="text-destructive" />
-                      </Button>
-                    </div>
-                  );
-                })}
+              <div className="ml-4 h-0 w-0">
+                <PopoverTrigger className="h-0 w-0" />
+                <PopoverContent
+                  alignOffset={-16}
+                  align="start"
+                  className="p-1 min-w-[200px]"
+                  side="bottom"
+                  sideOffset={-14}
+                  onOpenAutoFocus={(event) => event.preventDefault()}
+                  onCloseAutoFocus={(event) => event.preventDefault()}
+                  avoidCollisions={false}
+                >
+                  <div className="grid grid-cols-1">
+                    {autocompleteSuggestions.map((item) => {
+                      return (
+                        <Button className="justify-start p-1 h-auto" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
+                          {item.content}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
               </div>
-
-              {completeShoppingListItems.length > 0 && <hr />}
-
-              {completeShoppingListItems.map((item) => {
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {sortedIncompleteItems.map((item) => {
                 return (
-                  <div key={item.id} className="flex flex-row gap-2 opacity-70 items-center">
-                    <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} readOnly />
+                  <div className="inline-flex flex-row gap-2 w-full items-center" key={item.id}>
+                    <CheckableShoppingListItemInput
+                      className="flex-grow"
+                      isDraggable
+                      shoppingListItem={item}
+                      disabled={isPerformingAction}
+                      onCheck={markItemComplete}
+                      onContentBlurred={() => onChangeItemContent(item)}
+                      onContentKeyDown={(event) => onChangeItemContentKeyDown(event, item)}
+                      onContentChanged={(event) => onChangeItemValue(event, item.id)}
+                      onItemDropped={onShoppingListItemDropped}
+                      onNotesBlurred={() => onChangeItemNotes(item)}
+                      onNotesChanged={(event) => onChangeNotesValue(event, item.id)}
+                      onNotesKeyDown={(event) => onChangeItemNotesKeyDown(event, item)}
+                    />
                     <Button onClick={() => onDeleteItem(item)} variant="ghost">
                       <Minus className="text-destructive" />
                     </Button>
                   </div>
                 );
               })}
-            </Stack>
+            </div>
+
+            {completeShoppingListItems.length > 0 && <hr />}
+
+            {completeShoppingListItems.map((item) => {
+              return (
+                <div key={item.id} className="flex flex-row gap-2 opacity-70 items-center">
+                  <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} readOnly />
+                  <Button onClick={() => onDeleteItem(item)} variant="ghost">
+                    <Minus className="text-destructive" />
+                  </Button>
+                </div>
+              );
+            })}
+          </Stack>
+        </div>
+        {isLoadingShoppingListItems && (
+          <div className="fixed p-2 bottom-16 sm:bottom-0 right-0">
+            <LoadingSpinner width={40} height={40} />
           </div>
-        </LoadingGroup>
+        )}
       </Stack>
     </Popover>
   );
