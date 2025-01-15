@@ -26,6 +26,9 @@ export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingL
       queryClient.setQueriesData(
         {
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES({
+            user_kitchen_membership_id: params.user_kitchen_membership_id,
+          }))
         },
         oldDataCreator(data)
       );
@@ -174,7 +177,7 @@ export const useListShoppingListSharesQuery = (filters: ListShoppingListSharesFi
   };
 
   return useQuery({
-    queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+    queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(filters),
     queryFn: query,
     ...(args ?? {}),
   });

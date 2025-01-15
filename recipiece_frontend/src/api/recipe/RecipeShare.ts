@@ -68,6 +68,11 @@ export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShare, { 
       queryClient.setQueriesData(
         {
           queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPE_SHARES({
+              user_kitchen_membership_id: vars.user_kitchen_membership_id,
+            })
+          ),
         },
         oldDataCreator(data)
       );

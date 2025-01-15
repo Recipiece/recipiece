@@ -17,6 +17,10 @@ export const createUserKitchenMembership = async (
   const targetUser = await prisma.user.findFirst({
     where: {
       username: targetUsername,
+      preferences: {
+        path: ["account_visibility"],
+        not: "private",
+      },
     },
   });
 

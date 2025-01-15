@@ -260,12 +260,12 @@ export const RecipieceMenubar: FC = () => {
 
   return (
     <>
-      <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 bg-white sm:bg-primary text-white">
-        <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white" />
+      <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 sm:bg-primary text-white">
+        <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white dark:text-white" />
         <span className="ml-auto block sm:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="link" className="text-primary">
+              <Button variant="link" className="text-primary dark:text-white">
                 <CircleUserRound />
               </Button>
             </DropdownMenuTrigger>

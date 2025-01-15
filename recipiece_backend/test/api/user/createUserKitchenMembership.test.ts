@@ -86,4 +86,21 @@ describe("Create User Kitchen Memberships", () => {
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
+
+  it("should not allow a membership to be created targeting a user who has account_visibility of private", async () => {
+    const [privateUser] = await fixtures.createUserAndToken({
+      preferences: {
+        account_visibility: "private",
+      }
+    });
+    const response = await request(server)
+      .post("/user/kitchen/membership")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({
+        username: privateUser.username,
+      });
+
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+  });
 });

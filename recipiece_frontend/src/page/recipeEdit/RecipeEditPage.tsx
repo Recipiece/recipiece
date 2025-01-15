@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
-import { Button, Form, FormInput, FormTextarea, NotFound, Stack, SubmitButton, useToast } from "../../component";
+import { Button, Divider, Form, FormInput, FormTextarea, NotFound, Stack, SubmitButton, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
 import { ParseRecipeFromURLForm } from "../../dialog";
@@ -210,9 +210,9 @@ export const RecipeEditPage: FC = () => {
 
             {(isCreatingNewRecipe || !!recipe) && (
               <div className="grid gap-4 grid-cols-1">
-                <hr />
+                <Divider />
                 <IngredientsForm isLoading={isLoading} />
-                <hr />
+                <Divider />
                 <StepsForm isLoading={isLoading} />
               </div>
             )}

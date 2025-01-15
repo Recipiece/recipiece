@@ -74,11 +74,13 @@ export class RecipeQueryKeys {
     return base;
   };
 
-  public static readonly LIST_RECIPE_SHARES = (filters?: ListRecipeSharesFilters): RcpQueryKey => {
+  public static readonly LIST_RECIPE_SHARES = (filters?: Partial<ListRecipeSharesFilters>): RcpQueryKey => {
     const base: RcpQueryKey = ["listRecipeShares"];
-    const { page_number = 0, user_kitchen_membership_id, from_self, targeting_self } = filters ?? {};
+    const { page_number, user_kitchen_membership_id, from_self, targeting_self } = filters ?? {};
 
-    base.push({ page_number });
+    if(page_number) {
+      base.push({ page_number });
+    }
     if (user_kitchen_membership_id) {
       base.push({ user_kitchen_membership_id });
     }

@@ -126,6 +126,7 @@ export type User = {
     validated: Generated<boolean>;
     username: string;
     email: string;
+    preferences: Generated<unknown>;
 };
 export type UserAccessRecord = {
     id: Generated<number>;

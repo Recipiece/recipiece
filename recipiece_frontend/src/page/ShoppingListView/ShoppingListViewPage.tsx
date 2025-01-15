@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useCreateShoppingListShareMutation, useDeleteShoppingListMutation, useGetSelfQuery, useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
 import {
   Button,
+  Divider,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -384,7 +385,7 @@ export const ShoppingListViewPage: FC = () => {
               })}
             </div>
 
-            {completeShoppingListItems.length > 0 && <hr />}
+            {completeShoppingListItems.length > 0 && <Divider />}
 
             {completeShoppingListItems.map((item) => {
               return (

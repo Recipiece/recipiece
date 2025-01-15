@@ -55,6 +55,9 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
         data: {
           email: email,
           username: username,
+          preferences: {
+            account_visibility: "protected",
+          },
           credentials: {
             create: {
               password_hash: hashedPassword!,

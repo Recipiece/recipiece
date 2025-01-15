@@ -3,6 +3,7 @@ import { UpdateUserRequestSchema, UserSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../database";
+import { JsonObject } from "@prisma/client/runtime/library";
 
 export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequestSchema>): ApiResponse<UserSchema> => {
   const requestUser = request.user;
@@ -56,6 +57,9 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
     }
     updateBody.email = restBody.email;
   }
+  if("preferences" in restBody) {
+    updateBody.preferences = {...restBody.preferences};
+  }
 
   try {
     const updatedUser = await prisma.user.update({
@@ -66,7 +70,10 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
         ...updateBody,
       },
     });
-    return [StatusCodes.OK, updatedUser];
+    return [StatusCodes.OK, {
+      ...updatedUser,
+      preferences: updatedUser.preferences as JsonObject
+    }];
   } catch (err) {
     console.error(err);
     return [
