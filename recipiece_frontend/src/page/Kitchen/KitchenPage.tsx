@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { H2, Stack } from "../../component";
+import { Divider, H2, Stack } from "../../component";
 import { FromUserTable } from "./FromUserTable";
 import { PastTargetingMembershipsTable } from "./PastTargetingMembershipsTable";
 import { TargetingUserTable } from "./TargetingUserTable";
@@ -9,9 +9,9 @@ export const KitchenPage: FC = () => {
     <Stack>
       <H2>Your Kitchen</H2>
       <TargetingUserTable />
-      <hr />
+      <Divider />
       <FromUserTable />
-      <hr />
+      <Divider />
       <PastTargetingMembershipsTable />
     </Stack>
   );

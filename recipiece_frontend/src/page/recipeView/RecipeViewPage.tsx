@@ -219,7 +219,7 @@ export const RecipeViewPage: FC = () => {
                       <div key={ing.id} className="flex flex-row gap-2 items-center">
                         <Checkbox checked={checkedOffIngredients.includes(ing.id)} onClick={() => onIngredientChecked(ing.id)} />
                         <span
-                          className={`text-black inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}
+                          className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}
                           onClick={() => onIngredientChecked(ing.id)}
                         >
                           {(!!ing.amount || !!ing.unit) && (

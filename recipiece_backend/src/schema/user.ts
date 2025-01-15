@@ -2,12 +2,19 @@ import { array, bool, boolean, date, InferType, mixed, number, object, string } 
 import { RecipeImportFiles, UserKitchenInvitationStatus } from "../util/constant";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
+export const YUserPreferencesSchema = object({
+  account_visibility: string().oneOf(["protected", "private"]),
+});
+
+export interface UserPreferencesSchema extends InferType<typeof YUserPreferencesSchema> {}
+
 export const YUserSchema = object({
   email: string().required(),
   username: string().required(),
   created_at: date().required(),
   validated: boolean().required(),
   id: number().required(),
+  preferences: YUserPreferencesSchema,
 })
   .strict()
   .noUnknown();
@@ -68,6 +75,7 @@ export const YUpdateUserRequestSchema = object({
   id: number().required(),
   username: string().optional(),
   email: string().optional(),
+  preferences: YUserPreferencesSchema.optional(),
 })
   .strict()
   .noUnknown();
@@ -229,11 +237,11 @@ export interface SetUserKitchenMembershipStatusResponseSchema
 export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
   targeting_self: boolean().notRequired(),
   from_self: boolean().notRequired(),
-  status: array(
-    string().oneOf(UserKitchenInvitationStatus.ALL_STATUSES)
-  ).notRequired().transform((val) => {
-    return val.split(",");
-  }),
+  status: array(string().oneOf(UserKitchenInvitationStatus.ALL_STATUSES))
+    .notRequired()
+    .transform((val) => {
+      return val.split(",");
+    }),
   entity_id: number().notRequired(),
   entity: string().oneOf(["include", "exclude"]).notRequired(),
   entity_type: string().oneOf(["shopping_list", "recipe"]).notRequired(),
@@ -242,7 +250,7 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
     return !!ctx.from_self || !!ctx.targeting_self;
   })
   .test("entityHasProperContext", "Must specify entity_id, entity, and entity_type together", (ctx) => {
-    if(!!ctx.entity_id || !!ctx.entity || !!ctx.entity_type) {
+    if (!!ctx.entity_id || !!ctx.entity || !!ctx.entity_type) {
       return !!ctx.entity_id && !!ctx.entity && !!ctx.entity_type;
     }
     return true;

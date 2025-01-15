@@ -48,7 +48,7 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
           </ResponsiveHeader>
 
           <div className="mb-2">
-            <FormInput name="username" label="Username" required />
+            <FormInput autoComplete="off" name="username" label="Username" required />
           </div>
 
           <ResponsiveFooter className="flex-col-reverse">

@@ -24,6 +24,7 @@ export * from "./Sheet";
 export * from "./Sidebar";
 export * from "./Skeleton";
 export * from "./StaticTable";
+export * from "./Switch";
 export * from "./Tab";
 export * from "./Textarea";
 export * from "./Toast";

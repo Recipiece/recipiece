@@ -1,4 +1,5 @@
 export * from "./AuthenticatedLayout";
+export * from "./Divider";
 export * from "./Form";
 export * from "./Layout";
 export * from "./LoadingGroup";

@@ -23,6 +23,9 @@ export const seedUsers = async () => {
         email: "dev@recipiece.org",
         username: "dev29",
         validated: true,
+        preferences: {
+          account_visibility: "protected",
+        }
       },
     });
     await tx.userCredentials.create({
@@ -37,6 +40,9 @@ export const seedUsers = async () => {
         email: "other@recipiece.org",
         username: "other92",
         validated: true,
+        preferences: {
+          account_visibility: "protected",
+        }
       },
     });
     await tx.userCredentials.create({
@@ -51,6 +57,9 @@ export const seedUsers = async () => {
         email: "empty@recipiece.org",
         username: "empty1234",
         validated: false,
+        preferences: {
+          account_visibility: "protected",
+        }
       },
     });
     await tx.userCredentials.create({

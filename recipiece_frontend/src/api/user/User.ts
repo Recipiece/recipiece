@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Buffer } from "buffer";
-import { UserAccount } from "../../data";
+import { UserAccount, UserPreferences } from "../../data";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { TokenManager } from "../TokenManager";
 import { UserQueryKeys } from "./UserQueryKeys";
+
 
 export const useGetSelfQuery = (args?: QueryArgs<UserAccount>) => {
   const { getter } = useGet();
@@ -120,7 +121,7 @@ export const useCreateUserMutation = (args?: MutationArgs<void, any>) => {
   });
 };
 
-export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, { readonly id: number; readonly username?: string; readonly email?: string }>) => {
+export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, {readonly id: number, readonly username?: string, readonly email?: string; readonly preferences?: UserPreferences}>) => {
   const { putter } = usePut();
   const queryClient = useQueryClient();
 
@@ -140,7 +141,7 @@ export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, { readonl
     onSuccess: (data, vars, ctx) => {
       queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
         if (old) {
-          return { ...old, username: data.username, email: data.email };
+          return { ...old, username: data.username, email: data.email, preferences: {...data.preferences} };
         }
         return undefined;
       });

@@ -16,11 +16,13 @@ import { prisma } from "./src/database";
 import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
+import { UserPreferencesSchema } from "./src/schema";
 
 interface CreateUserAndTokenArgs {
   readonly email?: string;
   readonly username?: string;
   readonly password?: string;
+  readonly preferences?: UserPreferencesSchema;
 }
 
 declare global {
@@ -48,6 +50,9 @@ globalThis.fixtures = {
     const email = opts?.email ?? `${stringGen(15)}@${stringGen(5)}.${stringGen(3)}`;
     const username = opts?.username ?? stringGen(10);
     const password = opts?.password ?? stringGen(10);
+    const preferences = opts?.preferences ?? {
+      account_visibility: "protected",
+    };
     const hashedPassword = await hashPassword(password);
 
     // create a user
@@ -55,6 +60,7 @@ globalThis.fixtures = {
       data: {
         email: email,
         username: username,
+        preferences: preferences,
         credentials: {
           create: {
             password_hash: hashedPassword!,

@@ -1,9 +1,16 @@
+export type UserAccountVisibility = "protected" | "private";
+
+export interface UserPreferences {
+  readonly account_visibility: UserAccountVisibility;
+}
+
 export interface UserAccount {
   readonly id: number;
   readonly email: string;
   readonly username: string;
   readonly created_at: string;
   readonly validated: boolean;
+  readonly preferences: UserPreferences;
 }
 
 export interface RefreshTokenResponse {

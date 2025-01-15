@@ -26,6 +26,7 @@ model User {
   validated Boolean @default(false)
   username String @unique
   email String @unique
+  preferences Json @default("{}")
 
   recipes Recipe[]
   cookbooks Cookbook[]

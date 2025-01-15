@@ -33,7 +33,16 @@
     <link rel="stylesheet" href="%PUBLIC_URL%/main.css" />
     <link rel="stylesheet" href="%PUBLIC_URL%/layout.css" />
     <title>Recipiece</title>
-    <script>navigator.serviceWorker.register("%PUBLIC_URL%/service-worker.js")</script> 
+    <script>
+      navigator.serviceWorker.register("%PUBLIC_URL%/service-worker.js");
+    </script>
+    <script type="text/javascript">
+      const parsedTheme = JSON.parse(localStorage.getItem("recipiece/ui_theme") ?? "\"system\"");
+      const systemWantsDark = parsedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if(parsedTheme === "dark" || systemWantsDark) {
+        document.documentElement.classList.toggle("dark");
+      }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
