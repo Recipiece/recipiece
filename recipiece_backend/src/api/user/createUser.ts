@@ -3,7 +3,7 @@ import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { prisma } from "../../database";
-import { CreateUserRequestSchema } from "../../schema";
+import { CreateUserRequestSchema } from "@recipiece/types";
 import { ApiResponse } from "../../types";
 import { VERSION_ACCESS_LEVELS } from "../../util/constant";
 import { hashPassword } from "../../util/password";

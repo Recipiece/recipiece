@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { RequestImportRecipesRequestSchema } from "../../schema";
+import { RequestImportRecipesRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { RecipeImportFiles } from "../../util/constant";
 import { generateRecipeImportWorker } from "../../worker";

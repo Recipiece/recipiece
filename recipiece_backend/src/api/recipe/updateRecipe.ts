@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { RecipeSchema, UpdateRecipeRequestSchema } from "../../schema";
+import { RecipeSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequestSchema>): ApiResponse<RecipeSchema> => {

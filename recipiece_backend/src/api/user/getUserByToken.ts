@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { UserSchema } from "../../schema";
+import { UserSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { JsonObject } from "@prisma/client/runtime/library";
 

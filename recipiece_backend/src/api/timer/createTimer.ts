@@ -1,8 +1,8 @@
+import { CreateTimerRequestSchema, TimerSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { CreateTimerRequestSchema, TimerSchema } from "../../schema";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { prisma } from "../../database";
 import { timersQueue } from "../../scheduledJobs";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const createTimer = async (
   request: AuthenticatedRequest<CreateTimerRequestSchema>

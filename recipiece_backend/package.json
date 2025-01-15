@@ -4,12 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "dotenvx run -f .env.dev -- nodemon -L ./src/index.ts",
     "test": "dotenvx run -f .env.test -- jest --runInBand --forceExit",
-    "prisma-dev": "dotenvx run -f .env.dev -- prisma migrate dev",
     "prisma-test": "dotenvx run -f .env.test -- prisma migrate dev",
     "seed": "dotenvx run -f .env.dev -- node seed/index.mjs",
-    "build": "tsc --project tsconfig.prod.json"
+    "build": "tsc --project tsconfig.prod.json",
+    "prisma-dev": "dotenvx run -f .env.dev -- prisma migrate dev",
+    "build-dev": "webpack --config ./webpack.config.dev.js --watch",
+    "serve-dev": "dotenvx run -f .env.dev -- nodemon ./dist/dev/index.js",
+    "run-dev": "concurrently \"yarn build-dev\" \"yarn serve-dev\""
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",
@@ -34,6 +36,7 @@
     "@types/web-push": "^3.6.4",
     "@types/ws": "^8.5.13",
     "@types/yup": "^0.32.0",
+    "concurrently": "^9.1.2",
     "jabber": "^1.5.3",
     "jest": "^29.7.0",
     "jest-environment-node": "^29.7.0",
@@ -47,8 +50,12 @@
     "supertest": "^7.0.0",
     "superwstest": "^2.0.4",
     "ts-jest": "^29.2.5",
+    "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
     "@prisma/client": "5.20.0",

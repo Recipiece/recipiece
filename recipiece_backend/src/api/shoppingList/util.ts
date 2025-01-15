@@ -1,7 +1,7 @@
 import { ShoppingListItem } from "@prisma/client";
+import { ShoppingListItemSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { ExpressionBuilder, sql } from "kysely";
 import { DB, prisma } from "../../database";
-import { ShoppingListItemSchema, ShoppingListShareSchema } from "../../schema";
 
 export const MAX_NUM_ITEMS = 100000;
 

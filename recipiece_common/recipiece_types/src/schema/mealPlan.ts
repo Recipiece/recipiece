@@ -1,6 +1,6 @@
-import { array, boolean, date, InferType, number, object, string } from "yup";
-import { YRecipeSchema } from "./recipe";
+import { array, date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
+import { YRecipeSchema } from "./recipe";
 
 export const YMealPlanItemSchema = object({
   id: number().required(),

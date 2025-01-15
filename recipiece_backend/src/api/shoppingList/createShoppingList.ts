@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { CreateShoppingListSchema, ShoppingListSchema } from "../../schema";
+import { CreateShoppingListSchema, ShoppingListSchema } from "@recipiece/types";
 import { prisma } from "../../database";
 
 export const createShoppingList = async (request: AuthenticatedRequest<CreateShoppingListSchema>): ApiResponse<ShoppingListSchema> => {

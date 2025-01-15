@@ -1,6 +1,6 @@
+import { RemoveRecipeFromCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { RemoveRecipeFromCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>): ApiResponse<{}> => {

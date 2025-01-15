@@ -1,7 +1,7 @@
+import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { ShoppingListSchema } from "../../schema";
 import { prisma } from "../../database";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateShoppingList = async (request: AuthenticatedRequest): ApiResponse<ShoppingListSchema> => {
   const user = request.user;

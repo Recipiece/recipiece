@@ -1,7 +1,7 @@
 import { Recipe } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "../../schema";
+import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 import {

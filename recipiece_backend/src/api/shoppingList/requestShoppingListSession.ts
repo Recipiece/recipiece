@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { prisma, Redis } from "../../database";
 import { randomUUID } from "crypto";
-import { RequestShoppingListSessionResponseSchema } from "../../schema";
+import { RequestShoppingListSessionResponseSchema } from "@recipiece/types";
 import { sharesWithMemberships } from "./util";
 
 export const requestShoppingListSession = async (

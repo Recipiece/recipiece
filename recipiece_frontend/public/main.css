@@ -557,16 +557,12 @@ video {
   --input: 214.3 31.8% 91.4%;
   --card: 0 0% 100%;
   --card-foreground: 222.2 47.4% 11.2%;
-  /* --primary: 222.2 47.4% 11.2%; */
-  /* --primary: #b43f3f; */
-  /* --primary: #395144; */
   --primary: 148 17% 27%;
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
   --accent: 210 40% 96.1%;
   --accent-foreground: 222.2 47.4% 11.2%;
-  /* --destructive: 0 100% 50%; */
   --destructive: 348 100% 32%;
   --destructive-foreground: 210 40% 98%;
   --ring: 215 20.2% 65.1%;
@@ -582,32 +578,20 @@ video {
 }
 
 .dark {
-  /* --background: 224 71% 4%; */
   --background: 0 0% 7%;
   --foreground: 213 31% 91%;
-  /* --muted: 223 47% 11%; */
-  /* --muted: 148 17% 10%; */
   --muted: 0 0% 20%;
-  /* --muted-foreground: 215.4 16.3% 56.9%; */
   --muted-foreground: 213 31% 71%;
-  /* --accent: 216 34% 17%; */
   --accent: 0 0% 20%;
   --accent-foreground: 210 40% 98%;
-  /* --popover: 224 71% 4%; */
   --popover: 0 0% 12%;
-  /* --popover-foreground: 215 20.2% 65.1%; */
   --popover-foreground: 213 31% 91%;
-  /* --border: 216 34% 17%; */
   --border: 0 0% 5%;
-  /* --input: 216 34% 17%; */
   --input: 0 0% 20%;
-  /* --card: 224 71% 4%; */
   --card: 0 0% 12%;
   --card-foreground: 213 31% 91%;
-  /* --primary: 210 40% 98%; */
   --primary: 148 17% 27%;
   --primary-foreground: 222.2 47.4% 1.2%;
-  /* --secondary: 222.2 47.4% 11.2%; */
   --secondary: 148 17% 12%;
   --secondary-foreground: 210 40% 98%;
   --destructive: 0 63% 31%;
@@ -1970,11 +1954,6 @@ body {
   letter-spacing: 0.1em;
 }
 
-.text-black {
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0 / var(--tw-text-opacity));
-}
-
 .text-card-foreground {
   color: hsl(var(--card-foreground));
 }
@@ -2984,18 +2963,8 @@ body {
   border-color: hsl(var(--muted));
 }
 
-.dark\:border-white:is(.dark *) {
-  --tw-border-opacity: 1;
-  border-color: rgb(255 255 255 / var(--tw-border-opacity));
-}
-
 .dark\:bg-card:is(.dark *) {
   background-color: hsl(var(--card));
-}
-
-.dark\:bg-white:is(.dark *) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 .dark\:text-white:is(.dark *) {

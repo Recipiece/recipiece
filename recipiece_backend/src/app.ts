@@ -1,3 +1,4 @@
+import { YEmptySchema } from "@recipiece/types";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
@@ -7,20 +8,19 @@ import { WebSocketExpress, WSResponse } from "websocket-express";
 import { ValidationError } from "yup";
 import { ROUTES, WEBSOCKET_ROUTES } from "./api";
 import {
+  accessTokenAuthMiddleware,
   basicAuthMiddleware,
   broadcastMessageViaWebsocketToken,
   closeConnection,
+  refreshTokenAuthMiddleware,
   storeWebsocket,
-  accessTokenAuthMiddleware,
   validateRequestBodySchema,
   validateRequestQuerySchema,
   validateResponseSchema,
   wsTokenAuthMiddleware,
-  refreshTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
 import { Logger } from "./util/logger";
-import { YEmptySchema } from "./schema";
 
 const app = new WebSocketExpress();
 const logger = Logger.getLogger({

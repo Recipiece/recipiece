@@ -1,8 +1,8 @@
+import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ingredientsSubquery, sharesSubquery, sharesWithMemberships, stepsSubquery } from "./util";
-import { RecipeSchema } from "../../schema";
 
 /**
  * Get a recipe by id.

@@ -4,9 +4,8 @@ import {
   YListTimersResponseSchema,
   YTimerSchema,
   YUpdateTimerRequestSchema,
-} from "../../schema";
+} from "@recipiece/types";
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
 import { createTimer } from "./createTimer";
 import { deleteTimer } from "./deleteTimer";
 import { getTimer } from "./getTimer";

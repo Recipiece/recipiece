@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { MealPlanSchema, UpdateMealPlanRequestSchema } from "../../schema";
+import { MealPlanSchema, UpdateMealPlanRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateMealPlan = async (

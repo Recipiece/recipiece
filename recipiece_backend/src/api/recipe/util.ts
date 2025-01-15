@@ -1,6 +1,6 @@
+import { RecipeIngredientSchema, RecipeShareSchema, RecipeStepSchema } from "@recipiece/types";
 import { ExpressionBuilder, sql } from "kysely";
 import { DB } from "../../database";
-import { RecipeIngredientSchema, RecipeShareSchema, RecipeStepSchema } from "../../schema";
 
 export const ingredientsSubquery = (eb: ExpressionBuilder<DB, "recipes">) => {
   return eb

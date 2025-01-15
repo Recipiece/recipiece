@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../../database";
-import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "../../../schema";
+import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { sendRecipeSharedPushNotification } from "../../../util/pushNotification";
 

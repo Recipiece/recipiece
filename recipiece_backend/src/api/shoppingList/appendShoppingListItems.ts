@@ -1,9 +1,9 @@
+import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "../../schema";
+import { broadcastMessageViaEntityId } from "../../middleware";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { collapseOrders, MAX_NUM_ITEMS, sharesWithMemberships } from "./util";
-import { broadcastMessageViaEntityId } from "../../middleware";
 
 export const appendShoppingListItems = async (
   request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>

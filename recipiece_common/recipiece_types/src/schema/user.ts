@@ -1,5 +1,5 @@
-import { array, bool, boolean, date, InferType, mixed, number, object, string } from "yup";
-import { RecipeImportFiles, UserKitchenInvitationStatus } from "../util/constant";
+import { array, boolean, date, InferType, mixed, number, object, string } from "yup";
+import { RecipeImportFiles, UserKitchenInvitationStatus } from "../util";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YUserPreferencesSchema = object({

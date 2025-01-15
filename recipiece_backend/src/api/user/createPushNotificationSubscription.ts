@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CreatePushNotificationRequestSchema, EmptySchema } from "../../schema";
+import { CreatePushNotificationRequestSchema, EmptySchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const createPushNotificationSubscription = async (

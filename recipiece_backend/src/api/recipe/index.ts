@@ -6,7 +6,7 @@ import {
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
   YUpdateRecipeRequestSchema
-} from "../../schema";
+} from "@recipiece/types";
 import { Route } from "../../types";
 import { createRecipe } from "./createRecipe";
 import { deleteRecipe } from "./deleteRecipe";

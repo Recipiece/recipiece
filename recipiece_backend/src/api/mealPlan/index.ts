@@ -9,9 +9,8 @@ import {
   YMealPlanSchema,
   YUpdateMealPlanItemRequestSchema,
   YUpdateMealPlanRequestSchema,
-} from "../../schema";
+} from "@recipiece/types";
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
 import { createMealPlan } from "./createMealPlan";
 import { deleteMealPlan } from "./deleteMealPlan";
 import { getMealPlanById } from "./getMealPlanById";

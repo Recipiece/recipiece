@@ -1,6 +1,5 @@
-import { YAddRecipeToCookbookRequestSchema, YCookbookSchema, YCreateCookbookRequestSchema, YListCookbooksQuerySchema, YListCookbooksResponseSchema, YRemoveRecipeFromCookbookRequestSchema, YUpdateCookbookRequestSchema } from "../../schema";
+import { YAddRecipeToCookbookRequestSchema, YCookbookSchema, YCreateCookbookRequestSchema, YListCookbooksQuerySchema, YListCookbooksResponseSchema, YRemoveRecipeFromCookbookRequestSchema, YUpdateCookbookRequestSchema } from "@recipiece/types";
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
 import { addRecipeToCookbook } from "./addRecipeToCookbook";
 import { createCookbook } from "./createCookbook";
 import { deleteCookbook } from "./deleteCookbook";

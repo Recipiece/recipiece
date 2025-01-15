@@ -1,7 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { prisma } from "../../../database";
-import { Prisma } from "@prisma/client";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const updateItemForMealPlan = async (request: AuthenticatedRequest): ApiResponse<{}> => {
   const { id: userId } = request.user;

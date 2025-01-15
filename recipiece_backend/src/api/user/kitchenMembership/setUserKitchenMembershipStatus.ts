@@ -3,7 +3,7 @@ import { prisma } from "../../../database";
 import {
   SetUserKitchenMembershipStatusRequestSchema,
   SetUserKitchenMembershipStatusResponseSchema,
-} from "../../../schema";
+} from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { UserKitchenInvitationStatus } from "../../../util/constant";
 

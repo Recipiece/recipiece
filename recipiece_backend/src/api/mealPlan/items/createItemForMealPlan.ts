@@ -1,6 +1,6 @@
+import { CreateMealPlanItemRequestSchema, MealPlanItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../../database";
-import { CreateMealPlanItemRequestSchema, MealPlanItemSchema } from "../../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const createItemForMealPlan = async (

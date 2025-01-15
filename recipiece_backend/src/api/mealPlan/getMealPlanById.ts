@@ -1,8 +1,7 @@
-import { Prisma } from "@prisma/client";
-import { prisma } from "../../database";
-import { MealPlanSchema } from "../../schema";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { StatusCodes } from "http-status-codes";
+import { prisma } from "../../database";
+import { MealPlanSchema } from "@recipiece/types";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const getMealPlanById = async (request: AuthenticatedRequest): ApiResponse<MealPlanSchema> => {
   const { id: userId } = request.user;

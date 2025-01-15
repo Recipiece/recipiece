@@ -1,5 +1,4 @@
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
 import { listKnownIngredients } from "./listKnownIngredients";
 
 export const KNOWN_INGREDIENT_ROUTES: Route[] = [
@@ -8,6 +7,5 @@ export const KNOWN_INGREDIENT_ROUTES: Route[] = [
     authentication: "access_token",
     function: listKnownIngredients,
     method: "GET",
-    
   },
 ];

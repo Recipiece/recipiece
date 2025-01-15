@@ -1,6 +1,6 @@
+import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../../database";
-import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "../../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { sendShoppingListSharedPushNotification } from "../../../util/pushNotification";
 

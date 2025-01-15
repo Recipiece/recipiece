@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../../database";
-import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "../../../schema";
+import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { UserKitchenInvitationStatus } from "../../../util/constant";
 

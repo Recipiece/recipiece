@@ -1,6 +1,6 @@
+import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { ShoppingListSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { itemsSubquery, sharesSubquery, sharesWithMemberships } from "./util";
 

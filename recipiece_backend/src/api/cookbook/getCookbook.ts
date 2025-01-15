@@ -1,6 +1,6 @@
+import { CookbookSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { CookbookSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const getCookbook = async (req: AuthenticatedRequest): ApiResponse<CookbookSchema> => {

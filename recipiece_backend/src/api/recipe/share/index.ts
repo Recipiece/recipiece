@@ -3,7 +3,7 @@ import {
   YListRecipeSharesQuerySchema,
   YListRecipeSharesResponseSchema,
   YRecipeShareSchema,
-} from "../../../schema";
+} from "@recipiece/types";
 import { Route } from "../../../types";
 import { createRecipeShare } from "./createRecipeShare";
 import { deleteRecipeShare } from "./deleteRecipeShare";

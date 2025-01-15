@@ -12,7 +12,7 @@ import {
   YUserSchema,
   YValidateUserRequestSchema,
   YValidateUserResponseSchema,
-} from "../../schema";
+} from "@recipiece/types";
 import { Route } from "../../types";
 import { changePassword } from "./changePassword";
 import { createPushNotificationSubscription } from "./createPushNotificationSubscription";

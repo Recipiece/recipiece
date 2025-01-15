@@ -3,7 +3,7 @@ import {
   YListShoppingListSharesQuerySchema,
   YListShoppingListSharesResponseSchema,
   YShoppingListShareSchema,
-} from "../../../schema";
+} from "@recipiece/types";
 import { Route } from "../../../types";
 import { createShoppingListShare } from "./createShoppingListShare";
 import { deleteShoppingListShare } from "./deleteShoppingListShare";

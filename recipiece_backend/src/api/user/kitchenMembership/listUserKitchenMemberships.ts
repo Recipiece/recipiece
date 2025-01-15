@@ -2,7 +2,7 @@ import { Prisma, UserKitchenMembershipStatus } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema } from "../../../schema";
+import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema } from "@recipiece/types";
 import { DEFAULT_PAGE_SIZE, UserKitchenInvitationStatus } from "../../../util/constant";
 
 export const listUserKitchenMemberships = async (

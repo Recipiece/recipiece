@@ -1,6 +1,6 @@
+import { ListKnownIngredientsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { ListKnownIngredientsResponseSchema } from "../../schema";
 import { ApiResponse } from "../../types";
 
 export const listKnownIngredients = async (): ApiResponse<ListKnownIngredientsResponseSchema> => {

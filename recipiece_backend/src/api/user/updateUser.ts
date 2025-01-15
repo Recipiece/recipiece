@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { UpdateUserRequestSchema, UserSchema } from "../../schema";
+import { UpdateUserRequestSchema, UserSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../database";

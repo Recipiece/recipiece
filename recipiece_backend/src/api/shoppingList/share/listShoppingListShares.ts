@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "../../../schema";
+import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { StatusCodes } from "http-status-codes";
 import { DEFAULT_PAGE_SIZE } from "../../../util/constant";

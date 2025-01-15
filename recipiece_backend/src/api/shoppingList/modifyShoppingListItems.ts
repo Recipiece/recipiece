@@ -1,7 +1,7 @@
 import { ShoppingListItem } from "@prisma/client";
+import { ModifyShoppingListMessage, ModifyShoppingListResponse, ShoppingListItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../database";
-import { ModifyShoppingListMessage, ModifyShoppingListResponse, ShoppingListItemSchema } from "../../schema";
 import { ErrorResponse, WebsocketMethod, WebsocketRequest } from "../../types";
 import { collapseOrders, MAX_NUM_ITEMS } from "./util";
 
