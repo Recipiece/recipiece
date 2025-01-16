@@ -86,7 +86,7 @@ export const AboutTab: FC = () => {
         .
       </p>
       <p className="text-sm">
-        Version <i>{process.env.REACT_APP_RECIPIECE_VERSION}</i>, December 2024
+        Version <i>{process.env.RECIPIECE_VERSION}</i>, December 2024
       </p>
     </Stack>
   );

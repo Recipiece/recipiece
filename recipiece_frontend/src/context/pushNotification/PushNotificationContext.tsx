@@ -5,10 +5,14 @@ import { useLocalStorage } from "../../hooks";
 import { StorageKeys } from "../../util";
 
 const generateServiceWorkerPushNotificationSubscription = async () => {
-  const applicationServerKey = urlB64ToUint8Array(process.env.REACT_APP_VAPID_PUBLIC_KEY!);
-  const options = { applicationServerKey, userVisibleOnly: true };
-  const registration = await navigator.serviceWorker.ready;
-  return await registration.pushManager.subscribe(options);
+  if(process.env.NODE_ENV !== "development") {
+    const applicationServerKey = urlB64ToUint8Array(process.env.RECIPIECE_VAPID_PUBLIC_KEY!);
+    const options = { applicationServerKey, userVisibleOnly: true };
+    const registration = await navigator.serviceWorker.ready;
+    return await registration.pushManager.subscribe(options);
+  } else {
+    return Promise.resolve();
+  }
 };
 
 const urlB64ToUint8Array = (base64String: string) => {

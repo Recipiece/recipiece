@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { TokenManager } from "./TokenManager";
 
 export const getUrl = (): string => {
-  return process.env.REACT_APP_API_URL!;
+  return process.env.RECIPIECE_API_URL!;
 };
 
 export const getWebsocketUrl = (): string => {
-  return process.env.REACT_APP_WEBSOCKET_URL!;
+  return process.env.RECIPIECE_WEBSOCKET_URL!;
 };
 
 export const filtersToSearchParams = (filters: Record<string, any>) => {
