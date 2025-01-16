@@ -11,7 +11,7 @@ export const UserKitchenMembershipStatus = {
 } as const;
 export type UserKitchenMembershipStatus = (typeof UserKitchenMembershipStatus)[keyof typeof UserKitchenMembershipStatus];
 export type BackgroundJob = {
-    id: Generated<string>;
+    id: string;
     created_at: Generated<Timestamp>;
     finished_at: Timestamp | null;
     result: Generated<string>;
@@ -157,13 +157,13 @@ export type UserPushNotificationSubscription = {
     user_id: number;
 };
 export type UserSession = {
-    id: Generated<string>;
+    id: string;
     created_at: Generated<Timestamp>;
     scope: string;
     user_id: number;
 };
 export type UserValidationToken = {
-    id: Generated<string>;
+    id: string;
     created_at: Generated<Timestamp>;
     purpose: string;
     user_id: number;

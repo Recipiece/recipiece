@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
-import { prisma } from "../../database";
+import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest, TokenPayload } from "../../types";
 
 /**

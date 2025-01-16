@@ -1,6 +1,6 @@
 import { CreateTimerRequestSchema, TimerSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
+import { prisma } from "@recipiece/database";
 import { timersQueue } from "../../scheduledJobs";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 

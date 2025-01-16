@@ -1,10 +1,12 @@
 const path = require("path");
 const nodeExternals = require("webpack-node-externals");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: ["./src/index.ts"],
   mode: "development",
   target: "node",
+  devtool: "source-map",
   externals: [nodeExternals()],
   module: {
     rules: [
@@ -19,7 +21,11 @@ module.exports = {
           },
         ],
         exclude: /node_modules/,
-        include: [path.resolve(__dirname, "./src"), path.resolve(__dirname, "../recipiece_common/recipiece_types")],
+        include: [
+          path.resolve(__dirname, "./src"),
+          path.resolve(__dirname, "../recipiece_common/recipiece_types"),
+          path.resolve(__dirname, "../recipiece_common/recipiece_database"),
+        ],
       },
     ],
   },
@@ -27,6 +33,7 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js"],
     alias: {
       "@recipiece/types": path.resolve(__dirname, "../recipiece_common/recipiece_types/src"),
+      "@recipiece/database": path.resolve(__dirname, "../recipiece_common/recipiece_database/src"),
     },
   },
   output: {
@@ -38,4 +45,17 @@ module.exports = {
     aggregateTimeout: 300,
     poll: 1000,
   },
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        { from: "../recipiece_common/recipiece_database/node_modules/.prisma/client/schema.prisma", to: "./" },
+        {
+          from: "../recipiece_common/recipiece_database/node_modules/.prisma/client/libquery_engine*.node",
+          to: ({ ctx, filename }) => {
+            return "./[name][ext]";
+          },
+        },
+      ],
+    }),
+  ],
 };

@@ -1,7 +1,7 @@
 import { ForkRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
+import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequestSchema>): ApiResponse<RecipeSchema> => {

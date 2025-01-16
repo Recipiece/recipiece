@@ -1,4 +1,4 @@
-import { User, UserSession } from "@prisma/client";
+import { User, UserSession } from "@recipiece/database";
 import { Request, Response, ParamsDictionary, NextFunction } from "express";
 import { WSRequest, WSRequestHandler } from "websocket-express";
 import { ObjectSchema } from "yup";

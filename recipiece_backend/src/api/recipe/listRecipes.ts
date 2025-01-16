@@ -1,15 +1,8 @@
-import { Recipe } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
+import { prisma, Recipe, ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery } from "@recipiece/database";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
-import {
-  ingredientsSubquery,
-  sharesSubquery,
-  sharesWithMemberships,
-  stepsSubquery
-} from "./util";
 
 export const listRecipes = async (
   request: AuthenticatedRequest<any, ListRecipesQuerySchema>
@@ -25,14 +18,14 @@ export const listRecipes = async (
       return [
         stepsSubquery(eb).as("steps"),
         ingredientsSubquery(eb).as("ingredients"),
-        sharesSubquery(eb, user.id).as("shares"),
+        recipeSharesSubquery(eb, user.id).as("shares"),
       ];
     })
     .where((eb) => {
       if (shared_recipes === "include") {
         return eb.or([
           eb("recipes.user_id", "=", user.id),
-          eb.exists(sharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1)),
+          eb.exists(recipeSharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1)),
         ]);
       } else {
         return eb("recipes.user_id", "=", user.id);

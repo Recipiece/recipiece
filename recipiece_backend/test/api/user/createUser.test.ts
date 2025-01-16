@@ -1,6 +1,6 @@
+import { prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Create User", () => {
   it("should create a user, their credentials, and their access level", async () => {

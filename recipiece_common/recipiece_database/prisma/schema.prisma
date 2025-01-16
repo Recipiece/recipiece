@@ -9,7 +9,7 @@ generator client {
 
 generator kysely {
   provider = "prisma-kysely"
-  output = "../src/database/kysely"
+  output = "../src/prisma/generated/kysely"
   fileName = "index.ts"
 }
 

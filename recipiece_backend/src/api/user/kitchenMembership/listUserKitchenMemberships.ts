@@ -1,8 +1,7 @@
-import { Prisma, UserKitchenMembershipStatus } from "@prisma/client";
-import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
-import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { Prisma, prisma, UserKitchenMembershipStatus } from "@recipiece/database";
 import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { DEFAULT_PAGE_SIZE, UserKitchenInvitationStatus } from "../../../util/constant";
 
 export const listUserKitchenMemberships = async (
@@ -68,7 +67,7 @@ export const listUserKitchenMemberships = async (
               recipe_id: entity_id,
             },
           };
-        } else if(entity === "exclude") {
+        } else if (entity === "exclude") {
           where.recipe_shares = {
             none: {
               recipe_id: entity_id,

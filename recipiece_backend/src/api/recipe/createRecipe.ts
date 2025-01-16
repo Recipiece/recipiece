@@ -1,6 +1,5 @@
-import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
+import { Prisma, prisma } from "@recipiece/database";
 import { CreateRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 

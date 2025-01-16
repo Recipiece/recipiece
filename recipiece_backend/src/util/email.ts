@@ -1,4 +1,4 @@
-import { User, UserValidationToken } from "@prisma/client";
+import { User, UserValidationToken } from "@recipiece/database";
 import { createTransport, SendMailOptions } from "nodemailer";
 
 export const sendEmail = async (options: SendMailOptions) => {

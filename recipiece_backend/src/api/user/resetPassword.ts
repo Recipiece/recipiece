@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
+import { prisma } from "@recipiece/database";
 import { ResetPasswordRequestSchema } from "@recipiece/types";
 import { ApiResponse } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";

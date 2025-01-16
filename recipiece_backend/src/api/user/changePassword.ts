@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
+import { prisma } from "@recipiece/database";
 import { ChangePasswordRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { hashPassword } from "../../util/password";

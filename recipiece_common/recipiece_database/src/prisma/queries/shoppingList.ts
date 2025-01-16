@@ -1,7 +1,7 @@
 import { ShoppingListItem } from "@prisma/client";
-import { ShoppingListItemSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { ExpressionBuilder, sql } from "kysely";
-import { DB, prisma } from "../../database";
+import { DB, ShoppingListShare } from "../generated/kysely";
+import { prisma } from "../session";
 
 export const MAX_NUM_ITEMS = 100000;
 
@@ -49,7 +49,7 @@ export const collapseOrders = async (
 };
 
 
-export const sharesWithMemberships = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
+export const shoppingListSharesWithMemberships = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
   return eb
     .selectFrom("shopping_list_shares")
     .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "shopping_list_shares.user_kitchen_membership_id")
@@ -65,9 +65,9 @@ export const sharesWithMemberships = (eb: ExpressionBuilder<DB, "shopping_lists"
     });
 };
 
-export const sharesSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
-  return sharesWithMemberships(eb, userId).select(
-    sql<ShoppingListShareSchema[]>`
+export const shoppingListSharesSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
+  return shoppingListSharesWithMemberships(eb, userId).select(
+    sql<ShoppingListShare[]>`
       coalesce(
         jsonb_agg(shopping_list_shares.*),
         '[]'
@@ -76,12 +76,12 @@ export const sharesSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">, user
   );
 };
 
-export const itemsSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">) => {
+export const shoppingListItemsSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">) => {
   return eb
     .selectFrom("shopping_list_items")
     .whereRef("shopping_list_items.shopping_list_id", "=", "shopping_lists.id")
     .select(
-      sql<ShoppingListItemSchema[]>`
+      sql<ShoppingListItem[]>`
       coalesce(
         jsonb_agg(shopping_list_items.* order by shopping_list_items."order" asc),
         '[]'

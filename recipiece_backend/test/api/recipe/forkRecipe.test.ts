@@ -1,8 +1,7 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
+import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { RecipeSchema } from "../../../src/schema";
-import { prisma } from "../../../src/database";
 
 describe("Fork Recipe", () => {
   let user: User;

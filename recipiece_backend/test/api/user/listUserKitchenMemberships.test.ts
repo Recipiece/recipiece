@@ -1,13 +1,12 @@
-import { User } from "@prisma/client";
-import request from "supertest";
-import { prisma } from "../../../src/database";
-import { UserKitchenInvitationStatus } from "../../../src/util/constant";
+import { User, prisma } from "@recipiece/database";
 import {
   ListUserKitchenMembershipsQuerySchema,
   ListUserKitchenMembershipsResponseSchema,
   UserKitchenMembershipSchema,
-} from "../../../src/schema";
+} from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import request from "supertest";
+import { UserKitchenInvitationStatus } from "../../../src/util/constant";
 
 describe("List User Kitchen Memberships", () => {
   let user: User;

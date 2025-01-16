@@ -1,9 +1,7 @@
-import { ShoppingListItem } from "@prisma/client";
+import { collapseOrders, MAX_NUM_ITEMS, prisma, ShoppingListItem } from "@recipiece/database";
 import { ModifyShoppingListMessage, ModifyShoppingListResponse, ShoppingListItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
 import { ErrorResponse, WebsocketMethod, WebsocketRequest } from "../../types";
-import { collapseOrders, MAX_NUM_ITEMS } from "./util";
 
 const getCurrentItems: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (
   req: WebsocketRequest<ModifyShoppingListMessage>

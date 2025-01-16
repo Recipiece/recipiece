@@ -1,6 +1,11 @@
 export default {
   preset: "ts-jest",
   moduleFileExtensions: ["ts", "js"],
+  moduleNameMapper: {
+    "@recipiece/database": "<rootDir>/../recipiece_common/recipiece_database/src",
+    "@recipiece/types": "<rootDir>/../recipiece_common/recipiece_types/src",
+  },
+  resolver: "ts-jest-resolver",
   transform: {
     "^.+\\.ts$": ["ts-jest", {isolatedModules: true}], // Transform TypeScript files using ts-jest
   },

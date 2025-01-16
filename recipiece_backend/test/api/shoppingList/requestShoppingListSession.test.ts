@@ -1,8 +1,7 @@
-import { ShoppingList, User } from "@prisma/client";
-import { prisma } from "../../../src/database";
-import request from "supertest";
+import { prisma, ShoppingList, User } from "@recipiece/database";
+import { RequestShoppingListSessionResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { RequestShoppingListSessionResponseSchema } from "../../../src/schema";
+import request from "supertest";
 
 describe("Request Shopping List Session", () => {
   let user: User;

@@ -1,13 +1,12 @@
-import { RecipeIngredientSchema, RecipeShareSchema, RecipeStepSchema } from "@recipiece/types";
 import { ExpressionBuilder, sql } from "kysely";
-import { DB } from "../../database";
+import { DB, RecipeIngredient, RecipeShare, RecipeStep } from "../generated/kysely";
 
 export const ingredientsSubquery = (eb: ExpressionBuilder<DB, "recipes">) => {
   return eb
     .selectFrom("recipe_ingredients")
     .whereRef("recipe_ingredients.recipe_id", "=", "recipes.id")
     .select(
-      sql<RecipeIngredientSchema[]>`
+      sql<RecipeIngredient[]>`
       coalesce(
         jsonb_agg(recipe_ingredients.* order by recipe_ingredients."order" asc),
         '[]'
@@ -16,7 +15,7 @@ export const ingredientsSubquery = (eb: ExpressionBuilder<DB, "recipes">) => {
     );
 };
 
-export const sharesWithMemberships = (eb: ExpressionBuilder<DB, "recipes">, userId: number) => {
+export const recipeSharesWithMemberships = (eb: ExpressionBuilder<DB, "recipes">, userId: number) => {
   return eb
     .selectFrom("recipe_shares")
     .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "recipe_shares.user_kitchen_membership_id")
@@ -32,9 +31,9 @@ export const sharesWithMemberships = (eb: ExpressionBuilder<DB, "recipes">, user
     });
 };
 
-export const sharesSubquery = (eb: ExpressionBuilder<DB, "recipes">, userId: number) => {
-  return sharesWithMemberships(eb, userId).select(
-    sql<RecipeShareSchema[]>`
+export const recipeSharesSubquery = (eb: ExpressionBuilder<DB, "recipes">, userId: number) => {
+  return recipeSharesWithMemberships(eb, userId).select(
+    sql<RecipeShare[]>`
       coalesce(
         jsonb_agg(recipe_shares.*),
         '[]'
@@ -47,7 +46,7 @@ export const stepsSubquery = (eb: ExpressionBuilder<DB, "recipes">) => {
   return eb
     .selectFrom("recipe_steps")
     .select(
-      sql<RecipeStepSchema[]>`
+      sql<RecipeStep[]>`
       coalesce(
         jsonb_agg(recipe_steps.* order by recipe_steps."order" asc),
         '[]'

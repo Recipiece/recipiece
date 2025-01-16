@@ -1,8 +1,7 @@
-import { User, UserSession } from "@prisma/client";
+import { prisma, Redis, User, UserSession } from "@recipiece/database";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma, Redis } from "../database";
 import { ApiResponse, TokenPayload, WebsocketTokenPayload } from "../types";
 import { UserSessions } from "../util/constant";
 import { verifyToken } from "../util/token";

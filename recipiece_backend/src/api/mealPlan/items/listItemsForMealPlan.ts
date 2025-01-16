@@ -1,8 +1,7 @@
-import { Prisma } from "@prisma/client";
 import { ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../../database";
+import { Prisma, prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const listItemsForMealPlan = async (

@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { prisma } from "../../database";
+import { prisma } from "@recipiece/database";
 import { LoginResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserSessions } from "../../util/constant";

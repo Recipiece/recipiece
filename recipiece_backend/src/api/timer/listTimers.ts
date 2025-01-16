@@ -1,7 +1,6 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, prisma } from "@recipiece/database";
 import { ListTimersQuerySchema, ListTimersResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 

@@ -3,10 +3,7 @@
     "target": "ESNext",
     "module": "commonjs",
     // "rootDir": "./src",
-    "types": [
-      "jest",
-      "node",
-    ],
+    "types": ["jest", "node"],
     "sourceMap": true,
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -34,16 +31,19 @@
 
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true, /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "paths": {
-      "@recipiece/types": [
-        "../recipiece_common/recipiece_types/src/index.ts"
-      ]
+      "@recipiece/types": ["../recipiece_common/recipiece_types/src/index.ts"],
+      "@recipiece/database": ["../recipiece_common/recipiece_database/src/index.ts"]
     }
   },
-  "exclude": ["node_modules", "dist", "seed", "prisma"],
+  "exclude": ["node_modules", "dist", "seed"],
   "include": [
     "./src/**/*",
-    "../recipiece_common/recipiece_types/src/**/*"
+    "./test/**/*",
+    "./jest.config.ts",
+    "./jest.setup*.ts",
+    "../recipiece_common/recipiece_types/src/**/*",
+    "../recipiece_common/recipiece_database/src/**/*"
   ]
 }

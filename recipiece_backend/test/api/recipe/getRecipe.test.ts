@@ -1,8 +1,7 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
+import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
-import { RecipeSchema } from "../../../src/schema";
 
 describe("Get Recipe", () => {
   let user: User;
@@ -141,5 +140,5 @@ describe("Get Recipe", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-  })
+  });
 });

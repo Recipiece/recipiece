@@ -1,6 +1,5 @@
-import { Recipe, ShoppingList, Timer, User, UserPushNotificationSubscription } from "@prisma/client";
+import { prisma, Recipe, ShoppingList, Timer, User, UserPushNotificationSubscription } from "@recipiece/database";
 import webpush, { PushSubscription, WebPushError } from "web-push";
-import { prisma } from "../database";
 
 if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
   const { APP_EMAIL_ADDRESS, APP_VAPID_PUBLIC_KEY, APP_VAPID_PRIVATE_KEY } = process.env;

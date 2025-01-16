@@ -1,13 +1,12 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
+import { RefreshTokenResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import request from "supertest";
-import { RefreshTokenResponseSchema } from "../../../src/schema";
 import "jest-expect-message";
 import jwt from "jsonwebtoken";
-import { TokenPayload } from "../../../src/types";
 import { DateTime } from "luxon";
+import request from "supertest";
+import { TokenPayload } from "../../../src/types";
 import { UserSessions } from "../../../src/util/constant";
-import { prisma } from "../../../src/database";
 
 describe("Refresh Token", () => {
   let user: User;

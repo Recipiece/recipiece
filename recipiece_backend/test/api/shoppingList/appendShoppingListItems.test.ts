@@ -1,7 +1,6 @@
-import { ShoppingListItem, User } from "@prisma/client";
+import { ShoppingListItem, User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Append Shopping List Items", () => {
   let user: User;

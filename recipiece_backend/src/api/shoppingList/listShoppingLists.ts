@@ -1,9 +1,8 @@
 import { ListShoppingListsQuerySchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
+import { prisma, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
-import { itemsSubquery, sharesSubquery, sharesWithMemberships } from "./util";
 
 export const listShoppingLists = async (request: AuthenticatedRequest<any, ListShoppingListsQuerySchema>) => {
   const { shared_shopping_lists, page_number, page_size } = request.query;
@@ -15,15 +14,15 @@ export const listShoppingLists = async (request: AuthenticatedRequest<any, ListS
     .selectAll("shopping_lists")
     .select((eb) => {
       return [
-        itemsSubquery(eb).as("items"),
-        sharesSubquery(eb, user.id).as("shares"),
+        shoppingListItemsSubquery(eb).as("items"),
+        shoppingListSharesSubquery(eb, user.id).as("shares"),
       ];
     })
     .where((eb) => {
       if (shared_shopping_lists === "include") {
         return eb.or([
           eb("shopping_lists.user_id", "=", user.id),
-          eb.exists(sharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
+          eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
         ]);
       } else {
         return eb("shopping_lists.user_id", "=", user.id);

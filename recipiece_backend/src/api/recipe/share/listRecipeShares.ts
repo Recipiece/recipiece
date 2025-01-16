@@ -1,9 +1,8 @@
-import { Prisma } from "@prisma/client";
 import { ListRecipeSharesQuerySchema, ListRecipeSharesResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { StatusCodes } from "http-status-codes";
 import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
-import { prisma } from "../../../database";
+import { Prisma, prisma } from "@recipiece/database";
 
 /**
  * List recipes shares that are targeting the requesting user or the requesting user has sent.

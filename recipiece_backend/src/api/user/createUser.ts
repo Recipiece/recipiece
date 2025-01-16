@@ -1,14 +1,13 @@
-import { User } from "@prisma/client";
+import { prisma } from "@recipiece/database";
+import { CreateUserRequestSchema, UserPreferencesSchema, UserSchema } from "@recipiece/types";
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
-import { CreateUserRequestSchema } from "@recipiece/types";
 import { ApiResponse } from "../../types";
 import { VERSION_ACCESS_LEVELS } from "../../util/constant";
 import { hashPassword } from "../../util/password";
 
-export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<User> => {
+export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<UserSchema> => {
   const { username, email, password } = request.body;
 
   const existingUser = await prisma.user.findFirst({
@@ -75,7 +74,13 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
       return user;
     });
 
-    return [StatusCodes.CREATED, insertedUser];
+    return [
+      StatusCodes.CREATED,
+      {
+        ...insertedUser,
+        preferences: insertedUser.preferences as UserPreferencesSchema,
+      },
+    ];
   } catch (err) {
     console.error(err);
     return [

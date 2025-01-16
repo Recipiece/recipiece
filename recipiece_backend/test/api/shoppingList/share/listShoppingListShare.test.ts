@@ -1,8 +1,7 @@
-import { User } from "@prisma/client";
-import request from "supertest";
-import { prisma } from "../../../../src/database";
-import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "../../../../src/schema";
+import { User, prisma } from "@recipiece/database";
+import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import request from "supertest";
 
 describe("List Shopping List Shares", () => {
   let user: User;

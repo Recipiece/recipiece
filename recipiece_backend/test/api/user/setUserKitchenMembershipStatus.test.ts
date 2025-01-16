@@ -1,7 +1,6 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 import { UserKitchenInvitationStatus } from "../../../src/util/constant";
 
 describe("Set User Kitchen Membership Status", () => {

@@ -8,15 +8,14 @@
  * the actual api calls that are being made.
  */
 
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
+import { UserPreferencesSchema } from "@recipiece/types";
 import { randomUUID } from "crypto";
 import { enableFetchMocks } from "jest-fetch-mock";
 import app from "./src/app";
-import { prisma } from "./src/database";
 import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
-import { UserPreferencesSchema } from "./src/schema";
 
 interface CreateUserAndTokenArgs {
   readonly email?: string;

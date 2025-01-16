@@ -1,8 +1,6 @@
-import { User } from "@prisma/client";
-// @ts-ignore
+import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Get Cookbooks", () => {
   let user: User;
@@ -19,7 +17,7 @@ describe("Get Cookbooks", () => {
       data: {
         user_id: user.id,
         name: "test cookbook",
-      }
+      },
     });
 
     const response = await request(server)
@@ -32,12 +30,12 @@ describe("Get Cookbooks", () => {
   });
 
   it("should not get a cookbook that you do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
+    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
     const cookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,
         name: "test cookbook",
-      }
+      },
     });
 
     const response = await request(server)
@@ -50,9 +48,9 @@ describe("Get Cookbooks", () => {
 
   it("should not get a cookbook that does not exist", async () => {
     const response = await request(server)
-    .get("/cookbook/900000000")
-    .set("Content-Type", "application/json")
-    .set("Authorization", `Bearer ${bearerToken}`);
+      .get("/cookbook/900000000")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
