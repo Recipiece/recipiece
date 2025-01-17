@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 

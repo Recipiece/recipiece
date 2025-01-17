@@ -1,9 +1,8 @@
-import { Prisma } from "@prisma/client";
-import { ListTimersQuerySchema, ListTimersResponseSchema } from "../../schema";
+import { Prisma, prisma } from "@recipiece/database";
+import { ListTimersQuerySchema, ListTimersResponseSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
-import { prisma } from "../../database";
-import { StatusCodes } from "http-status-codes";
 
 export const listTimers = async (
   request: AuthenticatedRequest<any, ListTimersQuerySchema>

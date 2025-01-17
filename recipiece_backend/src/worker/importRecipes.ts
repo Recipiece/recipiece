@@ -1,15 +1,14 @@
-import { RecipeIngredient } from "@prisma/client";
+import { prisma, RecipeIngredient } from "@recipiece/database";
+import { RecipeIngredientSchema } from "@recipiece/types";
 import { createReadStream, mkdirSync, readdirSync, readFileSync, rmSync } from "fs";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import unzipper from "unzipper";
 import { isMainThread, parentPort, workerData } from "worker_threads";
 import { gunzipSync } from "zlib";
-import { prisma } from "../database";
-import { RecipeIngredientSchema } from "../schema";
 import { RecipeImportFiles } from "../util/constant";
-import { replaceUnicodeFractions } from "../util/fraction";
 import { sendFinishedImportJobFailedEmail, sendFinishedImportJobSuccessEmail } from "../util/email";
+import { replaceUnicodeFractions } from "../util/fraction";
 
 const paprikaImporter = async (fileName: string, userId: number) => {
   const tmpSeed = DateTime.utc().toISO();

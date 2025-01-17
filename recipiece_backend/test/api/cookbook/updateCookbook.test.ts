@@ -1,7 +1,6 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Update Cookbooks", () => {
   let user: User;
@@ -36,7 +35,7 @@ describe("Update Cookbooks", () => {
   });
 
   it("should not allow you to update a cookbook you do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
+    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
     const otherCookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,

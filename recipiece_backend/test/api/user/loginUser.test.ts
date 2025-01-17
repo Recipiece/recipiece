@@ -1,7 +1,7 @@
-import { User } from "@prisma/client";
+import { User } from "@recipiece/database";
+import { LoginResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { LoginResponseSchema } from "../../../src/schema";
 
 describe("Login User", () => {
   let user: User;

@@ -1,6 +1,5 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import request from "supertest";
-import { prisma } from "../../../../src/database";
 import { StatusCodes } from "http-status-codes";
 
 describe("Delete Shopping List Share", () => {

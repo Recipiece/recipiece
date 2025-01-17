@@ -1,7 +1,6 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Delete Recipes", () => {
   let user: User;
@@ -38,7 +37,7 @@ describe("Delete Recipes", () => {
   });
 
   it("should not allow a user to delete a recipe they do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
+    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
     const recipe = await prisma.recipe.create({
       data: {
         name: "asdfqwer",

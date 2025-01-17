@@ -1,8 +1,8 @@
 import { DateTime } from "luxon";
-import { RefreshTokenResponseSchema } from "../../schema";
+import { RefreshTokenResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserSessions } from "../../util/constant";
-import { prisma } from "../../database";
+import { prisma } from "@recipiece/database";
 import { randomUUID } from "crypto";
 import { StatusCodes } from "http-status-codes";
 import { generateToken } from "../../util/token";

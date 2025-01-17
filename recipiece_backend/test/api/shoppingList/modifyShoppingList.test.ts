@@ -1,9 +1,8 @@
-import { ShoppingList, ShoppingListItem, User } from "@prisma/client";
+import { prisma, Redis, ShoppingList, ShoppingListItem, User } from "@recipiece/database";
+import { ModifyShoppingListResponse } from "@recipiece/types";
 import { randomUUID } from "crypto";
 import "jest-expect-message";
 import request from "superwstest";
-import { prisma, Redis } from "../../../src/database";
-import { ModifyShoppingListResponse } from "../../../src/schema";
 
 const setShoppingListToken = async (shoppingListId: number): Promise<string> => {
   const wsToken = randomUUID().toString();

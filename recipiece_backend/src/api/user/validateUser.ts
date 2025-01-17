@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
-import { ValidateUserRequestSchema, ValidateUserResponseSchema } from "../../schema";
+import { prisma } from "@recipiece/database";
+import { ValidateUserRequestSchema, ValidateUserResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";
 

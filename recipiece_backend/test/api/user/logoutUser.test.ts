@@ -1,9 +1,8 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { verifyToken } from "../../../src/util/token";
 import { TokenPayload } from "../../../src/types";
-import { prisma } from "../../../src/database";
+import { verifyToken } from "../../../src/util/token";
 
 describe("Logout User", () => {
   let user: User;
@@ -28,11 +27,11 @@ describe("Logout User", () => {
     const decodedRefreshToken = verifyToken(refreshToken) as TokenPayload;
     expect(decodedRefreshToken).toBeTruthy();
 
-    const {session: sessionId} = decodedRefreshToken;
+    const { session: sessionId } = decodedRefreshToken;
     const matchingSession = await prisma.userSession.findFirst({
       where: {
         id: sessionId,
-      }
+      },
     });
     expect(matchingSession).toBeFalsy();
   });

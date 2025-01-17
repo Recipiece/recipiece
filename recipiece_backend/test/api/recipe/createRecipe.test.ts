@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
@@ -16,16 +16,20 @@ describe("Create Recipes", () => {
     const expectedBody = {
       name: "My Test Recipe",
       description: "A cool recipe",
-      steps: [{
-        content: "hello world",
-        order: 0,
-      }],
-      ingredients: [{
-        name: "asdfqwer",
-        unit: "1",
-        order: 0,
-      }],
-    }
+      steps: [
+        {
+          content: "hello world",
+          order: 0,
+        },
+      ],
+      ingredients: [
+        {
+          name: "asdfqwer",
+          unit: "1",
+          order: 0,
+        },
+      ],
+    };
 
     const response = await request(server)
       .post("/recipe")

@@ -1,5 +1,5 @@
+import { prisma } from "@recipiece/database";
 import { Job } from "bullmq";
-import { prisma } from "../database";
 import { sendTimerFinishedPushNotification } from "../util/pushNotification";
 
 export const processTimer = async (job: Job) => {

@@ -1,7 +1,6 @@
-import { User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
+import { prisma, User } from "@recipiece/database";
 
 describe("Add Recipe to Cookbook", () => {
   let user: User;

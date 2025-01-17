@@ -5,7 +5,7 @@ import {
   YSetUserKitchenMembershipStatusRequestSchema,
   YSetUserKitchenMembershipStatusResponseSchema,
   YUserKitchenMembershipSchema,
-} from "../../../schema";
+} from "@recipiece/types";
 import { Route } from "../../../types";
 import { createUserKitchenMembership } from "./createUserKitchenMembership";
 import { deleteUserKitchenMembership } from "./deleteUserKitchenMembership";

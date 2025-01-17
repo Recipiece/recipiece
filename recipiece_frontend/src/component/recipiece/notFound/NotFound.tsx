@@ -1,8 +1,6 @@
 import { FC, ReactNode, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../shadcn";
-import { ReactComponent as Oven } from "./Oven.svg";
-import { ReactComponent as QuestionMark } from "./QuestionMark.svg";
 
 export interface NotFoundProps {
   readonly message?: ReactNode;
@@ -20,8 +18,8 @@ export const NotFound: FC<NotFoundProps> = ({ message, backNav }) => {
 
   return (
     <div className="flex flex-col flex-wrap items-center justify-center">
-      <QuestionMark title="Not Found Question Mark" className="stroke-primary w-[100px] h-[100px] mb-2" />
-      <Oven title="Not Found Oven" className="fill-primary w-[128px] h-[128px] mb-2" />
+      {/* <QuestionMark title="Not Found Question Mark" className="stroke-primary w-[100px] h-[100px] mb-2" />
+      <Oven title="Not Found Oven" className="fill-primary w-[128px] h-[128px] mb-2" /> */}
       <p className="text-lg mb-2">{messageToDisplay}</p>
       {backNav && (
         <Button onClick={() => navigate(backNav)} type="button" variant="link">

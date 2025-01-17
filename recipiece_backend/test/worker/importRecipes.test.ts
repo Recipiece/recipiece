@@ -1,11 +1,10 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import archiver from "archiver";
 import { createWriteStream, mkdirSync, rmSync } from "fs";
 import fetch from "jest-fetch-mock";
 import { DateTime } from "luxon";
 import path from "path";
 import { gzipSync } from "zlib";
-import { prisma } from "../../src/database";
 import { RecipeImportFiles } from "../../src/util/constant";
 import { generateRecipeImportWorker } from "../../src/worker";
 import { runner } from "../../src/worker/importRecipes";

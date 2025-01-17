@@ -1,9 +1,7 @@
-import { User } from "@prisma/client";
-// @ts-ignore
+import { User, prisma } from "@recipiece/database";
+import { CookbookSchema, CreateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { CookbookSchema, CreateCookbookRequestSchema } from "../../../src/schema";
-import { prisma } from "../../../src/database";
 
 describe("Create Cookbooks", () => {
   let user: User;
@@ -19,7 +17,7 @@ describe("Create Cookbooks", () => {
     const expectedBody: CreateCookbookRequestSchema = {
       name: "My Test Cookbook",
       description: "The best recipes ever",
-    }
+    };
 
     const response = await request(server)
       .post("/cookbook")
@@ -40,7 +38,7 @@ describe("Create Cookbooks", () => {
       data: {
         name: "test",
         user_id: user.id,
-      }
+      },
     });
 
     const response = await request(server)
@@ -51,7 +49,7 @@ describe("Create Cookbooks", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-      expect(response.statusCode).toEqual(StatusCodes.CONFLICT);
+    expect(response.statusCode).toEqual(StatusCodes.CONFLICT);
   });
 
   it("should not allow a bad body to be passed in", async () => {
@@ -64,6 +62,6 @@ describe("Create Cookbooks", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-      expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
+    expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
   });
 });

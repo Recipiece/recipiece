@@ -9,7 +9,7 @@ import {
   YRequestShoppingListSessionResponseSchema,
   YShoppingListSchema,
   YUpdateShoppingListSchema,
-} from "../../schema";
+} from "@recipiece/types";
 import { Route, WebsocketRoute } from "../../types";
 import { appendShoppingListItems } from "./appendShoppingListItems";
 import { createShoppingList } from "./createShoppingList";

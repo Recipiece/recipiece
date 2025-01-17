@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Kysely, PostgresAdapter, PostgresIntrospector, PostgresQueryCompiler } from "kysely";
 import kyselyExtension from "prisma-extension-kysely";
-import { DB } from "./kysely";
+import { DB } from "./generated/kysely";
 
 export const prisma = new PrismaClient().$extends(
   kyselyExtension({

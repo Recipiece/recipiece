@@ -4,8 +4,9 @@ import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "../recipe";
 import { CookbookQueryKeys } from "./CookbookQueryKeys";
+import { CookbookSchema } from "@recipiece/types";
 
-export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<Cookbook>) => {
+export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<CookbookSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {

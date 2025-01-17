@@ -1,8 +1,7 @@
-import { User } from "@prisma/client";
-import { prisma } from "../../../src/database";
-import request from "supertest";
+import { User, prisma } from "@recipiece/database";
+import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { UserKitchenMembershipSchema } from "../../../src/schema";
+import request from "supertest";
 
 describe("Get User Kitchen Membership", () => {
   let user: User;

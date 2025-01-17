@@ -3,13 +3,13 @@
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
   previewFeatures = ["postgresqlExtensions"]
 }
 
 generator kysely {
   provider = "prisma-kysely"
-  output = "../src/database/kysely"
+  output = "../src/prisma/generated/kysely"
   fileName = "index.ts"
 }
 

@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
+import { prisma } from "@recipiece/database";
 import {
   SetUserKitchenMembershipStatusRequestSchema,
   SetUserKitchenMembershipStatusResponseSchema,
-} from "../../../schema";
+} from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { UserKitchenInvitationStatus } from "../../../util/constant";
 

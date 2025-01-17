@@ -1,7 +1,7 @@
+import { ListKnownIngredientsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ListKnownIngredientsResponseSchema } from "../../schema";
 import { ApiResponse } from "../../types";
+import { prisma } from "@recipiece/database";
 
 export const listKnownIngredients = async (): ApiResponse<ListKnownIngredientsResponseSchema> => {
   const ingredients = await prisma.knownIngredient.findMany({

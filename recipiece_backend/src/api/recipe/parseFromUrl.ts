@@ -1,5 +1,5 @@
+import { ParseRecipeFromURLRequestSchema, ParsedFromURLRecipe, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { ParseRecipeFromURLRequestSchema, ParsedFromURLRecipe, RecipeSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>): ApiResponse<RecipeSchema> => {

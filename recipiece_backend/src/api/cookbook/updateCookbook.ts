@@ -1,6 +1,6 @@
+import { CookbookSchema, UpdateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { CookbookSchema, UpdateCookbookRequestSchema } from "../../schema";
+import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateCookbook = async (req: AuthenticatedRequest<UpdateCookbookRequestSchema>): ApiResponse<CookbookSchema> => {
