@@ -1,12 +1,15 @@
-import HtmlWebpackPlugin from "html-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration, DefinePlugin } from "webpack";
+import "webpack-dev-server";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 const config: Configuration = {
-  mode: process.env.NODE_ENV === "production" ? "production" : "development",
+  mode: isProduction ? "production" : "development",
   entry: "./src/index.tsx",
-  devtool: process.env.NODE_ENV === "production" ? undefined : "cheap-source-map",
+  devtool: isProduction ? undefined : "cheap-source-map",
   module: {
     rules: [
       {
@@ -18,6 +21,7 @@ const config: Configuration = {
           },
         },
         exclude: /node_modules/,
+        include: [path.resolve(__dirname, "./src"), path.resolve(__dirname, "../recipiece_common/recipiece_types")],
       },
       {
         test: /\.css$/,
@@ -42,11 +46,14 @@ const config: Configuration = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".jsx"],
+    alias: {
+      "@recipiece/types": path.resolve(__dirname, "../recipiece_common/recipiece_types/src"),
+    },
   },
   output: {
     publicPath: "/",
     filename: "index.js",
-    path: path.resolve(__dirname, "dist", process.env.NODE_ENV === "production" ? "prod" : "dev"),
+    path: path.resolve(__dirname, "dist", isProduction ? "prod" : "dev"),
     clean: true,
   },
   plugins: [
@@ -58,7 +65,7 @@ const config: Configuration = {
       patterns: [
         {
           from: "public",
-          to: path.resolve(__dirname, "dist", process.env.NODE_ENV === "production" ? "prod" : "dev"),
+          to: path.resolve(__dirname, "dist", isProduction ? "prod" : "dev"),
           globOptions: {
             ignore: ["**/index.html"],
           },

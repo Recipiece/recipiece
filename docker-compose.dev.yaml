@@ -12,7 +12,7 @@ services:
       - ./recipiece_frontend:/recipiece_frontend
       - ./recipiece_common/recipiece_types:/recipiece_common/recipiece_types
   recipiece_database:
-    image: postgres
+    image: postgres:16
     restart: always
     environment:
       POSTGRES_PASSWORD: 'recipiece'
@@ -28,7 +28,7 @@ services:
     ports:
       - "6379:6379"
   recipiece_database_test:
-    image: postgres
+    image: postgres:16
     restart: always
     environment:
       POSTGRES_PASSWORD: 'recipiece'

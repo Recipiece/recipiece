@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -20,9 +16,10 @@
     "emitDeclarationOnly": false,
     "noEmitOnError": false,
     "noEmit": false,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@recipiece/types": ["../recipiece_common/recipiece_types/src/index.ts"]
+    }
   },
-  "include": [
-    "src"
-  ]
+  "include": ["./src/**/*", "../recipiece_common/recipiece_types/src/**/*"]
 }

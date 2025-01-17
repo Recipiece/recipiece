@@ -8,4 +8,4 @@ WORKDIR /recipiece_backend
 RUN yarn install --immutable
 
 # CMD ["yarn", "run-dev"]
-CMD ["sh", "-c", "yarn install --immutable && yarn run-dev"]
+CMD ["yarn", "run:dev"]

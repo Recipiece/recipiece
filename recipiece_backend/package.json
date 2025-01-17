@@ -9,9 +9,10 @@
     "seed": "dotenvx run -f .env.dev -- node seed/index.mjs",
     "build": "tsc --project tsconfig.prod.json",
     "prisma-dev": "dotenvx run -f .env.dev -- prisma migrate dev",
-    "build-dev": "webpack --config ./webpack.config.dev.js --watch",
-    "serve-dev": "dotenvx run -f .env.dev -- nodemon ./dist/dev/index.js",
-    "run-dev": "concurrently \"yarn build-dev\" \"yarn serve-dev\""
+    "build:dev": "NODE_ENV=development webpack",
+    "serve:dev": "dotenvx run -f .env.dev -- nodemon ./dist/dev/index.js",
+    "run:dev": "concurrently \"yarn build:dev --watch\" \"yarn serve:dev\"",
+    "build:prod": "NODE_ENV=production webpack"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",
@@ -33,6 +34,7 @@
     "@types/unzipper": "^0.10.10",
     "@types/uuid": "^10.0.0",
     "@types/web-push": "^3.6.4",
+    "@types/webpack-node-externals": "^3.0.4",
     "@types/ws": "^8.5.13",
     "@types/yup": "^0.32.0",
     "concurrently": "^9.1.2",

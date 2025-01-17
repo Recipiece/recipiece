@@ -1,12 +1,27 @@
-const path = require("path");
-const nodeExternals = require("webpack-node-externals");
-const CopyPlugin = require("copy-webpack-plugin");
+import path from "path";
+import nodeExternals from "webpack-node-externals";
+import CopyPlugin from "copy-webpack-plugin";
+import { Configuration } from "webpack";
 
-module.exports = {
-  entry: ["./src/index.ts"],
-  mode: "development",
+const isProduction = process.env.NODE_ENV === "production";
+const arch = process.env.TARGET_ARCH ?? "osx";
+
+let libqueryPath = "libquery_engine*.node";
+if(arch === "darwin") {
+  libqueryPath = "libquery_engine-darwin*.node";
+} else if (arch === "debian") {
+  libqueryPath = "libquery_engine-debian*.node";
+} else if (arch === "musl") {
+  libqueryPath = "libquery_engine-linux-musl*.node";
+}
+
+const config: Configuration = {
+  entry: [
+    "./src/index.ts",
+  ],
+  mode: isProduction ? "production" : "development",
   target: "node",
-  devtool: "source-map",
+  devtool: isProduction ? undefined : "source-map",
   externals: [nodeExternals()],
   module: {
     rules: [
@@ -16,7 +31,7 @@ module.exports = {
           {
             loader: "ts-loader",
             options: {
-              transpileOnly: true, // Faster builds for development
+              transpileOnly: !isProduction, // Faster builds for development
             },
           },
         ],
@@ -37,8 +52,9 @@ module.exports = {
     },
   },
   output: {
-    path: path.resolve(__dirname, "dist/dev"),
+    path: path.resolve(__dirname, "dist", isProduction ? "prod" : "dev"),
     filename: "index.js",
+    clean: true,
   },
   watchOptions: {
     ignored: /node_modules/,
@@ -50,8 +66,8 @@ module.exports = {
       patterns: [
         { from: "../recipiece_common/recipiece_database/node_modules/.prisma/client/schema.prisma", to: "./" },
         {
-          from: "../recipiece_common/recipiece_database/node_modules/.prisma/client/libquery_engine*.node",
-          to: ({ ctx, filename }) => {
+          from: `../recipiece_common/recipiece_database/node_modules/.prisma/client/${libqueryPath}`,
+          to: () => {
             return "./[name][ext]";
           },
         },
@@ -59,3 +75,5 @@ module.exports = {
     }),
   ],
 };
+
+export default config;

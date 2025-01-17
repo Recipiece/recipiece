@@ -1,6 +1,9 @@
-const path = require("path");
+import path from "path";
+import { Configuration } from "webpack";
 
-module.exports = {
+const isProduction = process.env.NODE_ENV === "production";
+
+const config: Configuration = {
   entry: "./src/index.ts",
   mode: "development",
   module: {
@@ -16,7 +19,7 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js"],
   },
   output: {
-    path: path.resolve(__dirname, "dist/dev"),
+    path: path.resolve(__dirname, "dist", isProduction ? "prod" : "dev"),
     filename: "index.js",
     library: {
       name: "@recipiece/types",
@@ -24,3 +27,5 @@ module.exports = {
     },
   },
 };
+
+export default config;
