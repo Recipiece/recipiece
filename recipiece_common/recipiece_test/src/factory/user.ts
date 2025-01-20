@@ -1,5 +1,20 @@
 import { faker } from "@faker-js/faker";
-import { prisma, User, UserCredentials } from "@recipiece/database";
+import { prisma, User, UserCredentials, UserKitchenMembership } from "@recipiece/database";
+
+export const generateUserKitchenMembership = async (membership?: Partial<Omit<UserKitchenMembership, "id">>) => {
+  const sourceUserId = membership?.source_user_id ?? (await generateUser()).id;
+  const destUserId = membership?.destination_user_id ?? (await generateUser()).id;
+  const status = membership?.status ?? faker.helpers.arrayElement(["accepted", "pending", "denied"]);
+
+  return prisma.userKitchenMembership.create({
+    data: {
+      source_user_id: sourceUserId,
+      destination_user_id: destUserId,
+      status: status,
+      created_at: membership?.created_at,
+    }
+  })
+}
 
 export const generateUserCredentials = async (userCredentials?: Partial<Omit<UserCredentials, "id">>) => {
   const userId = userCredentials?.user_id ?? (await generateUser()).id;

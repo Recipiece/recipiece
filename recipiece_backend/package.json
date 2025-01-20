@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "dotenvx run -f .env.test -- jest --runInBand --forceExit",
+    "test": "dotenvx run -f .env.test -- jest --forceExit",
     "prisma-test": "dotenvx run -f .env.test -- prisma migrate dev",
     "seed": "dotenvx run -f .env.dev -- node seed/index.mjs",
     "build": "tsc --project tsconfig.prod.json",
