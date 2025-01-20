@@ -3,18 +3,14 @@ import { DEFAULT_PAGE_SIZE } from "../util";
 
 export const YListQuerySchema = object({
   page_number: number().required(),
-  page_size: number()
-    .min(1)
-    .max(DEFAULT_PAGE_SIZE)
-    .default(undefined)
-    .notRequired()
-    .nullable()
-    .optional()
-    .transform((val) => {
-      return val ?? DEFAULT_PAGE_SIZE;
-    }),
+  page_size: number().min(1).max(DEFAULT_PAGE_SIZE).notRequired(),
 })
-  .strict()
+  .transform((val) => {
+    return {
+      ...val,
+      page_size: val.page_size ?? DEFAULT_PAGE_SIZE,
+    };
+  })
   .noUnknown();
 
 export interface ListQuerySchema extends InferType<typeof YListQuerySchema> {}
@@ -25,4 +21,4 @@ export function generateYListQuerySchema<T extends Maybe<AnyObject>>(dataSchema:
     has_next_page: boolean().required(),
     page: number().required(),
   });
-};
+}

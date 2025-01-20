@@ -19,7 +19,7 @@ const ICON_SIZES = {
   small: 10,
   medium: 20,
   large: 36,
-}
+};
 
 export const SharedAvatar: FC<SharedAvatarProps> = ({ userKitchenMembershipId, size = "medium" }) => {
   const { data: user } = useGetSelfQuery();
@@ -35,7 +35,7 @@ export const SharedAvatar: FC<SharedAvatarProps> = ({ userKitchenMembershipId, s
       {isMembershipTargetingSource && (
         <TooltipTrigger asChild>
           <div className={cn(W_H_SIZES[size], "bg-primary flex items-center justify-center text-white rounded-full")}>
-            <Waypoints size={ICON_SIZES[size]}/>
+            <Waypoints size={ICON_SIZES[size]} />
           </div>
         </TooltipTrigger>
       )}

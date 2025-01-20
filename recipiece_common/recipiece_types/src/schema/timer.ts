@@ -15,12 +15,8 @@ export interface TimerSchema extends InferType<typeof YTimerSchema> {}
  * Create timer
  */
 export const YCreateTimerRequestSchema = object({
-  duration_ms: number()
-    .required()
-    .min(1000, "Timer cannot be shorter than 1 second"),
-})
-  .strict()
-  .noUnknown();
+  duration_ms: number().required().min(1000, "Timer cannot be shorter than 1 second"),
+}).noUnknown();
 
 export interface CreateTimerRequestSchema extends InferType<typeof YCreateTimerRequestSchema> {}
 
@@ -29,12 +25,8 @@ export interface CreateTimerRequestSchema extends InferType<typeof YCreateTimerR
  */
 export const YUpdateTimerRequestSchema = object({
   id: number().required(),
-  duration_ms: number()
-    .notRequired()
-    .min(1000, "Timer cannot be shorter than 1 second"),
-})
-  .strict()
-  .noUnknown();
+  duration_ms: number().notRequired().min(1000, "Timer cannot be shorter than 1 second"),
+}).noUnknown();
 
 export interface UpdateTimerRequestSchema extends InferType<typeof YUpdateTimerRequestSchema> {}
 
@@ -43,9 +35,7 @@ export interface UpdateTimerRequestSchema extends InferType<typeof YUpdateTimerR
  */
 export const YListTimersQuerySchema = YListQuerySchema.shape({
   user_id: number().notRequired(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface ListTimersQuerySchema extends InferType<typeof YListTimersQuerySchema> {}
 

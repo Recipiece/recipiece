@@ -1,4 +1,4 @@
-export const nonsense = () => {}
+export const nonsense = () => {};
 
 // /**
 //  * These query hooks should be used only in the TimerContext, rather than directly by some component.

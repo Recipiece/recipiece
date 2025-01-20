@@ -78,7 +78,7 @@ export class RecipeQueryKeys {
     const base: RcpQueryKey = ["listRecipeShares"];
     const { page_number, user_kitchen_membership_id, from_self, targeting_self } = filters ?? {};
 
-    if(page_number) {
+    if (page_number) {
       base.push({ page_number });
     }
     if (user_kitchen_membership_id) {

@@ -9,5 +9,5 @@ export function floorDateToDay(date: DateTime) {
 }
 
 export function floorDateToBeginningOfWeek(date: DateTime) {
-  return date.minus({days: date.weekday - 1})
+  return date.minus({ days: date.weekday - 1 });
 }

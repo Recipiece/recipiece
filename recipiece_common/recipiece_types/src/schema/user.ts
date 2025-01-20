@@ -6,8 +6,7 @@ export const YUserPreferencesSchema = object({
   account_visibility: string().oneOf(["protected", "private"]),
 });
 
-export interface UserPreferencesSchema
-  extends InferType<typeof YUserPreferencesSchema> {}
+export interface UserPreferencesSchema extends InferType<typeof YUserPreferencesSchema> {}
 
 export const YUserSchema = object({
   email: string().required(),
@@ -16,9 +15,7 @@ export const YUserSchema = object({
   validated: boolean().required(),
   id: number().required(),
   preferences: YUserPreferencesSchema,
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface UserSchema extends InferType<typeof YUserSchema> {}
 
@@ -33,20 +30,12 @@ export const YUserKitchenMembershipSchema = object({
     id: number().required(),
     username: string().required(),
   }),
-  status: string()
-    .oneOf([
-      UserKitchenInvitationStatus.ACCEPTED,
-      UserKitchenInvitationStatus.DENIED,
-      UserKitchenInvitationStatus.PENDING,
-    ])
-    .required(),
-});
+  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED, UserKitchenInvitationStatus.PENDING]).required(),
+}).noUnknown();
 
-export interface UserKitchenMembershipSchema
-  extends InferType<typeof YUserKitchenMembershipSchema> {}
+export interface UserKitchenMembershipSchema extends InferType<typeof YUserKitchenMembershipSchema> {}
 
-export type UserKitchenMembershipSchemaStatus =
-  UserKitchenMembershipSchema["status"];
+export type UserKitchenMembershipSchemaStatus = UserKitchenMembershipSchema["status"];
 
 /**
  * Create user
@@ -55,12 +44,9 @@ export const YCreateUserRequestSchema = object({
   email: string().required(),
   username: string().required(),
   password: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface CreateUserRequestSchema
-  extends InferType<typeof YCreateUserRequestSchema> {}
+export interface CreateUserRequestSchema extends InferType<typeof YCreateUserRequestSchema> {}
 
 export const YCreateUserResponseSchema = object({
   id: number().required(),
@@ -68,12 +54,9 @@ export const YCreateUserResponseSchema = object({
   username: string().required(),
   email: string().required(),
   created_at: date().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface CreateUserResponseSchema
-  extends InferType<typeof YCreateUserResponseSchema> {}
+export interface CreateUserResponseSchema extends InferType<typeof YCreateUserResponseSchema> {}
 
 /**
  * Update user schema
@@ -83,33 +66,24 @@ export const YUpdateUserRequestSchema = object({
   username: string().optional(),
   email: string().optional(),
   preferences: YUserPreferencesSchema.optional(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface UpdateUserRequestSchema
-  extends InferType<typeof YUpdateUserRequestSchema> {}
+export interface UpdateUserRequestSchema extends InferType<typeof YUpdateUserRequestSchema> {}
 
 /**
  * Validate user account
  */
 export const YValidateUserRequestSchema = object({
   token: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface ValidateUserRequestSchema
-  extends InferType<typeof YValidateUserRequestSchema> {}
+export interface ValidateUserRequestSchema extends InferType<typeof YValidateUserRequestSchema> {}
 
 export const YValidateUserResponseSchema = object({
   validated: boolean().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface ValidateUserResponseSchema
-  extends InferType<typeof YValidateUserResponseSchema> {}
+export interface ValidateUserResponseSchema extends InferType<typeof YValidateUserResponseSchema> {}
 
 /**
  * Login
@@ -117,24 +91,18 @@ export interface ValidateUserResponseSchema
 export const YLoginResponseSchema = object({
   access_token: string().required(),
   refresh_token: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface LoginResponseSchema
-  extends InferType<typeof YLoginResponseSchema> {}
+export interface LoginResponseSchema extends InferType<typeof YLoginResponseSchema> {}
 
 /**
  * Issue forgot password token
  */
 export const YIssueForgotPasswordTokenRequestSchema = object({
   username_or_email: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface IssueForgotPasswordTokenRequestSchema
-  extends InferType<typeof YIssueForgotPasswordTokenRequestSchema> {}
+export interface IssueForgotPasswordTokenRequestSchema extends InferType<typeof YIssueForgotPasswordTokenRequestSchema> {}
 
 /**
  * Reset password
@@ -142,12 +110,9 @@ export interface IssueForgotPasswordTokenRequestSchema
 export const YResetPasswordRequestSchema = object({
   password: string().required(),
   token: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface ResetPasswordRequestSchema
-  extends InferType<typeof YResetPasswordRequestSchema> {}
+export interface ResetPasswordRequestSchema extends InferType<typeof YResetPasswordRequestSchema> {}
 
 /**
  * Refresh Token
@@ -155,39 +120,27 @@ export interface ResetPasswordRequestSchema
 export const YRefreshTokenResponseSchema = object({
   access_token: string().required(),
   refresh_token: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface RefreshTokenResponseSchema
-  extends InferType<typeof YRefreshTokenResponseSchema> {}
+export interface RefreshTokenResponseSchema extends InferType<typeof YRefreshTokenResponseSchema> {}
 
 /**
  * Request Import Recipes
  */
 export const YRequestImportRecipesRequestSchema = object({
-  source: string()
-    .oneOf(["paprika"], "The file format is not one of the known file formats")
-    .required(),
+  source: string().oneOf(["paprika"], "The file format is not one of the known file formats").required(),
   file: mixed()
     .test("fileSize", "The provided file is too large", (value) => {
       // @ts-ignore
       return value[0].size <= RecipeImportFiles.MAX_SIZE;
     })
-    .test(
-      "fileType",
-      "The provided file is not an acceptable format",
-      (value) => {
-        RecipeImportFiles.SUPPORTED_EXTENSIONS.includes(value as string);
-      }
-    )
+    .test("fileType", "The provided file is not an acceptable format", (value) => {
+      RecipeImportFiles.SUPPORTED_EXTENSIONS.includes(value as string);
+    })
     .required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface RequestImportRecipesRequestSchema
-  extends InferType<typeof YRequestImportRecipesRequestSchema> {}
+export interface RequestImportRecipesRequestSchema extends InferType<typeof YRequestImportRecipesRequestSchema> {}
 
 /**
  * Create a push notification subscription
@@ -204,69 +157,45 @@ export const YCreatePushNotificationRequestSubscriptionDataSchema = object({
 export const YCreatePushNotificationRequestSchema = object({
   device_id: string().required(),
   subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema,
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface CreatePushNotificationRequestSubscriptionDataSchema extends InferType<typeof YCreatePushNotificationRequestSubscriptionDataSchema>{}
+export interface CreatePushNotificationRequestSubscriptionDataSchema extends InferType<typeof YCreatePushNotificationRequestSubscriptionDataSchema> {}
 
-export interface CreatePushNotificationRequestSchema
-  extends InferType<typeof YCreatePushNotificationRequestSchema> {}
+export interface CreatePushNotificationRequestSchema extends InferType<typeof YCreatePushNotificationRequestSchema> {}
 
 /**
  * Change password
  */
 export const YChangePasswordRequestSchema = object({
   new_password: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface ChangePasswordRequestSchema
-  extends InferType<typeof YChangePasswordRequestSchema> {}
+export interface ChangePasswordRequestSchema extends InferType<typeof YChangePasswordRequestSchema> {}
 
 /**
  * Invite user to kitchen
  */
 export const YCreateUserKitchenMembershipRequestSchema = object({
   username: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
-export interface CreateUserKitchenMembershipRequestSchema
-  extends InferType<typeof YCreateUserKitchenMembershipRequestSchema> {}
+export interface CreateUserKitchenMembershipRequestSchema extends InferType<typeof YCreateUserKitchenMembershipRequestSchema> {}
 
 /**
  * Set kitchen membership status
  */
 export const YSetUserKitchenMembershipStatusRequestSchema = object({
   id: number().required(),
-  status: string()
-    .oneOf([
-      UserKitchenInvitationStatus.ACCEPTED,
-      UserKitchenInvitationStatus.DENIED,
-    ])
-    .required(),
-})
-  .strict()
-  .noUnknown();
+  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).required(),
+}).noUnknown();
 
-export interface SetUserKitchenMembershipStatusRequestSchema
-  extends InferType<typeof YSetUserKitchenMembershipStatusRequestSchema> {}
+export interface SetUserKitchenMembershipStatusRequestSchema extends InferType<typeof YSetUserKitchenMembershipStatusRequestSchema> {}
 
-export const YSetUserKitchenMembershipStatusResponseSchema =
-  YUserKitchenMembershipSchema.shape({
-    status: string()
-      .oneOf([
-        UserKitchenInvitationStatus.ACCEPTED,
-        UserKitchenInvitationStatus.DENIED,
-      ])
-      .required(),
-  });
+export const YSetUserKitchenMembershipStatusResponseSchema = YUserKitchenMembershipSchema.shape({
+  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).required(),
+});
 
-export interface SetUserKitchenMembershipStatusResponseSchema
-  extends InferType<typeof YSetUserKitchenMembershipStatusResponseSchema> {}
+export interface SetUserKitchenMembershipStatusResponseSchema extends InferType<typeof YSetUserKitchenMembershipStatusResponseSchema> {}
 
 /**
  * List kitchen memberships
@@ -283,31 +212,19 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
   entity: string().oneOf(["include", "exclude"]).notRequired(),
   entity_type: string().oneOf(["shopping_list", "recipe"]).notRequired(),
 })
-  .test(
-    "oneOfTargetingSelfOrFromSelf",
-    "Must specify at least one of targeting_self or from_self",
-    (ctx) => {
-      return !!ctx.from_self || !!ctx.targeting_self;
+  .test("oneOfTargetingSelfOrFromSelf", "Must specify at least one of targeting_self or from_self", (ctx) => {
+    return !!ctx.from_self || !!ctx.targeting_self;
+  })
+  .test("entityHasProperContext", "Must specify entity_id, entity, and entity_type together", (ctx) => {
+    if (!!ctx.entity_id || !!ctx.entity || !!ctx.entity_type) {
+      return !!ctx.entity_id && !!ctx.entity && !!ctx.entity_type;
     }
-  )
-  .test(
-    "entityHasProperContext",
-    "Must specify entity_id, entity, and entity_type together",
-    (ctx) => {
-      if (!!ctx.entity_id || !!ctx.entity || !!ctx.entity_type) {
-        return !!ctx.entity_id && !!ctx.entity && !!ctx.entity_type;
-      }
-      return true;
-    }
-  )
-  .strict()
+    return true;
+  })
   .noUnknown();
 
-export interface ListUserKitchenMembershipsQuerySchema
-  extends InferType<typeof YListUserKitchenMembershipsQuerySchema> {}
+export interface ListUserKitchenMembershipsQuerySchema extends InferType<typeof YListUserKitchenMembershipsQuerySchema> {}
 
-export const YListUserKitchenMembershipsResponseSchema =
-  generateYListQuerySchema(YUserKitchenMembershipSchema);
+export const YListUserKitchenMembershipsResponseSchema = generateYListQuerySchema(YUserKitchenMembershipSchema);
 
-export interface ListUserKitchenMembershipsResponseSchema
-  extends InferType<typeof YListUserKitchenMembershipsResponseSchema> {}
+export interface ListUserKitchenMembershipsResponseSchema extends InferType<typeof YListUserKitchenMembershipsResponseSchema> {}

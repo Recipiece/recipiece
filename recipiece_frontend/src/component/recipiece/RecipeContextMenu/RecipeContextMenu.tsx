@@ -1,17 +1,5 @@
 import { CookbookSchema, RecipeSchema, ShoppingListSchema, UserKitchenMembershipSchema } from "@recipiece/types";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Book,
-  BookMinus,
-  Edit,
-  RefreshCw,
-  Scaling,
-  Share,
-  ShoppingBasket,
-  Trash,
-  Utensils
-} from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Book, BookMinus, Edit, RefreshCw, Scaling, Share, ShoppingBasket, Trash, Utensils } from "lucide-react";
 import { FC, Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {

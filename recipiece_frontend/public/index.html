@@ -42,9 +42,9 @@
       navigator.serviceWorker.register("/service-worker.js");
     </script>
     <script type="text/javascript">
-      const parsedTheme = JSON.parse(localStorage.getItem("recipiece/ui_theme") ?? "\"system\"");
+      const parsedTheme = JSON.parse(localStorage.getItem("recipiece/ui_theme") ?? '"system"');
       const systemWantsDark = parsedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      if(parsedTheme === "dark" || systemWantsDark) {
+      if (parsedTheme === "dark" || systemWantsDark) {
         document.documentElement.classList.toggle("dark");
       }
     </script>

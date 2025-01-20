@@ -7,7 +7,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const arch = process.env.TARGET_ARCH ?? "osx";
 
 let libqueryPath = "libquery_engine*.node";
-if(arch === "darwin") {
+if (arch === "darwin") {
   libqueryPath = "libquery_engine-darwin*.node";
 } else if (arch === "debian") {
   libqueryPath = "libquery_engine-debian*.node";
@@ -44,9 +44,12 @@ const config: Configuration = {
     new CopyPlugin({
       patterns: [
         { from: "./node_modules/.prisma/client/schema.prisma", to: "./" },
-        { from: `./node_modules/.prisma/client/${libqueryPath}`, to: () => {
-          return "./[name][ext]"
-        } },
+        {
+          from: `./node_modules/.prisma/client/${libqueryPath}`,
+          to: () => {
+            return "./[name][ext]";
+          },
+        },
       ],
     }),
   ],

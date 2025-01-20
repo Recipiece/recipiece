@@ -20,7 +20,7 @@ export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredie
    * If we cannot treat the value as a fraction, we can't convert or scale it.
    */
   const isNumericIngredientAmount = useMemo(() => {
-    if(!ingredient.amount) {
+    if (!ingredient.amount) {
       return false;
     }
 

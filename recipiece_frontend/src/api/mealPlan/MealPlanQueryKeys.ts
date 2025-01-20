@@ -20,20 +20,23 @@ export class MealPlanQueryKeys {
   };
 
   public static readonly LIST_MEAL_PLAN_ITEMS = (mealPlanId: number, filters?: ListItemsForMealPlanQuerySchema): RcpQueryKey => {
-    const base: RcpQueryKey = ["listMealPlanItems", {
-      meal_plan_id: mealPlanId,
-    }];
+    const base: RcpQueryKey = [
+      "listMealPlanItems",
+      {
+        meal_plan_id: mealPlanId,
+      },
+    ];
 
-    if(filters) {
-      const {start_date, end_date} = filters;
-      if(start_date) {
-        base.push({ start_date })
+    if (filters) {
+      const { start_date, end_date } = filters;
+      if (start_date) {
+        base.push({ start_date });
       }
-      if(end_date) {
+      if (end_date) {
         base.push({ end_date });
       }
     }
 
     return base;
-  }
+  };
 }

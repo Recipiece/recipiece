@@ -158,7 +158,7 @@ export const convertIngredient = (ingredient: RecipeIngredientSchema, knownIngre
   }
 
   if (currentIngredientUnit !== "unitless") {
-    if(!matchingCurrentConverter) {
+    if (!matchingCurrentConverter) {
       return undefined;
     }
 

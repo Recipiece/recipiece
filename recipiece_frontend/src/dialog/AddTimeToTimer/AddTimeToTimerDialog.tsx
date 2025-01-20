@@ -39,7 +39,7 @@ export const AddTimeToTimerDialog: FC<AddTimeToTimerDialogProps> = ({ timer, onS
     return () => {
       clearInterval(interval);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer]);
 
   const form = useForm<AddTimeToTimerForm>({

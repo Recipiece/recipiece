@@ -68,7 +68,9 @@ export const AboutTab: FC = () => {
             </a>
           </>
           <>
-            <a className="underline" href="https://www.npmjs.com/package/convert-units">convert-units</a>
+            <a className="underline" href="https://www.npmjs.com/package/convert-units">
+              convert-units
+            </a>
           </>
         </List>
         The initial list of ingredients for weight-to-volume conversions is based off of King Arthur Baking&apos;s{" "}

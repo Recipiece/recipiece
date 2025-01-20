@@ -2,7 +2,7 @@ import { FC } from "react";
 import { TimerSchema } from "@recipiece/types";
 
 export const TimerMenuItem: FC<{ readonly timer: TimerSchema }> = ({ timer }) => {
-  return <></>
+  return <></>;
   // const { deleteTimer, updateTimer } = useContext(TimerContext);
   // const { toast } = useToast();
   // const { pushDialog, popDialog } = useContext(DialogContext);

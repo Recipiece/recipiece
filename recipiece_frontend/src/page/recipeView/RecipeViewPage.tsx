@@ -17,7 +17,7 @@ import {
   NotFound,
   RecipeContextMenu,
   RecipieceMenuBarContext,
-  SharedAvatar
+  SharedAvatar,
 } from "../../component";
 import { useLayout } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
@@ -218,10 +218,7 @@ export const RecipeViewPage: FC = () => {
                     return (
                       <div key={ing.id} className="flex flex-row gap-2 items-center">
                         <Checkbox checked={checkedOffIngredients.includes(ing.id)} onClick={() => onIngredientChecked(ing.id)} />
-                        <span
-                          className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}
-                          onClick={() => onIngredientChecked(ing.id)}
-                        >
+                        <span className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`} onClick={() => onIngredientChecked(ing.id)}>
                           {(!!ing.amount || !!ing.unit) && (
                             <span>
                               {formatIngredientAmount(ing.amount ?? "")} {ing.unit ?? ""}{" "}

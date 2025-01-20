@@ -1,5 +1,4 @@
 import { InferType, object } from "yup";
-import "./extensions";
 
 export * from "./convert";
 export * from "./cookbook";

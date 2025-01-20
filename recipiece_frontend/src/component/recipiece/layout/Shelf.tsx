@@ -5,5 +5,5 @@ export const Shelf: FC<PropsWithChildren> = ({ children }) => {
 };
 
 export const ShelfSpacer: FC = () => {
-  return <div className="ml-auto"></div>
-}
+  return <div className="ml-auto"></div>;
+};

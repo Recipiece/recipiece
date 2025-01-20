@@ -89,7 +89,7 @@
     "jest": "^27.4.3",
     "jest-resolve": "^27.4.2",
     "jest-watch-typeahead": "^1.0.0",
-    "prettier": "3.3.3",
+    "prettier": "^3.4.2",
     "resolve-url-loader": "^4.0.0",
     "sass-loader": "^12.3.0",
     "source-map-loader": "^3.0.0",
@@ -107,6 +107,7 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "scripts": {
+    "lint": "prettier . --write",
     "build:prod": "NODE_ENV=production webpack build",
     "build:dev": "NODE_ENV=development webpack build",
     "serve:dev": "NODE_ENV=development BROWSER=none webpack serve",

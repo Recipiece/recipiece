@@ -9,9 +9,7 @@ export const YShoppingListItemSchema = object({
   order: number().required(),
   content: string().required(),
   notes: string().notRequired().nullable(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export const YShoppingListShareSchema = object({
   id: number().required(),
@@ -27,9 +25,7 @@ export const YShoppingListSchema = object({
   user_id: number().required(),
   items: array(YShoppingListItemSchema).notRequired(),
   shares: array(YShoppingListShareSchema).notRequired(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface ShoppingListSchema extends InferType<typeof YShoppingListSchema> {}
 
@@ -42,9 +38,7 @@ export interface ShoppingListShareSchema extends InferType<typeof YShoppingListS
  */
 export const YCreateShoppingListSchema = object({
   name: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface CreateShoppingListSchema extends InferType<typeof YCreateShoppingListSchema> {}
 
@@ -54,9 +48,7 @@ export interface CreateShoppingListSchema extends InferType<typeof YCreateShoppi
 export const YUpdateShoppingListSchema = object({
   id: number().required(),
   name: string().notRequired(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface UpdateShoppingListSchema extends InferType<typeof YUpdateShoppingListSchema> {}
 
@@ -64,9 +56,14 @@ export interface UpdateShoppingListSchema extends InferType<typeof YUpdateShoppi
  * List shopping lists schema
  */
 export const YListShoppingListsQuerySchema = YListQuerySchema.shape({
-  shared_shopping_lists: string().oneOf(["include", "exclude"]).notRequired().default(undefined).transform((val) => val ?? "include"),
+  shared_shopping_lists: string().oneOf(["include", "exclude"]).notRequired(),
 })
-  .strict()
+  .transform((val) => {
+    return {
+      ...val,
+      shared_shopping_lists: val.shared_shopping_lists ?? "include",
+    };
+  })
   .noUnknown();
 
 export interface ListShoppingListsQuerySchema extends InferType<typeof YListShoppingListsQuerySchema> {}
@@ -80,9 +77,9 @@ export interface ListShoppingListsResponseSchema extends InferType<typeof YListS
  */
 export const YRequestShoppingListSessionResponseSchema = object({
   token: string().uuid().required(),
-}).strict().noUnknown();
+}).noUnknown();
 
-export interface RequestShoppingListSessionResponseSchema extends InferType<typeof YRequestShoppingListSessionResponseSchema>{}
+export interface RequestShoppingListSessionResponseSchema extends InferType<typeof YRequestShoppingListSessionResponseSchema> {}
 
 /**
  * Modify Shopping List
@@ -104,9 +101,7 @@ const MODIFY_SHOPPING_LIST_ACTIONS = [
 export const YModifyShoppingListMessage = object({
   action: string().oneOf([...MODIFY_SHOPPING_LIST_ACTIONS]),
   item: YShoppingListItemSchema.partial().notRequired().default(undefined),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface ModifyShoppingListMessage extends InferType<typeof YModifyShoppingListMessage> {}
 
@@ -123,16 +118,13 @@ export interface ModifyShoppingListResponse extends InferType<typeof YModifyShop
 export const YAppendShoppingListItemsRequestSchema = object({
   shopping_list_id: number().required(),
   items: array(YShoppingListItemSchema.omit(["id", "order", "completed", "shopping_list_id"])).required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface AppendShoppingListItemsRequestSchema extends InferType<typeof YAppendShoppingListItemsRequestSchema> {}
 
-export const YAppendShoppingListItemsResponseSchema = array(YShoppingListItemSchema).strict().required();
+export const YAppendShoppingListItemsResponseSchema = array(YShoppingListItemSchema).required();
 
-export interface AppendShoppingListItemsResponseSchema
-  extends InferType<typeof YAppendShoppingListItemsResponseSchema> {}
+export interface AppendShoppingListItemsResponseSchema extends InferType<typeof YAppendShoppingListItemsResponseSchema> {}
 
 /**
  * Create ShoppingList Share
@@ -140,9 +132,7 @@ export interface AppendShoppingListItemsResponseSchema
 export const YCreateShoppingListShareRequestSchema = object({
   user_kitchen_membership_id: number().required(),
   shopping_list_id: number().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface CreateShoppingListShareRequestSchema extends InferType<typeof YCreateShoppingListShareRequestSchema> {}
 
@@ -157,7 +147,6 @@ export const YListShoppingListSharesQuerySchema = YListQuerySchema.shape({
   .test("onlyOneOfTargetingSelfOrFromSelf", "Must specify only one of targeting_self or from_self", (ctx) => {
     return !ctx.from_self || !ctx.targeting_self;
   })
-  .strict()
   .noUnknown();
 
 export interface ListShoppingListSharesQuerySchema extends InferType<typeof YListShoppingListSharesQuerySchema> {}
@@ -170,8 +159,6 @@ export const YListShoppingListSharesResponseSchema = generateYListQuerySchema(
     }).required(),
     user_kitchen_membership: YUserKitchenMembershipSchema.required(),
   })
-)
-  .strict()
-  .noUnknown();
+).noUnknown();
 
 export interface ListShoppingListSharesResponseSchema extends InferType<typeof YListShoppingListSharesResponseSchema> {}

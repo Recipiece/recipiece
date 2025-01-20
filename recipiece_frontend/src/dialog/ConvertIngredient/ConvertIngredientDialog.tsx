@@ -103,12 +103,16 @@ export const ConvertIngredientDialog: FC<ConvertIngredientDialogProps> = ({ onCl
           unit: targetUnit as Unit,
         });
       } else {
-        form.setError("errorContainer", {
-          message: "Cannot make this conversion.",
-          type: "custom",
-        }, {
-          shouldFocus: false,
-        });
+        form.setError(
+          "errorContainer",
+          {
+            message: "Cannot make this conversion.",
+            type: "custom",
+          },
+          {
+            shouldFocus: false,
+          }
+        );
       }
     },
     [form, ingredient, knownIngredients, onSubmit]

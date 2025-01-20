@@ -9,25 +9,21 @@ export const YRecipeIngredientSchema = object({
   unit: string().notRequired(),
   amount: string().notRequired(),
   order: number().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export const YRecipeStepSchema = object({
   id: number().required(),
   recipe_id: number().required(),
   order: number().required(),
   content: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export const YRecipeShareSchema = object({
   id: number().required(),
   created_at: date().required(),
   recipe_id: number().required(),
   user_kitchen_membership_id: number().required(),
-});
+}).noUnknown();
 
 export const YRecipeSchema = object({
   id: number().required(),
@@ -40,9 +36,7 @@ export const YRecipeSchema = object({
   ingredients: array().of(YRecipeIngredientSchema).notRequired(),
   steps: array().of(YRecipeStepSchema).notRequired(),
   shares: array().of(YRecipeShareSchema).notRequired(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
 
@@ -77,9 +71,7 @@ export const YCreateRecipeRequestSchema = object({
       })
     )
     .notRequired(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface CreateRecipeRequestSchema extends InferType<typeof YCreateRecipeRequestSchema> {}
 
@@ -88,9 +80,7 @@ export interface CreateRecipeRequestSchema extends InferType<typeof YCreateRecip
  */
 export const YParseRecipeFromURLRequestSchema = object({
   source_url: string().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface ParseRecipeFromURLRequestSchema extends InferType<typeof YParseRecipeFromURLRequestSchema> {}
 
@@ -132,9 +122,7 @@ export const YUpdateRecipeRequestSchema = object({
       })
     )
     .notRequired(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecipeRequestSchema> {}
 
@@ -145,9 +133,14 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
   search: string().notRequired(),
   cookbook_id: number().notRequired(),
   cookbook_attachments: string().oneOf(["include", "exclude"]).notRequired(),
-  shared_recipes: string().oneOf(["include", "exclude"]).notRequired().default(undefined).transform((val) => val ?? "include"),
+  shared_recipes: string().oneOf(["include", "exclude"]).notRequired(),
 })
-  .strict()
+  .transform((val) => {
+    return {
+      ...val,
+      shared_recipes: val.shared_recipes ?? "include",
+    };
+  })
   .noUnknown();
 
 export interface ListRecipesQuerySchema extends InferType<typeof YListRecipesQuerySchema> {}
@@ -161,9 +154,7 @@ export interface ListRecipesResponseSchema extends InferType<typeof YListRecipes
  */
 export const YForkRecipeRequestSchema = object({
   original_recipe_id: number().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface ForkRecipeRequestSchema extends InferType<typeof YForkRecipeRequestSchema> {}
 
@@ -173,9 +164,7 @@ export interface ForkRecipeRequestSchema extends InferType<typeof YForkRecipeReq
 export const YCreateRecipeShareRequestSchema = object({
   user_kitchen_membership_id: number().required(),
   recipe_id: number().required(),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface CreateRecipeShareRequestSchema extends InferType<typeof YCreateRecipeShareRequestSchema> {}
 
@@ -190,7 +179,6 @@ export const YListRecipeSharesQuerySchema = YListQuerySchema.shape({
   .test("onlyOneOfTargetingSelfOrFromSelf", "Must specify only one of targeting_self or from_self", (ctx) => {
     return !ctx.from_self || !ctx.targeting_self;
   })
-  .strict()
   .noUnknown();
 
 export interface ListRecipeSharesQuerySchema extends InferType<typeof YListRecipeSharesQuerySchema> {}
@@ -203,8 +191,6 @@ export const YListRecipeSharesResponseSchema = generateYListQuerySchema(
     }).required(),
     user_kitchen_membership: YUserKitchenMembershipSchema.required(),
   })
-)
-  .strict()
-  .noUnknown();
+).noUnknown();
 
 export interface ListRecipeSharesResponseSchema extends InferType<typeof YListRecipeSharesResponseSchema> {}

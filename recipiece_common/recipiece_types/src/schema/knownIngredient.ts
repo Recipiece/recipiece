@@ -8,9 +8,7 @@ export const YKnownIngredientSchema = object({
   us_cups: number().required(),
   unitless_amount: number().notRequired().default(null),
   preferred_measure: string().notRequired().default(null),
-})
-  .strict()
-  .noUnknown();
+}).noUnknown();
 
 export interface KnownIngredientSchema extends InferType<typeof YKnownIngredientSchema> {}
 

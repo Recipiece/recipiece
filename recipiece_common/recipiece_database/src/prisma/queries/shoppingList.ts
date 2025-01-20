@@ -14,7 +14,7 @@ export const MAX_NUM_ITEMS = 100000;
  */
 export const collapseOrders = async (
   shoppingListId: number,
-  tx?: any
+  tx?: any,
 ): Promise<ShoppingListItem[]> => {
   return (await (tx ?? prisma).$queryRaw`
     with updated as (
@@ -48,11 +48,17 @@ export const collapseOrders = async (
   `) as unknown as ShoppingListItem[];
 };
 
-
-export const shoppingListSharesWithMemberships = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
+export const shoppingListSharesWithMemberships = (
+  eb: ExpressionBuilder<DB, "shopping_lists">,
+  userId: number,
+) => {
   return eb
     .selectFrom("shopping_list_shares")
-    .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "shopping_list_shares.user_kitchen_membership_id")
+    .innerJoin(
+      "user_kitchen_memberships",
+      "user_kitchen_memberships.id",
+      "shopping_list_shares.user_kitchen_membership_id",
+    )
     .whereRef("shopping_list_shares.shopping_list_id", "=", "shopping_lists.id")
     .where((eb) => {
       return eb.and([
@@ -65,18 +71,23 @@ export const shoppingListSharesWithMemberships = (eb: ExpressionBuilder<DB, "sho
     });
 };
 
-export const shoppingListSharesSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">, userId: number) => {
+export const shoppingListSharesSubquery = (
+  eb: ExpressionBuilder<DB, "shopping_lists">,
+  userId: number,
+) => {
   return shoppingListSharesWithMemberships(eb, userId).select(
     sql<ShoppingListShare[]>`
       coalesce(
         jsonb_agg(shopping_list_shares.*),
         '[]'
       )
-      `.as("shares_aggregate")
+      `.as("shares_aggregate"),
   );
 };
 
-export const shoppingListItemsSubquery = (eb: ExpressionBuilder<DB, "shopping_lists">) => {
+export const shoppingListItemsSubquery = (
+  eb: ExpressionBuilder<DB, "shopping_lists">,
+) => {
   return eb
     .selectFrom("shopping_list_items")
     .whereRef("shopping_list_items.shopping_list_id", "=", "shopping_lists.id")
@@ -86,6 +97,6 @@ export const shoppingListItemsSubquery = (eb: ExpressionBuilder<DB, "shopping_li
         jsonb_agg(shopping_list_items.* order by shopping_list_items."order" asc),
         '[]'
       )  
-      `.as("items_aggregate")
+      `.as("items_aggregate"),
     );
 };

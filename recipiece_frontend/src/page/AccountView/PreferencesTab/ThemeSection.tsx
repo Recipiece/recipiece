@@ -15,7 +15,7 @@ export const ThemeSection: FC = () => {
       }
 
       const systemWantsDark = newTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      if(newTheme === "dark" || systemWantsDark) {
+      if (newTheme === "dark" || systemWantsDark) {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
