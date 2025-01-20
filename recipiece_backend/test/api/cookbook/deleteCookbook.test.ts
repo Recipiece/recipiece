@@ -20,10 +20,7 @@ describe("Delete Cookbooks", () => {
       },
     });
 
-    const response = await request(server)
-      .delete(`/cookbook/${cookbook.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).delete(`/cookbook/${cookbook.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
@@ -44,10 +41,7 @@ describe("Delete Cookbooks", () => {
       },
     });
 
-    const response = await request(server)
-      .delete(`/cookbook/${cookbook.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).delete(`/cookbook/${cookbook.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
@@ -60,10 +54,7 @@ describe("Delete Cookbooks", () => {
   });
 
   it("should not delete a cookbook that does not exist", async () => {
-    const response = await request(server)
-      .delete(`/cookbook/900000000`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).delete(`/cookbook/900000000`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });

@@ -7,9 +7,7 @@ import { sendRecipeSharedPushNotification } from "../../../util/pushNotification
 /**
  * Allow a user to share a recipe they own with another user.
  */
-export const createRecipeShare = async (
-  request: AuthenticatedRequest<CreateRecipeShareRequestSchema>
-): ApiResponse<RecipeShareSchema> => {
+export const createRecipeShare = async (request: AuthenticatedRequest<CreateRecipeShareRequestSchema>): ApiResponse<RecipeShareSchema> => {
   const { recipe_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 

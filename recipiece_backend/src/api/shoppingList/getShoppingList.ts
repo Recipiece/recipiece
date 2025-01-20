@@ -1,9 +1,4 @@
-import {
-  prisma,
-  shoppingListItemsSubquery,
-  shoppingListSharesSubquery,
-  shoppingListSharesWithMemberships,
-} from "@recipiece/database";
+import { prisma, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
@@ -21,10 +16,7 @@ export const getShoppingList = async (request: AuthenticatedRequest): ApiRespons
     .where((eb) => {
       return eb.and([
         eb("shopping_lists.id", "=", listId),
-        eb.or([
-          eb("shopping_lists.user_id", "=", user.id),
-          eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
-        ]),
+        eb.or([eb("shopping_lists.user_id", "=", user.id), eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1))]),
       ]);
     });
 

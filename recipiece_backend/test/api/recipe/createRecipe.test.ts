@@ -2,7 +2,7 @@ import { User } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
-describe("Create Recipes", () => {
+describe("Create Recipe", () => {
   let user: User;
   let bearerToken: string;
 
@@ -31,11 +31,7 @@ describe("Create Recipes", () => {
       ],
     };
 
-    const response = await request(server)
-      .post("/recipe")
-      .send(expectedBody)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).post("/recipe").send(expectedBody).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const responseBody = response.body;

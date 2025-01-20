@@ -75,7 +75,7 @@ export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequest
       if (recipeBody.description) {
         recipeUpdateData.description = recipeBody.description;
       }
-      if(recipeBody.servings) {
+      if (recipeBody.servings) {
         recipeUpdateData.servings = recipeBody.servings;
       }
 

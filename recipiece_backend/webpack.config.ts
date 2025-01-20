@@ -8,7 +8,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const arch = process.env.TARGET_ARCH ?? "osx";
 
 let libqueryPath = "libquery_engine*.node";
-if(arch === "darwin") {
+if (arch === "darwin") {
   libqueryPath = "libquery_engine-darwin*.node";
 } else if (arch === "debian") {
   libqueryPath = "libquery_engine-debian*.node";
@@ -17,9 +17,7 @@ if(arch === "darwin") {
 }
 
 const config: Configuration = {
-  entry: [
-    "./src/index.ts",
-  ],
+  entry: ["./src/index.ts"],
   mode: isProduction ? "production" : "development",
   target: "node",
   devtool: isProduction ? undefined : "source-map",
@@ -58,12 +56,16 @@ const config: Configuration = {
     clean: true,
   },
   watchOptions: {
-    ignored: /node_modules/,
+    ignored: ["**/node_modules", "**/test"],
     aggregateTimeout: 300,
     poll: 1000,
   },
   plugins: [
-    new ForkTsCheckerWebpackPlugin(),
+    new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        memoryLimit: 4096,
+      },
+    }),
     new CopyPlugin({
       patterns: [
         { from: "../recipiece_common/recipiece_database/node_modules/.prisma/client/schema.prisma", to: "./" },

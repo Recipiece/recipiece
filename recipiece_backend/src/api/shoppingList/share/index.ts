@@ -1,9 +1,4 @@
-import {
-  YCreateShoppingListShareRequestSchema,
-  YListShoppingListSharesQuerySchema,
-  YListShoppingListSharesResponseSchema,
-  YShoppingListShareSchema,
-} from "@recipiece/types";
+import { YCreateShoppingListShareRequestSchema, YListShoppingListSharesQuerySchema, YListShoppingListSharesResponseSchema, YShoppingListShareSchema } from "@recipiece/types";
 import { Route } from "../../../types";
 import { createShoppingListShare } from "./createShoppingListShare";
 import { deleteShoppingListShare } from "./deleteShoppingListShare";

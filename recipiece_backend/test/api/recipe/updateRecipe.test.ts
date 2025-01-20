@@ -121,7 +121,7 @@ describe("Update Recipes", () => {
   });
 
   it(`should ${StatusCodes.NOT_FOUND} when trying to update a recipe you don't own`, async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
+    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
 
     const existingRecipe = await prisma.recipe.create({
       data: {

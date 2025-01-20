@@ -71,28 +71,20 @@ describe("Update User", () => {
 
   it("should not allow a duplicate username, case insensitive", async () => {
     const [otherUser] = await fixtures.createUserAndToken();
-    const response = await request(server)
-      .put("/user")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send({
-        id: user.id,
-        username: otherUser.username.toUpperCase(),
-      });
+    const response = await request(server).put("/user").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
+      id: user.id,
+      username: otherUser.username.toUpperCase(),
+    });
 
     expect(response.statusCode).toBe(StatusCodes.CONFLICT);
   });
 
   it("should not allow a duplicate email, case insensitive", async () => {
     const [otherUser] = await fixtures.createUserAndToken();
-    const response = await request(server)
-      .put("/user")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send({
-        id: user.id,
-        email: otherUser.email.toUpperCase(),
-      });
+    const response = await request(server).put("/user").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
+      id: user.id,
+      email: otherUser.email.toUpperCase(),
+    });
 
     expect(response.statusCode).toBe(StatusCodes.CONFLICT);
   });

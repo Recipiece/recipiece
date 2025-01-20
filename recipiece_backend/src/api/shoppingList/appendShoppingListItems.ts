@@ -4,9 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { broadcastMessageViaEntityId } from "../../middleware";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const appendShoppingListItems = async (
-  request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>
-): ApiResponse<AppendShoppingListItemsResponseSchema> => {
+export const appendShoppingListItems = async (request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>): ApiResponse<AppendShoppingListItemsResponseSchema> => {
   const shoppingListId = request.body.shopping_list_id;
   const user = request.user;
 
@@ -16,10 +14,7 @@ export const appendShoppingListItems = async (
     .where((eb) => {
       return eb.and([
         eb("shopping_lists.id", "=", shoppingListId),
-        eb.or([
-          eb("shopping_lists.user_id", "=", user.id),
-          eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
-        ]),
+        eb.or([eb("shopping_lists.user_id", "=", user.id), eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1))]),
       ]);
     })
     .executeTakeFirst();

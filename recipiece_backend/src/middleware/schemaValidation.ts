@@ -35,7 +35,7 @@ export const validateResponseSchema = (schema: ObjectSchema<Maybe<AnyObject>, un
 export const validateRequestQuerySchema = (schema: ObjectSchema<Maybe<AnyObject>, unknown>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const castQuery = schema.cast(req.query)
+      const castQuery = schema.cast(req.query);
       await schema.validate(castQuery);
       // @ts-ignore
       req.query = castQuery;

@@ -19,10 +19,7 @@ describe("Request Shopping List Session", () => {
   });
 
   it("should issue a session token", async () => {
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const data: RequestShoppingListSessionResponseSchema = response.body;
@@ -47,10 +44,7 @@ describe("Request Shopping List Session", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const data: RequestShoppingListSessionResponseSchema = response.body;
@@ -60,10 +54,7 @@ describe("Request Shopping List Session", () => {
   it("should not issue a session token to a non-shared user", async () => {
     const [_, otherBearerToken] = await fixtures.createUserAndToken();
 
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
@@ -86,19 +77,13 @@ describe("Request Shopping List Session", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 
   it("should not issue a session token for a non-existent shopping list", async () => {
-    const response = await request(server)
-      .get(`/shopping-list/5000000/session`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/5000000/session`).set("Authorization", `Bearer ${bearerToken}`).send();
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });

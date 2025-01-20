@@ -30,8 +30,8 @@ export const deleteTimer = async (request: AuthenticatedRequest): ApiResponse<{}
 
   // we removed a timer, so purge it out of the queue
   const timersJob = await timersQueue.getJob(`timer${timerId}`);
-  if(timersJob) {
-    await timersJob.remove(); 
+  if (timersJob) {
+    await timersJob.remove();
   }
 
   return [StatusCodes.OK, {}];

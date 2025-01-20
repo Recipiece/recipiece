@@ -9,7 +9,7 @@
  */
 
 import { User, prisma } from "@recipiece/database";
-import { UserPreferencesSchema } from "@recipiece/types";
+import { generateUser, generateUserCredentials } from "@recipiece/test";
 import { randomUUID } from "crypto";
 import { enableFetchMocks } from "jest-fetch-mock";
 import app from "./src/app";
@@ -17,15 +17,11 @@ import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
 
-interface CreateUserAndTokenArgs {
-  readonly email?: string;
-  readonly username?: string;
+interface CreateUserAndTokenArgs extends Partial<Omit<User, "id">> {
   readonly password?: string;
-  readonly preferences?: UserPreferencesSchema;
 }
 
 declare global {
-  // var testPrisma: typeof jestPrisma.client;
   var server: ReturnType<typeof app.listen>;
   var fixtures: {
     createUserAndToken: (opts?: CreateUserAndTokenArgs) => Promise<[User, string, string]>;
@@ -46,33 +42,41 @@ globalThis.fixtures = {
       return text;
     }
 
-    const email = opts?.email ?? `${stringGen(15)}@${stringGen(5)}.${stringGen(3)}`;
-    const username = opts?.username ?? stringGen(10);
-    const password = opts?.password ?? stringGen(10);
-    const preferences = opts?.preferences ?? {
+    const { password, preferences, ...restOpts } = opts ?? {};
+    const passwordToUse = password ?? stringGen(10);
+    const preferencesToUse = preferences ?? {
       account_visibility: "protected",
     };
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(passwordToUse);
+
+    const user = await generateUser({
+      preferences: preferencesToUse,
+      ...restOpts,
+    });
+    await generateUserCredentials({
+      user_id: user.id,
+      password_hash: hashedPassword,
+    });
 
     // create a user
-    const user = await prisma.user.create({
-      data: {
-        email: email,
-        username: username,
-        preferences: preferences,
-        credentials: {
-          create: {
-            password_hash: hashedPassword!,
-          },
-        },
-        // user_access_records: {
-        //   create: {
-        //     access_levels: accessLevels,
-        //     start_date: DateTime.utc().toJSDate(),
-        //   },
-        // },
-      },
-    });
+    // const user = await prisma.user.create({
+    //   data: {
+    //     email: email,
+    //     username: username,
+    //     preferences: preferences,
+    //     credentials: {
+    //       create: {
+    //         password_hash: hashedPassword!,
+    //       },
+    //     },
+    //     // user_access_records: {
+    //     //   create: {
+    //     //     access_levels: accessLevels,
+    //     //     start_date: DateTime.utc().toJSDate(),
+    //     //   },
+    //     // },
+    //   },
+    // });
 
     // create a session and a token
     const session = await prisma.userSession.create({
@@ -126,7 +130,7 @@ beforeAll(() => {
 
 // setup the server object before each test, and tear it down after each test
 beforeAll((done) => {
-  globalThis.server = app.listen(0, "localhost", done);
+  globalThis.server = app.listen(0, "127.0.0.1", done);
 });
 
 afterAll((done) => {

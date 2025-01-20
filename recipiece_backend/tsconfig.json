@@ -34,7 +34,8 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "paths": {
       "@recipiece/types": ["../recipiece_common/recipiece_types/src/index.ts"],
-      "@recipiece/database": ["../recipiece_common/recipiece_database/src/index.ts"]
+      "@recipiece/database": ["../recipiece_common/recipiece_database/src/index.ts"],
+      "@recipiece/test": ["../recipiece_common/recipiece_test/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "dist", "seed"],

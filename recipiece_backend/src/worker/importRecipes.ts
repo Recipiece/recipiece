@@ -73,7 +73,7 @@ const paprikaImporter = async (fileName: string, userId: number) => {
         parsedIngredients = splitIngredients.map((ing) => {
           return {
             name: ing,
-          }
+          };
         });
       } else {
         parsedIngredients = ((await response.json()) as { readonly ingredients: RecipeIngredient[] }).ingredients;
@@ -92,11 +92,11 @@ const paprikaImporter = async (fileName: string, userId: number) => {
         .map((rawStep) => rawStep.trim())
         .filter((rawStep) => !!rawStep)
         .map((rawStep, idx) => {
-        return {
-          content: replaceUnicodeFractions(rawStep),
-          order: idx,
-        };
-      });
+          return {
+            content: replaceUnicodeFractions(rawStep),
+            order: idx,
+          };
+        });
 
       // strip the photo data out of the recipe, if it's there, since it's so big
       const { photo_data, photo_hash, photo_large, ...restMetadata } = item;
@@ -154,12 +154,12 @@ export const runner = async (backgroundJobId: string) => {
     },
     include: {
       user: true,
-    }
+    },
   });
 
   const innerRunner = async () => {
     try {
-      const { file_name, user_id, source } = job.args as { readonly file_name: string; readonly user_id: number, readonly source: string };
+      const { file_name, user_id, source } = job.args as { readonly file_name: string; readonly user_id: number; readonly source: string };
       const importer = IMPORTER_MAP[source];
 
       if (importer) {
@@ -189,7 +189,7 @@ export const runner = async (backgroundJobId: string) => {
     },
   });
 
-  if(result === "success") {
+  if (result === "success") {
     await sendFinishedImportJobSuccessEmail(job.user, backgroundJobId);
   } else {
     await sendFinishedImportJobFailedEmail(job.user, backgroundJobId);

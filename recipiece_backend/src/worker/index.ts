@@ -28,6 +28,6 @@ export const generateRecipeImportWorker = (jobId: string) => {
   return generateWorker(path.resolve(__dirname, "./importRecipes.ts"), {
     workerData: {
       background_job_id: jobId,
-    }
+    },
   });
 };

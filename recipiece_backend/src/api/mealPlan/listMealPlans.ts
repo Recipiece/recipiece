@@ -4,9 +4,7 @@ import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 import { Prisma, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 
-export const listMealPlans = async (
-  request: AuthenticatedRequest<any, ListMealPlanQuerySchema>
-): ApiResponse<ListMealPlanResponseSchema> => {
+export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealPlanQuerySchema>): ApiResponse<ListMealPlanResponseSchema> => {
   const query = request.query;
   const { id: userId } = request.user;
 

@@ -56,7 +56,7 @@ describe("Remove Recipe from Cookbook", () => {
   });
 
   it("should not allow another user to remove recipes from a users cookbook", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
+    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
     const otherCookbook = await prisma.cookbook.create({
       data: {
         user_id: otherUser.id,

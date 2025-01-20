@@ -24,9 +24,7 @@ export type ApiMethod<BodyType = any, QueryType = any, ResponseType = any> =
   | ((req: Request<any, any, BodyType, QueryType>) => ResponseType | Promise<ResponseType>)
   | ((req: AuthenticatedRequest<BodyType, QueryType>) => ResponseType | Promise<ResponseType>);
 
-export type WebsocketMethod<RequestType = any, ResponseType = any> = (
-  req: WebsocketRequest<RequestType>
-) => Promise<[number, ResponseType | ErrorResponse]>;
+export type WebsocketMethod<RequestType = any, ResponseType = any> = (req: WebsocketRequest<RequestType>) => Promise<[number, ResponseType | ErrorResponse]>;
 
 export interface ErrorResponse {
   readonly message: string;

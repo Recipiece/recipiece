@@ -23,14 +23,10 @@ describe("Set User Kitchen Membership Status", () => {
       },
     });
 
-    const response = await request(server)
-      .put("/user/kitchen/membership")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send({
-        id: membership.id,
-        status: UserKitchenInvitationStatus.ACCEPTED,
-      });
+    const response = await request(server).put("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${otherBearerToken}`).send({
+      id: membership.id,
+      status: UserKitchenInvitationStatus.ACCEPTED,
+    });
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const invitation = await prisma.userKitchenMembership.findFirst({
@@ -53,14 +49,10 @@ describe("Set User Kitchen Membership Status", () => {
       },
     });
 
-    const response = await request(server)
-      .put("/user/kitchen/membership")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send({
-        id: membership.id,
-        status: UserKitchenInvitationStatus.ACCEPTED,
-      });
+    const response = await request(server).put("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
+      id: membership.id,
+      status: UserKitchenInvitationStatus.ACCEPTED,
+    });
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

@@ -55,8 +55,8 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
     }
     updateBody.email = restBody.email;
   }
-  if("preferences" in restBody) {
-    updateBody.preferences = {...restBody.preferences};
+  if ("preferences" in restBody) {
+    updateBody.preferences = { ...restBody.preferences };
   }
 
   try {
@@ -68,10 +68,13 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
         ...updateBody,
       },
     });
-    return [StatusCodes.OK, {
-      ...updatedUser,
-      preferences: updatedUser.preferences as UserPreferencesSchema,
-    }];
+    return [
+      StatusCodes.OK,
+      {
+        ...updatedUser,
+        preferences: updatedUser.preferences as UserPreferencesSchema,
+      },
+    ];
   } catch (err) {
     console.error(err);
     return [

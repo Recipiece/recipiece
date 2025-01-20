@@ -20,10 +20,7 @@ describe("Get Cookbooks", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/cookbook/${cookbook.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/cookbook/${cookbook.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     expect(response.body.id).toEqual(cookbook.id);
@@ -38,19 +35,13 @@ describe("Get Cookbooks", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/cookbook/${cookbook.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/cookbook/${cookbook.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
   it("should not get a cookbook that does not exist", async () => {
-    const response = await request(server)
-      .get("/cookbook/900000000")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get("/cookbook/900000000").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });

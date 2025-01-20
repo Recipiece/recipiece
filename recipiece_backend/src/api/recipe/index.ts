@@ -5,7 +5,7 @@ import {
   YListRecipesQuerySchema,
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
-  YUpdateRecipeRequestSchema
+  YUpdateRecipeRequestSchema,
 } from "@recipiece/types";
 import { Route } from "../../types";
 import { createRecipe } from "./createRecipe";

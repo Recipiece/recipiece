@@ -1,4 +1,12 @@
-import { YAddRecipeToCookbookRequestSchema, YCookbookSchema, YCreateCookbookRequestSchema, YListCookbooksQuerySchema, YListCookbooksResponseSchema, YRemoveRecipeFromCookbookRequestSchema, YUpdateCookbookRequestSchema } from "@recipiece/types";
+import {
+  YAddRecipeToCookbookRequestSchema,
+  YCookbookSchema,
+  YCreateCookbookRequestSchema,
+  YListCookbooksQuerySchema,
+  YListCookbooksResponseSchema,
+  YRemoveRecipeFromCookbookRequestSchema,
+  YUpdateCookbookRequestSchema,
+} from "@recipiece/types";
 import { Route } from "../../types";
 import { addRecipeToCookbook } from "./addRecipeToCookbook";
 import { createCookbook } from "./createCookbook";
@@ -16,7 +24,6 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: createCookbook,
     requestSchema: YCreateCookbookRequestSchema,
     responseSchema: YCookbookSchema,
-    
   },
   {
     path: "/cookbook/recipe/add",
@@ -24,21 +31,18 @@ export const COOKBOOK_ROUTES: Route[] = [
     method: "POST",
     function: addRecipeToCookbook,
     requestSchema: YAddRecipeToCookbookRequestSchema,
-    
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "access_token",
     method: "DELETE",
     function: deleteCookbook,
-    
   },
   {
     path: "/cookbook/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
     function: getCookbook,
-    
   },
   {
     path: "/cookbook/list",
@@ -47,7 +51,6 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: listCookbooks,
     requestSchema: YListCookbooksQuerySchema,
     responseSchema: YListCookbooksResponseSchema,
-    
   },
   {
     path: "/cookbook/recipe/remove",
@@ -55,7 +58,6 @@ export const COOKBOOK_ROUTES: Route[] = [
     method: "POST",
     function: removeRecipeFromCookbook,
     requestSchema: YRemoveRecipeFromCookbookRequestSchema,
-    
   },
   {
     path: "/cookbook",
@@ -64,6 +66,5 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: updateCookbook,
     requestSchema: YUpdateCookbookRequestSchema,
     responseSchema: YCookbookSchema,
-    
   },
 ];

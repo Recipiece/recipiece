@@ -11,9 +11,7 @@ import { generateRecipeImportWorker } from "../../worker";
  * At this point, the file has already been placed in the correct place by the Multer middleware, so just
  * tell the worker where the file is and let it rip.
  */
-export const requestImportRecipes = async (
-  request: AuthenticatedRequest<RequestImportRecipesRequestSchema>
-): ApiResponse<{}> => {
+export const requestImportRecipes = async (request: AuthenticatedRequest<RequestImportRecipesRequestSchema>): ApiResponse<{}> => {
   const user = request.user;
 
   const existingBackgroundJobs = await prisma.backgroundJob.findFirst({

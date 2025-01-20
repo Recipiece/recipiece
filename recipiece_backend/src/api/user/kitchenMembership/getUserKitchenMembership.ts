@@ -3,9 +3,7 @@ import { prisma } from "@recipiece/database";
 import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const getUserKitchenMembership = async (
-  request: AuthenticatedRequest
-): ApiResponse<UserKitchenMembershipSchema> => {
+export const getUserKitchenMembership = async (request: AuthenticatedRequest): ApiResponse<UserKitchenMembershipSchema> => {
   const membershipId = +request.params.id;
   const user = request.user;
 

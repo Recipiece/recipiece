@@ -4,9 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
-export const listTimers = async (
-  request: AuthenticatedRequest<any, ListTimersQuerySchema>
-): ApiResponse<ListTimersResponseSchema> => {
+export const listTimers = async (request: AuthenticatedRequest<any, ListTimersQuerySchema>): ApiResponse<ListTimersResponseSchema> => {
   const query = request.query;
   const user = request.user;
 

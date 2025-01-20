@@ -7,9 +7,7 @@ import { sendShoppingListSharedPushNotification } from "../../../util/pushNotifi
 /**
  * Allow a user to share a shopping list they own with another user.
  */
-export const createShoppingListShare = async (
-  request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>
-): ApiResponse<ShoppingListShareSchema> => {
+export const createShoppingListShare = async (request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>): ApiResponse<ShoppingListShareSchema> => {
   const { shopping_list_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 

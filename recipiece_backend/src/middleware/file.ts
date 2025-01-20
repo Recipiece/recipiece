@@ -13,7 +13,7 @@ const tmpRecipeImportStorage = multer.diskStorage({
       fs.mkdirSync(dest);
 
       const user = (req as AuthenticatedRequest).user;
-      if(user) {
+      if (user) {
         dest = `${RecipeImportFiles.TMP_DIR}/${user.id}`;
         fs.mkdirSync(dest);
       }

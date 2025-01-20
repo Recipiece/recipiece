@@ -33,7 +33,7 @@ const seedShoppingListsForUser = async (user) => {
     await prisma.shoppingList.create({
       data: {
         user_id: user.id,
-        name: faker.word.words({count: {min: 1, max: 5}}),
+        name: faker.word.words({ count: { min: 1, max: 5 } }),
         shopping_list_items: {
           createMany: {
             data: [...itemsArrayBase],

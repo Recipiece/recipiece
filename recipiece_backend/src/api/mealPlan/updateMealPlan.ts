@@ -3,9 +3,7 @@ import { prisma } from "@recipiece/database";
 import { MealPlanSchema, UpdateMealPlanRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateMealPlan = async (
-  request: AuthenticatedRequest<UpdateMealPlanRequestSchema>
-): ApiResponse<MealPlanSchema> => {
+export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPlanRequestSchema>): ApiResponse<MealPlanSchema> => {
   const { id: userId } = request.user;
   const { id: mealPlanId, ...restMealPlan } = request.body;
 

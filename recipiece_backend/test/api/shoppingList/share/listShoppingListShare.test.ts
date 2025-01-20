@@ -108,7 +108,7 @@ describe("List Shopping List Shares", () => {
       },
     });
 
-    const shoppingList =await prisma.shoppingList.create({
+    const shoppingList = await prisma.shoppingList.create({
       data: {
         user_id: user.id,
         name: "users shopping list",
@@ -154,7 +154,7 @@ describe("List Shopping List Shares", () => {
       },
     });
 
-    const shoppingList =await prisma.shoppingList.create({
+    const shoppingList = await prisma.shoppingList.create({
       data: {
         user_id: user.id,
         name: "users shopping list",

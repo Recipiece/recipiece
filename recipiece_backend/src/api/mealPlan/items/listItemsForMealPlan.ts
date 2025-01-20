@@ -4,9 +4,7 @@ import { DateTime } from "luxon";
 import { Prisma, prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const listItemsForMealPlan = async (
-  request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>
-): ApiResponse<ListItemsForMealPlanResponseSchema> => {
+export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>): ApiResponse<ListItemsForMealPlanResponseSchema> => {
   const { start_date, end_date } = request.query;
   const mealPlanId = +request.params.id;
   const { id: userId } = request.user;
@@ -33,7 +31,7 @@ export const listItemsForMealPlan = async (
     safeStartDate = DateTime.utc().minus({ days: 7 });
   } else {
     // if they did provide a start date, clamp it to the min of the meal plan's created_at and whatever they gave
-    safeStartDate = DateTime.max(DateTime.fromISO(start_date), DateTime.fromJSDate(mealPlan.created_at).minus({days: 1}));
+    safeStartDate = DateTime.max(DateTime.fromISO(start_date), DateTime.fromJSDate(mealPlan.created_at).minus({ days: 1 }));
   }
 
   let safeEndDate;

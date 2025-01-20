@@ -1,6 +1,6 @@
+import { prisma, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { ListShoppingListsQuerySchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
@@ -13,17 +13,11 @@ export const listShoppingLists = async (request: AuthenticatedRequest<any, ListS
     .selectFrom("shopping_lists")
     .selectAll("shopping_lists")
     .select((eb) => {
-      return [
-        shoppingListItemsSubquery(eb).as("items"),
-        shoppingListSharesSubquery(eb, user.id).as("shares"),
-      ];
+      return [shoppingListItemsSubquery(eb).as("items"), shoppingListSharesSubquery(eb, user.id).as("shares")];
     })
     .where((eb) => {
       if (shared_shopping_lists === "include") {
-        return eb.or([
-          eb("shopping_lists.user_id", "=", user.id),
-          eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
-        ]);
+        return eb.or([eb("shopping_lists.user_id", "=", user.id), eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1))]);
       } else {
         return eb("shopping_lists.user_id", "=", user.id);
       }

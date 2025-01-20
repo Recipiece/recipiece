@@ -9,15 +9,10 @@ if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
 const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
   try {
     if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
-      await webpush.sendNotification(
-        subscription.subscription_data as unknown as PushSubscription,
-        JSON.stringify(payload)
-      );
+      await webpush.sendNotification(subscription.subscription_data as unknown as PushSubscription, JSON.stringify(payload));
       return Promise.resolve();
     } else {
-      console.log(
-        `APP_ENABLE_PUSH_NOTIFICATIONS is set to ${process.env.APP_ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`
-      );
+      console.log(`APP_ENABLE_PUSH_NOTIFICATIONS is set to ${process.env.APP_ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`);
       console.log("would have sent");
       console.log(payload);
       console.log(`to subscription ${subscription.subscription_data}`);
@@ -37,11 +32,7 @@ const sendPushNotification = async (subscription: UserPushNotificationSubscripti
   }
 };
 
-export const sendShoppingListSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  shoppingList: ShoppingList,
-) => {
+export const sendShoppingListSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, shoppingList: ShoppingList) => {
   const message = {
     title: "Shopping List Shared",
     body: `${sourceUser.username} shared their shopping list ${shoppingList.name} with you`,
@@ -51,13 +42,9 @@ export const sendShoppingListSharedPushNotification = async (
     tag: `shoppingListShare${shoppingList.id}`,
   };
   await sendPushNotification(subscription, message);
-}
+};
 
-export const sendRecipeSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  recipe: Recipe,
-) => {
+export const sendRecipeSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, recipe: Recipe) => {
   const message = {
     title: "Recipe Shared",
     body: `${sourceUser.username} shared their recipe ${recipe.name} with you`,
@@ -67,12 +54,9 @@ export const sendRecipeSharedPushNotification = async (
     tag: `recipeShare${recipe.id}`,
   };
   await sendPushNotification(subscription, message);
-}
+};
 
-export const sendTimerFinishedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  timer: Timer
-) => {
+export const sendTimerFinishedPushNotification = async (subscription: UserPushNotificationSubscription, timer: Timer) => {
   const message = {
     title: "Time's Up!",
     body: "Your timer is done!",

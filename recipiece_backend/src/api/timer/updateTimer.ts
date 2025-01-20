@@ -4,9 +4,7 @@ import { prisma } from "@recipiece/database";
 import { timersQueue } from "../../scheduledJobs";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateTimer = async (
-  request: AuthenticatedRequest<UpdateTimerRequestSchema>
-): ApiResponse<TimerSchema> => {
+export const updateTimer = async (request: AuthenticatedRequest<UpdateTimerRequestSchema>): ApiResponse<TimerSchema> => {
   const timerId = request.body.id;
 
   const timer = await prisma.timer.findFirst({

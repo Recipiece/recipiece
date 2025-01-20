@@ -17,19 +17,12 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSc
     .selectFrom("recipes")
     .selectAll("recipes")
     .select((eb) => {
-      return [
-        stepsSubquery(eb).as("steps"),
-        ingredientsSubquery(eb).as("ingredients"),
-        recipeSharesSubquery(eb, user.id).as("shares"),
-      ];
+      return [stepsSubquery(eb).as("steps"), ingredientsSubquery(eb).as("ingredients"), recipeSharesSubquery(eb, user.id).as("shares")];
     })
     .where((eb) => {
       return eb.and([
         eb("recipes.id", "=", recipeId),
-        eb.or([
-          eb("recipes.user_id", "=", user.id),
-          eb.exists(recipeSharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1)),
-        ]),
+        eb.or([eb("recipes.user_id", "=", user.id), eb.exists(recipeSharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1))]),
       ]);
     });
 

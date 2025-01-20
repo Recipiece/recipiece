@@ -19,9 +19,7 @@ describe("Get Shopping List", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${existingShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${existingShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const shoppingListBody = response.body as ShoppingListSchema;
@@ -37,9 +35,7 @@ describe("Get Shopping List", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${existingShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${existingShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
@@ -96,9 +92,7 @@ describe("Get Shopping List", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${othersShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${othersShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: ShoppingListSchema = response.body;
@@ -131,10 +125,8 @@ describe("Get Shopping List", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${othersShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${othersShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-  })
+  });
 });

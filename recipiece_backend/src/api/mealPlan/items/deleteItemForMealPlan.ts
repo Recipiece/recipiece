@@ -24,7 +24,7 @@ export const deleteItemForMealPlan = async (request: AuthenticatedRequest): ApiR
   await prisma.mealPlanItem.delete({
     where: {
       id: +mealPlanItemId,
-    }
+    },
   });
   return [StatusCodes.OK, {}];
 };

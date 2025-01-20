@@ -66,7 +66,7 @@ export const wsTokenAuthMiddleware = async (req: Request, res: Response, next: N
  * @param token the token to check
  * @returns the user and the corresponding session
  */
-const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_TOKEN_SCOPE): ApiResponse<{readonly user: User, readonly session: UserSession}> => {
+const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_TOKEN_SCOPE): ApiResponse<{ readonly user: User; readonly session: UserSession }> => {
   if (!token) {
     console.log("no token provided");
     return [
@@ -141,5 +141,5 @@ const runTokenAuth = async (token?: string, expectedScope = UserSessions.ACCESS_
     ];
   }
 
-  return [StatusCodes.OK, {user: session.user, session: session}];
+  return [StatusCodes.OK, { user: session.user, session: session }];
 };

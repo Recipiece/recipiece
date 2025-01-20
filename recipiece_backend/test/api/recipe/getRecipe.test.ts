@@ -20,9 +20,7 @@ describe("Get Recipe", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/recipe/${existingRecipe.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/recipe/${existingRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const recipeBody = response.body as RecipeSchema;
@@ -39,9 +37,7 @@ describe("Get Recipe", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/recipe/${existingRecipe.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/recipe/${existingRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
@@ -99,9 +95,7 @@ describe("Get Recipe", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/recipe/${othersRecipe.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/recipe/${othersRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: RecipeSchema = response.body;
@@ -135,9 +129,7 @@ describe("Get Recipe", () => {
       },
     });
 
-    const response = await request(server)
-      .get(`/recipe/${othersRecipe.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/recipe/${othersRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

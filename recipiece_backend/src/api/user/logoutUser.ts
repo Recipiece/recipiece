@@ -5,12 +5,12 @@ import { ApiResponse, AuthenticatedRequest, TokenPayload } from "../../types";
 
 /**
  * When a user logs out, we expect there to be a valid auth token in the request that was used
- * 
+ *
  * This token belongs to a session (which also represents the refresh token), so we delete that session
  * from the database, effectively killing any and all auth tokens issues against that session.
  */
 export const logoutUser = async (request: AuthenticatedRequest): ApiResponse<{}> => {
-  const token = request.headers.authorization!
+  const token = request.headers.authorization!;
   const tokenSanitized = token.replace("Bearer", "").trim();
 
   try {
@@ -29,7 +29,7 @@ export const logoutUser = async (request: AuthenticatedRequest): ApiResponse<{}>
     await prisma.userSession.delete({
       where: {
         id: decoded.session,
-      }
+      },
     });
 
     return [StatusCodes.OK, {}];

@@ -43,9 +43,9 @@ export const changePassword = async (request: AuthenticatedRequest<ChangePasswor
     });
 
     return [StatusCodes.OK, {}];
-  } catch(err) {
+  } catch (err) {
     console.error(err);
-    
+
     return [
       StatusCodes.INTERNAL_SERVER_ERROR,
       {

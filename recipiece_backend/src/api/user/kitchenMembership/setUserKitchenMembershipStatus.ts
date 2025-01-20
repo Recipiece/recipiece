@@ -1,9 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "@recipiece/database";
-import {
-  SetUserKitchenMembershipStatusRequestSchema,
-  SetUserKitchenMembershipStatusResponseSchema,
-} from "@recipiece/types";
+import { SetUserKitchenMembershipStatusRequestSchema, SetUserKitchenMembershipStatusResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { UserKitchenInvitationStatus } from "../../../util/constant";
 
@@ -50,9 +47,7 @@ export const setUserKitchenMembershipStatus = async (
       StatusCodes.OK,
       {
         ...updatedRecord,
-        status: updatedRecord.status as
-          | typeof UserKitchenInvitationStatus.ACCEPTED
-          | typeof UserKitchenInvitationStatus.DENIED,
+        status: updatedRecord.status as typeof UserKitchenInvitationStatus.ACCEPTED | typeof UserKitchenInvitationStatus.DENIED,
       },
     ];
   } catch (err) {

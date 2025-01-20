@@ -12,7 +12,8 @@
     "build:dev": "NODE_ENV=development webpack",
     "serve:dev": "dotenvx run -f .env.dev -- nodemon ./dist/dev/index.js",
     "run:dev": "concurrently \"yarn build:dev --watch\" \"yarn serve:dev\"",
-    "build:prod": "NODE_ENV=production webpack"
+    "build:prod": "NODE_ENV=production webpack",
+    "lint": "prettier . --write"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",
@@ -49,7 +50,7 @@
     "jest-mock-extended": "^4.0.0-beta1",
     "jest-silent-reporter": "^0.6.0",
     "nodemon": "^3.1.7",
-    "prettier": "3.3.3",
+    "prettier": "^3.4.2",
     "supertest": "^7.0.0",
     "superwstest": "^2.0.4",
     "ts-jest": "^29.2.5",

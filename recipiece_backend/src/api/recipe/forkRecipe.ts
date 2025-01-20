@@ -16,9 +16,9 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
           user_kitchen_membership: {
             destination_user_id: user.id,
             status: "accepted",
-          }
-        }
-      }
+          },
+        },
+      },
     },
     include: {
       ingredients: true,

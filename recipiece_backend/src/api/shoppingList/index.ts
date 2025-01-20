@@ -29,7 +29,6 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: createShoppingList,
     requestSchema: YCreateShoppingListSchema,
     responseSchema: YShoppingListSchema,
-    
   },
   {
     path: "/shopping-list",
@@ -38,7 +37,6 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: updateShoppingList,
     requestSchema: YUpdateShoppingListSchema,
     responseSchema: YShoppingListSchema,
-    
   },
   {
     path: "/shopping-list/list",
@@ -47,21 +45,18 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: listShoppingLists,
     requestSchema: YListShoppingListsQuerySchema,
     responseSchema: YListShoppingListsResponseSchema,
-    
   },
   {
     path: "/shopping-list/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
     function: getShoppingList,
-    
   },
   {
     path: "/shopping-list/:id(\\d+)",
     authentication: "access_token",
     method: "DELETE",
     function: deleteShoppingList,
-    
   },
   {
     path: "/shopping-list/:id(\\d+)/session",
@@ -77,7 +72,6 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     function: appendShoppingListItems,
     requestSchema: YAppendShoppingListItemsRequestSchema,
     responseSchema: YAppendShoppingListItemsResponseSchema,
-    
   },
   ...SHOPPING_LIST_SHARE_ROUTES,
 ];
