@@ -1,7 +1,7 @@
 import { FC } from "react";
-import { Timer } from "../../../data";
+import { TimerSchema } from "@recipiece/types";
 
-export const TimerMenuItem: FC<{ readonly timer: Timer }> = ({ timer }) => {
+export const TimerMenuItem: FC<{ readonly timer: TimerSchema }> = ({ timer }) => {
   return <></>
   // const { deleteTimer, updateTimer } = useContext(TimerContext);
   // const { toast } = useToast();

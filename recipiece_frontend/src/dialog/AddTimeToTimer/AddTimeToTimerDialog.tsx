@@ -3,14 +3,14 @@ import { FC, useCallback, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormInput, SubmitButton } from "../../component";
-import { Timer } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 import { calculateRemainingTimerMillis, getTimerDisplay, Timers } from "../../util";
 import { DialogContext } from "../../context";
+import { TimerSchema } from "@recipiece/types";
 
 export interface AddTimeToTimerDialogProps extends BaseDialogProps<AddTimeToTimerForm> {
-  readonly timer: Timer;
+  readonly timer: TimerSchema;
 }
 
 const AddTimeToTimerFormSchema = z.object({

@@ -1,3 +1,4 @@
+import { CookbookSchema, RecipeSchema, ShoppingListSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -23,7 +24,6 @@ import {
   useRemoveRecipeFromCookbookMutation,
 } from "../../../api";
 import { DialogContext } from "../../../context";
-import { Cookbook, Recipe, ShoppingList, UserKitchenMembership } from "../../../data";
 import { ScaleRecipeSubmit, useAddRecipeToShoppingListDialog, useDeleteRecipeDialog } from "../../../dialog";
 import { useLayout } from "../../../hooks";
 import {
@@ -50,7 +50,7 @@ export interface RecipeContextMenuProps {
   readonly onScale?: (scaleFactor: number) => void;
   readonly canReset?: boolean;
   readonly onReset?: () => void;
-  readonly recipe: Recipe;
+  readonly recipe: RecipeSchema;
   readonly cookbookId?: number;
 }
 
@@ -114,7 +114,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const mobileOnAddToShoppingList = useCallback(() => {
     pushDialog("mobileShoppingLists", {
       onClose: () => popDialog("mobileShoppingLists"),
-      onSubmit: (shoppingList: ShoppingList) => {
+      onSubmit: (shoppingList: ShoppingListSchema) => {
         popDialog("mobileShoppingLists");
         onAddToShoppingList(shoppingList.id);
       },
@@ -125,7 +125,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     pushDialog("mobileCookbooks", {
       excludeContainingRecipeId: recipe.id,
       onClose: () => popDialog("mobileCookbooks"),
-      onSubmit: async (cookbook: Cookbook) => {
+      onSubmit: async (cookbook: CookbookSchema) => {
         try {
           await addRecipeToCookbook({
             recipe: recipe,
@@ -149,7 +149,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   }, [pushDialog, recipe, popDialog, addRecipeToCookbook, toast]);
 
   const onAddToCookbook = useCallback(
-    async (cookbook: Cookbook) => {
+    async (cookbook: CookbookSchema) => {
       try {
         await addRecipeToCookbook({
           recipe: recipe,
@@ -195,7 +195,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
       entity_id: recipe.id,
       entity_type: "recipe",
       onClose: () => popDialog("share"),
-      onSubmit: async (membership: UserKitchenMembership) => {
+      onSubmit: async (membership: UserKitchenMembershipSchema) => {
         try {
           await shareRecipe({
             user_kitchen_membership_id: membership.id,

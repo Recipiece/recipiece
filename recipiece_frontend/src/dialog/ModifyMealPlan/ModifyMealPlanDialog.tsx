@@ -1,14 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MealPlanSchema } from "@recipiece/types";
 import { FC, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormInput, Stack, SubmitButton } from "../../component";
-import { MealPlan } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface ModifyMealPlanDialogProps extends BaseDialogProps<ModifyMealPlanForm> {
-  readonly mealPlan?: MealPlan;
+  readonly mealPlan?: MealPlanSchema;
 }
 
 const ModifyMealPlanFormSchema = z.object({
@@ -41,9 +41,12 @@ export const ModifyMealPlanDialog: FC<ModifyMealPlanDialogProps> = ({ onSubmit, 
 
   const { isSubmitting } = form.formState;
 
-  const onModifyMealPlan = useCallback((data: ModifyMealPlanForm) => {
-    onSubmit?.(data);
-  }, [onSubmit]);
+  const onModifyMealPlan = useCallback(
+    (data: ModifyMealPlanForm) => {
+      onSubmit?.(data);
+    },
+    [onSubmit]
+  );
 
   return (
     <ResponsiveContent className="p-6">

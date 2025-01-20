@@ -1,22 +1,22 @@
+import { ListUserKitchenMembershipsQuerySchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useListUserKitchenMembershipsQuery } from "../../api";
 import { Avatar, AvatarFallback, Button, LoadingGroup, ScrollArea, ScrollBar } from "../../component";
-import { ListUserKitchenMembershipFilters, UserKitchenMembership } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface ShareDialogProps extends BaseDialogProps<UserKitchenMembership> {
+export interface ShareDialogProps extends BaseDialogProps<UserKitchenMembershipSchema> {
   readonly displayName: string;
   readonly entity_id?: number;
-  readonly entity_type?: ListUserKitchenMembershipFilters["entity_type"];
+  readonly entity_type?: ListUserKitchenMembershipsQuerySchema["entity_type"];
 }
 
 export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, entity_type, onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const filters: ListUserKitchenMembershipFilters = useMemo(() => {
-    let base: ListUserKitchenMembershipFilters = {
+  const filters: ListUserKitchenMembershipsQuerySchema = useMemo(() => {
+    let base: ListUserKitchenMembershipsQuerySchema = {
       from_self: true,
       page_number: 0,
       status: ["accepted"],
@@ -37,7 +37,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
   const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } = useListUserKitchenMembershipsQuery({ ...filters });
 
   const onSelectUser = useCallback(
-    async (membership: UserKitchenMembership) => {
+    async (membership: UserKitchenMembershipSchema) => {
       setIsDisabled(true);
       try {
         onSubmit && (await onSubmit?.(membership));

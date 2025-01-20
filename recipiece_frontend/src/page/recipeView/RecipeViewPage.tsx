@@ -19,10 +19,10 @@ import {
   RecipieceMenuBarContext,
   SharedAvatar
 } from "../../component";
-import { Recipe, RecipeIngredient } from "../../data";
 import { useLayout } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
 import { IngredientContextMenu } from "./IngredientContextMenu";
+import { RecipeIngredientSchema, RecipeSchema } from "@recipiece/types";
 
 export const RecipeViewPage: FC = () => {
   const { id } = useParams();
@@ -45,7 +45,7 @@ export const RecipeViewPage: FC = () => {
     return isLoadingCurrentUser || isLoadingRecipe;
   }, [isLoadingCurrentUser, isLoadingRecipe]);
 
-  const [recipe, setRecipe] = useState<Recipe | undefined>(originalRecipe);
+  const [recipe, setRecipe] = useState<RecipeSchema | undefined>(originalRecipe);
   const [checkedOffSteps, setCheckedOffSteps] = useState<number[]>([]);
   const [checkedOffIngredients, setCheckedOffIngredients] = useState<number[]>([]);
 
@@ -86,7 +86,7 @@ export const RecipeViewPage: FC = () => {
     [checkedOffIngredients]
   );
 
-  const onIngredientConverted = useCallback((ingredient: RecipeIngredient, newAmount: string, newUnit: string) => {
+  const onIngredientConverted = useCallback((ingredient: RecipeIngredientSchema, newAmount: string, newUnit: string) => {
     setRecipe((prev) => {
       if (prev) {
         return {

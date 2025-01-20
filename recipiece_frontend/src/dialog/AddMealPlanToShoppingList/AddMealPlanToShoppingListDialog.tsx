@@ -1,16 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DateTime } from "luxon";
+import { MealPlanItemSchema, MealPlanSchema } from "@recipiece/types";
 import { FC, useCallback, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormCheckbox, ScrollArea, SubmitButton } from "../../component";
-import { MealPlan, MealPlanItem } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
+import { DateTime } from "luxon";
 
 export interface AddMealPlanToShoppingListDialogProps extends BaseDialogProps<AddMealPlanToShoppingListForm> {
-  readonly mealPlan: MealPlan;
-  readonly mealPlanItems: MealPlanItem[];
+  readonly mealPlan: MealPlanSchema;
+  readonly mealPlanItems: MealPlanItemSchema[];
 }
 
 const AddMealPlanToShoppingListFormSchema = z.object({
@@ -33,9 +33,9 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
       .filter((item) => !!item.recipe?.ingredients)
       .map((item) => {
         let notesString = item.label ? `${item.label} - ` : "";
-        notesString += DateTime.fromISO(item.start_date).toFormat("EEE, MMM dd");
+        notesString += DateTime.fromJSDate(item.start_date).toFormat("EEE, MMM dd");
         notesString += ` - ${item.recipe!.name}`;
-        return item.recipe!.ingredients.map((ing) => {
+        return (item.recipe?.ingredients ?? []).map((ing) => {
           return {
             name: ing.name,
             selected: true,

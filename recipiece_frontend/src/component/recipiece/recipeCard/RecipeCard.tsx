@@ -1,15 +1,15 @@
+import { RecipeSchema } from "@recipiece/types";
 import { MoreVertical } from "lucide-react";
 import { FC, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetSelfQuery } from "../../../api";
-import { Recipe } from "../../../data";
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, DropdownMenu, DropdownMenuTrigger } from "../../shadcn";
 import { Shelf, ShelfSpacer } from "../Layout";
 import { RecipeContextMenu } from "../RecipeContextMenu";
 import { SharedAvatar } from "../SharedAvatar";
 
 export interface RecipeCardProps {
-  readonly recipe: Recipe;
+  readonly recipe: RecipeSchema;
   readonly cookbookId?: number;
 }
 

@@ -145,7 +145,7 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
   search: string().notRequired(),
   cookbook_id: number().notRequired(),
   cookbook_attachments: string().oneOf(["include", "exclude"]).notRequired(),
-  shared_recipes: string().oneOf(["include", "exclude"]).notRequired().default("include"),
+  shared_recipes: string().oneOf(["include", "exclude"]).notRequired().default(undefined).transform((val) => val ?? "include"),
 })
   .strict()
   .noUnknown();

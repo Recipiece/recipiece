@@ -1,12 +1,12 @@
+import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { FC, useState } from "react";
-import { useResponsiveDialogComponents } from "../../hooks";
-import { BaseDialogProps } from "../BaseDialogProps";
-import { UserKitchenMembership } from "../../data";
 import { useGetSelfQuery } from "../../api";
 import { Button } from "../../component";
+import { useResponsiveDialogComponents } from "../../hooks";
+import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface DeleteUserKitchenMembershipDialogProps extends BaseDialogProps<UserKitchenMembership> {
-  readonly userKitchenMembership: UserKitchenMembership;
+export interface DeleteUserKitchenMembershipDialogProps extends BaseDialogProps<UserKitchenMembershipSchema> {
+  readonly userKitchenMembership: UserKitchenMembershipSchema;
 }
 
 export const DeleteUserKitchenMembershipDialog: FC<DeleteUserKitchenMembershipDialogProps> = ({ onClose, onSubmit, userKitchenMembership }) => {
@@ -31,8 +31,8 @@ export const DeleteUserKitchenMembershipDialog: FC<DeleteUserKitchenMembershipDi
         </ResponsiveTitle>
         <ResponsiveDescription>
           {isTargetedUser && `You can leave ${userKitchenMembership.source_user.username}'s kitchen by selecting the Leave Kitchen button below.`}
-          {!isTargetedUser && `You can remove ${userKitchenMembership.destination_user.username} from your kitchen by selecting the Remove From Kitchen button below.`}
-          {" "}This will remove all shared items permanently, and cannot be undone.
+          {!isTargetedUser && `You can remove ${userKitchenMembership.destination_user.username} from your kitchen by selecting the Remove From Kitchen button below.`} This will
+          remove all shared items permanently, and cannot be undone.
         </ResponsiveDescription>
       </ResponsiveHeader>
       <ResponsiveFooter className="flex-col-reverse">

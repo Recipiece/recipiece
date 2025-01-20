@@ -1,18 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListRecipeFilters, ListRecipesResponse, Recipe } from "../../data";
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
+import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema, YListRecipesResponseSchema, YRecipeSchema } from "@recipiece/types";
 
-export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<Recipe>) => {
+export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const recipe = await getter<never, Recipe>({
+    const recipe = await getter<never, RecipeSchema>({
       path: `/recipe/${recipeId}`,
       withAuth: "access_token",
     });
-    return recipe.data;
+    return YRecipeSchema.cast(recipe.data);
   };
 
   return useQuery({
@@ -22,7 +22,7 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<Recipe>
   });
 };
 
-export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponse>) => {
+export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponseSchema>) => {
   // const searchParams = new URLSearchParams();
   // if (search) {
   //   searchParams.set("search", search);
@@ -31,7 +31,7 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   // searchParams.set("cookbook_attachments", "exclude");
   // searchParams.set("page_number", "0");
   // searchParams.set("page_size", "5");
-  let filters: ListRecipeFilters = {
+  let filters: Partial<ListRecipesQuerySchema> = {
     cookbook_id: cookbook_id,
     cookbook_attachments: "exclude",
     page_number: 0,
@@ -46,11 +46,11 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   const { getter } = useGet();
 
   const query = async () => {
-    const recipe = await getter<never, ListRecipesResponse>({
+    const recipe = await getter<never, ListRecipesResponseSchema>({
       path: path,
       withAuth: "access_token",
     });
-    return recipe.data;
+    return YListRecipesResponseSchema.cast(recipe.data);
   };
 
   return useQuery({
@@ -60,7 +60,7 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   });
 };
 
-export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?: QueryArgs<ListRecipesResponse>) => {
+export const useListRecipesForMealPlanQuery = (filters: ListRecipesQuerySchema, args?: QueryArgs<ListRecipesResponseSchema>) => {
   const { getter } = useGet();
 
   const searchParams = new URLSearchParams();
@@ -71,11 +71,11 @@ export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?
   }
 
   const query = async () => {
-    const recipes = await getter<never, ListRecipesResponse>({
+    const recipes = await getter<never, ListRecipesResponseSchema>({
       path: `/recipe/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return recipes.data;
+    return YListRecipesResponseSchema.cast(recipes.data);
   };
 
   return useQuery({
@@ -85,7 +85,7 @@ export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?
   });
 };
 
-export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs<ListRecipesResponse>) => {
+export const useListRecipesQuery = (filters: ListRecipesQuerySchema, args?: QueryArgs<ListRecipesResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -109,11 +109,11 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   }
 
   const query = async () => {
-    const recipes = await getter<never, ListRecipesResponse>({
+    const recipes = await getter<never, ListRecipesResponseSchema>({
       path: `/recipe/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return recipes.data;
+    return YListRecipesResponseSchema.cast(recipes.data);
   };
 
   return useQuery({
@@ -129,17 +129,17 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   });
 };
 
-export const useCreateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Recipe>>) => {
+export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, Partial<RecipeSchema>>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: Partial<Recipe>) => {
-    const response = await poster<Partial<Recipe>, Recipe>({
+  const mutation = async (data: Partial<RecipeSchema>) => {
+    const response = await poster<Partial<RecipeSchema>, RecipeSchema>({
       path: "/recipe",
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YRecipeSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -155,17 +155,17 @@ export const useCreateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Reci
   });
 };
 
-export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Recipe>>) => {
+export const useUpdateRecipeMutation = (args?: MutationArgs<RecipeSchema, Partial<RecipeSchema>>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
-  const mutation = async (data: Partial<Recipe>) => {
-    const response = await putter<Partial<Recipe>, Recipe>({
+  const mutation = async (data: Partial<RecipeSchema>) => {
+    const response = await putter<Partial<RecipeSchema>, RecipeSchema>({
       path: `/recipe`,
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YRecipeSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -181,11 +181,11 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Reci
   });
 };
 
-export const useDeleteRecipeMutation = (args?: MutationArgs<{}, Recipe>) => {
+export const useDeleteRecipeMutation = (args?: MutationArgs<{}, RecipeSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (recipe: Recipe) => {
+  const mutation = async (recipe: RecipeSchema) => {
     const response = await deleter({
       path: "/recipe",
       id: recipe.id,
@@ -207,18 +207,18 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<{}, Recipe>) => {
   });
 };
 
-export const useParseRecipeFromURLMutation = (args?: MutationArgs<Recipe, string>) => {
+export const useParseRecipeFromURLMutation = (args?: MutationArgs<RecipeSchema, string>) => {
   const { poster } = usePost();
 
   const mutation = async (url: string) => {
-    const response = await poster<{ readonly source_url: string }, Recipe>({
+    const response = await poster<{ readonly source_url: string }, RecipeSchema>({
       path: "/recipe/parse/url",
       body: {
         source_url: url,
       },
       withAuth: "access_token",
     });
-    return response.data;
+    return YRecipeSchema.cast(response.data);
   };
 
   return useMutation({
@@ -227,17 +227,17 @@ export const useParseRecipeFromURLMutation = (args?: MutationArgs<Recipe, string
   });
 };
 
-export const useForkRecipeMutation = (args?: MutationArgs<Recipe, { readonly original_recipe_id: number }>) => {
+export const useForkRecipeMutation = (args?: MutationArgs<RecipeSchema, { readonly original_recipe_id: number }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
   const mutation = async (body: { readonly original_recipe_id: number }) => {
-    const response = await poster<typeof body, Recipe>({
+    const response = await poster<typeof body, RecipeSchema>({
       path: "/recipe/fork",
       body: { ...body },
       withAuth: "access_token",
     });
-    return response.data;
+    return YRecipeSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};

@@ -1,11 +1,11 @@
+import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useListRecipesToAddToCookbook } from "../../api";
 import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
-import { ListRecipeFilters, Recipe } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface SearchRecipesForCookbookDialogProps extends BaseDialogProps<Recipe> {
+export interface SearchRecipesForCookbookDialogProps extends BaseDialogProps<RecipeSchema> {
   readonly cookbookId: number;
 }
 
@@ -14,7 +14,7 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const [filters, setFilters] = useState<ListRecipeFilters>({
+  const [filters, setFilters] = useState<ListRecipesQuerySchema>({
     page_number: 0,
     search: "",
   });
@@ -44,7 +44,7 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
   }, [searchTerm]);
 
   const onRecipeSelected = useCallback(
-    async (recipe: Recipe) => {
+    async (recipe: RecipeSchema) => {
       setIsDisabled(true);
       try {
         await Promise.resolve(onSubmit?.(recipe));

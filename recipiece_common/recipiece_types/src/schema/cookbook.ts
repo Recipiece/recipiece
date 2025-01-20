@@ -1,4 +1,4 @@
-import { InferType, number, object, string } from "yup";
+import { date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 
 export const YCookbookSchema = object({
@@ -6,6 +6,7 @@ export const YCookbookSchema = object({
   user_id: number().required(),
   name: string().required(),
   description: string().notRequired(),
+  created_at: date().required(),
 }).strict().noUnknown();
 
 export interface CookbookSchema extends InferType<typeof YCookbookSchema> {}

@@ -7,10 +7,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useListKnownIngredientsQuery } from "../../api";
 import { Button, Form, FormInput, FormSelect, Label, LoadingGroup, SelectItem, SubmitButton } from "../../component";
-import { KnownIngredient, RecipeIngredient } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { ALL_UNITS, convertIngredient, formatIngredientAmount } from "../../util";
 import { BaseDialogProps } from "../BaseDialogProps";
+import { KnownIngredientSchema, RecipeIngredientSchema } from "@recipiece/types";
 
 export interface ConvertIngredientDialogSubmit {
   readonly unit: Unit;
@@ -18,7 +18,7 @@ export interface ConvertIngredientDialogSubmit {
 }
 
 export interface ConvertIngredientDialogProps extends BaseDialogProps<ConvertIngredientDialogSubmit> {
-  readonly ingredient: RecipeIngredient;
+  readonly ingredient: RecipeIngredientSchema;
 }
 
 const ConvertIngredientFormSchema = z.object({
@@ -39,7 +39,7 @@ const CONVERT_OPTIONS = ALL_UNITS.map((unitBlob) => {
 export const ConvertIngredientDialog: FC<ConvertIngredientDialogProps> = ({ onClose, onSubmit, ingredient }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
   const { data: knownIngredients, isLoading: isLoadingKnownIngredients } = useListKnownIngredientsQuery();
-  const [matchingKnownIngredient, setMatchingKnownIngredient] = useState<KnownIngredient | undefined>(undefined);
+  const [matchingKnownIngredient, setMatchingKnownIngredient] = useState<KnownIngredientSchema | undefined>(undefined);
   const [isSussingOutIngredient, setIsSussingOutIngredient] = useState(true);
 
   const form = useForm<ConvertIngredientForm>({
@@ -95,7 +95,7 @@ export const ConvertIngredientDialog: FC<ConvertIngredientDialogProps> = ({ onCl
   const onConvertIngredient = useCallback(
     (formData: ConvertIngredientForm) => {
       const { targetUnit, knownIngredientId } = formData;
-      const knownIngredient = knownIngredients!.data.find((ki) => ki.id === +knownIngredientId)!;
+      const knownIngredient = knownIngredients!.data!.find((ki) => ki.id === +knownIngredientId)!;
       const newAmount = convertIngredient(ingredient, knownIngredient, targetUnit as Unit);
       if (newAmount) {
         onSubmit?.({

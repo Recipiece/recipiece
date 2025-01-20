@@ -1,3 +1,4 @@
+import { MealPlanItemSchema, MealPlanSchema, RecipeSchema } from "@recipiece/types";
 import { Lightbulb, Minus, SquareArrowOutUpRight, UtensilsCrossed } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
@@ -5,12 +6,11 @@ import { Link } from "react-router-dom";
 import { useCreateMealPlanItemMutation, useDeleteMealPlanItemMutation, useUpdateMealPlanItemMutation } from "../../api";
 import { Button, Card, Input } from "../../component";
 import { DialogContext } from "../../context";
-import { MealPlan, MealPlanItem, Recipe } from "../../data";
 
 export interface MealPlanItemsCardProps {
-  readonly mealPlan: MealPlan;
+  readonly mealPlan: MealPlanSchema;
   readonly startDate: DateTime;
-  readonly initialMealPlanItems: Partial<MealPlanItem>[];
+  readonly initialMealPlanItems: Partial<MealPlanItemSchema>[];
   readonly isEditing: boolean;
 }
 
@@ -29,11 +29,11 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
   const onAddRecipe = useCallback(() => {
     pushDialog("searchRecipesForMealPlan", {
       onClose: () => popDialog("searchRecipesForMealPlan"),
-      onSubmit: async (recipe: Recipe) => {
+      onSubmit: async (recipe: RecipeSchema) => {
         const createdItem = await createMealPlanItem({
           recipe_id: recipe.id,
           meal_plan_id: mealPlan.id,
-          start_date: startDate.toUTC().toISO()!,
+          start_date: startDate.toUTC().toJSDate()!,
           notes: "",
           label: `Meal ${currentValues.length + 1}`,
         });
@@ -47,7 +47,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
     const createdItem = await createMealPlanItem({
       freeform_content: "",
       meal_plan_id: mealPlan.id,
-      start_date: startDate.toUTC().toISO()!,
+      start_date: startDate.toUTC().toJSDate()!,
       notes: "",
       label: `Meal ${currentValues.length + 1}`,
     });
@@ -55,7 +55,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
   }, [createMealPlanItem, mealPlan.id, startDate, currentValues]);
 
   const onRemoveItem = useCallback(
-    async (mealPlanItem: MealPlanItem) => {
+    async (mealPlanItem: MealPlanItemSchema) => {
       await deleteMealPlanItem(mealPlanItem);
       setCurrentValues((prev) => [...prev.filter((cv) => cv.id !== mealPlanItem.id)]);
     },
@@ -172,7 +172,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
               component = (
                 <Input
                   placeholder="What do you want to make?"
-                  value={freeform_content}
+                  value={freeform_content ?? ""}
                   onChange={(event) => onChangeFreeformContent(index, event.target.value)}
                   onBlur={(event) => onUpdateFreeformContent(id!, event.target.value)}
                 />
@@ -188,7 +188,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
                 {isEditing && (
                   <Input
                     placeholder="What is this meal for?"
-                    value={label}
+                    value={label ?? ""}
                     onChange={(event) => onChangeLabel(index, event.target.value)}
                     onBlur={(event) => onUpdateLabel(id!, event.target.value)}
                   />
@@ -200,7 +200,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
                 {isEditing && (
                   <Input
                     placeholder="Anything to note?"
-                    value={notes}
+                    value={notes ?? ""}
                     onBlur={(event) => onUpdateNotes(id!, event.target.value)}
                     onChange={(event) => onChangeNotes(index, event.target.value)}
                   />
@@ -209,7 +209,7 @@ export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startD
               </div>
               {isEditing && (
                 <div className="col-span-12 flex flex-row">
-                  <Button variant="ghost" onClick={() => onRemoveItem(value as MealPlanItem)} className="text-destructive ml-auto">
+                  <Button variant="ghost" onClick={() => onRemoveItem(value as MealPlanItemSchema)} className="text-destructive ml-auto">
                     <Minus />
                   </Button>
                 </div>

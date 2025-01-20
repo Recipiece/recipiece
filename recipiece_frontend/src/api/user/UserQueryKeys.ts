@@ -1,10 +1,10 @@
-import { ListUserKitchenMembershipFilters } from "../../data";
+import { ListUserKitchenMembershipsQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class UserQueryKeys {
   public static readonly CURRENT_USER = "currentUser";
 
-  public static LIST_USER_KITCHEN_MEMBERSHIPS = (filters?: Partial<ListUserKitchenMembershipFilters>): RcpQueryKey => {
+  public static LIST_USER_KITCHEN_MEMBERSHIPS = (filters?: Partial<ListUserKitchenMembershipsQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listKitchenMemberships"];
     const { from_self, targeting_self, page_number, status, entity, entity_id, entity_type } = filters ?? {};
 

@@ -6,8 +6,10 @@ export const YListQuerySchema = object({
   page_size: number()
     .min(1)
     .max(DEFAULT_PAGE_SIZE)
-    .default(DEFAULT_PAGE_SIZE)
+    .default(undefined)
     .notRequired()
+    .nullable()
+    .optional()
     .transform((val) => {
       return val ?? DEFAULT_PAGE_SIZE;
     }),

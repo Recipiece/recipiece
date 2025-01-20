@@ -1,16 +1,24 @@
+import {
+  ListShoppingListSharesQuerySchema,
+  ListShoppingListSharesResponseSchema,
+  ListShoppingListsResponseSchema,
+  ShoppingListSchema,
+  ShoppingListShareSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
-import { ListShoppingListResponse, ListShoppingListSharesFilters, ListShoppingListSharesResponse, ShoppingList, ShoppingListShare } from "../../data";
-import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
+import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
 import { UserQueryKeys } from "../user";
+import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
 
-export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingListShare, { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }>) => {
+export const useCreateShoppingListShareMutation = (
+  args?: MutationArgs<ShoppingListShareSchema, { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }>
+) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
   const mutation = async (data: { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }) => {
-    const response = await poster<typeof data, ShoppingListShare>({
+    const response = await poster<typeof data, ShoppingListShareSchema>({
       path: "/shopping-list/share",
       body: data,
       withAuth: "access_token",
@@ -22,13 +30,15 @@ export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingL
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data: ShoppingListShare, params, ctx) => {
+    onSuccess: (data: ShoppingListShareSchema, params, ctx) => {
       queryClient.setQueriesData(
         {
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
-          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES({
-            user_kitchen_membership_id: params.user_kitchen_membership_id,
-          }))
+          predicate: generatePartialMatchPredicate(
+            ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES({
+              user_kitchen_membership_id: params.user_kitchen_membership_id,
+            })
+          ),
         },
         oldDataCreator(data)
       );
@@ -50,7 +60,7 @@ export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingL
         {
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
         },
-        (oldData: ListShoppingListResponse | undefined) => {
+        (oldData: ListShoppingListsResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
@@ -69,7 +79,7 @@ export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingL
           return undefined;
         }
       );
-      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingList | undefined) => {
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingListSchema | undefined) => {
         if (oldData) {
           return {
             ...oldData,
@@ -85,11 +95,11 @@ export const useCreateShoppingListShareMutation = (args?: MutationArgs<ShoppingL
   });
 };
 
-export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, ShoppingListShare>) => {
+export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, ShoppingListShareSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (share: ShoppingListShare) => {
+  const mutation = async (share: ShoppingListShareSchema) => {
     return await deleter({
       path: "/shopping-list/share",
       id: share.id,
@@ -128,7 +138,7 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
         {
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
         },
-        (oldData: ListShoppingListResponse | undefined) => {
+        (oldData: ListShoppingListsResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
@@ -147,7 +157,7 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
           return undefined;
         }
       );
-      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingList | undefined) => {
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingListSchema | undefined) => {
         if (oldData) {
           return {
             ...oldData,
@@ -163,13 +173,13 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
   });
 };
 
-export const useListShoppingListSharesQuery = (filters: ListShoppingListSharesFilters, args?: QueryArgs<ListShoppingListSharesResponse>) => {
+export const useListShoppingListSharesQuery = (filters: ListShoppingListSharesQuerySchema, args?: QueryArgs<ListShoppingListSharesResponseSchema>) => {
   const { getter } = useGet();
 
   const searchParams = filtersToSearchParams(filters);
 
   const query = async () => {
-    const shoppingListShares = await getter<never, ListShoppingListSharesResponse>({
+    const shoppingListShares = await getter<never, ListShoppingListSharesResponseSchema>({
       path: `/shopping-list/share/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });

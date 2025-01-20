@@ -1,5 +1,6 @@
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import { Configuration, DefinePlugin } from "webpack";
 import "webpack-dev-server";
@@ -57,6 +58,7 @@ const config: Configuration = {
     clean: true,
   },
   plugins: [
+    new ForkTsCheckerWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "public", "index.html"),
       publicPath: "/",
@@ -82,6 +84,7 @@ const config: Configuration = {
   devServer: {
     port: 3000,
     historyApiFallback: true,
+    liveReload: true,
     static: {
       directory: path.resolve(__dirname, "public"),
       publicPath: "/",

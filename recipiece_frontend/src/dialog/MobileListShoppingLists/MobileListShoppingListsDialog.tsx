@@ -1,11 +1,11 @@
+import { ShoppingListSchema } from "@recipiece/types";
 import { FC } from "react";
 import { useListShoppingListsQuery } from "../../api";
 import { Button, LoadingGroup } from "../../component";
-import { ShoppingList } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export const MobileListShoppingListsDialog: FC<BaseDialogProps<ShoppingList>> = ({ onSubmit }) => {
+export const MobileListShoppingListsDialog: FC<BaseDialogProps<ShoppingListSchema>> = ({ onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveTitle } = useResponsiveDialogComponents();
   const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery({
     page_number: 0,

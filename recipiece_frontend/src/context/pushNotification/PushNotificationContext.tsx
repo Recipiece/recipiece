@@ -1,3 +1,4 @@
+import { YCreatePushNotificationRequestSubscriptionDataSchema } from "@recipiece/types";
 import { createContext, FC, PropsWithChildren, useCallback, useEffect } from "react";
 import { v4 } from "uuid";
 import { TokenManager, useOptIntoPushNotificationsMutation } from "../../api";
@@ -5,13 +6,13 @@ import { useLocalStorage } from "../../hooks";
 import { StorageKeys } from "../../util";
 
 const generateServiceWorkerPushNotificationSubscription = async () => {
-  if(process.env.NODE_ENV !== "development") {
+  if (process.env.NODE_ENV !== "development") {
     const applicationServerKey = urlB64ToUint8Array(process.env.RECIPIECE_VAPID_PUBLIC_KEY!);
     const options = { applicationServerKey, userVisibleOnly: true };
     const registration = await navigator.serviceWorker.ready;
     return await registration.pushManager.subscribe(options);
   } else {
-    return Promise.resolve();
+    return Promise.resolve({} as PushSubscription);
   }
 };
 
@@ -79,7 +80,7 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
           const subscription = await generateServiceWorkerPushNotificationSubscription();
           await optIntoPushNotifications({
             device_id: deviceId,
-            subscription_data: subscription.toJSON(),
+            subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema.cast(subscription.toJSON()),
           });
         }
       } catch {
@@ -99,9 +100,9 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
         // go ahead and create a new subscription for this device id
         const subscription = await generateServiceWorkerPushNotificationSubscription();
         try {
-         await optIntoPushNotifications({
+          await optIntoPushNotifications({
             device_id: deviceId,
-            subscription_data: subscription.toJSON(),
+            subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema.cast(subscription.toJSON()),
           });
         } catch {
           // noop

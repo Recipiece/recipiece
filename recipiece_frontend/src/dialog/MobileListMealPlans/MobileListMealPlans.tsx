@@ -1,14 +1,14 @@
+import { ListMealPlanQuerySchema, MealPlanSchema } from "@recipiece/types";
 import { FC, useMemo } from "react";
-import { BaseDialogProps } from "../BaseDialogProps";
-import { ListMealPlanFilters, MealPlan } from "../../data";
-import { useResponsiveDialogComponents } from "../../hooks";
 import { useListMealPlansQuery } from "../../api";
 import { Button, LoadingGroup } from "../../component";
+import { useResponsiveDialogComponents } from "../../hooks";
+import { BaseDialogProps } from "../BaseDialogProps";
 
-export const MobileListMealPlansDialog: FC<BaseDialogProps<MealPlan>> = ({ onSubmit }) => {
+export const MobileListMealPlansDialog: FC<BaseDialogProps<MealPlanSchema>> = ({ onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveTitle } = useResponsiveDialogComponents();
 
-  const queryFilters: ListMealPlanFilters = useMemo(() => {
+  const queryFilters: ListMealPlanQuerySchema = useMemo(() => {
     return {
       page_number: 0,
     };

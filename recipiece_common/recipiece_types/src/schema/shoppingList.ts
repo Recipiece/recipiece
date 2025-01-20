@@ -64,7 +64,7 @@ export interface UpdateShoppingListSchema extends InferType<typeof YUpdateShoppi
  * List shopping lists schema
  */
 export const YListShoppingListsQuerySchema = YListQuerySchema.shape({
-  shared_shopping_lists: string().oneOf(["include", "exclude"]).notRequired().default("include"),
+  shared_shopping_lists: string().oneOf(["include", "exclude"]).notRequired().default(undefined).transform((val) => val ?? "include"),
 })
   .strict()
   .noUnknown();

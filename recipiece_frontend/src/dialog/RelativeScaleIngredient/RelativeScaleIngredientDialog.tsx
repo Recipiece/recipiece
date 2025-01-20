@@ -1,20 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RecipeIngredientSchema } from "@recipiece/types";
+import Fraction from "fraction.js";
 import { FC, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormInput, SubmitButton } from "../../component";
-import { RecipeIngredient } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
 import { BaseDialogProps } from "../BaseDialogProps";
-import Fraction from "fraction.js";
 
 export interface RelativeScaleIngredientSubmit {
   readonly scaleFactor: number;
 }
 
 export interface RelativeScaleIngredientDialogProps extends BaseDialogProps<RelativeScaleIngredientSubmit> {
-  readonly ingredient: RecipeIngredient & { amount: string };
+  readonly ingredient: RecipeIngredientSchema & { amount: string };
 }
 
 const RelativeScaleIngredientFormSchema = z.object({

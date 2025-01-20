@@ -1,6 +1,8 @@
+import { MealPlanItemSchema, MealPlanSchema, ShoppingListItemSchema, ShoppingListSchema } from "@recipiece/types";
 import { ChartNoAxesGantt, CircleArrowDown, CircleArrowUp, Edit, ListCheck, MoreVertical, RefreshCcw, ShoppingBasket, Trash } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   useAppendShoppingListItemsMutation,
@@ -27,12 +29,10 @@ import {
   useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
-import { MealPlan, MealPlanItem, ShoppingList, ShoppingListItem } from "../../data";
+import { AddMealPlanToShoppingListForm } from "../../dialog";
+import { useLayout } from "../../hooks";
 import { floorDateToDay } from "../../util";
 import { MealPlanItemsCard } from "./MealPlanItemCard";
-import { useLayout } from "../../hooks";
-import { AddMealPlanToShoppingListForm } from "../../dialog";
-import { createPortal } from "react-dom";
 
 /**
  * This is a rather tricky form, and we're not even really using a form for this.
@@ -54,7 +54,7 @@ import { createPortal } from "react-dom";
  * and refetch that from the backend, re-reduce, and move along
  */
 
-type MealPlanItemsFormType = { readonly [key: string]: Partial<MealPlanItem>[] };
+type MealPlanItemsFormType = { readonly [key: string]: Partial<MealPlanItemSchema>[] };
 
 export const MealPlanViewPage: FC = () => {
   const { id } = useParams();
@@ -109,9 +109,9 @@ export const MealPlanViewPage: FC = () => {
 
   const { mutateAsync: appendItemsToShoppingList } = useAppendShoppingListItemsMutation();
 
-  const mealPlanCreatedAt = useMemo(() => {
-    return DateTime.fromISO(mealPlan?.created_at!);
-  }, [mealPlan]);
+  // const mealPlanCreatedAt = useMemo(() => {
+  const mealPlanCreatedAt = DateTime.fromJSDate(mealPlan?.created_at!);
+  // }, [mealPlan]);
 
   const canAddToShoppingList = useMemo(() => {
     return !!(mealPlanItems?.meal_plan_items ?? []).find((item) => !!item.recipe);
@@ -119,8 +119,8 @@ export const MealPlanViewPage: FC = () => {
 
   const defaultValues: MealPlanItemsFormType = useMemo(() => {
     if (mealPlanItems) {
-      const reduced = mealPlanItems.meal_plan_items.reduce((accum: { [key: string]: MealPlanItem[] }, curr) => {
-        const flooredIsoStartDate = floorDateToDay(DateTime.fromISO(curr.start_date)).toISO()!;
+      const reduced = (mealPlanItems.meal_plan_items ?? []).reduce((accum: { [key: string]: MealPlanItemSchema[] }, curr) => {
+        const flooredIsoStartDate = floorDateToDay(DateTime.fromJSDate(curr.start_date)).toISO()!;
         const existingArrayForStartDate = accum[flooredIsoStartDate] ?? [];
         return {
           ...accum,
@@ -141,7 +141,7 @@ export const MealPlanViewPage: FC = () => {
 
   const onLoadMoreAbove = useCallback(() => {
     const shifted = currentStartDate.minus({ days: 1 });
-    const mealPlanCreatedAt = DateTime.fromISO(mealPlan!.created_at);
+    const mealPlanCreatedAt = DateTime.fromJSDate(mealPlan!.created_at);
     const newVal = DateTime.max(shifted, mealPlanCreatedAt);
     setCurrentStartDate(newVal);
   }, [currentStartDate, mealPlan]);
@@ -160,7 +160,7 @@ export const MealPlanViewPage: FC = () => {
     pushDialog("modifyMealPlan", {
       mealPlan: mealPlan,
       onClose: () => popDialog("modifyMealPlan"),
-      onSubmit: async (modifiedMealPlan: MealPlan) => {
+      onSubmit: async (modifiedMealPlan: MealPlanSchema) => {
         try {
           await updateMealPlan({ ...modifiedMealPlan, id: mealPlan?.id! });
           toast({
@@ -184,7 +184,7 @@ export const MealPlanViewPage: FC = () => {
     pushDialog("deleteMealPlan", {
       mealPlan: mealPlan,
       onClose: () => popDialog("deleteMealPlan"),
-      onSubmit: async (mealPlanToDelete: MealPlan) => {
+      onSubmit: async (mealPlanToDelete: MealPlanSchema) => {
         popDialog("deleteMealPlan");
         try {
           await deleteMealPlan(mealPlanToDelete);
@@ -205,14 +205,14 @@ export const MealPlanViewPage: FC = () => {
   }, [deleteMealPlan, mealPlan, navigate, popDialog, pushDialog, toast]);
 
   const onAddMealPlanToShoppingList = useCallback(
-    (shoppingList: ShoppingList) => {
+    (shoppingList: ShoppingListSchema) => {
       pushDialog("addMealPlanToShoppingList", {
         mealPlan: mealPlan!,
-        mealPlanItems: mealPlanItems!.meal_plan_items,
+        mealPlanItems: mealPlanItems!.meal_plan_items ?? [],
         onClose: () => popDialog("addMealPlanToShoppingList"),
         onSubmit: async (managedItems: AddMealPlanToShoppingListForm) => {
           try {
-            const selectedItems: Partial<ShoppingListItem>[] = managedItems.items
+            const selectedItems: Partial<ShoppingListItemSchema>[] = managedItems.items
               .filter((item) => item.selected)
               .map((item) => {
                 return {
@@ -249,7 +249,7 @@ export const MealPlanViewPage: FC = () => {
   const mobileOnAddToShoppingList = useCallback(() => {
     pushDialog("mobileShoppingLists", {
       onClose: () => popDialog("mobileShoppingLists"),
-      onSubmit: (shoppingList: ShoppingList) => {
+      onSubmit: (shoppingList: ShoppingListSchema) => {
         popDialog("mobileShoppingLists");
         onAddMealPlanToShoppingList(shoppingList);
       },
@@ -315,14 +315,25 @@ export const MealPlanViewPage: FC = () => {
         </DropdownMenuContent>
       </DropdownMenu>
     );
-  }, [canAddToShoppingList, isEditing, isLoadingShoppingLists, isMobile, mobileOnAddToShoppingList, onAddMealPlanToShoppingList, onDeleteMealPlan, onEditMealPlan, onResetDateBounds, shoppingLists?.data]);
+  }, [
+    canAddToShoppingList,
+    isEditing,
+    isLoadingShoppingLists,
+    isMobile,
+    mobileOnAddToShoppingList,
+    onAddMealPlanToShoppingList,
+    onDeleteMealPlan,
+    onEditMealPlan,
+    onResetDateBounds,
+    shoppingLists?.data,
+  ]);
 
   return (
     <Stack>
       <LoadingGroup isLoading={isLoadingMealPlan} className="h-8 w-52">
         <div className="flex flex-col sm:flex-row">
           <h1 className="text-2xl">{mealPlan?.name}</h1>
-          {(isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current) && createPortal(contextMenu, mobileMenuPortalRef?.current)}
+          {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(contextMenu, mobileMenuPortalRef?.current)}
           {!isMobile && <>{contextMenu}</>}
         </div>
       </LoadingGroup>

@@ -1,9 +1,9 @@
+import { ShoppingListSchema } from "@recipiece/types";
 import { ComponentProps, FC } from "react";
-import { ShoppingList } from "../../../data";
 import { MenubarItem } from "../../shadcn";
 import { SharedAvatar } from "../SharedAvatar";
 
-export const ShoppingListMenuItem: FC<{ readonly shoppingList: ShoppingList } & ComponentProps<typeof MenubarItem>> = ({ shoppingList, ...restProps }) => {
+export const ShoppingListMenuItem: FC<{ readonly shoppingList: ShoppingListSchema } & ComponentProps<typeof MenubarItem>> = ({ shoppingList, ...restProps }) => {
   const membershipId = shoppingList.shares?.[0]?.user_kitchen_membership_id;
 
   return (

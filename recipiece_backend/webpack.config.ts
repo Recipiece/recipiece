@@ -1,5 +1,6 @@
 import path from "path";
 import nodeExternals from "webpack-node-externals";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
 import { Configuration } from "webpack";
 
@@ -62,6 +63,7 @@ const config: Configuration = {
     poll: 1000,
   },
   plugins: [
+    new ForkTsCheckerWebpackPlugin(),
     new CopyPlugin({
       patterns: [
         { from: "../recipiece_common/recipiece_database/node_modules/.prisma/client/schema.prisma", to: "./" },

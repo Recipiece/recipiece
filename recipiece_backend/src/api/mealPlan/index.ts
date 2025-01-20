@@ -51,7 +51,6 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "GET",
     function: getMealPlanById,
-    
     responseSchema: YMealPlanSchema,
   },
   {
@@ -59,14 +58,12 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "DELETE",
     function: deleteMealPlan,
-    
   },
   {
     path: "/meal-plan/:id(\\d+)/item/list",
     authentication: "access_token",
     method: "GET",
     function: listItemsForMealPlan,
-    
     requestSchema: YListItemsForMealPlanQuerySchema,
     responseSchema: YListItemsForMealPlanResponseSchema,
   },

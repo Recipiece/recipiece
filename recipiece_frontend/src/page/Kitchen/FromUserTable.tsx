@@ -83,7 +83,7 @@ export const FromUserTable: FC = () => {
                 return (
                   <StaticTableRow key={membership.id}>
                     <>{membership.destination_user.username}</>
-                    <>{DateTime.fromISO(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
+                    <>{DateTime.fromJSDate(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                     <>{KitchenMembershipStatusMap[membership.status]}</>
                     <div className="flex flex-row gap-2">
                       {membership.status === "accepted" && (

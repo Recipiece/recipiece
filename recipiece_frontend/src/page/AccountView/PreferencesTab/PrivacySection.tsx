@@ -1,10 +1,10 @@
 import { FC, useCallback } from "react";
 import { H3, Label, LoadingGroup, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from "../../../component";
-import { UserAccount, UserAccountVisibility } from "../../../data";
 import { useUpdateUserMutation } from "../../../api";
+import { UserSchema } from "@recipiece/types";
 
 export interface PrivacySectionProps {
-  readonly user?: UserAccount;
+  readonly user?: UserSchema;
   readonly isLoading: boolean;
 }
 
@@ -21,7 +21,7 @@ export const PrivacySection: FC<PrivacySectionProps> = ({ user, isLoading }) => 
           id: user!.id,
           preferences: {
             ...user!.preferences,
-            account_visibility: newVisibility as UserAccountVisibility,
+            account_visibility: newVisibility as UserSchema["preferences"]["account_visibility"],
           },
         });
         toast({

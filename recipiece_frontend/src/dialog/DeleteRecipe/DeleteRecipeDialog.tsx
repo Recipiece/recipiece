@@ -1,11 +1,11 @@
+import { RecipeSchema } from "@recipiece/types";
 import { FC, useState } from "react";
 import { Button } from "../../component";
-import { Recipe } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface DeleteRecipeDialogProps extends BaseDialogProps<Recipe> {
-  readonly recipe: Recipe;
+export interface DeleteRecipeDialogProps extends BaseDialogProps<RecipeSchema> {
+  readonly recipe: RecipeSchema;
 }
 
 export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, onClose, onSubmit }) => {

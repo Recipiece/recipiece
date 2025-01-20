@@ -12,12 +12,14 @@
   "devDependencies": {
     "@swc/core": "^1.10.7",
     "@swc/register": "^0.1.10",
+    "@types/luxon": "^3.4.2",
     "ts-loader": "^9.5.2",
     "typescript": "^5.7.3",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "luxon": "^3.5.0",
     "yup": "^1.6.1"
   }
 }
