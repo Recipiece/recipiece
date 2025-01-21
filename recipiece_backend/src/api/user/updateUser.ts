@@ -1,9 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { UpdateUserRequestSchema, UserSchema } from "../../schema";
+import { UpdateUserRequestSchema, UserPreferencesSchema, UserSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { Prisma } from "@prisma/client";
-import { prisma } from "../../database";
-import { JsonObject } from "@prisma/client/runtime/library";
+import { Prisma, prisma } from "@recipiece/database";
 
 export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequestSchema>): ApiResponse<UserSchema> => {
   const requestUser = request.user;
@@ -57,8 +55,8 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
     }
     updateBody.email = restBody.email;
   }
-  if("preferences" in restBody) {
-    updateBody.preferences = {...restBody.preferences};
+  if ("preferences" in restBody) {
+    updateBody.preferences = { ...restBody.preferences };
   }
 
   try {
@@ -70,10 +68,13 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
         ...updateBody,
       },
     });
-    return [StatusCodes.OK, {
-      ...updatedUser,
-      preferences: updatedUser.preferences as JsonObject
-    }];
+    return [
+      StatusCodes.OK,
+      {
+        ...updatedUser,
+        preferences: updatedUser.preferences as UserPreferencesSchema,
+      },
+    ];
   } catch (err) {
     console.error(err);
     return [

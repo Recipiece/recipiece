@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { prisma } from "../../database";
-import { LoginResponseSchema } from "../../schema";
+import { prisma } from "@recipiece/database";
+import { LoginResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserSessions } from "../../util/constant";
 import { StatusCodes } from "http-status-codes";
@@ -8,11 +8,11 @@ import { generateToken } from "../../util/token";
 
 /**
  * Login the user who has authenticated through basic auth.
- * 
+ *
  * This will generate an access token and a refresh token. The refresh token is really
  * a session for the user. When we authenticate later on against an access token, we will attempt to
  * find a valid session for the user for that token.
- * 
+ *
  * When the user logs out, we will kill the session, which will effectively invalidate any access token issued
  * for that session.
  */

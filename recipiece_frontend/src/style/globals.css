@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 
 @layer base {
   :root {
@@ -38,7 +38,7 @@
   }
 
   .dark {
-    --background: 0 0% 7%; 
+    --background: 0 0% 7%;
     --foreground: 213 31% 91%;
     --muted: 0 0% 20%;
     --muted-foreground: 213 31% 71%;
@@ -75,6 +75,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }

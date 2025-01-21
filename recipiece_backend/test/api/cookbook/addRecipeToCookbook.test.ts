@@ -1,32 +1,20 @@
-import { User } from "@prisma/client";
+import { prisma, User } from "@recipiece/database";
+import { generateCookbook, generateRecipe } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
+import { generateCookbookWithRecipe } from "./fixtures";
 
 describe("Add Recipe to Cookbook", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should allow a recipe to be attached to a cookbook", async () => {
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
-    });
-
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        name: "test cookbook",
-        user_id: user.id,
-      },
-    });
+    const recipe = await generateRecipe({ user_id: user.id });
+    const cookbook = await generateCookbook({ user_id: user.id });
 
     const response = await request(server)
       .post("/cookbook/recipe/add")
@@ -50,20 +38,8 @@ describe("Add Recipe to Cookbook", () => {
   });
 
   it("should not allow another users recipe to be attached to a cookbook", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    const otherRecipe = await prisma.recipe.create({
-      data: {
-        name: "other users recipe",
-        user_id: otherUser.id,
-      },
-    });
-
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        name: "test cookbook",
-        user_id: user.id,
-      },
-    });
+    const otherRecipe = await generateRecipe();
+    const cookbook = await generateCookbook({ user_id: user.id });
 
     const response = await request(server)
       .post("/cookbook/recipe/add")
@@ -87,26 +63,7 @@ describe("Add Recipe to Cookbook", () => {
   });
 
   it("should not allow duplicate attachments in the same cookbook", async () => {
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
-    });
-
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        name: "test cookbook",
-        user_id: user.id,
-      },
-    });
-
-    await prisma.recipeCookbookAttachment.create({
-      data: {
-        recipe_id: recipe.id,
-        cookbook_id: cookbook.id,
-      },
-    });
+    const [cookbook, recipe] = await generateCookbookWithRecipe(user.id);
 
     const response = await request(server)
       .post("/cookbook/recipe/add")

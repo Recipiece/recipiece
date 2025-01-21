@@ -1,4 +1,4 @@
-import { User, UserValidationToken } from "@prisma/client";
+import { User, UserValidationToken } from "@recipiece/database";
 import { createTransport, SendMailOptions } from "nodemailer";
 
 export const sendEmail = async (options: SendMailOptions) => {
@@ -32,10 +32,9 @@ export const sendEmail = async (options: SendMailOptions) => {
   }
 };
 
-export const sendFinishedImportJobSuccessEmail = async (user: User, jobId: string) => {
+export const sendFinishedImportJobSuccessEmail = async (user: User) => {
   const textEmail = `
 Recipiece has finished importing your file! Your recipes should now be available within Recipiece. Happy Cooking!.
-For troubleshooting and reference, the import is associated with the job id ${jobId}.
   `;
 
   const htmlEmail = `
@@ -68,8 +67,6 @@ For troubleshooting and reference, the import is associated with the job id ${jo
         </div>
         <div class="content">
             Recipiece has finished importing your file! Your recipes should now be available within Recipiece. Happy Cooking!
-            <br />
-            For troubleshooting and reference, the import is associated with the job id ${jobId}.
         </div>
     </body>
 </html>
@@ -84,10 +81,9 @@ For troubleshooting and reference, the import is associated with the job id ${jo
   });
 };
 
-export const sendFinishedImportJobFailedEmail = async (user: User, jobId: string) => {
+export const sendFinishedImportJobFailedEmail = async (user: User) => {
   const textEmail = `
 Recipiece was unable to import your recipes from your recent file upload.
-For troubleshooting and reference, the import was associated with the job id ${jobId}.
   `;
 
   const htmlEmail = `
@@ -120,8 +116,6 @@ For troubleshooting and reference, the import was associated with the job id ${j
         </div>
         <div class="content">
             Recipiece was unable to import your recipes from your recent file upload.
-            <br/>
-            For troubleshooting and reference, the import was associated with the job id ${jobId}.
         </div>
     </body>
 </html>

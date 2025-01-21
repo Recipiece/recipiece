@@ -25,7 +25,7 @@ export const MobileCreateMenuDialog: FC<BaseDialogProps<MobileCreateMenuDialogOp
           Recipe from Scratch
         </Button>
         <Button onClick={() => onSubmit?.("timer")} className="dark:text-white">
-          <Watch className="mr-2"/>
+          <Watch className="mr-2" />
           Timer
         </Button>
         <Button onClick={() => onSubmit?.("cookbook")} className="dark:text-white">

@@ -1,11 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { CreatePushNotificationRequestSchema, EmptySchema } from "../../schema";
+import { prisma } from "@recipiece/database";
+import { CreatePushNotificationRequestSchema, EmptySchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const createPushNotificationSubscription = async (
-  request: AuthenticatedRequest<CreatePushNotificationRequestSchema>
-): ApiResponse<EmptySchema> => {
+export const createPushNotificationSubscription = async (request: AuthenticatedRequest<CreatePushNotificationRequestSchema>): ApiResponse<EmptySchema> => {
   const { subscription_data, device_id } = request.body;
   const userId = request.user.id;
 

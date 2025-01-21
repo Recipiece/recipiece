@@ -1,6 +1,6 @@
+import { prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";
 import { sendAccountVerificationEmail } from "../../util/email";

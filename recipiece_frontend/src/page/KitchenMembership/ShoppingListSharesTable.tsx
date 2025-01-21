@@ -4,9 +4,9 @@ import { FC, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeleteShoppingListShareMutation, useListShoppingListSharesQuery } from "../../api";
 import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
-import { ShoppingListShare, UserKitchenMembership } from "../../data";
+import { ShoppingListShareSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 
-export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembership }> = ({ membership }) => {
+export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembershipSchema }> = ({ membership }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [shoppingListSharesPage, setShoppingListSharesPage] = useState(0);
@@ -25,7 +25,7 @@ export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembe
   );
 
   const onUnshareShoppingList = useCallback(
-    async (share: ShoppingListShare) => {
+    async (share: ShoppingListShareSchema) => {
       try {
         await deleteShoppingListShare(share);
         toast({
@@ -65,7 +65,7 @@ export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembe
                           <ExternalLink />
                         </Button>
                       </div>
-                      <>{DateTime.fromISO(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
+                      <>{DateTime.fromJSDate(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                       <>
                         <Button size="sm" variant="destructive" onClick={() => onUnshareShoppingList(share)} disabled={isDeletingShoppingListShare}>
                           Un-Share

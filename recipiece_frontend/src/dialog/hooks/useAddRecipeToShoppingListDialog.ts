@@ -1,11 +1,11 @@
+import { RecipeSchema } from "@recipiece/types";
 import { useCallback, useContext } from "react";
+import { useAppendShoppingListItemsMutation } from "../../api";
+import { useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { AddRecipeToShoppingListForm } from "../AddRecipeToShoppingList";
-import { useToast } from "../../component";
-import { useAppendShoppingListItemsMutation } from "../../api";
-import { Recipe } from "../../data";
 
-export const useAddRecipeToShoppingListDialog = (recipe: Recipe) => {
+export const useAddRecipeToShoppingListDialog = (recipe: RecipeSchema) => {
   const { pushDialog, popDialog } = useContext(DialogContext);
   const { toast } = useToast();
 

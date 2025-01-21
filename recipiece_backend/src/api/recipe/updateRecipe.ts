@@ -1,7 +1,6 @@
-import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { RecipeSchema, UpdateRecipeRequestSchema } from "../../schema";
+import { Prisma, prisma } from "@recipiece/database";
+import { RecipeSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequestSchema>): ApiResponse<RecipeSchema> => {
@@ -76,7 +75,7 @@ export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequest
       if (recipeBody.description) {
         recipeUpdateData.description = recipeBody.description;
       }
-      if(recipeBody.servings) {
+      if (recipeBody.servings) {
         recipeUpdateData.servings = recipeBody.servings;
       }
 

@@ -1,19 +1,16 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import { randomUUID } from "crypto";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { UserValidationTokenTypes } from "../../../src/util/constant";
 import { verifyPassword } from "../../../src/util/password";
-import { prisma } from "../../../src/database";
 
 describe("Reset Password", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should set the user credentials to the new password for a user", async () => {

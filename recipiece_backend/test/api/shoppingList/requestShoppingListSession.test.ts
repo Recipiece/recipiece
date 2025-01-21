@@ -1,8 +1,8 @@
-import { ShoppingList, User } from "@prisma/client";
-import { prisma } from "../../../src/database";
-import request from "supertest";
+import { prisma, ShoppingList, User } from "@recipiece/database";
+import { generateShoppingList, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
+import { RequestShoppingListSessionResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { RequestShoppingListSessionResponseSchema } from "../../../src/schema";
+import request from "supertest";
 
 describe("Request Shopping List Session", () => {
   let user: User;
@@ -11,19 +11,11 @@ describe("Request Shopping List Session", () => {
 
   beforeEach(async () => {
     [user, bearerToken] = await fixtures.createUserAndToken();
-    shoppingList = await prisma.shoppingList.create({
-      data: {
-        user_id: user.id,
-        name: "Test shopping list",
-      },
-    });
+    shoppingList = await generateShoppingList({ user_id: user.id });
   });
 
   it("should issue a session token", async () => {
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const data: RequestShoppingListSessionResponseSchema = response.body;
@@ -33,25 +25,18 @@ describe("Request Shopping List Session", () => {
   it("should issue a session token to a shared user", async () => {
     const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
 
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
 
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    const share = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const data: RequestShoppingListSessionResponseSchema = response.body;
@@ -61,10 +46,7 @@ describe("Request Shopping List Session", () => {
   it("should not issue a session token to a non-shared user", async () => {
     const [_, otherBearerToken] = await fixtures.createUserAndToken();
 
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
@@ -72,34 +54,24 @@ describe("Request Shopping List Session", () => {
   it("should not issue a session token to a shared user where the membership is not accepted", async () => {
     const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
 
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "denied",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "denied",
     });
 
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    const share = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
-    const response = await request(server)
-      .get(`/shopping-list/${shoppingList.id}/session`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/${shoppingList.id}/session`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 
   it("should not issue a session token for a non-existent shopping list", async () => {
-    const response = await request(server)
-      .get(`/shopping-list/5000000/session`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).get(`/shopping-list/5000000/session`).set("Authorization", `Bearer ${bearerToken}`).send();
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });

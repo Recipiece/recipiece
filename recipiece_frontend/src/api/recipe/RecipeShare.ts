@@ -1,11 +1,19 @@
+import {
+  ListRecipeSharesQuerySchema,
+  ListRecipeSharesResponseSchema,
+  ListRecipesResponseSchema,
+  RecipeSchema,
+  RecipeShareSchema,
+  YListRecipeSharesResponseSchema,
+  YRecipeShareSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
-import { ListRecipeSharesFilters, ListRecipeSharesResponse, ListRecipesResponse, Recipe, RecipeShare } from "../../data";
-import { RecipeQueryKeys } from "./RecipeQueryKeys";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
+import { MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
 import { UserQueryKeys } from "../user";
+import { RecipeQueryKeys } from "./RecipeQueryKeys";
 
-export const useListRecipeSharesQuery = (filters: ListRecipeSharesFilters, args?: QueryArgs<ListRecipeSharesResponse>) => {
+export const useListRecipeSharesQuery = (filters: ListRecipeSharesQuerySchema, args?: QueryArgs<ListRecipeSharesResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -23,37 +31,37 @@ export const useListRecipeSharesQuery = (filters: ListRecipeSharesFilters, args?
   }
 
   const query = async () => {
-    const recipe = await getter<never, ListRecipeSharesResponse>({
+    const shares = await getter<never, ListRecipeSharesResponseSchema>({
       path: `/recipe/share/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return recipe;
+    return YListRecipeSharesResponseSchema.cast(shares.data);
   };
 
   return useQuery({
     queryFn: async () => {
       const response = await query();
-      response.data.data.forEach((rs) => {
+      response.data.forEach((rs) => {
         queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE_SHARE(rs.id), rs);
       });
-      return response.data;
+      return response;
     },
     queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(filters),
     ...(args ?? {}),
   });
 };
 
-export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShare, { readonly user_kitchen_membership_id: number; readonly recipe_id: number }>) => {
+export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShareSchema, { readonly user_kitchen_membership_id: number; readonly recipe_id: number }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
   const mutation = async (body: { readonly user_kitchen_membership_id: number; readonly recipe_id: number }) => {
-    const response = await poster<typeof body, RecipeShare>({
+    const response = await poster<typeof body, RecipeShareSchema>({
       path: "/recipe/share",
       body: { ...body },
       withAuth: "access_token",
     });
-    return response.data;
+    return YRecipeShareSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -93,7 +101,7 @@ export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShare, { 
         {
           queryKey: RecipeQueryKeys.LIST_RECIPES(),
         },
-        (oldData: ListRecipesResponse | undefined) => {
+        (oldData: ListRecipesResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
@@ -114,7 +122,7 @@ export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShare, { 
       );
 
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE_SHARE(data.id), data);
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.recipe_id), (oldRecipe: Recipe | undefined) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.recipe_id), (oldRecipe: RecipeSchema | undefined) => {
         if (oldRecipe) {
           return {
             ...oldRecipe,
@@ -130,11 +138,11 @@ export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShare, { 
   });
 };
 
-export const useDeleteRecipeShareMutation = (args?: MutationArgs<{}, RecipeShare>) => {
+export const useDeleteRecipeShareMutation = (args?: MutationArgs<{}, RecipeShareSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (share: RecipeShare) => {
+  const mutation = async (share: RecipeShareSchema) => {
     return await deleter({
       path: "/recipe/share",
       id: share.id,
@@ -174,7 +182,7 @@ export const useDeleteRecipeShareMutation = (args?: MutationArgs<{}, RecipeShare
         {
           queryKey: RecipeQueryKeys.LIST_RECIPES(),
         },
-        (oldData: ListRecipesResponse | undefined) => {
+        (oldData: ListRecipesResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
@@ -197,7 +205,7 @@ export const useDeleteRecipeShareMutation = (args?: MutationArgs<{}, RecipeShare
       );
 
       queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE_SHARE(params.id) });
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(params.recipe_id), (oldData: Recipe | undefined) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(params.recipe_id), (oldData: RecipeSchema | undefined) => {
         if (oldData) {
           return {
             ...oldData,

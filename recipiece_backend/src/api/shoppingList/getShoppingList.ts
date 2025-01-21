@@ -1,8 +1,7 @@
+import { prisma, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
+import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ShoppingListSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { itemsSubquery, sharesSubquery, sharesWithMemberships } from "./util";
 
 export const getShoppingList = async (request: AuthenticatedRequest): ApiResponse<ShoppingListSchema> => {
   const user = request.user;
@@ -12,15 +11,12 @@ export const getShoppingList = async (request: AuthenticatedRequest): ApiRespons
     .selectFrom("shopping_lists")
     .selectAll("shopping_lists")
     .select((eb) => {
-      return [itemsSubquery(eb).as("items"), sharesSubquery(eb, user.id).as("shares")];
+      return [shoppingListItemsSubquery(eb).as("items"), shoppingListSharesSubquery(eb, user.id).as("shares")];
     })
     .where((eb) => {
       return eb.and([
         eb("shopping_lists.id", "=", listId),
-        eb.or([
-          eb("shopping_lists.user_id", "=", user.id),
-          eb.exists(sharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
-        ]),
+        eb.or([eb("shopping_lists.user_id", "=", user.id), eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1))]),
       ]);
     });
 
@@ -35,5 +31,5 @@ export const getShoppingList = async (request: AuthenticatedRequest): ApiRespons
     ];
   }
 
-  return [StatusCodes.OK, list];
+  return [StatusCodes.OK, list as ShoppingListSchema];
 };

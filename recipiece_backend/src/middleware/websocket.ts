@@ -1,24 +1,24 @@
 import { ExtendedWebSocket } from "websocket-express";
-import { Redis } from "../database";
 import { WebsocketTokenPayload } from "../types";
+import { Redis } from "@recipiece/database";
 
 const OPEN_CONNECTIONS_MAP = new Map<string, ExtendedWebSocket>();
 
 export const storeWebsocket = (broadcastId: string, websocket: ExtendedWebSocket) => {
   OPEN_CONNECTIONS_MAP.set(broadcastId, websocket);
-}
+};
 
 export const closeConnection = async (wsToken: string) => {
   // remove the token from redis
   const redis = await Redis.getInstance();
-  const values = (await redis.HGETALL(`ws:${wsToken}`) as unknown as WebsocketTokenPayload);
+  const values = (await redis.HGETALL(`ws:${wsToken}`)) as unknown as WebsocketTokenPayload;
   const { entity_id, entity_type } = values;
   const sMembersKey = `${entity_type}:${entity_id}`;
   await redis.SREM(sMembersKey, wsToken);
 
   // clear the websocket from the map
   OPEN_CONNECTIONS_MAP.delete(wsToken);
-}
+};
 
 export const broadcastMessageViaEntityId = async (entityType: string, entityId: number, message: any) => {
   const redis = await Redis.getInstance();
@@ -36,11 +36,11 @@ export const broadcastMessageViaEntityId = async (entityType: string, entityId: 
       return await redis.SREM(`${entityType}:${entityId}`, broadcastId);
     }
   });
-}
+};
 
 export const broadcastMessageViaWebsocketToken = async (wsToken: string, message: any) => {
   const redis = await Redis.getInstance();
-  const values = (await redis.HGETALL(`ws:${wsToken}`) as unknown as WebsocketTokenPayload);
+  const values = (await redis.HGETALL(`ws:${wsToken}`)) as unknown as WebsocketTokenPayload;
   const { entity_id, entity_type } = values;
   const sMembersKey = `${entity_type}:${entity_id}`;
   const broadcastIds = await redis.SMEMBERS(sMembersKey);

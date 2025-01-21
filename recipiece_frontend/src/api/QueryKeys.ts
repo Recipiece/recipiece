@@ -52,9 +52,9 @@ export const generatePartialMatchPredicate = (partialQueryKey: RcpQueryKey) => {
       const partialKey = Object.keys(partialKeyObject)[0];
       const partialVal = Object.values(partialKeyObject)[0];
       const presentInRestQueryKeys = restQueryKeys.find((val) => {
-        if(partialKey in val) {
+        if (partialKey in val) {
           const valAtKey = val[partialKey];
-          if(Array.isArray(valAtKey) && Array.isArray(partialVal)) {
+          if (Array.isArray(valAtKey) && Array.isArray(partialVal)) {
             return valAtKey.every((v) => partialVal.includes(v));
           } else {
             return val[partialKey] === partialVal;

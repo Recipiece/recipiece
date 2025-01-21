@@ -1,10 +1,9 @@
-export const nonsense = () => {}
+export const nonsense = () => {};
 
 // /**
 //  * These query hooks should be used only in the TimerContext, rather than directly by some component.
 //  */
 // import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-// import { ListTimerFilters, Timer } from "../data";
 // import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "./Request";
 
 // export const useGetTimerByIdQuery = (timerId: number, args?: QueryArgs) => {

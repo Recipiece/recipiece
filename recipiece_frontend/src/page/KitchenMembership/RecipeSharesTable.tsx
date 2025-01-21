@@ -1,12 +1,12 @@
 import { FC, useCallback, useState } from "react";
-import { RecipeShare, UserKitchenMembership } from "../../data";
 import { useDeleteRecipeShareMutation, useListRecipeSharesQuery } from "../../api";
 import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
 import { ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DateTime } from "luxon";
+import { RecipeShareSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 
-export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership }> = ({ membership }) => {
+export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipSchema }> = ({ membership }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [recipeSharesPage, setRecipeSharesPage] = useState(0);
@@ -25,7 +25,7 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership 
   );
 
   const onUnshareRecipe = useCallback(
-    async (share: RecipeShare) => {
+    async (share: RecipeShareSchema) => {
       try {
         await deleteRecipeShare(share);
         toast({
@@ -65,7 +65,7 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembership 
                           <ExternalLink />
                         </Button>
                       </div>
-                      <>{DateTime.fromISO(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
+                      <>{DateTime.fromJSDate(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                       <>
                         <Button size="sm" variant="destructive" onClick={() => onUnshareRecipe(share)} disabled={isDeletingRecipeShare}>
                           Un-Share

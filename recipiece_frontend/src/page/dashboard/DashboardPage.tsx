@@ -4,13 +4,13 @@ import { useParams } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
 import { Button, Grid, H2, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
 import { DialogContext } from "../../context";
-import { ListRecipeFilters, Recipe } from "../../data";
+import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 
 export const DashboardPage: FC = () => {
   const { cookbookId } = useParams();
   const { pushDialog, popDialog } = useContext(DialogContext);
 
-  const defaultFilters: ListRecipeFilters = useMemo(() => {
+  const defaultFilters: ListRecipesQuerySchema = useMemo(() => {
     if (cookbookId) {
       return {
         page_number: 0,
@@ -28,7 +28,7 @@ export const DashboardPage: FC = () => {
     }
   }, [cookbookId]);
 
-  const [filters, setFilters] = useState<ListRecipeFilters>({ ...defaultFilters });
+  const [filters, setFilters] = useState<ListRecipesQuerySchema>({ ...defaultFilters });
   const [searchTerm, setSearchTerm] = useState("");
 
   const { toast } = useToast();
@@ -79,7 +79,7 @@ export const DashboardPage: FC = () => {
   const onFindRecipe = useCallback(() => {
     pushDialog("searchRecipesForCookbook", {
       cookbookId: +cookbookId!,
-      onSubmit: async (recipe: Recipe) => {
+      onSubmit: async (recipe: RecipeSchema) => {
         try {
           await addRecipeToCookbook({ recipe: recipe, cookbook: cookbook! });
           toast({

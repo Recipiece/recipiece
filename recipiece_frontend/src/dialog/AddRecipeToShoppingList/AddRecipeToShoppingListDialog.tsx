@@ -1,14 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RecipeSchema } from "@recipiece/types";
 import { FC, useCallback } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormCheckbox, ScrollArea, SubmitButton } from "../../component";
-import { Recipe } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface AddRecipeToShoppingListDialogProps extends BaseDialogProps<AddRecipeToShoppingListForm> {
-  readonly recipe: Recipe;
+  readonly recipe: RecipeSchema;
 }
 
 const AddRecipeToShoppingListFormSchema = z.object({
@@ -29,13 +29,13 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
   const form = useForm<AddRecipeToShoppingListForm>({
     resolver: zodResolver(AddRecipeToShoppingListFormSchema),
     defaultValues: {
-      items: recipe.ingredients.map((ing) => {
+      items: (recipe.ingredients ?? []).map((ing) => {
         let notesString = `${recipe.name} - `;
-        if(ing.amount) {
-          notesString += `${ing.amount} `
+        if (ing.amount) {
+          notesString += `${ing.amount} `;
         }
-        if(ing.unit) {
-          notesString += `${ing.unit} `
+        if (ing.unit) {
+          notesString += `${ing.unit} `;
         }
         return {
           name: ing.name,
@@ -60,7 +60,7 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
 
   const onSelectAll = useCallback(() => {
     form.reset({
-      items: recipe.ingredients.map((ing) => {
+      items: (recipe.ingredients ?? []).map((ing) => {
         return {
           name: ing.name,
           selected: true,
@@ -71,7 +71,7 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
 
   const onDeselectAll = useCallback(() => {
     form.reset({
-      items: recipe.ingredients.map((ing) => {
+      items: (recipe.ingredients ?? []).map((ing) => {
         return {
           name: ing.name,
           selected: false,

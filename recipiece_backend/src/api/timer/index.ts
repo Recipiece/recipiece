@@ -1,12 +1,5 @@
-import {
-  YCreateTimerRequestSchema,
-  YListTimersQuerySchema,
-  YListTimersResponseSchema,
-  YTimerSchema,
-  YUpdateTimerRequestSchema,
-} from "../../schema";
+import { YCreateTimerRequestSchema, YListTimersQuerySchema, YListTimersResponseSchema, YTimerSchema, YUpdateTimerRequestSchema } from "@recipiece/types";
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
 import { createTimer } from "./createTimer";
 import { deleteTimer } from "./deleteTimer";
 import { getTimer } from "./getTimer";
@@ -19,7 +12,7 @@ export const TIMER_ROUTES: Route[] = [
     function: createTimer,
     authentication: "access_token",
     method: "POST",
-    
+
     requestSchema: YCreateTimerRequestSchema,
     responseSchema: YTimerSchema,
   },
@@ -28,14 +21,12 @@ export const TIMER_ROUTES: Route[] = [
     function: deleteTimer,
     authentication: "access_token",
     method: "DELETE",
-    
   },
   {
     path: "/timer/:id(\\d+)",
     function: getTimer,
     authentication: "access_token",
     method: "GET",
-    
   },
   {
     path: "/timer/list",
@@ -44,7 +35,6 @@ export const TIMER_ROUTES: Route[] = [
     function: listTimers,
     requestSchema: YListTimersQuerySchema,
     responseSchema: YListTimersResponseSchema,
-    
   },
   {
     path: "/timer",
@@ -53,6 +43,5 @@ export const TIMER_ROUTES: Route[] = [
     function: updateTimer,
     requestSchema: YUpdateTimerRequestSchema,
     responseSchema: YTimerSchema,
-    
   },
 ];

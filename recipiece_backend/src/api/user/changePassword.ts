@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ChangePasswordRequestSchema } from "../../schema";
+import { prisma } from "@recipiece/database";
+import { ChangePasswordRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { hashPassword } from "../../util/password";
 
@@ -43,9 +43,9 @@ export const changePassword = async (request: AuthenticatedRequest<ChangePasswor
     });
 
     return [StatusCodes.OK, {}];
-  } catch(err) {
+  } catch (err) {
     console.error(err);
-    
+
     return [
       StatusCodes.INTERNAL_SERVER_ERROR,
       {

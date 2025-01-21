@@ -10,7 +10,7 @@ dotenv.config({ path: ".env.test" });
 
 export default async () => {
   try {
-    execSync("yarn run dotenv -e .env.test prisma migrate deploy");
+    execSync("dotenvx run -f .env.test -- yarn  --cwd ../recipiece_common/recipiece_database run prisma migrate deploy");
   } catch (err) {
     console.error(err);
     process.exit(1);

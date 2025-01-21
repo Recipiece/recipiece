@@ -1,8 +1,7 @@
+import { ingredientsSubquery, prisma, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery } from "@recipiece/database";
+import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { ingredientsSubquery, sharesSubquery, sharesWithMemberships, stepsSubquery } from "./util";
-import { RecipeSchema } from "../../schema";
 
 /**
  * Get a recipe by id.
@@ -18,19 +17,12 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSc
     .selectFrom("recipes")
     .selectAll("recipes")
     .select((eb) => {
-      return [
-        stepsSubquery(eb).as("steps"),
-        ingredientsSubquery(eb).as("ingredients"),
-        sharesSubquery(eb, user.id).as("shares"),
-      ];
+      return [stepsSubquery(eb).as("steps"), ingredientsSubquery(eb).as("ingredients"), recipeSharesSubquery(eb, user.id).as("shares")];
     })
     .where((eb) => {
       return eb.and([
         eb("recipes.id", "=", recipeId),
-        eb.or([
-          eb("recipes.user_id", "=", user.id),
-          eb.exists(sharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1)),
-        ]),
+        eb.or([eb("recipes.user_id", "=", user.id), eb.exists(recipeSharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1))]),
       ]);
     });
 
@@ -45,5 +37,5 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSc
     ];
   }
 
-  return [StatusCodes.OK, recipe];
+  return [StatusCodes.OK, recipe as RecipeSchema];
 };

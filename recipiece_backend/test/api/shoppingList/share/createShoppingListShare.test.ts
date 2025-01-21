@@ -1,8 +1,8 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
+import { generateShoppingList, generateShoppingListShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../../src/database";
-import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "../../../../src/schema";
 
 describe("Create Shopping List Share", () => {
   let user: User;
@@ -15,20 +15,12 @@ describe("Create Shopping List Share", () => {
   });
 
   it("should allow a user to share a shopping list from one user to another", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "test shopping list",
-        user_id: user.id,
-      },
-    });
+    const shoppingList = await generateShoppingList({ user_id: user.id });
 
     const response = await request(server)
       .post("/shopping-list/share")
@@ -53,26 +45,15 @@ describe("Create Shopping List Share", () => {
   });
 
   it("should not allow a duplicate share", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "test shopping list",
-        user_id: user.id,
-      },
-    });
-
-    await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    const shoppingList = await generateShoppingList({ user_id: user.id });
+    await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     const response = await request(server)
@@ -87,20 +68,12 @@ describe("Create Shopping List Share", () => {
   });
 
   it("should not allow a share to a kitchen membership that is not accepted", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "pending",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "pending",
     });
-
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "test shopping list",
-        user_id: user.id,
-      },
-    });
+    const shoppingList = await generateShoppingList({ user_id: user.id });
 
     const response = await request(server)
       .post("/shopping-list/share")
@@ -121,12 +94,7 @@ describe("Create Shopping List Share", () => {
   });
 
   it("should not allow a share to a kitchen membership that does not exist", async () => {
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "test shopping list",
-        user_id: user.id,
-      },
-    });
+    const shoppingList = await generateShoppingList({ user_id: user.id });
 
     const response = await request(server)
       .post("/shopping-list/share")
@@ -146,12 +114,10 @@ describe("Create Shopping List Share", () => {
   });
 
   it("should not allow a share to a shopping list that does not exist", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "pending",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "pending",
     });
 
     const response = await request(server)
@@ -172,22 +138,13 @@ describe("Create Shopping List Share", () => {
   });
 
   it("should not allow a share to a shopping list that the requesting user does not own", async () => {
-    const [thirdUser] = await fixtures.createUserAndToken();
-
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "pending",
-      },
+    const thirdUser = await generateUser();
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "pending",
     });
-
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "test shopping list",
-        user_id: thirdUser.id,
-      },
-    });
+    const shoppingList = await generateShoppingList({ user_id: thirdUser.id });
 
     const response = await request(server)
       .post("/shopping-list/share")

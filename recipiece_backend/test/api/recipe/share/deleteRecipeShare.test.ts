@@ -1,7 +1,7 @@
-import { User } from "@prisma/client";
-import request from "supertest";
-import { prisma } from "../../../../src/database";
+import { User, prisma } from "@recipiece/database";
+import { generateRecipe, generateRecipeShare, generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
+import request from "supertest";
 
 describe("Delete Recipe Share", () => {
   let user: User;
@@ -14,32 +14,18 @@ describe("Delete Recipe Share", () => {
   });
 
   it("should allow a user to delete their shared recipe", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
+    });
+    const recipe = await generateRecipe({ user_id: user.id });
+    const share = await generateRecipeShare({
+      recipe_id: recipe.id,
+      user_kitchen_membership_id: membership.id,
     });
 
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
-    });
-
-    const share = await prisma.recipeShare.create({
-      data: {
-        recipe_id: recipe.id,
-        user_kitchen_membership_id: membership.id,
-      },
-    });
-
-    const response = await request(server)
-      .delete(`/recipe/share/${share.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/recipe/share/${share.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -53,33 +39,18 @@ describe("Delete Recipe Share", () => {
 
   it("should not allow a user to delete a share they did not make", async () => {
     const [_, thirdUserToken] = await fixtures.createUserAndToken();
-
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
+    });
+    const recipe = await generateRecipe({ user_id: user.id });
+    const share = await generateRecipeShare({
+      recipe_id: recipe.id,
+      user_kitchen_membership_id: membership.id,
     });
 
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
-    });
-
-    const share = await prisma.recipeShare.create({
-      data: {
-        recipe_id: recipe.id,
-        user_kitchen_membership_id: membership.id,
-      },
-    });
-
-    const response = await request(server)
-      .delete(`/recipe/share/${share.id}`)
-      .set("Authorization", `Bearer ${thirdUserToken}`)
-      .send();
+    const response = await request(server).delete(`/recipe/share/${share.id}`).set("Authorization", `Bearer ${thirdUserToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 
@@ -92,10 +63,7 @@ describe("Delete Recipe Share", () => {
   });
 
   it("should not allow a user to delete a share that doesn't exist", async () => {
-    const response = await request(server)
-      .delete(`/recipe/share/1000000`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/recipe/share/1000000`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

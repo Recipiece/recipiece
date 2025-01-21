@@ -25,7 +25,7 @@ export const seedUsers = async () => {
         validated: true,
         preferences: {
           account_visibility: "protected",
-        }
+        },
       },
     });
     await tx.userCredentials.create({
@@ -42,7 +42,7 @@ export const seedUsers = async () => {
         validated: true,
         preferences: {
           account_visibility: "protected",
-        }
+        },
       },
     });
     await tx.userCredentials.create({
@@ -59,7 +59,7 @@ export const seedUsers = async () => {
         validated: false,
         preferences: {
           account_visibility: "protected",
-        }
+        },
       },
     });
     await tx.userCredentials.create({
@@ -69,7 +69,6 @@ export const seedUsers = async () => {
       },
     });
   });
-
 };
 
 export const seedUserKitchenMemberships = async () => {
@@ -89,7 +88,7 @@ export const seedUserKitchenMemberships = async () => {
     const emptyUser = await tx.user.findFirst({
       where: {
         username: "empty1234",
-      }
+      },
     });
 
     await tx.userKitchenMembership.create({

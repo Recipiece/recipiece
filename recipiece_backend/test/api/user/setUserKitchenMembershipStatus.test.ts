@@ -1,7 +1,7 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
+import { generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 import { UserKitchenInvitationStatus } from "../../../src/util/constant";
 
 describe("Set User Kitchen Membership Status", () => {
@@ -16,22 +16,16 @@ describe("Set User Kitchen Membership Status", () => {
   });
 
   it("should allow a targeted user set the status of an membership", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: UserKitchenInvitationStatus.PENDING,
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: UserKitchenInvitationStatus.PENDING,
     });
 
-    const response = await request(server)
-      .put("/user/kitchen/membership")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send({
-        id: membership.id,
-        status: UserKitchenInvitationStatus.ACCEPTED,
-      });
+    const response = await request(server).put("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${otherBearerToken}`).send({
+      id: membership.id,
+      status: UserKitchenInvitationStatus.ACCEPTED,
+    });
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const invitation = await prisma.userKitchenMembership.findFirst({
@@ -46,22 +40,16 @@ describe("Set User Kitchen Membership Status", () => {
   });
 
   it("should not allow the source user to modify the status", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: UserKitchenInvitationStatus.PENDING,
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: UserKitchenInvitationStatus.PENDING,
     });
 
-    const response = await request(server)
-      .put("/user/kitchen/membership")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send({
-        id: membership.id,
-        status: UserKitchenInvitationStatus.ACCEPTED,
-      });
+    const response = await request(server).put("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
+      id: membership.id,
+      status: UserKitchenInvitationStatus.ACCEPTED,
+    });
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

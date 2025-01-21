@@ -1,8 +1,8 @@
-import { User } from "@prisma/client";
+import { User } from "@recipiece/database";
+import { generateShoppingList, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
+import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
-import { ShoppingListSchema } from "../../../src/schema";
 
 describe("Get Shopping List", () => {
   let user: User;
@@ -13,16 +13,9 @@ describe("Get Shopping List", () => {
   });
 
   it("should allow a user to get a shopping list", async () => {
-    const existingShoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test ShoppingList",
-        user_id: user.id,
-      },
-    });
+    const existingShoppingList = await generateShoppingList({ user_id: user.id });
 
-    const response = await request(server)
-      .get(`/shopping-list/${existingShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${existingShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const shoppingListBody = response.body as ShoppingListSchema;
@@ -30,17 +23,9 @@ describe("Get Shopping List", () => {
   });
 
   it("should not retrieve a shopping list that is not shared and does not belong to the requesting user", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
-    const existingShoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test ShoppingList",
-        user_id: otherUser.id,
-      },
-    });
+    const existingShoppingList = await generateShoppingList();
 
-    const response = await request(server)
-      .get(`/shopping-list/${existingShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${existingShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
@@ -51,55 +36,30 @@ describe("Get Shopping List", () => {
   });
 
   it("should get a shared shopping list", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
-    const othersShoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test ShoppingList",
-        user_id: otherUser.id,
-      },
+    const othersShoppingList = await generateShoppingList();
+    const membership = await generateUserKitchenMembership({
+      source_user_id: othersShoppingList.user_id,
+      destination_user_id: user.id,
+      status: "accepted",
     });
-
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-      },
-    });
-
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: othersShoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    const share = await generateShoppingListShare({
+      shopping_list_id: othersShoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     // make a membership and share going the other way to ensure we dont pick up stray records
-    const mirroredMembership = await prisma.userKitchenMembership.create({
-      data: {
-        destination_user_id: otherUser.id,
-        source_user_id: user.id,
-        status: "accepted",
-      },
+    const mirroredMembership = await generateUserKitchenMembership({
+      destination_user_id: othersShoppingList.user_id,
+      source_user_id: user.id,
+      status: "accepted",
+    });
+    const usersShoppingList = await generateShoppingList({ user_id: user.id });
+    const usersShoppingListShare = await generateShoppingListShare({
+      user_kitchen_membership_id: mirroredMembership.id,
+      shopping_list_id: usersShoppingList.id,
     });
 
-    const usersShoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "users shoppingList",
-        user_id: user.id,
-      },
-    });
-
-    const usersShoppingListShare = await prisma.shoppingListShare.create({
-      data: {
-        user_kitchen_membership_id: mirroredMembership.id,
-        shopping_list_id: usersShoppingList.id,
-      },
-    });
-
-    const response = await request(server)
-      .get(`/shopping-list/${othersShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${othersShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: ShoppingListSchema = response.body;
@@ -109,33 +69,21 @@ describe("Get Shopping List", () => {
   });
 
   it("should not get a shared shopping list where the membership is not accepted", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
-    const othersShoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test ShoppingList",
-        user_id: otherUser.id,
-      },
+    const otherShoppingList = await generateShoppingList();
+
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherShoppingList.user_id,
+      destination_user_id: user.id,
+      status: "denied",
     });
 
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "denied",
-      },
+    const share = await generateShoppingListShare({
+      shopping_list_id: otherShoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: othersShoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
-    });
-
-    const response = await request(server)
-      .get(`/shopping-list/${othersShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/shopping-list/${otherShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-  })
+  });
 });

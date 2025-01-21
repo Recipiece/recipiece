@@ -1,4 +1,4 @@
-import { ListCookbookFilters } from "../../data";
+import { ListCookbooksQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class CookbookQueryKeys {
@@ -6,7 +6,7 @@ export class CookbookQueryKeys {
     return ["cookbook", { id: cookbookId }];
   };
 
-  public static readonly LIST_COOKBOOK = (filters?: Partial<ListCookbookFilters>): RcpQueryKey => {
+  public static readonly LIST_COOKBOOK = (filters?: Partial<ListCookbooksQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listCookbook"];
     if (filters) {
       const { page_number, search, exclude_containing_recipe_id } = filters;

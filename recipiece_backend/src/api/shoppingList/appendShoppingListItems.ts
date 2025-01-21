@@ -1,13 +1,10 @@
+import { collapseOrders, MAX_NUM_ITEMS, prisma, shoppingListSharesWithMemberships } from "@recipiece/database";
+import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "../../schema";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { collapseOrders, MAX_NUM_ITEMS, sharesWithMemberships } from "./util";
 import { broadcastMessageViaEntityId } from "../../middleware";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const appendShoppingListItems = async (
-  request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>
-): ApiResponse<AppendShoppingListItemsResponseSchema> => {
+export const appendShoppingListItems = async (request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>): ApiResponse<AppendShoppingListItemsResponseSchema> => {
   const shoppingListId = request.body.shopping_list_id;
   const user = request.user;
 
@@ -17,10 +14,7 @@ export const appendShoppingListItems = async (
     .where((eb) => {
       return eb.and([
         eb("shopping_lists.id", "=", shoppingListId),
-        eb.or([
-          eb("shopping_lists.user_id", "=", user.id),
-          eb.exists(sharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1)),
-        ]),
+        eb.or([eb("shopping_lists.user_id", "=", user.id), eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1))]),
       ]);
     })
     .executeTakeFirst();
@@ -56,5 +50,5 @@ export const appendShoppingListItems = async (
   // broadcast the message to any listening
   await broadcastMessageViaEntityId("modifyShoppingListSession", shoppingList.id, websocketMessage);
 
-  return [StatusCodes.OK, collapsed];
+  return [StatusCodes.OK, collapsed as unknown as AppendShoppingListItemsResponseSchema];
 };

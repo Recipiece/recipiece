@@ -1,3 +1,4 @@
+import { ShoppingListItemSchema, ShoppingListSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { Edit, Eraser, Minus, MoreVertical, Share, Trash } from "lucide-react";
 import React, { createRef, FC, KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -26,7 +27,6 @@ import {
   useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
-import { ShoppingList, ShoppingListItem, UserKitchenMembership } from "../../data";
 import { useLayout } from "../../hooks";
 import { CheckableShoppingListItemInput } from "./ShoppingListItemInput";
 
@@ -61,7 +61,7 @@ export const ShoppingListViewPage: FC = () => {
 
   const [newestShoppingListItem, setNewestShoppingListItem] = useState("");
   const [isAutoCompleteOpen, setIsAutoCompleteOpen] = useState(false);
-  const [incompleteItems, setIncompleteItems] = useState<{ readonly [key: number]: ShoppingListItem }>({});
+  const [incompleteItems, setIncompleteItems] = useState<{ readonly [key: number]: ShoppingListItemSchema }>({});
   const newItemRef = createRef<HTMLInputElement>();
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export const ShoppingListViewPage: FC = () => {
   }, [incompleteItems]);
 
   const onChangeItemContent = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       setItemContent({
         ...item,
       });
@@ -91,7 +91,7 @@ export const ShoppingListViewPage: FC = () => {
   );
 
   const onChangeItemContentKeyDown = useCallback(
-    (event: KeyboardEvent, item: ShoppingListItem) => {
+    (event: KeyboardEvent, item: ShoppingListItemSchema) => {
       if (event.key === "Enter") {
         onChangeItemContent(item);
       }
@@ -109,7 +109,7 @@ export const ShoppingListViewPage: FC = () => {
   }, []);
 
   const onChangeItemNotes = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       setItemNotes({
         ...item,
       });
@@ -118,7 +118,7 @@ export const ShoppingListViewPage: FC = () => {
   );
 
   const onChangeItemNotesKeyDown = useCallback(
-    (event: KeyboardEvent, item: ShoppingListItem) => {
+    (event: KeyboardEvent, item: ShoppingListItemSchema) => {
       if (event.key === "Enter") {
         onChangeItemNotes(item);
       }
@@ -163,7 +163,7 @@ export const ShoppingListViewPage: FC = () => {
   }, [shoppingListItems]);
 
   const onShoppingListItemDropped = useCallback(
-    (item: ShoppingListItem, intoSpot: number) => {
+    (item: ShoppingListItemSchema, intoSpot: number) => {
       setItemOrder({
         ...item,
         order: intoSpot,
@@ -173,7 +173,7 @@ export const ShoppingListViewPage: FC = () => {
   );
 
   const onSelectAutocompleteItem = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       markItemIncomplete(item);
       setNewestShoppingListItem("");
     },
@@ -185,7 +185,7 @@ export const ShoppingListViewPage: FC = () => {
   }, []);
 
   const onDeleteItem = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       deleteItem({ ...item });
     },
     [deleteItem]
@@ -215,7 +215,7 @@ export const ShoppingListViewPage: FC = () => {
   const onRequestShoppingListDelete = useCallback(() => {
     pushDialog("deleteShoppingList", {
       onClose: () => popDialog("deleteShoppingList"),
-      onSubmit: async (list: ShoppingList) => {
+      onSubmit: async (list: ShoppingListSchema) => {
         try {
           await deleteShoppingList(list);
           toast({
@@ -243,7 +243,7 @@ export const ShoppingListViewPage: FC = () => {
       entity_id: shoppingList!.id,
       entity_type: "shopping_list",
       onClose: () => popDialog("share"),
-      onSubmit: async (membership: UserKitchenMembership) => {
+      onSubmit: async (membership: UserKitchenMembershipSchema) => {
         try {
           await createShoppingListShare({
             shopping_list_id: shoppingList!.id,

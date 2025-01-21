@@ -54,7 +54,7 @@ export const CreateTimerDialog: FC<CreateTimerDialogProps> = ({ onClose, onSubmi
         }
       } catch {}
     },
-    [onSubmit, toast, requestAndSaveNotificationPermissions],
+    [onSubmit, toast, requestAndSaveNotificationPermissions]
   );
 
   return (

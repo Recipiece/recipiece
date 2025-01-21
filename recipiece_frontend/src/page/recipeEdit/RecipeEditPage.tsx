@@ -6,28 +6,32 @@ import { z } from "zod";
 import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
 import { Button, Divider, Form, FormInput, FormTextarea, NotFound, Stack, SubmitButton, useToast } from "../../component";
 import { DialogContext } from "../../context";
-import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
 import { ParseRecipeFromURLForm } from "../../dialog";
 import { IngredientsForm } from "./IngredientsForm";
 import { StepsForm } from "./StepsForm";
 import { formatIngredientAmount } from "../../util";
+import { RecipeIngredientSchema, RecipeSchema, RecipeStepSchema } from "@recipiece/types";
 
 const RecipeFormSchema = z.object({
   name: z.string().min(3).max(100),
   description: z.string().max(1000).optional(),
   servings: z.coerce.number().min(0).optional(),
-  steps: z.array(
-    z.object({
-      content: z.string().min(3),
-    })
-  ),
-  ingredients: z.array(
-    z.object({
-      name: z.string().min(1),
-      unit: z.string().optional().nullable(),
-      amount: z.string().optional().nullable(),
-    })
-  ),
+  steps: z
+    .array(
+      z.object({
+        content: z.string().min(3),
+      })
+    )
+    .default([]),
+  ingredients: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        unit: z.string().optional().nullable(),
+        amount: z.string().optional().nullable(),
+      })
+    )
+    .default([]),
 });
 
 type RecipeForm = z.infer<typeof RecipeFormSchema>;
@@ -77,7 +81,7 @@ export const RecipeEditPage: FC = () => {
   const { mutateAsync: parseRecipe } = useParseRecipeFromURLMutation();
 
   const onSubmit = async (formData: RecipeForm) => {
-    const sanitizedFormData: Partial<Recipe> = {
+    const sanitizedFormData: Partial<RecipeSchema> = {
       id: isCreatingNewRecipe ? undefined : recipeId,
       name: formData.name,
       description: formData.description,
@@ -87,17 +91,17 @@ export const RecipeEditPage: FC = () => {
           ...ing,
           order: index,
         };
-      }) as RecipeIngredient[],
+      }) as RecipeIngredientSchema[],
       steps: formData.steps.map((step, index) => {
         return {
           ...step,
           order: index,
         };
-      }) as RecipeStep[],
+      }) as RecipeStepSchema[],
     };
 
     try {
-      let response: Recipe;
+      let response: RecipeSchema;
       if (isCreatingNewRecipe) {
         response = await createRecipe(sanitizedFormData);
       } else {
@@ -124,8 +128,8 @@ export const RecipeEditPage: FC = () => {
     if (recipe) {
       return {
         name: recipe.name,
-        description: recipe.description,
-        steps: recipe.steps,
+        description: recipe.description ?? "",
+        steps: recipe.steps ?? [],
         ingredients: (recipe.ingredients ?? []).map((ing) => {
           return {
             ...ing,
@@ -133,7 +137,7 @@ export const RecipeEditPage: FC = () => {
             unit: ing.unit === null ? undefined : ing.unit,
           };
         }),
-        servings: recipe.servings,
+        servings: recipe.servings ?? undefined,
       };
     } else {
       return {
@@ -160,7 +164,7 @@ export const RecipeEditPage: FC = () => {
   const onParseRecipeDialogSubmit = async (data: ParseRecipeFromURLForm) => {
     try {
       const response = await parseRecipe(data.url);
-      form.reset({ ...response });
+      form.reset({ ...response } as RecipeForm);
       popDialog("parseRecipeFromURL");
       toast({
         title: "Recipe Parsed",

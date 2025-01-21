@@ -9,9 +9,8 @@ import {
   YMealPlanSchema,
   YUpdateMealPlanItemRequestSchema,
   YUpdateMealPlanRequestSchema,
-} from "../../schema";
+} from "@recipiece/types";
 import { Route } from "../../types";
-import { Versions } from "../../util/constant";
 import { createMealPlan } from "./createMealPlan";
 import { deleteMealPlan } from "./deleteMealPlan";
 import { getMealPlanById } from "./getMealPlanById";
@@ -27,7 +26,6 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     function: createMealPlan,
     requestSchema: YCreateMealPlanRequestSchema,
     responseSchema: YMealPlanSchema,
-    
   },
   {
     path: "/meal-plan",
@@ -36,7 +34,6 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     function: updateMealPlan,
     requestSchema: YUpdateMealPlanRequestSchema,
     responseSchema: YMealPlanSchema,
-    
   },
   {
     path: "/meal-plan/list",
@@ -45,14 +42,12 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     function: listMealPlans,
     requestSchema: YListMealPlanQuerySchema,
     responseSchema: YListMealPlanResponseSchema,
-    
   },
   {
     path: "/meal-plan/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
     function: getMealPlanById,
-    
     responseSchema: YMealPlanSchema,
   },
   {
@@ -60,14 +55,12 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "DELETE",
     function: deleteMealPlan,
-    
   },
   {
     path: "/meal-plan/:id(\\d+)/item/list",
     authentication: "access_token",
     method: "GET",
     function: listItemsForMealPlan,
-    
     requestSchema: YListItemsForMealPlanQuerySchema,
     responseSchema: YListItemsForMealPlanResponseSchema,
   },
@@ -76,7 +69,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "POST",
     function: createItemForMealPlan,
-    
+
     requestSchema: YCreateMealPlanItemRequestSchema,
     responseSchema: YMealPlanItemSchema,
   },
@@ -85,7 +78,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "PUT",
     function: updateItemForMealPlan,
-    
+
     requestSchema: YUpdateMealPlanItemRequestSchema,
     responseSchema: YMealPlanItemSchema,
   },
@@ -94,6 +87,5 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "DELETE",
     function: deleteItemForMealPlan,
-    
   },
 ];

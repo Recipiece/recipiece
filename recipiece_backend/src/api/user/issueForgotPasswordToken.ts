@@ -1,31 +1,29 @@
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
-import { IssueForgotPasswordTokenRequestSchema } from "../../schema";
+import { prisma } from "@recipiece/database";
+import { IssueForgotPasswordTokenRequestSchema } from "@recipiece/types";
 import { ApiResponse } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";
 import { sendForgotPasswordEmail } from "../../util/email";
 
-export const issueForgotPasswordToken = async (
-  request: Request<any, any, IssueForgotPasswordTokenRequestSchema>
-): ApiResponse<{}> => {
+export const issueForgotPasswordToken = async (request: Request<any, any, IssueForgotPasswordTokenRequestSchema>): ApiResponse<{}> => {
   const { username_or_email } = request.body;
 
   const matchingUser = await prisma.user.findFirst({
     where: {
       OR: [
         {
-          email: username_or_email
+          email: username_or_email,
         },
         {
           username: username_or_email,
-        }
+        },
       ],
-    }
+    },
   });
 
-  if(!matchingUser) {
+  if (!matchingUser) {
     return [StatusCodes.CREATED, {}];
   }
 

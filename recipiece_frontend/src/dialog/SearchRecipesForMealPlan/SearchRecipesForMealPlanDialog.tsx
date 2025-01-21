@@ -1,16 +1,16 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import { useListRecipesForMealPlanQuery } from "../../api";
 import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
-import { ListRecipeFilters, Recipe } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
+import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 
-export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSubmit }) => {
+export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const [filters, setFilters] = useState<ListRecipeFilters>({
+  const [filters, setFilters] = useState<ListRecipesQuerySchema>({
     page_number: 0,
     search: "",
   });
@@ -38,7 +38,7 @@ export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<Recipe>> = ({ on
   }, [searchTerm]);
 
   const onRecipeSelected = useCallback(
-    async (recipe: Recipe) => {
+    async (recipe: RecipeSchema) => {
       setIsDisabled(true);
       try {
         await Promise.resolve(onSubmit?.(recipe));

@@ -1,8 +1,8 @@
+import { RefreshTokenResponseSchema } from "@recipiece/types";
 import axios, { AxiosHeaders } from "axios";
-import { StorageKeys } from "../util";
-import { RefreshTokenResponse } from "../data";
 import { jwtDecode } from "jwt-decode";
 import { DateTime } from "luxon";
+import { StorageKeys } from "../util";
 
 /**
  * This class intentionally sits outside of the state/render system.
@@ -69,7 +69,7 @@ export class TokenManager {
     headers.set("Authorization", `Bearer ${this.refreshToken}`);
     headers.set("Content-Type", "application/json");
     const response = await axios.post(
-      `${process.env.REACT_APP_API_URL!}/user/refresh-token`,
+      `${process.env.RECIPIECE_API_URL!}/user/refresh-token`,
       {},
       {
         headers: headers,
@@ -77,7 +77,7 @@ export class TokenManager {
     );
     if (response.status === 200) {
       // huzzah, we have new tokens. Set them in the context and then surface them to the caller
-      const responseData = response.data as RefreshTokenResponse;
+      const responseData = response.data as RefreshTokenResponseSchema;
       sessionStorage.setItem(StorageKeys.ACCESS_TOKEN, JSON.stringify(responseData.access_token));
       if (responseData.refresh_token !== this.refreshToken) {
         localStorage.setItem(StorageKeys.REFRESH_TOKEN, JSON.stringify(responseData.refresh_token));

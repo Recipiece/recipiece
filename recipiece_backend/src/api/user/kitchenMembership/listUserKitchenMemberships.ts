@@ -1,23 +1,13 @@
-import { Prisma, UserKitchenMembershipStatus } from "@prisma/client";
+import { Prisma, prisma, UserKitchenMembershipStatus } from "@recipiece/database";
+import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema } from "../../../schema";
 import { DEFAULT_PAGE_SIZE, UserKitchenInvitationStatus } from "../../../util/constant";
 
 export const listUserKitchenMemberships = async (
   request: AuthenticatedRequest<any, ListUserKitchenMembershipsQuerySchema>
 ): ApiResponse<ListUserKitchenMembershipsResponseSchema> => {
-  const {
-    targeting_self,
-    from_self,
-    page_number,
-    page_size,
-    status = UserKitchenInvitationStatus.ALL_STATUSES,
-    entity,
-    entity_id,
-    entity_type,
-  } = request.query;
+  const { targeting_self, from_self, page_number, page_size, status = UserKitchenInvitationStatus.ALL_STATUSES, entity, entity_id, entity_type } = request.query;
 
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
 
@@ -68,7 +58,7 @@ export const listUserKitchenMemberships = async (
               recipe_id: entity_id,
             },
           };
-        } else if(entity === "exclude") {
+        } else if (entity === "exclude") {
           where.recipe_shares = {
             none: {
               recipe_id: entity_id,

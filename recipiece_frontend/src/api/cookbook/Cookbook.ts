@@ -1,19 +1,28 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cookbook, ListCookbookFilters, ListCookbooksResponse, ListRecipesResponse, Recipe } from "../../data";
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "../recipe";
 import { CookbookQueryKeys } from "./CookbookQueryKeys";
+import {
+  CookbookSchema,
+  ListCookbooksQuerySchema,
+  ListCookbooksResponseSchema,
+  ListRecipeSharesResponseSchema,
+  ListRecipesResponseSchema,
+  RecipeSchema,
+  YCookbookSchema,
+  YListCookbooksResponseSchema,
+} from "@recipiece/types";
 
-export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<Cookbook>) => {
+export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<CookbookSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const recipe = await getter<never, Cookbook>({
+    const cookbook = await getter<never, CookbookSchema>({
       path: `/cookbook/${cookbookId}`,
       withAuth: "access_token",
     });
-    return recipe.data;
+    return YCookbookSchema.cast(cookbook.data);
   };
 
   return useQuery({
@@ -23,7 +32,7 @@ export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<Coo
   });
 };
 
-export const useListCookbooksQuery = (filters: ListCookbookFilters, args?: QueryArgs<ListCookbooksResponse>) => {
+export const useListCookbooksQuery = (filters: ListCookbooksQuerySchema, args?: QueryArgs<ListCookbooksResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -41,11 +50,11 @@ export const useListCookbooksQuery = (filters: ListCookbookFilters, args?: Query
   }
 
   const query = async () => {
-    const cookbooks = await getter<never, { readonly data: Cookbook[]; readonly page: number; readonly hasNextPage: boolean }>({
+    const cookbooks = await getter<never, ListCookbooksResponseSchema>({
       path: `/cookbook/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return cookbooks.data;
+    return YListCookbooksResponseSchema.cast(cookbooks.data);
   };
 
   return useQuery({
@@ -67,17 +76,17 @@ export const useListCookbooksQuery = (filters: ListCookbookFilters, args?: Query
   });
 };
 
-export const useCreateCookbookMutation = (args?: MutationArgs<Cookbook, Partial<Cookbook>>) => {
+export const useCreateCookbookMutation = (args?: MutationArgs<CookbookSchema, Partial<CookbookSchema>>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: Partial<Cookbook>) => {
-    const response = await poster<Partial<Cookbook>, Cookbook>({
+  const mutation = async (data: Partial<CookbookSchema>) => {
+    const response = await poster<Partial<CookbookSchema>, CookbookSchema>({
       path: "/cookbook",
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YCookbookSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -93,17 +102,17 @@ export const useCreateCookbookMutation = (args?: MutationArgs<Cookbook, Partial<
   });
 };
 
-export const useUpdateCookbookMutation = (args?: MutationArgs<Cookbook, Partial<Cookbook>>) => {
+export const useUpdateCookbookMutation = (args?: MutationArgs<CookbookSchema, Partial<CookbookSchema>>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
-  const mutation = async (data: Partial<Cookbook>) => {
-    const response = await putter<Partial<Cookbook>, Cookbook>({
+  const mutation = async (data: Partial<CookbookSchema>) => {
+    const response = await putter<Partial<CookbookSchema>, CookbookSchema>({
       path: "/cookbook",
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YCookbookSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -119,11 +128,11 @@ export const useUpdateCookbookMutation = (args?: MutationArgs<Cookbook, Partial<
   });
 };
 
-export const useDeleteCookbookMutation = (args?: MutationArgs<{}, Cookbook>) => {
+export const useDeleteCookbookMutation = (args?: MutationArgs<{}, CookbookSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (cookbook: Cookbook) => {
+  const mutation = async (cookbook: CookbookSchema) => {
     return await deleter({
       path: "/cookbook",
       id: cookbook.id,
@@ -146,11 +155,11 @@ export const useDeleteCookbookMutation = (args?: MutationArgs<{}, Cookbook>) => 
   });
 };
 
-export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { readonly recipe: Recipe; readonly cookbook: Cookbook }>) => {
+export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: { readonly recipe: Recipe; readonly cookbook: Cookbook }) => {
+  const mutation = async (data: { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }) => {
     const response = await poster<{ readonly recipe_id: number; readonly cookbook_id: number }, void>({
       path: "/cookbook/recipe/add",
       body: {
@@ -173,7 +182,7 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { re
       });
       queryClient.setQueriesData(
         { queryKey: RecipeQueryKeys.LIST_RECIPES({ cookbook_id: params.cookbook.id, cookbook_attachments: "include" }) },
-        (oldData: ListRecipesResponse | undefined) => {
+        (oldData: ListRecipesResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
@@ -194,7 +203,7 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { re
             exclude_containing_recipe_id: params.recipe.id,
           }),
         },
-        (oldData: ListCookbooksResponse | undefined) => {
+        (oldData: ListCookbooksResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
@@ -211,11 +220,11 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { re
   });
 };
 
-export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<{}, { readonly recipe: Recipe; readonly cookbook: Cookbook }>) => {
+export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<{}, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: { readonly recipe: Recipe; readonly cookbook: Cookbook }) => {
+  const mutation = async (data: { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }) => {
     return await poster<{ readonly recipe_id: number; cookbook_id: number }, void>({
       path: "/cookbook/recipe/remove",
       body: {
@@ -239,7 +248,7 @@ export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<{}, { re
         {
           queryKey: RecipeQueryKeys.LIST_RECIPES({ cookbook_id: params.cookbook.id, cookbook_attachments: "include" }),
         },
-        (oldData: ListRecipesResponse | undefined) => {
+        (oldData: ListRecipeSharesResponseSchema | undefined) => {
           if (oldData) {
             const newVal = {
               ...oldData,
@@ -257,7 +266,7 @@ export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<{}, { re
             exclude_containing_recipe_id: params.recipe.id,
           }),
         },
-        (oldData: ListCookbooksResponse | undefined) => {
+        (oldData: ListCookbooksResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,

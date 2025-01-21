@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
-import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "../../../schema";
+import { prisma } from "@recipiece/database";
+import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { UserKitchenInvitationStatus } from "../../../util/constant";
 
@@ -10,9 +10,7 @@ import { UserKitchenInvitationStatus } from "../../../util/constant";
  *
  * Users can only send an invitation to another user once, to prevent spamming.
  */
-export const createUserKitchenMembership = async (
-  request: AuthenticatedRequest<CreateUserKitchenMembershipRequestSchema>
-): ApiResponse<UserKitchenMembershipSchema> => {
+export const createUserKitchenMembership = async (request: AuthenticatedRequest<CreateUserKitchenMembershipRequestSchema>): ApiResponse<UserKitchenMembershipSchema> => {
   const targetUsername = request.body.username;
   const targetUser = await prisma.user.findFirst({
     where: {
@@ -74,10 +72,7 @@ export const createUserKitchenMembership = async (
       StatusCodes.OK,
       {
         ...membership,
-        status: membership.status as
-          | typeof UserKitchenInvitationStatus.PENDING
-          | typeof UserKitchenInvitationStatus.ACCEPTED
-          | typeof UserKitchenInvitationStatus.DENIED,
+        status: membership.status as typeof UserKitchenInvitationStatus.PENDING | typeof UserKitchenInvitationStatus.ACCEPTED | typeof UserKitchenInvitationStatus.DENIED,
       },
     ];
   } catch (err) {

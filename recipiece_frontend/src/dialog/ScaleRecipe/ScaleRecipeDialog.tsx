@@ -11,8 +11,7 @@ export interface ScaleRecipeSubmit {
   readonly scaleFactor: number;
 }
 
-export interface ScaleRecipeDialogProps extends BaseDialogProps<ScaleRecipeSubmit> {
-}
+export interface ScaleRecipeDialogProps extends BaseDialogProps<ScaleRecipeSubmit> {}
 
 const ScaleRecipeFormSchema = z.object({
   amount: z.string().superRefine((value, ctx) => {
@@ -62,9 +61,7 @@ export const ScaleRecipeDialog: FC<ScaleRecipeDialogProps> = ({ onClose, onSubmi
         <form onSubmit={form.handleSubmit(onScale)}>
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>Scale Recipe</ResponsiveTitle>
-            <ResponsiveDescription>
-              Enter a number or fraction to scale the recipe by.
-            </ResponsiveDescription>
+            <ResponsiveDescription>Enter a number or fraction to scale the recipe by.</ResponsiveDescription>
           </ResponsiveHeader>
 
           <div className="flex flex-row items-end gap-2">

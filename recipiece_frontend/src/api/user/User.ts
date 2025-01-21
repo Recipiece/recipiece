@@ -1,21 +1,29 @@
+import {
+  CreatePushNotificationRequestSchema,
+  CreateUserRequestSchema,
+  CreateUserResponseSchema,
+  UpdateUserRequestSchema,
+  UserSchema,
+  YCreateUserResponseSchema,
+  YLoginResponseSchema,
+  YUserSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Buffer } from "buffer";
-import { UserAccount, UserPreferences } from "../../data";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { TokenManager } from "../TokenManager";
 import { UserQueryKeys } from "./UserQueryKeys";
 
-
-export const useGetSelfQuery = (args?: QueryArgs<UserAccount>) => {
+export const useGetSelfQuery = (args?: QueryArgs<UserSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const data = await getter<never, UserAccount>({
+    const data = await getter<never, UserSchema>({
       path: "/user/self",
       withAuth: "access_token",
     });
-    return data.data;
+    return YUserSchema.cast(data.data);
   };
 
   return useQuery({
@@ -40,7 +48,7 @@ export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token
         Authorization: `Basic ${encoded}`,
       },
     });
-    return response.data;
+    return YLoginResponseSchema.cast(response.data);
   };
 
   return useMutation({
@@ -104,15 +112,15 @@ export const useLogoutUserMutation = (args?: MutationArgs<void, void>) => {
   });
 };
 
-export const useCreateUserMutation = (args?: MutationArgs<void, any>) => {
+export const useCreateUserMutation = (args?: MutationArgs<CreateUserResponseSchema, CreateUserRequestSchema>) => {
   const { poster } = usePost();
 
-  const mutation = async (args: { readonly username: string; readonly password: string; readonly email: string }) => {
-    const response = await poster<typeof args, never>({
+  const mutation = async (args: CreateUserRequestSchema) => {
+    const response = await poster({
       path: "/user",
       body: args,
     });
-    return response.data;
+    return YCreateUserResponseSchema.cast(response.data);
   };
 
   return useMutation({
@@ -121,17 +129,17 @@ export const useCreateUserMutation = (args?: MutationArgs<void, any>) => {
   });
 };
 
-export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, {readonly id: number, readonly username?: string, readonly email?: string; readonly preferences?: UserPreferences}>) => {
+export const useUpdateUserMutation = (args?: MutationArgs<UserSchema, UpdateUserRequestSchema>) => {
   const { putter } = usePut();
   const queryClient = useQueryClient();
 
-  const mutation = async (args: { readonly id: number; readonly username?: string; readonly email?: string }) => {
-    const response = await putter<typeof args, UserAccount>({
+  const mutation = async (args: UpdateUserRequestSchema) => {
+    const response = await putter({
       path: "/user",
       body: args,
       withAuth: "access_token",
     });
-    return response.data;
+    return YUserSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -139,9 +147,9 @@ export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, {readonly
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
+      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserSchema) => {
         if (old) {
-          return { ...old, username: data.username, email: data.email, preferences: {...data.preferences} };
+          return { ...old, username: data.username, email: data.email, preferences: { ...data.preferences } };
         }
         return undefined;
       });
@@ -168,7 +176,7 @@ export const useVerifyAccountMutation = (args?: MutationArgs<{}, {}>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (_, __, ctx) => {
-      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
+      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserSchema) => {
         if (old) {
           return { ...old, validated: true };
         }
@@ -242,7 +250,7 @@ export const useRequestRecipeImportMutation = (args?: MutationArgs<unknown, { re
     formData.append("file", body.file);
     formData.append("source", body.source);
 
-    return await poster<FormData, never>({
+    return await poster({
       path: "/user/import-recipes",
       body: formData,
       withAuth: "access_token",
@@ -263,11 +271,11 @@ export const useRequestRecipeImportMutation = (args?: MutationArgs<unknown, { re
   });
 };
 
-export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<unknown, { readonly subscription_data: PushSubscriptionJSON; readonly device_id: string }>) => {
+export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<unknown, CreatePushNotificationRequestSchema>) => {
   const { poster } = usePost();
 
-  const mutation = async (body: { readonly subscription_data: PushSubscriptionJSON; readonly device_id: string }) => {
-    return await poster<typeof body, never>({
+  const mutation = async (body: CreatePushNotificationRequestSchema) => {
+    return await poster({
       path: "/user/push-notifications/opt-in",
       body: { ...body },
       withAuth: "access_token",

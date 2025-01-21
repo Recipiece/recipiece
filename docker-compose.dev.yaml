@@ -1,18 +1,18 @@
-version: '3.9'
 services:
   recipiece_frontend:
     build:
-      context: ./recipiece_frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./recipiece_frontend/Dockerfile
     ports:
       - "3000:3000"
     restart: unless-stopped
     depends_on:
       - recipiece_backend
     volumes:
-      - ./recipiece_frontend:/home
+      - ./recipiece_frontend:/recipiece_frontend
+      - ./recipiece_common/recipiece_types:/recipiece_common/recipiece_types
   recipiece_database:
-    image: postgres
+    image: postgres:16
     restart: always
     environment:
       POSTGRES_PASSWORD: 'recipiece'
@@ -28,7 +28,7 @@ services:
     ports:
       - "6379:6379"
   recipiece_database_test:
-    image: postgres
+    image: postgres:16
     restart: always
     environment:
       POSTGRES_PASSWORD: 'recipiece'
@@ -38,8 +38,8 @@ services:
       - "5433:5432"
   recipiece_backend:
     build:
-      context: ./recipiece_backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./recipiece_backend/Dockerfile
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -48,7 +48,8 @@ services:
       - recipiece_redis
       - recipiece_recipe_importer
     volumes:
-      - ./recipiece_backend:/home
+      - ./recipiece_backend:/recipiece_backend
+      - ./recipiece_common:/recipiece_common
   recipiece_recipe_importer:
     build:
       context: ./recipiece_recipe_importer

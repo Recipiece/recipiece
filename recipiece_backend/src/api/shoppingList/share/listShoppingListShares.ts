@@ -1,17 +1,14 @@
-import { Prisma } from "@prisma/client";
-import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "../../../schema";
+import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { StatusCodes } from "http-status-codes";
 import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
-import { prisma } from "../../../database";
+import { Prisma, prisma } from "@recipiece/database";
 
 /**
  * List shoppingLists shares that are targeting the requesting user or the requesting user has sent.
  * Only user_kitchen_memberships with a status of "accepted" will be considered.
  */
-export const listShoppingListShares = async (
-  request: AuthenticatedRequest<any, ListShoppingListSharesQuerySchema>
-): ApiResponse<ListShoppingListSharesResponseSchema> => {
+export const listShoppingListShares = async (request: AuthenticatedRequest<any, ListShoppingListSharesQuerySchema>): ApiResponse<ListShoppingListSharesResponseSchema> => {
   const { page_number, page_size, targeting_self, from_self, user_kitchen_membership_id } = request.query;
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
 

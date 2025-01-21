@@ -1,9 +1,4 @@
-import {
-  YCreateRecipeShareRequestSchema,
-  YListRecipeSharesQuerySchema,
-  YListRecipeSharesResponseSchema,
-  YRecipeShareSchema,
-} from "../../../schema";
+import { YCreateRecipeShareRequestSchema, YListRecipeSharesQuerySchema, YListRecipeSharesResponseSchema, YRecipeShareSchema } from "@recipiece/types";
 import { Route } from "../../../types";
 import { createRecipeShare } from "./createRecipeShare";
 import { deleteRecipeShare } from "./deleteRecipeShare";

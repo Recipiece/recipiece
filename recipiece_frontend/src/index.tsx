@@ -7,7 +7,7 @@ root.render(
   <StrictMode>
     <App />
   </StrictMode>
-)
+);
 
 // const registerServiceWorker = async () => {
 //   if ("serviceWorker" in navigator) {
@@ -24,7 +24,5 @@ root.render(
 //     }
 //   }
 // };
-
-
 
 // serviceWorker.register();

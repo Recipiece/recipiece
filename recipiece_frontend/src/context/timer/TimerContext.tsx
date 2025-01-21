@@ -246,13 +246,15 @@ export const TimerContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <TimerContext.Provider
-      value={{
-        // allTimers,
-        // activeTimers: sortedActiveTimers,
-        // createTimer,
-        // updateTimer,
-        // deleteTimer,
-      }}
+      value={
+        {
+          // allTimers,
+          // activeTimers: sortedActiveTimers,
+          // createTimer,
+          // updateTimer,
+          // deleteTimer,
+        }
+      }
     >
       {children}
     </TimerContext.Provider>

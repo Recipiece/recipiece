@@ -1,11 +1,9 @@
+import { CreateMealPlanItemRequestSchema, MealPlanItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
-import { CreateMealPlanItemRequestSchema, MealPlanItemSchema } from "../../../schema";
+import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const createItemForMealPlan = async (
-  request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>
-): ApiResponse<MealPlanItemSchema> => {
+export const createItemForMealPlan = async (request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>): ApiResponse<MealPlanItemSchema> => {
   const { id: userId } = request.user;
   const { meal_plan_id, ...restMealPlanItem } = request.body;
 
@@ -37,7 +35,7 @@ export const createItemForMealPlan = async (
           steps: true,
         },
       },
-    }
+    },
   });
   return [StatusCodes.OK, mealPlanItem];
 };

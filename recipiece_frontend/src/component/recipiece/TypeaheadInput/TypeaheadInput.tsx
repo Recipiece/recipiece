@@ -9,16 +9,22 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, o
   const inputRef = createRef<HTMLInputElement>();
   const [currentAutoCompleteOptions, setCurrentAutoCompleteOptions] = useState<string[]>([]);
 
-  const onSelectAutocompleteItem = useCallback((item: string) => {
-    if(inputRef.current) {
-      inputRef.current.value = item;
-    }
-  }, [inputRef]);
+  const onSelectAutocompleteItem = useCallback(
+    (item: string) => {
+      if (inputRef.current) {
+        inputRef.current.value = item;
+      }
+    },
+    [inputRef]
+  );
 
-  const onChangeWrapper = useCallback((changeEvent: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentAutoCompleteOptions(autocompleteOptions(changeEvent.target.value));
-    onChange?.(changeEvent);
-  }, [autocompleteOptions, onChange]);
+  const onChangeWrapper = useCallback(
+    (changeEvent: React.ChangeEvent<HTMLInputElement>) => {
+      setCurrentAutoCompleteOptions(autocompleteOptions(changeEvent.target.value));
+      onChange?.(changeEvent);
+    },
+    [autocompleteOptions, onChange]
+  );
 
   return (
     <>

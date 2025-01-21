@@ -1,13 +1,12 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
+import { RefreshTokenResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import request from "supertest";
-import { RefreshTokenResponseSchema } from "../../../src/schema";
 import "jest-expect-message";
 import jwt from "jsonwebtoken";
-import { TokenPayload } from "../../../src/types";
 import { DateTime } from "luxon";
+import request from "supertest";
+import { TokenPayload } from "../../../src/types";
 import { UserSessions } from "../../../src/util/constant";
-import { prisma } from "../../../src/database";
 
 describe("Refresh Token", () => {
   let user: User;
@@ -15,17 +14,11 @@ describe("Refresh Token", () => {
   let refreshToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
-    refreshToken = userAndToken[2];
+    [user, bearerToken, refreshToken] = await fixtures.createUserAndToken();
   });
 
   it("should refresh the access token", async () => {
-    const response = await request(server)
-      .post(`/user/refresh-token`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${refreshToken}`);
+    const response = await request(server).post(`/user/refresh-token`).set("Content-Type", "application/json").set("Authorization", `Bearer ${refreshToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseBody: RefreshTokenResponseSchema = response.body;
@@ -63,10 +56,7 @@ describe("Refresh Token", () => {
       },
     });
 
-    const response = await request(server)
-      .post(`/user/refresh-token`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${refreshToken}`);
+    const response = await request(server).post(`/user/refresh-token`).set("Content-Type", "application/json").set("Authorization", `Bearer ${refreshToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseBody: RefreshTokenResponseSchema = response.body;
@@ -76,10 +66,7 @@ describe("Refresh Token", () => {
   });
 
   it("should not accept the access token in the authorization header", async () => {
-    const response = await request(server)
-      .post(`/user/refresh-token`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).post(`/user/refresh-token`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
   });

@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
 import { useListUserKitchenMembershipsQuery, useUpdatePendingUserKitchenMembershipMutation } from "../../api";
 import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
-import { UserKitchenMembership } from "../../data";
+import { UserKitchenMembershipSchema } from "@recipiece/types";
 
 export const TargetingUserTable: FC = () => {
   const { toast } = useToast();
@@ -22,7 +22,7 @@ export const TargetingUserTable: FC = () => {
   const hasAnyTargetingRequests = !!kitchenMembershipsTargetingUser?.data?.length;
 
   const onAccept = useCallback(
-    async (membership: UserKitchenMembership) => {
+    async (membership: UserKitchenMembershipSchema) => {
       try {
         await updateKitchenMembership({
           id: membership.id,
@@ -44,7 +44,7 @@ export const TargetingUserTable: FC = () => {
   );
 
   const onDeny = useCallback(
-    async (membership: UserKitchenMembership) => {
+    async (membership: UserKitchenMembershipSchema) => {
       try {
         await updateKitchenMembership({
           id: membership.id,
@@ -82,7 +82,7 @@ export const TargetingUserTable: FC = () => {
                 return (
                   <StaticTableRow key={membership.id}>
                     <>{membership.source_user.username}</>
-                    <>{DateTime.fromISO(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
+                    <>{DateTime.fromJSDate(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                     <div className="flex flex-row gap-2">
                       <Button disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)}>
                         <CheckCircle2 className="sm:mr-2" />

@@ -1,13 +1,10 @@
-import { Prisma } from "@prisma/client";
-import { ListMealPlanQuerySchema, ListMealPlanResponseSchema } from "../../schema";
+import { ListMealPlanQuerySchema, ListMealPlanResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
-import { prisma } from "../../database";
+import { Prisma, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 
-export const listMealPlans = async (
-  request: AuthenticatedRequest<any, ListMealPlanQuerySchema>
-): ApiResponse<ListMealPlanResponseSchema> => {
+export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealPlanQuerySchema>): ApiResponse<ListMealPlanResponseSchema> => {
   const query = request.query;
   const { id: userId } = request.user;
 

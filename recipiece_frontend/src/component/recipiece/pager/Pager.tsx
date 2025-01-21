@@ -1,12 +1,5 @@
 import { FC, useMemo } from "react";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "../../shadcn";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../../shadcn";
 import { ChevronFirst } from "lucide-react";
 
 export interface PagerProps {

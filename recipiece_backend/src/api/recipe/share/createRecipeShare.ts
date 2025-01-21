@@ -1,15 +1,13 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
-import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "../../../schema";
+import { prisma } from "@recipiece/database";
+import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { sendRecipeSharedPushNotification } from "../../../util/pushNotification";
 
 /**
  * Allow a user to share a recipe they own with another user.
  */
-export const createRecipeShare = async (
-  request: AuthenticatedRequest<CreateRecipeShareRequestSchema>
-): ApiResponse<RecipeShareSchema> => {
+export const createRecipeShare = async (request: AuthenticatedRequest<CreateRecipeShareRequestSchema>): ApiResponse<RecipeShareSchema> => {
   const { recipe_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 

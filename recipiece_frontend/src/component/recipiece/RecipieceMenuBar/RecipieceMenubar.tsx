@@ -1,3 +1,4 @@
+import { CookbookSchema, ShoppingListSchema } from "@recipiece/types";
 import { Book, CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
 import { createContext, createRef, FC, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,10 +9,9 @@ import {
   useListCookbooksQuery,
   useListMealPlansQuery,
   useListShoppingListsQuery,
-  useLogoutUserMutation
+  useLogoutUserMutation,
 } from "../../../api";
 import { DialogContext } from "../../../context";
-import { Cookbook, ShoppingList } from "../../../data";
 import { CreateCookbookForm, CreateShoppingListForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
 import {
   Button,
@@ -55,7 +55,7 @@ export const RecipieceMenuBarContextProvider: FC<PropsWithChildren> = ({ childre
  */
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
-  
+
   const { toast } = useToast();
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
@@ -90,7 +90,7 @@ export const RecipieceMenubar: FC = () => {
       await logoutUser();
     } catch {
       // noop
-    } finally { 
+    } finally {
       navigate("/login");
     }
   }, [logoutUser, navigate]);
@@ -231,7 +231,7 @@ export const RecipieceMenubar: FC = () => {
   const onMobileViewShoppingLists = useCallback(() => {
     pushDialog("mobileShoppingLists", {
       onClose: () => popDialog("mobileShoppingLists"),
-      onSubmit: (shoppingList: ShoppingList) => {
+      onSubmit: (shoppingList: ShoppingListSchema) => {
         popDialog("mobileShoppingLists");
         navigate(`/shopping-list/${shoppingList.id}`);
       },
@@ -241,7 +241,7 @@ export const RecipieceMenubar: FC = () => {
   const onMobileViewCookbooks = useCallback(() => {
     pushDialog("mobileCookbooks", {
       onClose: () => popDialog("mobileCookbooks"),
-      onSubmit: (cookbook: Cookbook) => {
+      onSubmit: (cookbook: CookbookSchema) => {
         popDialog("mobileCookbooks");
         navigate(`/cookbook/${cookbook.id}`);
       },
@@ -251,7 +251,7 @@ export const RecipieceMenubar: FC = () => {
   const onMobileViewMealPlans = useCallback(() => {
     pushDialog("mobileMealPlans", {
       onClose: () => popDialog("mobileMealPlans"),
-      onSubmit: (cookbook: Cookbook) => {
+      onSubmit: (cookbook: CookbookSchema) => {
         popDialog("mobileMealPlans");
         navigate(`/meal-plan/view/${cookbook.id}`);
       },
@@ -270,12 +270,8 @@ export const RecipieceMenubar: FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => navigate("/kitchen")}>
-                My Kitchen
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/account")}>
-                My Account
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/kitchen")}>My Kitchen</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/account")}>My Account</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onLogout}>Sign Out</DropdownMenuItem>
             </DropdownMenuContent>

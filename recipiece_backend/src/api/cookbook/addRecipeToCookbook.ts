@@ -1,6 +1,6 @@
+import { prisma } from "@recipiece/database";
+import { AddRecipeToCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { AddRecipeToCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>): ApiResponse<{}> => {

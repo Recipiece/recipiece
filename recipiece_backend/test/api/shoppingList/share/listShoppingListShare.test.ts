@@ -1,8 +1,8 @@
-import { User } from "@prisma/client";
-import request from "supertest";
-import { prisma } from "../../../../src/database";
-import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "../../../../src/schema";
+import { User } from "@recipiece/database";
+import { generateShoppingList, generateShoppingListShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import request from "supertest";
 
 describe("List Shopping List Shares", () => {
   let user: User;
@@ -16,26 +16,15 @@ describe("List Shopping List Shares", () => {
   });
 
   it("should list shopping list shares targeting the user", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const userShoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "user shopping list",
-        user_id: user.id,
-      },
-    });
-
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        user_kitchen_membership_id: membership.id,
-        shopping_list_id: userShoppingList.id,
-      },
+    const userShoppingList = await generateShoppingList({ user_id: user.id });
+    const share = await generateShoppingListShare({
+      user_kitchen_membership_id: membership.id,
+      shopping_list_id: userShoppingList.id,
     });
 
     const response = await request(server)
@@ -54,26 +43,15 @@ describe("List Shopping List Shares", () => {
   });
 
   it("should list shopping list shares originating from the user", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const userShoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "user shopping list",
-        user_id: user.id,
-      },
-    });
-
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        user_kitchen_membership_id: membership.id,
-        shopping_list_id: userShoppingList.id,
-      },
+    const userShoppingList = await generateShoppingList({ user_id: user.id });
+    const share = await generateShoppingListShare({
+      user_kitchen_membership_id: membership.id,
+      shopping_list_id: userShoppingList.id,
     });
 
     const response = await request(server)
@@ -92,42 +70,25 @@ describe("List Shopping List Shares", () => {
   });
 
   it("should list shares for a particular user kitchen membership", async () => {
-    const [thirdUser] = await fixtures.createUserAndToken();
-    const userToOtherMembership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const thirdUser = await generateUser();
+    const userToOtherMembership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const userToThirdMembership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: thirdUser.id,
-        status: "accepted",
-      },
+    const userToThirdMembership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: thirdUser.id,
+      status: "accepted",
     });
-
-    const shoppingList =await prisma.shoppingList.create({
-      data: {
-        user_id: user.id,
-        name: "users shopping list",
-      },
+    const shoppingList = await generateShoppingList({ user_id: user.id });
+    const userToOtherShare = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: userToOtherMembership.id,
     });
-
-    const userToOtherShare = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: userToOtherMembership.id,
-      },
-    });
-
-    const userToThirdShare = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: userToThirdMembership.id,
-      },
+    const userToThirdShare = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: userToThirdMembership.id,
     });
 
     const response = await request(server)
@@ -147,26 +108,15 @@ describe("List Shopping List Shares", () => {
   });
 
   it("should only list shares for accepted memberships", async () => {
-    const userToOtherMembership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "denied",
-      },
+    const userToOtherMembership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "denied",
     });
-
-    const shoppingList =await prisma.shoppingList.create({
-      data: {
-        user_id: user.id,
-        name: "users shopping list",
-      },
-    });
-
-    const userToOtherShare = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: userToOtherMembership.id,
-      },
+    const shoppingList = await generateShoppingList({ user_id: user.id });
+    const userToOtherShare = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: userToOtherMembership.id,
     });
 
     const response = await request(server)

@@ -66,7 +66,7 @@ export const ChangePasswordSection: FC = () => {
       newPassword: "",
       currentPassword: "",
       confirmNewPassword: "",
-    })
+    });
   }, [form]);
 
   return (
@@ -85,23 +85,20 @@ export const ChangePasswordSection: FC = () => {
               <FormInput name="confirmNewPassword" label="Confirm New Password" type="password" className="sm:pr-[50%]" />
             </>
           )}
-          
-            <div className="flex flex-row gap-2">
+
+          <div className="flex flex-row gap-2">
             {!isEditing && (
-              <Button onClick={() => setIsEditing(true)} className="ml-auto">Change Password</Button>
+              <Button onClick={() => setIsEditing(true)} className="ml-auto">
+                Change Password
+              </Button>
             )}
             {isEditing && (
               <Button onClick={onCancel} variant="secondary" className="ml-auto">
                 Cancel
               </Button>
             )}
-            {isEditing && (
-              <SubmitButton>
-                Change Password
-              </SubmitButton>
-            )}
-            </div>
-          
+            {isEditing && <SubmitButton>Change Password</SubmitButton>}
+          </div>
         </div>
       </form>
     </Form>

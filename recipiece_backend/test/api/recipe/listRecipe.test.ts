@@ -1,8 +1,8 @@
-import { Recipe, User } from "@prisma/client";
+import { Recipe, User } from "@recipiece/database";
+import { generateCookbook, generateRecipe, generateRecipeCookbookAttachment, generateRecipeShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
-import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema } from "../../../src/schema";
 
 describe("List Recipes", () => {
   let user: User;
@@ -14,13 +14,7 @@ describe("List Recipes", () => {
 
   it("should list the recipes for the user associated with a token", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
-      });
+      await generateRecipe({ user_id: user.id });
     }
 
     const response = await request(server)
@@ -38,27 +32,14 @@ describe("List Recipes", () => {
 
   it("should allow name filtering", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
-      });
+      await generateRecipe({ user_id: user.id });
     }
-
-    await prisma.recipe.create({
-      data: {
-        name: "NAME NAME NAME",
-        description: "Test",
-        user_id: user.id,
-      },
-    });
+    const filterRecipe = await generateRecipe({ user_id: user.id, name: "NAME NAME NAME!!!" });
 
     const response = await request(server)
       .get("/recipe/list")
       .query(<ListRecipesQuerySchema>{
-        search: "name",
+        search: "!!!",
         page_number: 0,
       })
       .set("Content-Type", "application/json")
@@ -67,18 +48,12 @@ describe("List Recipes", () => {
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const results = response.body.data as Recipe[];
     expect(results.length).toEqual(1);
-    expect(results[0].name).toEqual("NAME NAME NAME");
+    expect(results[0].name).toEqual(filterRecipe.name);
   });
 
   it("should page", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
-      });
+      await generateRecipe({ user_id: user.id });
     }
 
     const response = await request(server)
@@ -96,38 +71,23 @@ describe("List Recipes", () => {
   });
 
   it("should list shared recipes", async () => {
-    const [otherUser] = await fixtures.createUserAndToken();
+    const otherUser = await generateUser();
     // allow otherUser to share a recipe to user
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
     });
 
-    const otherRecipe = await prisma.recipe.create({
-      data: {
-        name: "Other Recipe",
-        user_id: otherUser.id,
-      },
-    });
+    const otherRecipe = await generateRecipe({ user_id: otherUser.id });
 
-    await prisma.recipeShare.create({
-      data: {
-        user_kitchen_membership_id: membership.id,
-        recipe_id: otherRecipe.id,
-      },
+    await generateRecipeShare({
+      user_kitchen_membership_id: membership.id,
+      recipe_id: otherRecipe.id,
     });
 
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
-      });
+      await generateRecipe({ user_id: user.id });
     }
 
     const response = await request(server)
@@ -145,38 +105,23 @@ describe("List Recipes", () => {
   });
 
   it("should not list shared recipes", async () => {
-    const [otherUser] = await fixtures.createUserAndToken();
+    const otherUser = await generateUser();
     // allow otherUser to share a recipe to user
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
     });
 
-    const otherRecipe = await prisma.recipe.create({
-      data: {
-        name: "Other Recipe",
-        user_id: otherUser.id,
-      },
-    });
+    const otherRecipe = await generateRecipe({ user_id: otherUser.id });
 
-    await prisma.recipeShare.create({
-      data: {
-        user_kitchen_membership_id: membership.id,
-        recipe_id: otherRecipe.id,
-      },
+    await generateRecipeShare({
+      user_kitchen_membership_id: membership.id,
+      recipe_id: otherRecipe.id,
     });
 
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
-      });
+      await generateRecipe({ user_id: user.id });
     }
 
     const response = await request(server)
@@ -198,37 +143,24 @@ describe("List Recipes", () => {
   });
 
   it("should not list shared recipes belonging to a non-accepted membership", async () => {
-    const [otherUser] = await fixtures.createUserAndToken();
+    const otherUser = await generateUser();
     // allow otherUser to share a recipe to user
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "denied",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "denied",
     });
 
-    const otherRecipe = await prisma.recipe.create({
-      data: {
-        name: "Other Recipe",
-        user_id: otherUser.id,
-      },
-    });
+    const otherRecipe = await generateRecipe({ user_id: otherUser.id });
 
-    await prisma.recipeShare.create({
-      data: {
-        user_kitchen_membership_id: membership.id,
-        recipe_id: otherRecipe.id,
-      },
+    await generateRecipeShare({
+      user_kitchen_membership_id: membership.id,
+      recipe_id: otherRecipe.id,
     });
 
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
+      await generateRecipe({
+        user_id: user.id,
       });
     }
 
@@ -252,34 +184,15 @@ describe("List Recipes", () => {
 
   it("should list recipes in a cookbook", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
-      });
+      await generateRecipe({ user_id: user.id });
     }
 
-    const recipeToAttach = await prisma.recipe.create({
-      data: {
-        user_id: user.id,
-        name: "attach me",
-      },
-    });
+    const recipeToAttach = await generateRecipe({ user_id: user.id });
+    const cookbook = await generateCookbook({ user_id: user.id });
 
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        user_id: user.id,
-        name: "test cookbook",
-      },
-    });
-
-    const attachment = await prisma.recipeCookbookAttachment.create({
-      data: {
-        recipe_id: recipeToAttach.id,
-        cookbook_id: cookbook.id,
-      },
+    const attachment = await generateRecipeCookbookAttachment({
+      recipe_id: recipeToAttach.id,
+      cookbook_id: cookbook.id,
     });
 
     const response = await request(server)
@@ -301,34 +214,14 @@ describe("List Recipes", () => {
 
   it("should exclude recipes in a cookbook", async () => {
     for (let i = 0; i < 10; i++) {
-      await prisma.recipe.create({
-        data: {
-          name: `Test recipe ${i}`,
-          description: "Test",
-          user_id: user.id,
-        },
-      });
+      await generateRecipe({ user_id: user.id });
     }
 
-    const recipeToAttach = await prisma.recipe.create({
-      data: {
-        user_id: user.id,
-        name: "attach me",
-      },
-    });
-
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        user_id: user.id,
-        name: "test cookbook",
-      },
-    });
-
-    const attachment = await prisma.recipeCookbookAttachment.create({
-      data: {
-        recipe_id: recipeToAttach.id,
-        cookbook_id: cookbook.id,
-      },
+    const recipeToAttach = await generateRecipe({ user_id: user.id });
+    const cookbook = await generateCookbook({ user_id: user.id });
+    const attachment = await generateRecipeCookbookAttachment({
+      recipe_id: recipeToAttach.id,
+      cookbook_id: cookbook.id,
     });
 
     const response = await request(server)

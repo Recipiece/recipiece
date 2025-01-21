@@ -16,9 +16,9 @@ import {
   StaticTableRow,
   useToast,
 } from "../../component";
-import { UserKitchenMembership } from "../../data";
 import { KitchenMembershipStatusMap } from "../../util";
 import { useDeleteUserKitchenMembershipDialog } from "./hook";
+import { UserKitchenMembershipSchema } from "@recipiece/types";
 
 export const PastTargetingMembershipsTable: FC = () => {
   const { toast } = useToast();
@@ -38,7 +38,7 @@ export const PastTargetingMembershipsTable: FC = () => {
   const hasAnyRequests = !!kitchenMemberships?.data?.length;
 
   const onAccept = useCallback(
-    async (membership: UserKitchenMembership) => {
+    async (membership: UserKitchenMembershipSchema) => {
       try {
         await updateKitchenMembership({
           id: membership.id,
@@ -60,7 +60,7 @@ export const PastTargetingMembershipsTable: FC = () => {
   );
 
   const onDeny = useCallback(
-    async (membership: UserKitchenMembership) => {
+    async (membership: UserKitchenMembershipSchema) => {
       try {
         await updateKitchenMembership({
           id: membership.id,
@@ -111,7 +111,7 @@ export const PastTargetingMembershipsTable: FC = () => {
                     return (
                       <StaticTableRow key={membership.id}>
                         <>{membership.source_user.username}</>
-                        <>{DateTime.fromISO(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
+                        <>{DateTime.fromJSDate(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
                         <>{KitchenMembershipStatusMap[membership.status]}</>
                         <div className="flex flex-row gap-2">
                           {membership.status !== "accepted" && (

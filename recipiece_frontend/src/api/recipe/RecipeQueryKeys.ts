@@ -1,4 +1,4 @@
-import { ListRecipeFilters, ListRecipeSharesFilters } from "../../data";
+import { ListRecipeSharesQuerySchema, ListRecipesQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class RecipeQueryKeys {
@@ -12,7 +12,7 @@ export class RecipeQueryKeys {
     return base;
   };
 
-  public static readonly LIST_RECIPES = (filters?: Partial<ListRecipeFilters>): RcpQueryKey => {
+  public static readonly LIST_RECIPES = (filters?: Partial<ListRecipesQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listRecipes"];
     if (filters) {
       const { page_number, cookbook_id, search, cookbook_attachments, shared_recipes } = filters;
@@ -40,7 +40,7 @@ export class RecipeQueryKeys {
     return base;
   };
 
-  public static readonly LIST_RECIPES_FOR_MEAL_PLAN = (filters?: Partial<ListRecipeFilters>): RcpQueryKey => {
+  public static readonly LIST_RECIPES_FOR_MEAL_PLAN = (filters?: Partial<ListRecipesQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["recipeMealPlanSearch"];
     if (filters) {
       const { page_number, cookbook_id, search } = filters;
@@ -74,11 +74,11 @@ export class RecipeQueryKeys {
     return base;
   };
 
-  public static readonly LIST_RECIPE_SHARES = (filters?: Partial<ListRecipeSharesFilters>): RcpQueryKey => {
+  public static readonly LIST_RECIPE_SHARES = (filters?: Partial<ListRecipeSharesQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listRecipeShares"];
     const { page_number, user_kitchen_membership_id, from_self, targeting_self } = filters ?? {};
 
-    if(page_number) {
+    if (page_number) {
       base.push({ page_number });
     }
     if (user_kitchen_membership_id) {

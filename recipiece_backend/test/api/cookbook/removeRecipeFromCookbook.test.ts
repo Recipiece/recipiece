@@ -1,39 +1,18 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
+import { generateCookbookWithRecipe } from "./fixtures";
 
 describe("Remove Recipe from Cookbook", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should allow a recipe to be removed from a cookbook", async () => {
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
-    });
-
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        name: "test cookbook",
-        user_id: user.id,
-      },
-    });
-
-    await prisma.recipeCookbookAttachment.create({
-      data: {
-        recipe_id: recipe.id,
-        cookbook_id: cookbook.id,
-      },
-    });
+    const [cookbook, recipe] = await generateCookbookWithRecipe(user.id);
 
     const response = await request(server)
       .post("/cookbook/recipe/remove")
@@ -57,27 +36,7 @@ describe("Remove Recipe from Cookbook", () => {
   });
 
   it("should not allow another user to remove recipes from a users cookbook", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    const otherCookbook = await prisma.cookbook.create({
-      data: {
-        user_id: otherUser.id,
-        name: "other user cookbook",
-      },
-    });
-
-    const otherRecipe = await prisma.recipe.create({
-      data: {
-        user_id: otherUser.id,
-        name: "other user cookbook",
-      },
-    });
-
-    await prisma.recipeCookbookAttachment.create({
-      data: {
-        recipe_id: otherRecipe.id,
-        cookbook_id: otherCookbook.id,
-      },
-    });
+    const [otherCookbook, otherRecipe] = await generateCookbookWithRecipe();
 
     const response = await request(server)
       .post("/cookbook/recipe/remove")

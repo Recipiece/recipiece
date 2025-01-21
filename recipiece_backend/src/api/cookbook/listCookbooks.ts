@@ -1,13 +1,10 @@
-import { Prisma } from "@prisma/client";
+import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "../../schema";
+import { prisma, Prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
-export const listCookbooks = async (
-  req: AuthenticatedRequest<any, ListCookbooksQuerySchema>
-): ApiResponse<ListCookbooksResponseSchema> => {
+export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooksQuerySchema>): ApiResponse<ListCookbooksResponseSchema> => {
   const user = req.user;
 
   const page = req.query.page_number;

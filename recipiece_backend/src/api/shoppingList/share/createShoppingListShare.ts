@@ -1,15 +1,13 @@
+import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
-import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "../../../schema";
+import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { sendShoppingListSharedPushNotification } from "../../../util/pushNotification";
 
 /**
  * Allow a user to share a shopping list they own with another user.
  */
-export const createShoppingListShare = async (
-  request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>
-): ApiResponse<ShoppingListShareSchema> => {
+export const createShoppingListShare = async (request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>): ApiResponse<ShoppingListShareSchema> => {
   const { shopping_list_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 

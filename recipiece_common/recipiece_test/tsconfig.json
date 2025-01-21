@@ -1,0 +1,15 @@
+{
+  "extends": ["../tsconfig.common.json"],
+  "compilerOptions": {
+    "outDir": "./dist/dev",
+    "paths": {
+      "@recipiece/database": ["../recipiece_database/src/index.ts"]
+    }
+  },
+  "include": ["./src/**/*", "../recipiece_database/src/**/*"],
+  "references": [
+    {
+      "path": "../recipiece_database"
+    }
+  ]
+}

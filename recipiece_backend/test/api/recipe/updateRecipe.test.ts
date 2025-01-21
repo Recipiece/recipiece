@@ -1,55 +1,56 @@
-import { User } from "@prisma/client";
+import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { RecipeSchema } from "../../../src/schema";
-import { prisma } from "../../../src/database";
+import { RecipeSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
+import { generateRecipeWithIngredientsAndSteps } from "@recipiece/test";
 
 describe("Update Recipes", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should update a recipe", async () => {
-    const existingRecipe = await prisma.recipe.create({
-      data: {
-        name: "My Cool Recipe",
-        description: "A recipe",
-        user_id: user.id,
-        ingredients: {
-          createMany: {
-            data: [
-              {
-                name: "old ingredient 01",
-                order: 0,
-              },
-              {
-                name: "old ingredient 02",
-                order: 1,
-              },
-            ],
-          },
-        },
-        steps: {
-          createMany: {
-            data: [
-              {
-                content: "asdfqwer",
-                order: 0,
-              },
-            ],
-          },
-        },
-      },
+    const existingRecipe = await generateRecipeWithIngredientsAndSteps({
+      user_id: user.id,
     });
+    // const existingRecipe = await prisma.recipe.create({
+    //   data: {
+    //     name: "My Cool Recipe",
+    //     description: "A recipe",
+    //     user_id: user.id,
+    //     ingredients: {
+    //       createMany: {
+    //         data: [
+    //           {
+    //             name: "old ingredient 01",
+    //             order: 0,
+    //           },
+    //           {
+    //             name: "old ingredient 02",
+    //             order: 1,
+    //           },
+    //         ],
+    //       },
+    //     },
+    //     steps: {
+    //       createMany: {
+    //         data: [
+    //           {
+    //             content: "asdfqwer",
+    //             order: 0,
+    //           },
+    //         ],
+    //       },
+    //     },
+    //   },
+    // });
 
     const response = await request(server)
       .put("/recipe")
-      .send({
+      .send(<UpdateRecipeRequestSchema>{
         id: existingRecipe.id,
         name: existingRecipe.name + "asdfqwer",
         description: existingRecipe.description + "zxcvuiop",
@@ -110,52 +111,19 @@ describe("Update Recipes", () => {
     expect(allSteps[0].id).toEqual(step.id);
   });
 
-  it(`should ${StatusCodes.NOT_FOUND} when a recipe is not found`, async () => {
+  it("should not update a recipe that does not exist", async () => {
     const response = await request(server)
       .put("/recipe")
       .send({
-        id: 1,
+        id: 100000,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
-  it(`should ${StatusCodes.NOT_FOUND} when trying to update a recipe you don't own`, async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-
-    const existingRecipe = await prisma.recipe.create({
-      data: {
-        name: "My Cool Recipe",
-        description: "A recipe",
-        user_id: otherUser.id,
-        ingredients: {
-          createMany: {
-            data: [
-              {
-                name: "old ingredient 01",
-                order: 0,
-              },
-              {
-                name: "old ingredient 02",
-                order: 1,
-              },
-            ],
-          },
-        },
-        steps: {
-          createMany: {
-            data: [
-              {
-                content: "asdfqwer",
-                order: 0,
-              },
-            ],
-          },
-        },
-      },
-    });
-
+  it("should not update a recipe that does not belong to you", async () => {
+    const existingRecipe = await generateRecipeWithIngredientsAndSteps();
     const response = await request(server)
       .put("/recipe")
       .send({

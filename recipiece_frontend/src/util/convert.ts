@@ -1,6 +1,6 @@
-import Fraction from "fraction.js";
-import { KnownIngredient, RecipeIngredient } from "../data";
+import { KnownIngredientSchema, RecipeIngredientSchema } from "@recipiece/types";
 import convert, { Unit as ConvertUnit } from "convert-units";
+import Fraction from "fraction.js";
 
 interface UnitConverter {
   readonly convert_symbol: ConvertUnit;
@@ -137,7 +137,7 @@ export const VOLUME_UNITS: UnitConverter[] = [
 
 export const ALL_UNITS = [...MASS_UNITS, ...VOLUME_UNITS];
 
-export const convertIngredient = (ingredient: RecipeIngredient, knownIngredient: KnownIngredient, targetUnit: ConvertUnit): number | undefined => {
+export const convertIngredient = (ingredient: RecipeIngredientSchema, knownIngredient: KnownIngredientSchema, targetUnit: ConvertUnit): number | undefined => {
   const currentIngredientUnit = (ingredient.unit || "unitless").toLowerCase().trim();
   let convertingAmount = new Fraction(ingredient.amount!).valueOf();
   let baseKnownConvertUnit: ConvertUnit;
@@ -158,7 +158,7 @@ export const convertIngredient = (ingredient: RecipeIngredient, knownIngredient:
   }
 
   if (currentIngredientUnit !== "unitless") {
-    if(!matchingCurrentConverter) {
+    if (!matchingCurrentConverter) {
       return undefined;
     }
 

@@ -25,21 +25,21 @@ export class Logger {
   }
 
   public log(message?: any, ...optionalParams: any[]) {
-    if(this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
+    if (this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
       return;
     }
     console.log(message, ...optionalParams);
   }
 
   public error(message?: any, ...optionalParams: any[]) {
-    if(this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
+    if (this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
       return;
     }
     console.error(message, ...optionalParams);
   }
 
   public warn(message?: any, ...optionalParams: any[]) {
-    if(this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
+    if (this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
       return;
     }
     console.warn(message, ...optionalParams);
