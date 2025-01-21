@@ -4,16 +4,15 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "dotenvx run -f .env.test -- jest --forceExit",
-    "prisma-test": "dotenvx run -f .env.test -- prisma migrate dev",
+    "test": "dotenvx run -f .env.test -- jest --runInBand --forceExit",
+    "lint": "prettier . --write",
     "seed": "dotenvx run -f .env.dev -- node seed/index.mjs",
-    "build": "tsc --project tsconfig.prod.json",
-    "prisma-dev": "dotenvx run -f .env.dev -- prisma migrate dev",
-    "build:dev": "NODE_ENV=development webpack",
+    "migrate:test": "dotenvx run -f .env.test -- yarn --cwd ../recipiece_common/recipiece_database run migrate",
+    "migrate:dev": "dotenvx run -f .env.dev -- yarn --cwd ../recipiece_common/recipiece_database run migrate",
     "serve:dev": "dotenvx run -f .env.dev -- nodemon ./dist/dev/index.js",
     "run:dev": "concurrently \"yarn build:dev --watch\" \"yarn serve:dev\"",
-    "build:prod": "NODE_ENV=production webpack",
-    "lint": "prettier . --write"
+    "build:dev": "NODE_ENV=development webpack",
+    "build:prod": "NODE_ENV=production webpack"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",

@@ -10,10 +10,7 @@ describe("Logout User", () => {
   let refreshToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
-    refreshToken = userAndToken[2];
+    [user, bearerToken, refreshToken] = await fixtures.createUserAndToken();
   });
 
   it("should remove the user session", async () => {

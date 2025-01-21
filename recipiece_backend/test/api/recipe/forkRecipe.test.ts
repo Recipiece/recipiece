@@ -14,7 +14,7 @@ describe("Fork Recipe", () => {
     [otherUser] = await fixtures.createUserAndToken();
   });
 
-  it("should clone the entire recipe", async () => {
+  it("should clone the recipe with ingredients and steps", async () => {
     const originalRecipe = await generateRecipeWithIngredientsAndSteps({
       user_id: otherUser.id,
     });

@@ -14,10 +14,7 @@ describe("Refresh Token", () => {
   let refreshToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
-    refreshToken = userAndToken[2];
+    [user, bearerToken, refreshToken] = await fixtures.createUserAndToken();
   });
 
   it("should refresh the access token", async () => {

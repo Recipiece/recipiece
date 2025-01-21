@@ -2,6 +2,8 @@ import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { UserKitchenInvitationStatus } from "../../../src/util/constant";
+import { generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import "jest-expect-message";
 
 describe("Create User Kitchen Memberships", () => {
   let user: User;
@@ -17,7 +19,6 @@ describe("Create User Kitchen Memberships", () => {
     const response = await request(server).post("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
       username: user.username,
     });
-
     expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 
@@ -39,12 +40,10 @@ describe("Create User Kitchen Memberships", () => {
   });
 
   it("should not allow duplicate memberships to be created", async () => {
-    await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: UserKitchenInvitationStatus.DENIED,
-      },
+    await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: UserKitchenInvitationStatus.DENIED,
     });
 
     const response = await request(server).post("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
@@ -75,7 +74,7 @@ describe("Create User Kitchen Memberships", () => {
   });
 
   it("should not allow a membership to be created targeting a user who has account_visibility of private", async () => {
-    const [privateUser] = await fixtures.createUserAndToken({
+    const privateUser = await generateUser({
       preferences: {
         account_visibility: "private",
       },

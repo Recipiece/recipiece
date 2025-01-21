@@ -8,8 +8,7 @@ describe("Login User", () => {
   const defaultPassword = "test1234!";
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken({ password: defaultPassword });
-    user = userAndToken[0];
+    [user] = await fixtures.createUserAndToken({ password: defaultPassword });
   });
 
   it("should allow a user to login with a valid email and password", async () => {

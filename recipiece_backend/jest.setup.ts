@@ -42,41 +42,15 @@ globalThis.fixtures = {
       return text;
     }
 
-    const { password, preferences, ...restOpts } = opts ?? {};
+    const { password, ...restOpts } = opts ?? {};
     const passwordToUse = password ?? stringGen(10);
-    const preferencesToUse = preferences ?? {
-      account_visibility: "protected",
-    };
     const hashedPassword = await hashPassword(passwordToUse);
 
-    const user = await generateUser({
-      preferences: preferencesToUse,
-      ...restOpts,
-    });
+    const user = await generateUser({ ...restOpts });
     await generateUserCredentials({
       user_id: user.id,
       password_hash: hashedPassword,
     });
-
-    // create a user
-    // const user = await prisma.user.create({
-    //   data: {
-    //     email: email,
-    //     username: username,
-    //     preferences: preferences,
-    //     credentials: {
-    //       create: {
-    //         password_hash: hashedPassword!,
-    //       },
-    //     },
-    //     // user_access_records: {
-    //     //   create: {
-    //     //     access_levels: accessLevels,
-    //     //     start_date: DateTime.utc().toJSDate(),
-    //     //   },
-    //     // },
-    //   },
-    // });
 
     // create a session and a token
     const session = await prisma.userSession.create({
@@ -119,7 +93,7 @@ jest.mock("bullmq", () => {
 });
 
 // just in case there's any extra users hanging around.
-beforeEach(async () => {
+beforeAll(async () => {
   await prisma.user.deleteMany();
 });
 

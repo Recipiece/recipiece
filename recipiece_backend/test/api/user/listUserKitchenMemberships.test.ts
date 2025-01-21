@@ -3,6 +3,7 @@ import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsRespon
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { UserKitchenInvitationStatus } from "../../../src/util/constant";
+import { generateRecipe, generateRecipeShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 
 describe("List User Kitchen Memberships", () => {
   let user: User;
@@ -16,24 +17,16 @@ describe("List User Kitchen Memberships", () => {
 
   it("should list memberships", async () => {
     for (let i = 0; i < 10; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: user.id,
-          destination_user_id: tmpUser.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        source_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
     for (let i = 0; i < 10; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: tmpUser.id,
-          destination_user_id: user.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        destination_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
@@ -54,24 +47,16 @@ describe("List User Kitchen Memberships", () => {
 
   it("should list only memberships targeting the user", async () => {
     for (let i = 0; i < 10; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: user.id,
-          destination_user_id: tmpUser.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        source_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
     for (let i = 0; i < 10; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: tmpUser.id,
-          destination_user_id: user.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        destination_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
@@ -95,24 +80,16 @@ describe("List User Kitchen Memberships", () => {
 
   it("should list memberships originating from the user", async () => {
     for (let i = 0; i < 10; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: user.id,
-          destination_user_id: tmpUser.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        source_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
     for (let i = 0; i < 10; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: tmpUser.id,
-          destination_user_id: user.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        destination_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
@@ -136,24 +113,16 @@ describe("List User Kitchen Memberships", () => {
 
   it("should list memberships with a subset of statuses", async () => {
     for (let i = 0; i < UserKitchenInvitationStatus.ALL_STATUSES.length * 4; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: user.id,
-          destination_user_id: tmpUser.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        source_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
     for (let i = 0; i < UserKitchenInvitationStatus.ALL_STATUSES.length * 4; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: tmpUser.id,
-          destination_user_id: user.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        destination_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
@@ -189,13 +158,9 @@ describe("List User Kitchen Memberships", () => {
 
   it("should page", async () => {
     for (let i = 0; i < 10; i++) {
-      const [tmpUser] = await fixtures.createUserAndToken();
-      await prisma.userKitchenMembership.create({
-        data: {
-          source_user_id: user.id,
-          destination_user_id: tmpUser.id,
-          status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
-        },
+      await generateUserKitchenMembership({
+        source_user_id: user.id,
+        status: UserKitchenInvitationStatus.ALL_STATUSES[i % UserKitchenInvitationStatus.ALL_STATUSES.length],
       });
     }
 
@@ -216,35 +181,19 @@ describe("List User Kitchen Memberships", () => {
   });
 
   it("should exclude a provided shared entity", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
+    const recipe = await generateRecipe({ user_id: user.id });
+    const recipeShare = await generateRecipeShare({
+      user_kitchen_membership_id: membership.id,
+      recipe_id: recipe.id,
     });
-
-    const recipeShare = await prisma.recipeShare.create({
-      data: {
-        user_kitchen_membership_id: membership.id,
-        recipe_id: recipe.id,
-      },
-    });
-
-    const [thirdUser] = await fixtures.createUserAndToken();
-    const thirdMembership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: thirdUser.id,
-        status: "accepted",
-      },
+    const thirdMembership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      status: "accepted",
     });
 
     const response = await request(server)
@@ -266,35 +215,21 @@ describe("List User Kitchen Memberships", () => {
   });
 
   it("should include only a provided shared entity", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
+    const recipe = await generateRecipe({
+      user_id: user.id,
     });
-
-    const recipeShare = await prisma.recipeShare.create({
-      data: {
-        user_kitchen_membership_id: membership.id,
-        recipe_id: recipe.id,
-      },
+    const recipeShare = await generateRecipeShare({
+      user_kitchen_membership_id: membership.id,
+      recipe_id: recipe.id,
     });
-
-    const [thirdUser] = await fixtures.createUserAndToken();
-    const thirdMembership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: thirdUser.id,
-        status: "accepted",
-      },
+    const thirdMembership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      status: "accepted",
     });
 
     const response = await request(server)

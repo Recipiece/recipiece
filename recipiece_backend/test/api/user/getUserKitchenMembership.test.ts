@@ -1,4 +1,5 @@
 import { User, prisma } from "@recipiece/database";
+import { generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -15,12 +16,10 @@ describe("Get User Kitchen Membership", () => {
   });
 
   it("should get a membership where the source user is the requesting user", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "pending",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "pending",
     });
 
     const response = await request(server).get(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${bearerToken}`);
@@ -33,12 +32,10 @@ describe("Get User Kitchen Membership", () => {
   });
 
   it("should get a membership where the destination user is the requesting user", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "pending",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "pending",
     });
 
     const response = await request(server).get(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`);
@@ -51,13 +48,11 @@ describe("Get User Kitchen Membership", () => {
   });
 
   it("should not get a membership the requesting user is not a part of", async () => {
-    const [thirdUser] = await fixtures.createUserAndToken();
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: thirdUser.id,
-        status: "pending",
-      },
+    const thirdUser = await generateUser();
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: thirdUser.id,
+      status: "pending",
     });
 
     const response = await request(server).get(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`);

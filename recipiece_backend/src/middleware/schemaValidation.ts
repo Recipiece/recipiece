@@ -5,8 +5,10 @@ import { AnyObject, Maybe, ObjectSchema } from "yup";
 export const validateRequestBodySchema = (schema: ObjectSchema<Maybe<AnyObject>, unknown>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const castBody = schema.cast(req.body);
       await schema.validate(req.body);
+      const castBody = schema.cast(req.body, {
+        stripUnknown: true,
+      });
       req.body = castBody;
       next();
     } catch (error) {

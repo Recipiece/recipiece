@@ -1,4 +1,5 @@
 import { User, prisma } from "@recipiece/database";
+import { generateCookbook } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
@@ -7,18 +8,11 @@ describe("Update Cookbooks", () => {
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should update a cookbook", async () => {
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        user_id: user.id,
-        name: "Test cookbook",
-      },
-    });
+    const cookbook = await generateCookbook({ user_id: user.id });
 
     const response = await request(server)
       .put("/cookbook")
@@ -35,14 +29,7 @@ describe("Update Cookbooks", () => {
   });
 
   it("should not allow you to update a cookbook you do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
-    const otherCookbook = await prisma.cookbook.create({
-      data: {
-        user_id: otherUser.id,
-        name: "other user cookbook",
-        description: "dont you dare update me",
-      },
-    });
+    const otherCookbook = await generateCookbook();
 
     const response = await request(server)
       .put("/cookbook")

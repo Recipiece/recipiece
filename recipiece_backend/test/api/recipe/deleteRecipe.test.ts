@@ -12,9 +12,7 @@ describe("Delete Recipes", () => {
   });
 
   it("should allow a user to delete their recipe", async () => {
-    const recipe = await generateRecipe({
-      user_id: user.id,
-    });
+    const recipe = await generateRecipe({ user_id: user.id });
 
     const response = await request(server).delete(`/recipe/${recipe.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
@@ -29,7 +27,6 @@ describe("Delete Recipes", () => {
   });
 
   it("should not allow a user to delete a recipe they do not own", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({ email: "otheruser@recipiece.org" });
     const recipe = await generateRecipe();
 
     const response = await request(server).delete(`/recipe/${recipe.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);

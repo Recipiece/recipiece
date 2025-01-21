@@ -1,4 +1,5 @@
-import { User, prisma } from "@recipiece/database";
+import { User } from "@recipiece/database";
+import { generateCookbook } from "@recipiece/test";
 import { CookbookSchema, CreateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -8,9 +9,7 @@ describe("Create Cookbooks", () => {
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should allow a cookbook to be created", async () => {
@@ -30,13 +29,7 @@ describe("Create Cookbooks", () => {
   });
 
   it("should not allow a cookbook with the same name to be created for a user", async () => {
-    const existingCookbook = await prisma.cookbook.create({
-      data: {
-        name: "test",
-        user_id: user.id,
-      },
-    });
-
+    const existingCookbook = await generateCookbook({ user_id: user.id });
     const response = await request(server)
       .post("/cookbook")
       .send({

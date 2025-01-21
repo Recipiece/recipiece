@@ -1,6 +1,7 @@
 import { User, prisma } from "@recipiece/database";
 import request from "supertest";
 import { StatusCodes } from "http-status-codes";
+import { generateShoppingList, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
 
 describe("Delete Shopping List Share", () => {
   let user: User;
@@ -13,26 +14,15 @@ describe("Delete Shopping List Share", () => {
   });
 
   it("should allow a user to delete their shared shopping list", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "test shopping list",
-        user_id: user.id,
-      },
-    });
-
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    const shoppingList = await generateShoppingList({ user_id: user.id });
+    const share = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     const response = await request(server).delete(`/shopping-list/share/${share.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
@@ -50,26 +40,16 @@ describe("Delete Shopping List Share", () => {
   it("should not allow a user to delete a share they did not make", async () => {
     const [_, thirdUserToken] = await fixtures.createUserAndToken();
 
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
+    const shoppingList = await generateShoppingList({ user_id: user.id });
 
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "test shopping list",
-        user_id: user.id,
-      },
-    });
-
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    const share = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     const response = await request(server).delete(`/shopping-list/share/${share.id}`).set("Authorization", `Bearer ${thirdUserToken}`).send();

@@ -9,7 +9,8 @@
     "generate": "prisma generate",
     "build:dev": "NODE_ENV=development yarn generate && webpack",
     "build:prod": "NODE_ENV=production yarn generate && webpack",
-    "lint": "prettier . --write"
+    "lint": "prettier . --write",
+    "migrate": "prisma migrate dev"
   },
   "devDependencies": {
     "@swc/core": "^1.10.7",

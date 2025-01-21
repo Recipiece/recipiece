@@ -1,7 +1,8 @@
 import { User, prisma } from "@recipiece/database";
+import { generateUserKitchenMembership } from "@recipiece/test";
+import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { UserKitchenInvitationStatus } from "../../../src/util/constant";
-import { StatusCodes } from "http-status-codes";
 
 describe("Delete User Kitchen Membership", () => {
   let user: User;
@@ -15,12 +16,10 @@ describe("Delete User Kitchen Membership", () => {
   });
 
   it("should allow the targeted user to delete the membership", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: UserKitchenInvitationStatus.PENDING,
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: UserKitchenInvitationStatus.PENDING,
     });
 
     const response = await request(server).delete(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
@@ -37,12 +36,10 @@ describe("Delete User Kitchen Membership", () => {
   });
 
   it("should allow the source user to delete the membership", async () => {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: UserKitchenInvitationStatus.PENDING,
-      },
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: UserKitchenInvitationStatus.PENDING,
     });
 
     const response = await request(server).delete(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${bearerToken}`).send();

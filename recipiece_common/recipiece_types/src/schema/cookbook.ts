@@ -17,7 +17,7 @@ export interface CookbookSchema extends InferType<typeof YCookbookSchema> {}
 export const YCreateCookbookRequestSchema = object({
   name: string().required(),
   description: string().notRequired(),
-}).noUnknown();
+}).strict().noUnknown();
 
 export interface CreateCookbookRequestSchema extends InferType<typeof YCreateCookbookRequestSchema> {}
 

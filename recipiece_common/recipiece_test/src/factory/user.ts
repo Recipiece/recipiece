@@ -12,9 +12,9 @@ export const generateUserKitchenMembership = async (membership?: Partial<Omit<Us
       destination_user_id: destUserId,
       status: status,
       created_at: membership?.created_at,
-    }
-  })
-}
+    },
+  });
+};
 
 export const generateUserCredentials = async (userCredentials?: Partial<Omit<UserCredentials, "id">>) => {
   const userId = userCredentials?.user_id ?? (await generateUser()).id;
@@ -35,6 +35,9 @@ export const generateUser = async (user?: Partial<Omit<User, "id">>): Promise<Us
       email: user?.email ?? faker.internet.email(),
       created_at: user?.created_at,
       validated: user?.validated ?? false,
+      preferences: user?.preferences ?? {
+        account_visibility: "protected",
+      },
     },
   });
 };

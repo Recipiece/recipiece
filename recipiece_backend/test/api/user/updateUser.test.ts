@@ -1,4 +1,5 @@
 import { User, prisma } from "@recipiece/database";
+import { generateUser } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
@@ -7,9 +8,7 @@ describe("Update User", () => {
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should allow a user to update their username", async () => {
@@ -55,7 +54,7 @@ describe("Update User", () => {
   });
 
   it("should not allow another user to update you", async () => {
-    const [otherUser, otherUserToken] = await fixtures.createUserAndToken();
+    const [_, otherUserToken] = await fixtures.createUserAndToken();
 
     const response = await request(server)
       .put("/user")
@@ -70,7 +69,7 @@ describe("Update User", () => {
   });
 
   it("should not allow a duplicate username, case insensitive", async () => {
-    const [otherUser] = await fixtures.createUserAndToken();
+    const otherUser = await generateUser();
     const response = await request(server).put("/user").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
       id: user.id,
       username: otherUser.username.toUpperCase(),
@@ -80,7 +79,7 @@ describe("Update User", () => {
   });
 
   it("should not allow a duplicate email, case insensitive", async () => {
-    const [otherUser] = await fixtures.createUserAndToken();
+    const otherUser = await generateUser();
     const response = await request(server).put("/user").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
       id: user.id,
       email: otherUser.email.toUpperCase(),

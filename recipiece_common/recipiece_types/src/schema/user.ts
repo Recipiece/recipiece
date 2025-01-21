@@ -221,6 +221,7 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
     }
     return true;
   })
+  .strict()
   .noUnknown();
 
 export interface ListUserKitchenMembershipsQuerySchema extends InferType<typeof YListUserKitchenMembershipsQuerySchema> {}

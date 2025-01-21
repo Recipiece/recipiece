@@ -10,9 +10,7 @@ describe("Reset Password", () => {
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should set the user credentials to the new password for a user", async () => {

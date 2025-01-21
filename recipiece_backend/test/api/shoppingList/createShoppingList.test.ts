@@ -7,9 +7,7 @@ describe("Create Shopping List", () => {
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should allow a shopping list to be created", async () => {
