@@ -1,10 +1,10 @@
 import { prisma, RecipeIngredient } from "@recipiece/database";
 import { RecipeIngredientSchema } from "@recipiece/types";
+import { Job } from "bullmq";
 import { createReadStream, mkdirSync, readdirSync, readFileSync, rmSync } from "fs";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import unzipper from "unzipper";
-import { isMainThread, parentPort, workerData } from "worker_threads";
 import { gunzipSync } from "zlib";
 import { RecipeImportFiles } from "../util/constant";
 import { sendFinishedImportJobFailedEmail, sendFinishedImportJobSuccessEmail } from "../util/email";
@@ -144,22 +144,16 @@ const IMPORTER_MAP: { [key: string]: (fileName: string, userId: number) => Promi
   paprika: paprikaImporter,
 };
 
-export const runner = async (backgroundJobId: string) => {
-  // pull the first job we find along with the user
-  const job = await prisma.backgroundJob.findFirstOrThrow({
+export const importRecipes = async (job: Job) => {
+  const { file_name, user_id, source } = job.data as { readonly file_name: string; readonly user_id: number; readonly source: string };
+  const user = await prisma.user.findFirstOrThrow({
     where: {
-      id: backgroundJobId,
-      finished_at: null,
-      purpose: RecipeImportFiles.IMPORT_TOPIC,
-    },
-    include: {
-      user: true,
+      id: user_id,
     },
   });
 
   const innerRunner = async () => {
     try {
-      const { file_name, user_id, source } = job.args as { readonly file_name: string; readonly user_id: number; readonly source: string };
       const importer = IMPORTER_MAP[source];
 
       if (importer) {
@@ -179,31 +173,12 @@ export const runner = async (backgroundJobId: string) => {
   const result = (await innerRunner()) ?? "failed";
 
   const now = DateTime.utc();
-  await prisma.backgroundJob.update({
-    where: {
-      id: backgroundJobId,
-    },
-    data: {
-      finished_at: now.toJSDate(),
-      result: result,
-    },
-  });
 
   if (result === "success") {
-    await sendFinishedImportJobSuccessEmail(job.user, backgroundJobId);
+    await sendFinishedImportJobSuccessEmail(user);
   } else {
-    await sendFinishedImportJobFailedEmail(job.user, backgroundJobId);
+    await sendFinishedImportJobFailedEmail(user);
   }
 
-  console.log(`finished job id ${backgroundJobId} at ${now.toISO()} with status ${result}`);
+  console.log(`finished job id ${job.id} at ${now.toISO()} with status ${result}`);
 };
-
-if (!isMainThread) {
-  runner(workerData.background_job_id)
-    .catch((err) => {
-      console.error(err);
-    })
-    .finally(() => {
-      parentPort?.postMessage("done");
-    });
-}

@@ -17,7 +17,9 @@ if (arch === "darwin") {
 }
 
 const config: Configuration = {
-  entry: ["./src/index.ts"],
+  entry: {
+    index: "./src/index.ts",
+  },
   mode: isProduction ? "production" : "development",
   target: "node",
   devtool: isProduction ? undefined : "source-map",
@@ -52,7 +54,7 @@ const config: Configuration = {
   },
   output: {
     path: path.resolve(__dirname, "dist", isProduction ? "prod" : "dev"),
-    filename: "index.js",
+    filename: "[name].js",
     clean: true,
   },
   watchOptions: {

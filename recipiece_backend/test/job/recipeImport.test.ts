@@ -1,13 +1,13 @@
 import { User, prisma } from "@recipiece/database";
 import archiver from "archiver";
+import { Job } from "bullmq";
 import { createWriteStream, mkdirSync, rmSync } from "fs";
 import fetch from "jest-fetch-mock";
 import { DateTime } from "luxon";
 import path from "path";
 import { gzipSync } from "zlib";
+import { importRecipes } from "../../src/job/recipeImports";
 import { RecipeImportFiles } from "../../src/util/constant";
-import { generateRecipeImportWorker } from "../../src/worker";
-import { runner } from "../../src/worker/importRecipes";
 
 describe("Import Recipes", () => {
   describe("From Paprika", () => {
@@ -131,16 +131,6 @@ describe("Import Recipes", () => {
       jest.restoreAllMocks();
     });
 
-    it("should do nothing if a job is not present", (done) => {
-      const worker = generateRecipeImportWorker("nonsense");
-      worker.on("message", (value) => {
-        expect(value).toBe("done");
-        done();
-      });
-
-      worker.postMessage({});
-    });
-
     it("should parse the recipes", async () => {
       fetch.mockIf(`${process.env.APP_RECIPE_PARSER_SERVICE_URL!}/ingredients/parse`, async () => {
         return JSON.stringify({
@@ -148,20 +138,14 @@ describe("Import Recipes", () => {
         });
       });
 
-      const job = await prisma.backgroundJob.create({
+      const job = {
         data: {
+          file_name: path.resolve(__dirname, `${RecipeImportFiles.TMP_DIR}/${user.id}/test_data.paprikarecipes`),
           user_id: user.id,
-          purpose: RecipeImportFiles.IMPORT_TOPIC,
-          finished_at: null,
-          args: {
-            file_name: path.resolve(__dirname, `${RecipeImportFiles.TMP_DIR}/${user.id}/test_data.paprikarecipes`),
-            user_id: user.id,
-            source: "paprika",
-          },
+          source: "paprika",
         },
-      });
-
-      await runner(job.id);
+      };
+      await importRecipes(job as Job);
 
       const firstCreatedRecipe = await prisma.recipe.findFirst({
         where: {
@@ -180,15 +164,6 @@ describe("Import Recipes", () => {
       expect(secondCreatedRecipe).toBeTruthy();
       expect(secondCreatedRecipe!.user_id).toBe(user.id);
       expect(secondCreatedRecipe!.description).toBe(rawPaprikaRecipe02.description);
-
-      const alteredJob = await prisma.backgroundJob.findFirst({
-        where: {
-          id: job.id,
-        },
-      });
-      expect(alteredJob).toBeTruthy();
-      expect(alteredJob!.finished_at).toBeTruthy();
-      expect(alteredJob!.result).toBe("success");
     });
   });
 });

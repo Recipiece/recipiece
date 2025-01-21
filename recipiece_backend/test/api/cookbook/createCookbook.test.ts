@@ -28,19 +28,6 @@ describe("Create Cookbooks", () => {
     expect(responseBody.user_id).toEqual(user.id);
   });
 
-  it("should not allow a cookbook with the same name to be created for a user", async () => {
-    const existingCookbook = await generateCookbook({ user_id: user.id });
-    const response = await request(server)
-      .post("/cookbook")
-      .send({
-        name: existingCookbook.name,
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toEqual(StatusCodes.CONFLICT);
-  });
-
   it("should not allow a bad body to be passed in", async () => {
     const response = await request(server)
       .post("/cookbook")

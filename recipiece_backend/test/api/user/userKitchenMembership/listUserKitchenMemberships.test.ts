@@ -1,9 +1,9 @@
-import { User, prisma } from "@recipiece/database";
+import { User } from "@recipiece/database";
+import { generateRecipe, generateRecipeShare, generateUserKitchenMembership } from "@recipiece/test";
 import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { UserKitchenInvitationStatus } from "../../../src/util/constant";
-import { generateRecipe, generateRecipeShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { UserKitchenInvitationStatus } from "../../../../src/util/constant";
 
 describe("List User Kitchen Memberships", () => {
   let user: User;

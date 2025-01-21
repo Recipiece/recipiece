@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { timersQueue } from "../../scheduledJobs";
+import { timersQueue } from "../../job";
 
 export const deleteTimer = async (request: AuthenticatedRequest): ApiResponse<{}> => {
   const timerId = +request.params.id;

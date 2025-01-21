@@ -2,7 +2,7 @@ import { User, prisma } from "@recipiece/database";
 import { generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { UserKitchenInvitationStatus } from "../../../src/util/constant";
+import { UserKitchenInvitationStatus } from "../../../../src/util/constant";
 
 describe("Delete User Kitchen Membership", () => {
   let user: User;

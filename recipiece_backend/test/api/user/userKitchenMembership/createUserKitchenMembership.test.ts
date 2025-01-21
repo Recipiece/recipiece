@@ -1,7 +1,7 @@
 import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { UserKitchenInvitationStatus } from "../../../src/util/constant";
+import { UserKitchenInvitationStatus } from "../../../../src/util/constant";
 import { generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import "jest-expect-message";
 

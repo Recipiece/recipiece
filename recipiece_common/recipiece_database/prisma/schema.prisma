@@ -207,7 +207,7 @@ model Cookbook {
   created_at DateTime @default(now())
 
   recipe_cookbook_attachments RecipeCookbookAttachment[]
-  @@unique([user_id, name])
+  @@index([user_id, name])
 }
 
 model RecipeCookbookAttachment {
@@ -235,7 +235,7 @@ model ShoppingList {
   shopping_list_items ShoppingListItem[]
   shopping_list_shares ShoppingListShare[]
 
-  @@unique([user_id, name])
+  @@index([user_id, name])
 }
 
 model ShoppingListShare {
