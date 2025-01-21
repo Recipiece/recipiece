@@ -51,7 +51,7 @@ export interface RecipeShareSchema extends InferType<typeof YRecipeShareSchema> 
  */
 export const YCreateRecipeRequestSchema = object({
   name: string().required(),
-  description: string().required(),
+  description: string().notRequired(),
   servings: number().notRequired(),
   ingredients: array()
     .of(

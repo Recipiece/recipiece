@@ -170,7 +170,8 @@ export const RecipeEditPage: FC = () => {
         title: "Recipe Parsed",
         description: "This recipe was successfully imported.",
       });
-    } catch {
+    } catch (err) {
+      console.error(err);
       popDialog("parseRecipeFromURL");
       toast({
         title: "Recipe Parsing Failed",

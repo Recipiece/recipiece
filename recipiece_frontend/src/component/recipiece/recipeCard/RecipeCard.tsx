@@ -38,7 +38,7 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
         <CardFooter>
           <div className="flex flex-row w-full items-center">
             <SharedAvatar userKitchenMembershipId={userKitchenMembershipId} />
-            <DropdownMenuTrigger className="ml-auto">
+            <DropdownMenuTrigger className="ml-auto" asChild>
               <Button variant="ghost" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                 <MoreVertical />
               </Button>

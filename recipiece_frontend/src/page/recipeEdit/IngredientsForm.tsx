@@ -30,7 +30,6 @@ const IngredientFormNameInput: FC<{ readonly isDragging: boolean; readonly index
   return (
     <FormInput
       onKeyDown={(event) => {
-        event.preventDefault();
         onKeyDown(event);
       }}
       className="flex-grow"
@@ -52,7 +51,6 @@ const IngredientFormAmountInput: FC<{ readonly isDragging: boolean; readonly ind
   return (
     <FormInput
       onKeyDown={(event) => {
-        event.preventDefault();
         onKeyDown(event);
       }}
       className="flex-grow"
@@ -97,7 +95,6 @@ const IngredientFormUnitInput: FC<{ readonly isDragging: boolean; index: number;
       <div>
         <FormInput
           onKeyDown={(event) => {
-            event.preventDefault();
             onKeyDown(event);
           }}
           className="flex-grow"
@@ -225,8 +222,8 @@ export const IngredientsForm: FC<IngredientsFormProps> = ({ isLoading }) => {
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      event.preventDefault();
       if (event.key === "Enter") {
+        event.preventDefault();
         addIngredient();
       }
     },

@@ -147,7 +147,12 @@ export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, Partia
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, variables, context) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataCreator(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+        },
+        oldDataCreator(data)
+      );
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
       onSuccess?.(data, variables, context);
     },
@@ -218,7 +223,9 @@ export const useParseRecipeFromURLMutation = (args?: MutationArgs<RecipeSchema, 
       },
       withAuth: "access_token",
     });
-    return YRecipeSchema.cast(response.data);
+    return YRecipeSchema.cast(response.data, {
+      assert: false,
+    });
   };
 
   return useMutation({

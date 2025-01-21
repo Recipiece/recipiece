@@ -115,7 +115,7 @@ describe("Append Shopping List Items", () => {
       const item = await generateShoppingListItem({
         completed: i >= 5,
         shopping_list_id: shoppingList.id,
-      })
+      });
       items.push(item);
     }
 
