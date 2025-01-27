@@ -3,7 +3,7 @@ import { generateUser, generateUserKitchenMembership } from "./user";
 import { faker } from "@faker-js/faker";
 
 type FullShoppingListInput = Partial<Omit<ShoppingList, "id">> & {
-  readonly shopping_list_items: Partial<Omit<ShoppingListItem, "id" | "order" | "shopping_list_id">>[];
+  readonly shopping_list_items?: Partial<Omit<ShoppingListItem, "id" | "order" | "shopping_list_id">>[];
 };
 
 type FullShoppingListOutput = ShoppingList & {
@@ -86,7 +86,7 @@ export const generateShoppingListShare = async (share?: Partial<Omit<ShoppingLis
     data: {
       shopping_list_id: shoppingList.id,
       user_kitchen_membership_id: membership.id,
-      created_at: share?.created_at,
+      created_at: share?.created_at ?? new Date(),
     },
   });
 };
@@ -132,7 +132,7 @@ export const generateShoppingList = async (shoppingList?: Partial<Omit<ShoppingL
   return prisma.shoppingList.create({
     data: {
       name: shoppingList?.name ?? faker.word.noun(),
-      created_at: shoppingList?.created_at,
+      created_at: shoppingList?.created_at ?? new Date(),
       user_id: userId,
     },
   });

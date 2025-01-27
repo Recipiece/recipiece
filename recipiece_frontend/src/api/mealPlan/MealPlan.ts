@@ -3,17 +3,55 @@ import {
   ListItemsForMealPlanResponseSchema,
   ListMealPlanQuerySchema,
   ListMealPlanResponseSchema,
+  MealPlanConfigurationSchema,
   MealPlanItemSchema,
   MealPlanSchema,
   YListItemsForMealPlanResponseSchema,
   YListMealPlanResponseSchema,
+  YMealPlanConfigurationSchema,
   YMealPlanItemSchema,
-  YMealPlanSchema,
+  YMealPlanSchema
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { MealPlanQueryKeys } from "./MealPlanQueryKeys";
+
+export const useSetMealPlanConfigurationMutation = (
+  args?: MutationArgs<MealPlanConfigurationSchema, { readonly mealPlanId: number; readonly configuration: MealPlanConfigurationSchema }>
+) => {
+  const { putter } = usePut();
+  const queryClient = useQueryClient();
+
+  const mutation = async (body: { mealPlanId: number; configuration: MealPlanConfigurationSchema }) => {
+    const response = await putter({
+      path: `/meal-plan/${body.mealPlanId}/configuration`,
+      withAuth: "access_token",
+      body: { ...body.configuration },
+    });
+    return YMealPlanConfigurationSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(vars.mealPlanId), (oldData: MealPlanSchema) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            configuration: { ...data },
+          };
+        }
+        return undefined;
+      });
+      // queryClient.setQueriesData
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
 
 export const useGetMealPlanByIdQuery = (listId: number, args?: QueryArgs<MealPlanSchema>) => {
   const { getter } = useGet();
@@ -39,10 +77,6 @@ export const useListMealPlansQuery = (filters: ListMealPlanQuerySchema, args?: Q
 
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
-
-  // if (filters.search) {
-  //   searchParams.append("search", filters.search);
-  // }
 
   const query = async () => {
     const mealPlans = await getter<never, ListMealPlanResponseSchema>({
@@ -142,18 +176,9 @@ export const useDeleteMealPlanMutation = (args?: MutationArgs<{}, MealPlanSchema
   });
 };
 
-export const useListItemsForMealPlanQuery = (mealPlanId: number, filters: ListItemsForMealPlanQuerySchema, args?: QueryArgs<ListItemsForMealPlanResponseSchema>) => {
+export const useListMealPlanItemsQuery = (mealPlanId: number, filters: ListItemsForMealPlanQuerySchema, args?: QueryArgs<ListItemsForMealPlanResponseSchema>) => {
   const { getter } = useGet();
   const searchParams = filtersToSearchParams(filters);
-  // const searchParams = new URLSearchParams();
-
-  // if (filters.start_date) {
-  //   searchParams.append("start_date", filters.start_date);
-  // }
-
-  // if (filters.end_date) {
-  //   searchParams.append("end_date", filters.end_date);
-  // }
 
   const query = async () => {
     const mealPlans = await getter<never, ListItemsForMealPlanResponseSchema>({

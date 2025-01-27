@@ -4,3 +4,4 @@ export * from "./FormCheckbox";
 export * from "./SubmitButton";
 export * from "./FormFile";
 export * from "./FormSelect";
+export * from "./FormSwitch";

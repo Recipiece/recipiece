@@ -6,7 +6,7 @@ import fetch from "jest-fetch-mock";
 import { DateTime } from "luxon";
 import path from "path";
 import { gzipSync } from "zlib";
-import { importRecipes } from "../../src/job/recipeImports";
+import { importRecipes } from "../../src/job/processors/recipeImports";
 import { RecipeImportFiles } from "../../src/util/constant";
 
 describe("Import Recipes", () => {

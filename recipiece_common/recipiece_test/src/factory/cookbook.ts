@@ -23,7 +23,7 @@ export const generateCookbook = async (cookbook?: Partial<Omit<Cookbook, "id">>)
       name: cookbook?.name ?? faker.book.title(),
       user_id: userId,
       description: cookbook?.description ?? faker.word.words({ count: { min: 2, max: 15 } }),
-      created_at: cookbook?.created_at,
+      created_at: cookbook?.created_at ?? new Date(),
     },
   });
 };

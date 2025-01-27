@@ -1,367 +1,385 @@
-import { MealPlanItemSchema, MealPlanSchema, ShoppingListItemSchema, ShoppingListSchema } from "@recipiece/types";
-import { ChartNoAxesGantt, CircleArrowDown, CircleArrowUp, Edit, ListCheck, MoreVertical, RefreshCcw, ShoppingBasket, Trash } from "lucide-react";
+import { MealPlanItemSchema } from "@recipiece/types";
+import { ArrowLeft, ArrowRight, CircleCheck, CircleX, GanttChart, Home, MoreVertical, Pencil, Settings } from "lucide-react";
 import { DateTime } from "luxon";
-import { FC, useCallback, useContext, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  useAppendShoppingListItemsMutation,
-  useDeleteMealPlanMutation,
-  useGetMealPlanByIdQuery,
-  useListItemsForMealPlanQuery,
-  useListShoppingListsQuery,
-  useUpdateMealPlanMutation,
-} from "../../api";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-  LoadingGroup,
-  RecipieceMenuBarContext,
-  Stack,
-  useToast,
-} from "../../component";
-import { DialogContext } from "../../context";
-import { AddMealPlanToShoppingListForm } from "../../dialog";
+import { useGetMealPlanByIdQuery, useGetSelfQuery, useListMealPlanItemsQuery } from "../../api";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Form, H2, LoadingGroup, RecipieceMenuBarContext, SubmitButton } from "../../component";
 import { useLayout } from "../../hooks";
-import { floorDateToDay } from "../../util";
-import { MealPlanItemsCard } from "./MealPlanItemCard";
+import { ceilDateToDay, floorDateToDay } from "../../util";
+import { FormyMealPlanItem, MealPlanItemsForm } from "./MealPlanForm";
+import { MealPlanItemCard } from "./MealPlanItemCard";
 
-/**
- * This is a rather tricky form, and we're not even really using a form for this.
- * When we first load in, we will show only the current week, starting at monday.
- *
- * The user will be able to press an up button if the current week's start date is >= the meal plans created at date
- * This will load in the prior min(7, days between start of previous week and created at) days
- *
- * The user will also be able to press a down arrow that pops in more days below.
- *
- * The backend simply returns to us a list of all meal plan items on the meal plan for the given time period
- * We will organize that output into a form that looks like
- * {
- *   "<representation_date>": <meal_plan_items>[]
- * }
- * which is really just the meal plan items chunked into days.
- *
- * When the user presses the up/down, we'll expand the date range over which we want to look for items
- * and refetch that from the backend, re-reduce, and move along
- */
+const mealPlanItemSorter = (a: FormyMealPlanItem, b: FormyMealPlanItem) => {
+  let stringyA = "";
+  if (a.recipe) {
+    stringyA = a.recipe.name;
+  } else if (a.freeform_content) {
+    stringyA = a.freeform_content;
+  }
 
-type MealPlanItemsFormType = { readonly [key: string]: Partial<MealPlanItemSchema>[] };
+  let stringyB = "";
+  if (b.recipe) {
+    stringyB = b.recipe.name;
+  } else if (b.freeform_content) {
+    stringyB = b.freeform_content;
+  }
+
+  if (stringyA && stringyB) {
+    return stringyA.localeCompare(stringyB);
+  } else if (stringyA && !stringyB) {
+    return 1;
+  } else if (!stringyA && stringyB) {
+    return -1;
+  } else {
+    return 0;
+  }
+};
 
 export const MealPlanViewPage: FC = () => {
-  const { id } = useParams();
-  const mealPlanId = +id!;
+  const params = useParams();
+  const mealPlanId = +params.id!;
+  const navigate = useNavigate();
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [observer, setObserver] = useState<IntersectionObserver | undefined>(undefined);
+  const [inViewId, setInViewId] = useState(0);
+  const [debouncedInViewId, setDebouncedInViewId] = useState(0);
+  const [viewStartDate, setViewStartDate] = useState<DateTime>(DateTime.utc().minus({ days: 2 }));
+  const [viewEndDate, setViewEndDate] = useState<DateTime>(DateTime.utc().plus({ days: 2 }));
+  const [mappedMealPlanItems, setMappedMealPlanItems] = useState<MealPlanItemsForm>({ mealPlanItems: new Array(5) });
+
+  const dataStartDate = useMemo(() => viewStartDate.plus({ days: inViewId - 4 }), [viewStartDate, inViewId]);
+  const dataEndDate = useMemo(() => viewStartDate.plus({ days: inViewId + 4 }), [viewStartDate, inViewId]);
+
+  const daysSpan = useMemo(() => {
+    return viewEndDate && viewStartDate ? Math.ceil(viewEndDate.diff(viewStartDate, "days").days) : 0;
+  }, [viewEndDate, viewStartDate]);
+
+  const elementWindow = useMemo(() => {
+    return Array.from(Array(daysSpan).keys());
+  }, [daysSpan]);
 
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
-  const { pushDialog, popDialog } = useContext(DialogContext);
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const { isMobile } = useLayout();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isShoppingListContextMenuOpen, setIsShoppingListContextMenuOpen] = useState(false);
-
+  const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
   const { data: mealPlan, isLoading: isLoadingMealPlan } = useGetMealPlanByIdQuery(mealPlanId);
-  const { mutateAsync: updateMealPlan } = useUpdateMealPlanMutation();
-  const { mutateAsync: deleteMealPlan } = useDeleteMealPlanMutation();
+  const { data: mealPlanItems, isLoading: isLoadingMealPlanItems } = useListMealPlanItemsQuery(mealPlanId, {
+    start_date: floorDateToDay(dataStartDate).toISO(),
+    end_date: ceilDateToDay(dataEndDate).toISO(),
+    page_number: 0,
+  });
 
-  const todayDate = useMemo(() => floorDateToDay(DateTime.now()), []);
-
-  const [currentStartDate, setCurrentStartDate] = useState<DateTime>(todayDate);
-  const [currentEndDate, setCurrentEndDate] = useState<DateTime>(todayDate.plus({ days: 5 }));
-
-  const daysBetweenBounds: DateTime[] = useMemo(() => {
-    const duration = currentEndDate.toLocal().diff(currentStartDate.toLocal(), ["days"]);
-    const datesArray = [];
-    for (let i = 0; i < duration.days; i++) {
-      datesArray[i] = currentStartDate.plus({ days: i });
-    }
-    return datesArray;
-  }, [currentStartDate, currentEndDate]);
-
-  const { data: mealPlanItems } = useListItemsForMealPlanQuery(
-    mealPlan?.id!,
-    {
-      start_date: currentStartDate.toUTC().toISO()!,
-      end_date: currentEndDate.toUTC().toISO()!,
+  const form = useForm<MealPlanItemsForm>({
+    defaultValues: {
+      mealPlanItems: [],
     },
-    {
-      enabled: !!mealPlan,
-    }
-  );
+  });
 
-  const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery(
-    {
-      page_number: 0,
-    },
-    {
-      enabled: !!isShoppingListContextMenuOpen,
-    }
-  );
+  /**
+   * Debounce the view id change so as to not fire off 100000 requests on scroll
+   */
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setInViewId(debouncedInViewId);
+    }, 200);
 
-  const { mutateAsync: appendItemsToShoppingList } = useAppendShoppingListItemsMutation();
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [debouncedInViewId]);
 
-  // const mealPlanCreatedAt = useMemo(() => {
-  const mealPlanCreatedAt = DateTime.fromJSDate(mealPlan?.created_at!);
-  // }, [mealPlan]);
+  useEffect(() => {
+    const items = mealPlanItems?.data ?? [];
+    setMappedMealPlanItems((prev) => {
+      /**
+       * Reduce down the results and sort them into buckets based on the day the start dates correspond to.
+       *
+       * Then, place them in a further bucket based on the "time of day" that the item falls into for a given day.
+       *
+       * Then, sort the items alphabetically so as to not continually shuffle them around.
+       *
+       * Finally, merge whatever the previous values were up with the new reduced values.
+       *
+       * That gives us our nicely sorted form data.
+       */
+      const reduced: MealPlanItemsForm["mealPlanItems"] = items.reduce((rolling: MealPlanItemsForm["mealPlanItems"], curr: MealPlanItemSchema) => {
+        const itemStartDate = DateTime.fromJSDate(curr.start_date);
+        const daysDiff = Math.round(itemStartDate.diff(viewStartDate, "days").days);
+        let entry = rolling[daysDiff] ?? {};
 
-  const canAddToShoppingList = useMemo(() => {
-    return !!(mealPlanItems?.meal_plan_items ?? []).find((item) => !!item.recipe);
-  }, [mealPlanItems]);
+        if (itemStartDate.hour < 12) {
+          entry = {
+            ...entry,
+            morningItems: [...(entry.morningItems ?? []), curr],
+          };
+        } else if (itemStartDate.hour >= 12 && itemStartDate.hour <= 17) {
+          entry = {
+            ...entry,
+            middayItems: [...(entry.middayItems ?? []), curr],
+          };
+        } else {
+          entry = {
+            ...entry,
+            eveningItems: [...(entry.eveningItems ?? []), curr],
+          };
+        }
+        const copy = [...rolling];
+        copy[daysDiff] = entry;
+        return copy;
+      }, []);
 
-  const defaultValues: MealPlanItemsFormType = useMemo(() => {
-    if (mealPlanItems) {
-      const reduced = (mealPlanItems.meal_plan_items ?? []).reduce((accum: { [key: string]: MealPlanItemSchema[] }, curr) => {
-        const flooredIsoStartDate = floorDateToDay(DateTime.fromJSDate(curr.start_date)).toISO()!;
-        const existingArrayForStartDate = accum[flooredIsoStartDate] ?? [];
+      const sortedReduced: MealPlanItemsForm["mealPlanItems"] = reduced.map((entry) => {
         return {
-          ...accum,
-          [flooredIsoStartDate]: [
-            ...existingArrayForStartDate,
-            {
-              ...curr,
-              notes: curr.notes ?? "",
-            },
-          ],
+          morningItems: [...(entry?.morningItems ?? []).sort(mealPlanItemSorter)],
+          middayItems: [...(entry?.middayItems ?? []).sort(mealPlanItemSorter)],
+          eveningItems: [...(entry?.eveningItems ?? []).sort(mealPlanItemSorter)],
         };
-      }, {});
-      return reduced;
-    } else {
-      return {};
-    }
+      });
+
+      let merged = [];
+      if (prev.mealPlanItems.length > sortedReduced.length) {
+        merged = prev.mealPlanItems.map((_, idx) => {
+          return sortedReduced[idx] ?? prev.mealPlanItems[idx];
+        });
+      } else {
+        merged = sortedReduced;
+      }
+
+      return {
+        mealPlanItems: [...merged],
+      };
+    });
   }, [mealPlanItems]);
 
-  const onLoadMoreAbove = useCallback(() => {
-    const shifted = currentStartDate.minus({ days: 1 });
-    const mealPlanCreatedAt = DateTime.fromJSDate(mealPlan!.created_at);
-    const newVal = DateTime.max(shifted, mealPlanCreatedAt);
-    setCurrentStartDate(newVal);
-  }, [currentStartDate, mealPlan]);
+  /**
+   * Reset the form but keep whatever is currently being edited when we get new values
+   */
+  useEffect(() => {
+    form.reset(
+      { ...mappedMealPlanItems },
+      {
+        keepDirtyValues: isEditing,
+      }
+    );
+  }, [mappedMealPlanItems]);
 
-  const onLoadMoreBelow = useCallback(() => {
-    const shifted = currentEndDate.plus({ days: 1 });
-    setCurrentEndDate(shifted);
-  }, [currentEndDate]);
-
-  const onResetDateBounds = useCallback(() => {
-    setCurrentStartDate(todayDate);
-    setCurrentEndDate(todayDate.plus({ days: 5 }));
-  }, [todayDate]);
-
-  const onEditMealPlan = useCallback(() => {
-    pushDialog("modifyMealPlan", {
-      mealPlan: mealPlan,
-      onClose: () => popDialog("modifyMealPlan"),
-      onSubmit: async (modifiedMealPlan: MealPlanSchema) => {
-        try {
-          await updateMealPlan({ ...modifiedMealPlan, id: mealPlan?.id! });
-          toast({
-            title: "Meal Plan Updated",
-            description: "Your meal plan was updated.",
-          });
-        } catch {
-          toast({
-            title: "Unable to Update Meal Plan",
-            description: "We were unable to update your meal plan. Try again later",
-            variant: "destructive",
-          });
-        } finally {
-          popDialog("modifyMealPlan");
-        }
-      },
+  /**
+   * Reset the mapped values when we change meal plan ids
+   */
+  useEffect(() => {
+    setMappedMealPlanItems({
+      mealPlanItems: new Array(5),
     });
-  }, [pushDialog, mealPlan, popDialog, updateMealPlan, toast]);
-
-  const onDeleteMealPlan = useCallback(async () => {
-    pushDialog("deleteMealPlan", {
-      mealPlan: mealPlan,
-      onClose: () => popDialog("deleteMealPlan"),
-      onSubmit: async (mealPlanToDelete: MealPlanSchema) => {
-        popDialog("deleteMealPlan");
-        try {
-          await deleteMealPlan(mealPlanToDelete);
-          navigate("/");
-          toast({
-            title: "Meal Plan Deleted",
-            description: "Your meal plan has been deleted",
-          });
-        } catch {
-          toast({
-            title: "Unable to Delete Meal Plan",
-            description: "Your meal plan could not be deleted. Try again later.",
-            variant: "destructive",
-          });
-        }
-      },
-    });
-  }, [deleteMealPlan, mealPlan, navigate, popDialog, pushDialog, toast]);
-
-  const onAddMealPlanToShoppingList = useCallback(
-    (shoppingList: ShoppingListSchema) => {
-      pushDialog("addMealPlanToShoppingList", {
-        mealPlan: mealPlan!,
-        mealPlanItems: mealPlanItems!.meal_plan_items ?? [],
-        onClose: () => popDialog("addMealPlanToShoppingList"),
-        onSubmit: async (managedItems: AddMealPlanToShoppingListForm) => {
-          try {
-            const selectedItems: Partial<ShoppingListItemSchema>[] = managedItems.items
-              .filter((item) => item.selected)
-              .map((item) => {
-                return {
-                  content: item.name,
-                  notes: item.notes,
-                };
-              });
-
-            if (selectedItems.length > 0) {
-              await appendItemsToShoppingList({
-                shopping_list_id: shoppingList.id,
-                items: selectedItems,
-              });
-              toast({
-                title: "Items Added",
-                description: "The items have been added to your shopping list!",
-              });
-            }
-          } catch {
-            toast({
-              title: "Error Adding Items",
-              description: "There was an error adding the items to your shopping list. Try again later.",
-              variant: "destructive",
-            });
-          } finally {
-            popDialog("addMealPlanToShoppingList");
-          }
-        },
-      });
-    },
-    [appendItemsToShoppingList, mealPlan, mealPlanItems, popDialog, pushDialog, toast]
-  );
-
-  const mobileOnAddToShoppingList = useCallback(() => {
-    pushDialog("mobileShoppingLists", {
-      onClose: () => popDialog("mobileShoppingLists"),
-      onSubmit: (shoppingList: ShoppingListSchema) => {
-        popDialog("mobileShoppingLists");
-        onAddMealPlanToShoppingList(shoppingList);
-      },
-    });
-  }, [pushDialog, popDialog, onAddMealPlanToShoppingList]);
+  }, [mealPlanId]);
 
   const contextMenu = useMemo(() => {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="sm:ml-auto text-primary">
+        <DropdownMenuTrigger asChild className="ml-auto">
+          <Button variant="ghost" className="text-primary">
             <MoreVertical />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {!isEditing && (
-            <DropdownMenuItem onClick={() => setIsEditing(true)}>
-              <ChartNoAxesGantt /> Manage Meals
+          {user?.id === mealPlan?.user_id && (
+            <DropdownMenuItem>
+              <Pencil /> Edit Name
             </DropdownMenuItem>
           )}
-          {isEditing && (
-            <DropdownMenuItem onClick={() => setIsEditing(false)}>
-              <ListCheck /> Save Meals
-            </DropdownMenuItem>
-          )}
-          {!isMobile && (
-            <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
-              <DropdownMenuSubTrigger disabled={!canAddToShoppingList}>
-                <ShoppingBasket />
-                Add to Shopping List
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
-                    {(shoppingLists?.data || []).map((list) => {
-                      return (
-                        <DropdownMenuItem onClick={() => onAddMealPlanToShoppingList(list)} key={list.id}>
-                          {list.name}
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </LoadingGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          )}
-          {isMobile && (
-            <DropdownMenuItem disabled={!canAddToShoppingList} onClick={mobileOnAddToShoppingList}>
-              <ShoppingBasket /> Add to Shopping List
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onResetDateBounds}>
-            <RefreshCcw /> Reset View
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onEditMealPlan}>
-            <Edit /> Edit Meal Plan
-          </DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive" onClick={onDeleteMealPlan}>
-            <Trash /> Delete Meal Plan
+          <DropdownMenuItem onClick={() => navigate(`/meal-plan/${mealPlan!.id}/configuration`)}>
+            <Settings /> Configure
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
-  }, [
-    canAddToShoppingList,
-    isEditing,
-    isLoadingShoppingLists,
-    isMobile,
-    mobileOnAddToShoppingList,
-    onAddMealPlanToShoppingList,
-    onDeleteMealPlan,
-    onEditMealPlan,
-    onResetDateBounds,
-    shoppingLists?.data,
-  ]);
+  }, [user, mealPlan]);
+
+  const onNextDay = useCallback(() => {
+    const element = document.getElementById(`entry:${inViewId + 1}`);
+    element?.scrollIntoView({ behavior: "smooth" });
+  }, [inViewId]);
+
+  const onPreviousDay = useCallback(() => {
+    const element = document.getElementById(`entry:${inViewId - 1}`);
+    element?.scrollIntoView({ behavior: "smooth" });
+  }, [inViewId]);
+
+  const onHomeDay = useCallback(() => {
+    if (viewStartDate) {
+      const homeElementNumber = Math.round(DateTime.utc().diff(viewStartDate, "days").days);
+      const element = document.getElementById(`entry:${homeElementNumber}`);
+      element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [viewStartDate]);
+
+  /**
+   * Setup the view start and end dates, which are 3 months in either direct from today.
+   * Bound the start of the view to the min of (three months ago, meal plan start date)
+   */
+  useEffect(() => {
+    if (mealPlan) {
+      const mealPlanCreatedAt = DateTime.fromJSDate(mealPlan.created_at).toUTC();
+      const threeMonthsAgo = DateTime.utc().minus({ months: 3 });
+      const startDate = mealPlanCreatedAt < threeMonthsAgo ? threeMonthsAgo : mealPlanCreatedAt;
+      const endDate = DateTime.utc().plus({ months: 3 });
+      setViewStartDate(startDate);
+      setViewEndDate(endDate);
+    }
+  }, [mealPlan]);
+
+  /**
+   * When we setup the start date, scroll the "right" item into view
+   */
+  useEffect(() => {
+    if (viewStartDate) {
+      const homeElementNumber = Math.round(DateTime.utc().diff(viewStartDate, "days").days);
+      const element = document.getElementById(`entry:${homeElementNumber}`);
+      element?.scrollIntoView({ behavior: "instant", block: "nearest" } as unknown as ScrollOptions);
+    }
+  }, [viewStartDate]);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const cb = (entries: IntersectionObserverEntry[]) => {
+        const intersectingEntries = entries.filter((e) => e.isIntersecting && e.intersectionRatio === 1.0);
+        if (intersectingEntries.length > 0) {
+          const currentEntry = intersectingEntries[0];
+          if (currentEntry) {
+            const splitId = currentEntry.target.id.split(":")[1];
+            const entryNumber = Number.parseInt(splitId);
+            setDebouncedInViewId(entryNumber);
+          }
+        }
+      };
+
+      const observer = new IntersectionObserver(cb, {
+        root: scrollContainerRef.current,
+        rootMargin: "0px",
+        threshold: 1.0,
+      });
+      setObserver(observer);
+    }
+
+    return () => {
+      observer?.disconnect?.();
+    };
+  }, [isLoadingMealPlan]);
+
+  useEffect(() => {
+    elementWindow
+      .map((windowId) => {
+        return document.getElementById(`entry:${windowId}`);
+      })
+      .forEach((val) => {
+        if (val) {
+          observer?.observe?.(val);
+        }
+      });
+
+    return () => {
+      elementWindow
+        .map((windowId) => {
+          return document.getElementById(`entry:${windowId}`);
+        })
+        .forEach((val) => {
+          if (val) {
+            observer?.unobserve?.(val);
+          }
+        });
+    };
+  }, [elementWindow]);
+
+  const onSubmit = useCallback((formData: MealPlanItemsForm) => {
+    setIsEditing(false);
+  }, []);
+
+  const onCancelEditing = useCallback(() => {
+    setIsEditing(false);
+    form.reset({ ...mappedMealPlanItems });
+  }, [mappedMealPlanItems, form]);
 
   return (
-    <Stack>
-      <LoadingGroup isLoading={isLoadingMealPlan} className="h-8 w-52">
-        <div className="flex flex-col sm:flex-row">
-          <h1 className="text-2xl">{mealPlan?.name}</h1>
-          {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(contextMenu, mobileMenuPortalRef?.current)}
-          {!isMobile && <>{contextMenu}</>}
-        </div>
-      </LoadingGroup>
-      {mealPlan && (
-        <div className="flex flex-col gap-4">
-          <div className="text-center">
-            <Button variant="ghost" onClick={onLoadMoreAbove} disabled={currentStartDate <= mealPlanCreatedAt}>
-              <CircleArrowUp />
-            </Button>
+    <LoadingGroup isLoading={isLoadingMealPlan || isLoadingUser} variant="skeleton" className="w-full sm:w-[300px] h-11">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center">
+              <H2>{mealPlan?.name}</H2>
+
+              {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(contextMenu, mobileMenuPortalRef.current)}
+              {!isMobile && <>{contextMenu}</>}
+            </div>
+
+            <div className="flex flex-row gap-2">
+              <Button variant="outline" onClick={onPreviousDay} disabled={inViewId === 0}>
+                <ArrowLeft />
+              </Button>
+
+              <Button variant="outline" onClick={onHomeDay}>
+                <Home />
+              </Button>
+
+              <Button variant="outline" onClick={onNextDay} disabled={inViewId === elementWindow.length - 1}>
+                <ArrowRight />
+              </Button>
+
+              <span className="mr-auto" />
+
+              {!isEditing && (
+                <Button onClick={() => setIsEditing(true)}>
+                  <GanttChart />
+                  <span className="hidden sm:inline-block ml-2">Manage Meals</span>
+                </Button>
+              )}
+              {isEditing && (
+                <Button variant="outline" onClick={onCancelEditing}>
+                  <CircleX />
+                  <span className="hidden sm:inline-block ml-2">Cancel</span>
+                </Button>
+              )}
+              {isEditing && (
+                <SubmitButton>
+                  <CircleCheck />
+                  <span className="hidden sm:inline-block ml-2">Save</span>
+                </SubmitButton>
+              )}
+            </div>
+
+            <div
+              ref={scrollContainerRef}
+              className="snap-x snap-mandatory overflow-x-scroll whitespace-nowrap relative flex flex-row gap-2"
+              style={{
+                scrollbarWidth: "none",
+              }}
+            >
+              {elementWindow.map((dist) => {
+                const displayDate = viewStartDate!.plus({ days: dist });
+                return (
+                  <div
+                    id={`entry:${dist}`}
+                    key={dist.toString()}
+                    className="snap-start inline-block basis-full sm:basis-[calc(50%-4px)] lg:basis-[calc(33%-0.5px)] flex-grow-0 flex-shrink-0"
+                  >
+                    <MealPlanItemCard
+                      dayId={dist}
+                      isEditing={isEditing}
+                      isLoading={isLoadingMealPlanItems && !mappedMealPlanItems.mealPlanItems[dist]}
+                      mealPlan={mealPlan!}
+                      mealPlanItems={mappedMealPlanItems.mealPlanItems[dist] ?? {}}
+                      date={displayDate}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          {daysBetweenBounds.map((day) => {
-            return (
-              <MealPlanItemsCard
-                key={day.toMillis()}
-                isEditing={isEditing}
-                startDate={floorDateToDay(day)}
-                mealPlan={mealPlan}
-                initialMealPlanItems={defaultValues[floorDateToDay(day).toISO()!]}
-              />
-            );
-          })}
-          <div className="text-center mt-2">
-            <Button variant="ghost" onClick={onLoadMoreBelow} disabled={currentEndDate.diff(currentStartDate, ["months"]).months > 6}>
-              <CircleArrowDown />
-            </Button>
-          </div>
-        </div>
-      )}
-    </Stack>
+        </form>
+      </Form>
+    </LoadingGroup>
   );
 };

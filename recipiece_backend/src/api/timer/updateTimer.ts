@@ -1,7 +1,7 @@
+import { prisma } from "@recipiece/database";
 import { TimerSchema, UpdateTimerRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
-import { timersQueue } from "../../job";
+// import { timersQueue } from "../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateTimer = async (request: AuthenticatedRequest<UpdateTimerRequestSchema>): ApiResponse<TimerSchema> => {
@@ -33,15 +33,15 @@ export const updateTimer = async (request: AuthenticatedRequest<UpdateTimerReque
   });
 
   // update the job if there is one in the timers queue
-  const job = await timersQueue.getJob(`timer${updatedTimer.id}`);
-  if (job) {
-    try {
-      await job.changeDelay(updatedTimer.duration_ms);
-    } catch (err) {
-      console.log(`could not change timer delay for timer ${updatedTimer.id}`);
-      console.error(err);
-    }
-  }
+  // const job = await timersQueue.getJob(`timer${updatedTimer.id}`);
+  // if (job) {
+  //   try {
+  //     await job.changeDelay(updatedTimer.duration_ms);
+  //   } catch (err) {
+  //     console.log(`could not change timer delay for timer ${updatedTimer.id}`);
+  //     console.error(err);
+  //   }
+  // }
 
   return [StatusCodes.OK, updatedTimer];
 };

@@ -96,7 +96,7 @@ export const generateRecipeShare = async (recipeShare?: Partial<Omit<RecipeShare
     data: {
       recipe_id: recipe.id,
       user_kitchen_membership_id: membership.id,
-      created_at: recipeShare?.created_at,
+      created_at: recipeShare?.created_at ?? new Date(),
     },
   });
 };
@@ -167,7 +167,7 @@ export const generateRecipe = async (recipe?: Partial<Omit<Recipe, "id">>): Prom
       duration_ms: recipe?.duration_ms ?? faker.number.int({ min: 10000, max: 100000 }),
       description: recipe?.description ?? faker.word.words({ count: { min: 5, max: 20 } }),
       servings: recipe?.servings ?? faker.number.int({ min: 1, max: 100 }),
-      created_at: recipe?.created_at,
+      created_at: recipe?.created_at ?? new Date(),
     },
   });
 };

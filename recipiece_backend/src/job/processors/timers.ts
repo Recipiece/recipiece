@@ -1,6 +1,6 @@
 import { prisma } from "@recipiece/database";
 import { Job } from "bullmq";
-import { sendTimerFinishedPushNotification } from "../util/pushNotification";
+import { sendTimerFinishedPushNotification } from "../../util/pushNotification";
 
 export const processTimer = async (job: Job) => {
   const pushNotificationSubscriptions = await prisma.userPushNotificationSubscription.findMany({

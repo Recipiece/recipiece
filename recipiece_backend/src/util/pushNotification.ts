@@ -1,4 +1,4 @@
-import { prisma, Recipe, ShoppingList, Timer, User, UserPushNotificationSubscription } from "@recipiece/database";
+import { MealPlan, prisma, Recipe, ShoppingList, Timer, User, UserPushNotificationSubscription } from "@recipiece/database";
 import webpush, { PushSubscription, WebPushError } from "web-push";
 
 if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
@@ -30,6 +30,19 @@ const sendPushNotification = async (subscription: UserPushNotificationSubscripti
       });
     }
   }
+};
+
+export const sendMeatTimerNotification = async (subscription: UserPushNotificationSubscription, mealPlan: MealPlan, notificationBody: string) => {
+  const message = {
+    title: "Time to Thaw!",
+    body: notificationBody,
+    type: "thawMeatTimer",
+    data: { meal_plan_id: mealPlan.id },
+    requiresInteraction: false,
+    vibrate: [200, 100, 200, 100, 200, 100, 200],
+    tag: `thawMeatTimer${mealPlan.id}`,
+  };
+  await sendPushNotification(subscription, message);
 };
 
 export const sendShoppingListSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, shoppingList: ShoppingList) => {

@@ -64,6 +64,7 @@ model UserKitchenMembership {
 
   recipe_shares RecipeShare[]
   shopping_list_shares ShoppingListShare[]
+  meal_plan_shares MealPlanShare[]
 
   @@index([status, destination_user_id])
   @@index([status, source_user_id])
@@ -314,11 +315,28 @@ model MealPlan {
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
   name String
+  configuration Json @default("{}")
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
 
   meal_plan_items MealPlanItem[]
+  meal_plan_shares MealPlanShare[]
+}
+
+model MealPlanShare {
+  @@map("meal_plan_shares")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  meal_plan_id Int
+  meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([meal_plan_id, user_kitchen_membership_id])
 }
 
 model MealPlanItem {
@@ -331,10 +349,12 @@ model MealPlanItem {
   freeform_content String?
   notes String?
   recipe_id Int?
-  label String?
+  leftover_of_meal_plan_item_id Int? @unique
 
   meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe Recipe? @relation(fields: [recipe_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  leftover_of_meal_plan_item MealPlanItem? @relation("leftover_of_meal_plan_item", fields: [leftover_of_meal_plan_item_id], references: [id],  onDelete: Cascade, onUpdate: Cascade)
+  leftover MealPlanItem? @relation("leftover_of_meal_plan_item")
 }
 
 model ScheduledNotification {

@@ -5,6 +5,7 @@ export * from "./ForgotPassword";
 export * from "./Kitchen";
 export * from "./KitchenMembership";
 export * from "./Login";
+export * from "./MealPlanConfiguration";
 export * from "./MealPlanView";
 export * from "./RecipeEdit";
 export * from "./RecipeView";

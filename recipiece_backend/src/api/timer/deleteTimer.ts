@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { timersQueue } from "../../job";
+// import { timersQueue } from "../../job";
 
 export const deleteTimer = async (request: AuthenticatedRequest): ApiResponse<{}> => {
   const timerId = +request.params.id;
@@ -29,10 +29,10 @@ export const deleteTimer = async (request: AuthenticatedRequest): ApiResponse<{}
   });
 
   // we removed a timer, so purge it out of the queue
-  const timersJob = await timersQueue.getJob(`timer${timerId}`);
-  if (timersJob) {
-    await timersJob.remove();
-  }
+  // const timersJob = await timersQueue.getJob(`timer${timerId}`);
+  // if (timersJob) {
+  //   await timersJob.remove();
+  // }
 
   return [StatusCodes.OK, {}];
 };

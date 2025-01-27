@@ -19,6 +19,10 @@ export class MealPlanQueryKeys {
     return base;
   };
 
+  public static readonly GET_MEAL_PLAN_SESSION = (mealPlanId: number): RcpQueryKey => {
+    return ["mealPlanSession", { id: mealPlanId }];
+  };
+
   public static readonly LIST_MEAL_PLAN_ITEMS = (mealPlanId: number, filters?: ListItemsForMealPlanQuerySchema): RcpQueryKey => {
     const base: RcpQueryKey = [
       "listMealPlanItems",

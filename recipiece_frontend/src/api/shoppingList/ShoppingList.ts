@@ -89,29 +89,19 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
       },
       reconnectAttempts: 2,
       reconnectInterval: 1000,
+      filter: (event) => {
+        const jsony = JSON.parse(event.data);
+        return jsony.responding_to_action !== "__ping__";
+      },
+      heartbeat: {
+        message: JSON.stringify({
+          action: "__ping__",
+        }),
+        interval: 5000,
+      },
     },
     !!wsSession?.token && !isFetchingWsSession && !isLoadingWsSession
   );
-
-  /**
-   * Ping Pong with the websocket to keep it alive
-   */
-  useEffect(() => {
-    if (readyState === ReadyState.OPEN) {
-      const interval = setInterval(() => {
-        sendMessage(
-          JSON.stringify({
-            action: "__ping__",
-          })
-        );
-      }, 5000);
-
-      return () => {
-        clearInterval(interval);
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [readyState]);
 
   const setItemNotes = useCallback(
     (item: Partial<ShoppingListItemSchema>) => {

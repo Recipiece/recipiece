@@ -39,6 +39,7 @@ export type MealPlan = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
     name: string;
+    configuration: Generated<unknown>;
     user_id: number;
 };
 export type MealPlanItem = {
@@ -49,7 +50,13 @@ export type MealPlanItem = {
     freeform_content: string | null;
     notes: string | null;
     recipe_id: number | null;
-    label: string | null;
+    leftover_of_meal_plan_item_id: number | null;
+};
+export type MealPlanShare = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    meal_plan_id: number;
+    user_kitchen_membership_id: number;
 };
 export type Recipe = {
     id: Generated<number>;
@@ -173,6 +180,7 @@ export type DB = {
     cookbooks: Cookbook;
     known_ingredients: KnownIngredient;
     meal_plan_items: MealPlanItem;
+    meal_plan_shares: MealPlanShare;
     meal_plans: MealPlan;
     recipe_cookbook_attachments: RecipeCookbookAttachment;
     recipe_ingredients: RecipeIngredient;
