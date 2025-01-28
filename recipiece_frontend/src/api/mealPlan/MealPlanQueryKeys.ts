@@ -1,4 +1,4 @@
-import { ListItemsForMealPlanQuerySchema, ListMealPlanQuerySchema } from "@recipiece/types";
+import { ListItemsForMealPlanQuerySchema, ListMealPlanSharesQuerySchema, ListMealPlansQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class MealPlanQueryKeys {
@@ -6,7 +6,7 @@ export class MealPlanQueryKeys {
     return ["mealPlan", { id: mealPlanId }];
   };
 
-  public static readonly LIST_MEAL_PLANS = (filters?: ListMealPlanQuerySchema): RcpQueryKey => {
+  public static readonly LIST_MEAL_PLANS = (filters?: ListMealPlansQuerySchema): RcpQueryKey => {
     const base: RcpQueryKey = ["listMealPlans"];
 
     if (filters) {
@@ -39,6 +39,35 @@ export class MealPlanQueryKeys {
       if (end_date) {
         base.push({ end_date });
       }
+    }
+
+    return base;
+  };
+
+  public static readonly LIST_MEAL_PLAN_SHARES = (filters?: Partial<ListMealPlanSharesQuerySchema>): RcpQueryKey => {
+    const base: RcpQueryKey = ["listMealPlanShares"];
+
+    const { targeting_self, from_self, page_number, user_kitchen_membership_id } = filters ?? {};
+    if (targeting_self !== undefined) {
+      base.push({ targeting_self });
+    }
+    if (from_self !== undefined) {
+      base.push({ from_self });
+    }
+    if (page_number !== undefined) {
+      base.push({ page_number });
+    }
+    if (user_kitchen_membership_id) {
+      base.push({ user_kitchen_membership_id });
+    }
+    return base;
+  };
+
+  public static readonly GET_MEAL_PLAN_SHARE = (id?: number): RcpQueryKey => {
+    const base: RcpQueryKey = ["mealPlanShare"];
+
+    if (id) {
+      base.push({ id });
     }
 
     return base;

@@ -68,7 +68,7 @@ export const authenticatedRoutes = [
     element: MealPlanViewPage,
   },
   {
-    path: "/meal-plan/:id/configuration",
+    path: "/meal-plan/view/:id/configuration",
     element: MealPlanConfigurationPage,
   },
   {

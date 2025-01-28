@@ -1,21 +1,25 @@
 import { DEFAULT_PAGE_SIZE, ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { Prisma, prisma } from "@recipiece/database";
+import { mealPlanSharesWithMemberships, Prisma, prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>): ApiResponse<ListItemsForMealPlanResponseSchema> => {
   const { start_date, end_date, page_number, page_size } = request.query;
   const pageSize = page_size ?? DEFAULT_PAGE_SIZE;
   const mealPlanId = +request.params.id;
-  const { id: userId } = request.user;
+  const user = request.user;
 
-  const mealPlan = await prisma.mealPlan.findFirst({
-    where: {
-      user_id: userId,
-      id: mealPlanId,
-    },
-  });
+  const mealPlan = await prisma.$kysely
+      .selectFrom("meal_plans")
+      .selectAll("meal_plans")
+      .where((eb) => {
+        return eb.and([
+          eb("meal_plans.id", "=", mealPlanId),
+          eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
+        ]);
+      })
+      .executeTakeFirst();
 
   if (!mealPlan) {
     return [

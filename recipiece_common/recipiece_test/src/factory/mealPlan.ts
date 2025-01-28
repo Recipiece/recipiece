@@ -69,7 +69,6 @@ export const generateMealPlanItem = async (mealPlanItem?: Partial<Omit<MealPlanI
       freeform_content: freeformContent,
       recipe_id: recipeId,
       notes: mealPlanItem?.notes ?? faker.word.words({ count: { min: 0, max: 5 } }),
-      label: mealPlanItem?.label ?? faker.helpers.arrayElement(["Breakfast", "Lunch", "Dinner", "Snack"]),
     },
   });
 };

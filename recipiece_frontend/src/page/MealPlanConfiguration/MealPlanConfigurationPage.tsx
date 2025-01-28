@@ -1,14 +1,16 @@
 import { MealPlanConfigurationSchema } from "@recipiece/types";
 import { FC, useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetMealPlanByIdQuery, useGetSelfQuery, useSetMealPlanConfigurationMutation } from "../../api";
-import { Form, H2, LoadingGroup, SubmitButton, useToast } from "../../component";
+import { Button, Form, H2, LoadingGroup, SubmitButton, useToast } from "../../component";
 import { GeneralConfigCard } from "./GeneralConfigCard";
 import { MeatConfigCard } from "./MeatConfigCard";
 import { NotificationConfigCard } from "./NotificationConfigCard";
+import { ArrowLeft } from "lucide-react";
 
 export const MealPlanConfigurationPage: FC = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const mealPlanId = +id!;
   const { toast } = useToast();
@@ -42,7 +44,7 @@ export const MealPlanConfigurationPage: FC = () => {
 
   useEffect(() => {
     form.reset({ ...defaultValues });
-  }, [mealPlan]);
+  }, [defaultValues]);
 
   const onSave = useCallback(async (formData: MealPlanConfigurationSchema) => {
     try {
@@ -69,8 +71,11 @@ export const MealPlanConfigurationPage: FC = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSave)}>
             <div className="flex flex-col gap-2">
-              <div className="flex flex-row items-center">
-                <H2>{mealPlan.name} Settings</H2>
+              <div className="flex flex-row items-center gap-2">
+                <Button variant="outline" onClick={() => navigate(`/meal-plan/view/${mealPlanId}`)}>
+                  <ArrowLeft />
+                </Button>
+                <H2 className="mb-0 pb-0">{mealPlan.name}</H2>
                 {canEdit && (
                   <SubmitButton className="ml-auto">Save</SubmitButton>
                 )}

@@ -1,18 +1,22 @@
 import { CreateMealPlanItemRequestSchema, MealPlanItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const createItemForMealPlan = async (request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>): ApiResponse<MealPlanItemSchema> => {
-  const { id: userId } = request.user;
+  const user = request.user;
   const { meal_plan_id, ...restMealPlanItem } = request.body;
 
-  const mealPlan = await prisma.mealPlan.findFirst({
-    where: {
-      id: meal_plan_id,
-      user_id: userId,
-    },
-  });
+  const mealPlan = await prisma.$kysely
+      .selectFrom("meal_plans")
+      .selectAll("meal_plans")
+      .where((eb) => {
+        return eb.and([
+          eb("meal_plans.id", "=", meal_plan_id),
+          eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
+        ]);
+      })
+      .executeTakeFirst();
 
   if (!mealPlan) {
     return [

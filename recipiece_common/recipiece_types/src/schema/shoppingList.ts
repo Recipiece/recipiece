@@ -36,21 +36,21 @@ export interface ShoppingListShareSchema extends InferType<typeof YShoppingListS
 /**
  * Create shopping list
  */
-export const YCreateShoppingListSchema = object({
+export const YCreateShoppingListRequestSchema = object({
   name: string().required(),
 }).noUnknown();
 
-export interface CreateShoppingListSchema extends InferType<typeof YCreateShoppingListSchema> {}
+export interface CreateShoppingListRequestSchema extends InferType<typeof YCreateShoppingListRequestSchema> {}
 
 /**
  * Update shopping list
  */
-export const YUpdateShoppingListSchema = object({
+export const YUpdateShoppingListRequestSchema = object({
   id: number().required(),
   name: string().notRequired(),
 }).noUnknown();
 
-export interface UpdateShoppingListSchema extends InferType<typeof YUpdateShoppingListSchema> {}
+export interface UpdateShoppingListRequestSchema extends InferType<typeof YUpdateShoppingListRequestSchema> {}
 
 /**
  * List shopping lists schema

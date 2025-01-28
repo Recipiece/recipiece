@@ -1,14 +1,14 @@
 import { prisma } from "@recipiece/database";
-import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
+import { CreateMealPlanShareRequestSchema, MealPlanShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { sendShoppingListSharedPushNotification } from "../../../util/pushNotification";
+import { sendMealPlanSharedPushNotification } from "../../../util/pushNotification";
 
 /**
- * Allow a user to share a shopping list they own with another user.
+ * Allow a user to share a meal plan they own with another user.
  */
-export const createShoppingListShare = async (request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>): ApiResponse<ShoppingListShareSchema> => {
-  const { shopping_list_id, user_kitchen_membership_id } = request.body;
+export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMealPlanShareRequestSchema>): ApiResponse<MealPlanShareSchema> => {
+  const { meal_plan_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 
   const membership = await prisma.userKitchenMembership.findUnique({
@@ -32,30 +32,30 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
     ];
   }
 
-  const shoppingList = await prisma.shoppingList.findUnique({
+  const mealPlan = await prisma.mealPlan.findUnique({
     where: {
-      id: shopping_list_id,
+      id: meal_plan_id,
       user_id: user.id,
     },
   });
 
-  if (!shoppingList) {
+  if (!mealPlan) {
     return [
       StatusCodes.NOT_FOUND,
       {
-        message: `Shopping list ${shopping_list_id} not found`,
+        message: `Meal plan ${meal_plan_id} not found`,
       },
     ];
   }
 
   try {
-    const share = await prisma.shoppingListShare.create({
+    const share = await prisma.mealPlanShare.create({
       data: {
-        shopping_list_id: shoppingList.id,
+        meal_plan_id: mealPlan.id,
         user_kitchen_membership_id: user_kitchen_membership_id,
       },
       include: {
-        shopping_list: true,
+        meal_plan: true,
       },
     });
 
@@ -66,7 +66,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
     });
     if (subscriptions.length > 0) {
       subscriptions.forEach(async (sub) => {
-        await sendShoppingListSharedPushNotification(sub, membership.source_user, shoppingList);
+        await sendMealPlanSharedPushNotification(sub, membership.source_user, mealPlan);
       });
     }
 
@@ -76,7 +76,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
       return [
         StatusCodes.CONFLICT,
         {
-          message: "Shopping list has already been shared",
+          message: "Meal plan has already been shared",
         },
       ];
     } else {
@@ -84,7 +84,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
       return [
         StatusCodes.INTERNAL_SERVER_ERROR,
         {
-          message: "Unable to share shopping list",
+          message: "Unable to share meal plan",
         },
       ];
     }

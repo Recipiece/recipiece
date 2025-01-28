@@ -32,9 +32,9 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
     const items = mealPlanItems
       .filter((item) => !!item.recipe?.ingredients)
       .map((item) => {
-        let notesString = item.label ? `${item.label} - ` : "";
-        notesString += DateTime.fromJSDate(item.start_date).toFormat("EEE, MMM dd");
-        notesString += ` - ${item.recipe!.name}`;
+        const itemStartDate = DateTime.fromJSDate(item.start_date);
+        const formattedDate = itemStartDate.toFormat("EEE ")
+        const notesString = ``;
         return (item.recipe?.ingredients ?? []).map((ing) => {
           return {
             name: ing.name,

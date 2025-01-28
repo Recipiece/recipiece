@@ -1,14 +1,18 @@
 import {
   YAppendShoppingListItemsRequestSchema,
   YAppendShoppingListItemsResponseSchema,
-  YCreateShoppingListSchema,
+  YCreateShoppingListRequestSchema,
+  YCreateShoppingListShareRequestSchema,
+  YListShoppingListSharesQuerySchema,
+  YListShoppingListSharesResponseSchema,
   YListShoppingListsQuerySchema,
   YListShoppingListsResponseSchema,
   YModifyShoppingListMessage,
   YModifyShoppingListResponse,
   YRequestShoppingListSessionResponseSchema,
   YShoppingListSchema,
-  YUpdateShoppingListSchema,
+  YShoppingListShareSchema,
+  YUpdateShoppingListRequestSchema
 } from "@recipiece/types";
 import { Route, WebsocketRoute } from "../../types";
 import { appendShoppingListItems } from "./appendShoppingListItems";
@@ -18,7 +22,7 @@ import { getShoppingList } from "./getShoppingList";
 import { listShoppingLists } from "./listShoppingLists";
 import { modifyShoppingListItems } from "./modifyShoppingListItems";
 import { requestShoppingListSession } from "./requestShoppingListSession";
-import { SHOPPING_LIST_SHARE_ROUTES } from "./share";
+import { createShoppingListShare, deleteShoppingListShare, listShoppingListShares } from "./share";
 import { updateShoppingList } from "./updateShoppingList";
 
 export const SHOPPING_LIST_ROUTES: Route[] = [
@@ -27,7 +31,7 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     authentication: "access_token",
     method: "POST",
     function: createShoppingList,
-    requestSchema: YCreateShoppingListSchema,
+    requestSchema: YCreateShoppingListRequestSchema,
     responseSchema: YShoppingListSchema,
   },
   {
@@ -35,7 +39,7 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     authentication: "access_token",
     method: "PUT",
     function: updateShoppingList,
-    requestSchema: YUpdateShoppingListSchema,
+    requestSchema: YUpdateShoppingListRequestSchema,
     responseSchema: YShoppingListSchema,
   },
   {
@@ -73,7 +77,28 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     requestSchema: YAppendShoppingListItemsRequestSchema,
     responseSchema: YAppendShoppingListItemsResponseSchema,
   },
-  ...SHOPPING_LIST_SHARE_ROUTES,
+  {
+    path: "/shopping-list/share",
+    authentication: "access_token",
+    method: "POST",
+    function: createShoppingListShare,
+    requestSchema: YCreateShoppingListShareRequestSchema,
+    responseSchema: YShoppingListShareSchema,
+  },
+  {
+    path: "/shopping-list/share/:id(\\d+)",
+    authentication: "access_token",
+    method: "DELETE",
+    function: deleteShoppingListShare,
+  },
+  {
+    path: "/shopping-list/share/list",
+    authentication: "access_token",
+    method: "GET",
+    function: listShoppingListShares,
+    requestSchema: YListShoppingListSharesQuerySchema,
+    responseSchema: YListShoppingListSharesResponseSchema,
+  },
 ];
 
 export const SHOPPING_LIST_WEBSOCKET_ROUTES: WebsocketRoute[] = [

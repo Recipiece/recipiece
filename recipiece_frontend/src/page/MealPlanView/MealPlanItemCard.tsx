@@ -1,19 +1,14 @@
-import { MealPlanItemSchema, MealPlanSchema, RecipeSchema } from "@recipiece/types";
+import { MealPlanSchema, RecipeSchema } from "@recipiece/types";
+import { Minus } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useMemo } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Button, Card, CardContent, CardTitle, FormInput, FormTextarea, H3, H4, LoadingGroup, Separator, Skeleton } from "../../component";
+import { Button, Card, CardContent, CardTitle, FormInput, FormTextarea, H3, H4, Separator, Skeleton } from "../../component";
 import { DialogContext } from "../../context";
 import { MealPlanItemsForm } from "./MealPlanForm";
-import { Minus } from "lucide-react";
 
 export interface MealPlanItemCardProps {
   readonly mealPlan: MealPlanSchema;
-  readonly mealPlanItems: {
-    readonly morningItems: Omit<MealPlanItemSchema, "id" | "created_at">[];
-    readonly middayItems: Omit<MealPlanItemSchema, "id" | "created_at">[];
-    readonly eveningItems: Omit<MealPlanItemSchema, "id" | "created_at">[];
-  };
   readonly date: DateTime;
   readonly isLoading: boolean;
   readonly isEditing: boolean;
@@ -153,7 +148,7 @@ const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate,
   );
 };
 
-export const MealPlanItemCard: FC<MealPlanItemCardProps> = ({ isLoading, isEditing, mealPlan, date, mealPlanItems, dayId }) => {
+export const MealPlanItemCard: FC<MealPlanItemCardProps> = ({ isLoading, isEditing, mealPlan, date, dayId }) => {
   return (
     <Card className="p-6">
       <CardTitle className="mb-4">

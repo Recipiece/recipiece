@@ -6,9 +6,9 @@ export interface FormyMealPlanItem extends Omit<MealPlanItemSchema, "id" | "crea
 }
 
 export interface MealPlanItemsForm {
-  readonly mealPlanItems: {
+  readonly mealPlanItems: ({
     readonly morningItems: FormyMealPlanItem[];
     readonly middayItems: FormyMealPlanItem[];
     readonly eveningItems: FormyMealPlanItem[];
-  }[];
+  } | undefined) [];
 }

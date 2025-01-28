@@ -1,17 +1,24 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
 import { YRecipeSchema } from "./recipe";
+import { YUserKitchenMembershipSchema } from "./user";
+
+export const YMealPlanShareSchema = object({
+  id: number().required(),
+  created_at: date().required(),
+  meal_plan_id: number().required(),
+  user_kitchen_membership_id: number().required(),
+});
 
 export const YMealPlanItemSchema = object({
   id: number().required(),
   created_at: date().required(),
   meal_plan_id: number().required(),
   start_date: date().required(),
-  freeform_content: string().notRequired().nullable(),
-  notes: string().notRequired().nullable(),
-  recipe_id: number().notRequired().nullable(),
-  recipe: YRecipeSchema.notRequired().nullable(),
-  label: string().notRequired().nullable(),
+  freeform_content: string().notRequired(),
+  notes: string().notRequired(),
+  recipe_id: number().notRequired(),
+  recipe: YRecipeSchema.notRequired(),
 }).noUnknown();
 
 export const YMealPlanConfigurationSchema = object({
@@ -26,7 +33,11 @@ export const YMealPlanConfigurationSchema = object({
     preferred_thawing_method: string().oneOf(["refrigerator", "cold_water", "microwave"]).notRequired(),
     send_thawing_notification: boolean().notRequired(),
   }).notRequired(),
-}).strict().noUnknown();
+})
+  .strict()
+  .noUnknown();
+
+export interface MealPlanShareSchema extends InferType<typeof YMealPlanShareSchema> {}
 
 export interface MealPlanConfigurationSchema extends InferType<typeof YMealPlanConfigurationSchema> {}
 
@@ -38,6 +49,7 @@ export const YMealPlanSchema = object({
   user_id: number().required(),
   created_at: date().required(),
   configuration: YMealPlanConfigurationSchema.notRequired(),
+  shares: array(YMealPlanShareSchema).notRequired(),
 }).noUnknown();
 
 export interface MealPlanSchema extends InferType<typeof YMealPlanSchema> {}
@@ -64,13 +76,22 @@ export interface UpdateMealPlanRequestSchema extends InferType<typeof YUpdateMea
 /**
  * List meal plans
  */
-export const YListMealPlanQuerySchema = YListQuerySchema.shape({});
+export const YListMealPlansQuerySchema = YListQuerySchema.shape({
+  shared_meal_plans: string().oneOf(["include", "exclude"]).notRequired(),
+})
+  .transform((val) => {
+    return {
+      ...val,
+      shared_meal_plans: val.shared_meal_plans ?? "include",
+    };
+  })
+  .noUnknown();
 
-export interface ListMealPlanQuerySchema extends InferType<typeof YListMealPlanQuerySchema> {}
+export interface ListMealPlansQuerySchema extends InferType<typeof YListMealPlansQuerySchema> {}
 
-export const YListMealPlanResponseSchema = generateYListQuerySchema(YMealPlanSchema);
+export const YListMealPlansResponseSchema = generateYListQuerySchema(YMealPlanSchema);
 
-export interface ListMealPlanResponseSchema extends InferType<typeof YListMealPlanResponseSchema> {}
+export interface ListMealPlansResponseSchema extends InferType<typeof YListMealPlansResponseSchema> {}
 
 /**
  * List items for meal plan
@@ -120,44 +141,6 @@ export const YUpdateMealPlanItemRequestSchema = object({
 export interface UpdateMealPlanItemRequestSchema extends InferType<typeof YUpdateMealPlanItemRequestSchema> {}
 
 /**
- * Request meal plan session
- */
-export const YRequestMealPlanSessionResponseSchema = object({
-  token: string().uuid().required(),
-}).noUnknown();
-
-export interface RequestMealPlanSessionResponseSchema extends InferType<typeof YRequestMealPlanSessionResponseSchema> {}
-
-/**
- * Modify meal plan
- */
-const MODIFY_MEAL_PLAN_ACTIONS = ["current_items", "add_item", "delete_item", "set_session_upper_bound", "set_session_lower_bound", "__ping__"];
-
-export const YModifyMealPlanMessage = object({
-  action: string().oneOf([...MODIFY_MEAL_PLAN_ACTIONS]),
-  item: object({
-    start_date: date().required(),
-    freeform_content: string().notRequired().nullable(),
-    notes: string().notRequired().nullable(),
-    recipe_id: number().notRequired().nullable(),
-    label: string().notRequired().nullable(),
-  })
-    .notRequired()
-    .default(undefined),
-  start_date: date().required(),
-  end_date: date().required(),
-}).noUnknown();
-
-export interface ModifyMealPlanMessageSchema extends InferType<typeof YModifyMealPlanMessage> {}
-
-export const YModifyMealPlanResponse = object({
-  responding_to_action: string().oneOf([...MODIFY_MEAL_PLAN_ACTIONS]),
-  items: array(YMealPlanItemSchema).required(),
-});
-
-export interface ModifyMealPlanResponseSchema extends InferType<typeof YModifyMealPlanResponse> {}
-
-/**
  * Meal Plan Configuration
  */
 export const YSetMealPlanConfigurationRequestSchema = object({
@@ -165,3 +148,58 @@ export const YSetMealPlanConfigurationRequestSchema = object({
 });
 
 export interface SetMealPlanConfigurationRequestSchema extends InferType<typeof YSetMealPlanConfigurationRequestSchema> {}
+
+/**
+ * Bulk set items
+ */
+export const YBulkSetMealPlanItemsRequestSchema = object({
+  create: array(YMealPlanItemSchema.omit(["id", "created_at", "recipe"])).required(),
+  update: array(YMealPlanItemSchema.omit(["recipe"])).required(),
+  delete: array(YMealPlanItemSchema.omit(["recipe"])).required(),
+}).noUnknown();
+
+export interface BulkSetMealPlanItemsRequestSchema extends InferType<typeof YBulkSetMealPlanItemsRequestSchema> {}
+
+export const YBulkSetMealPlanItemsResponseSchema = object({
+  created: array(YMealPlanItemSchema).required(),
+  updated: array(YMealPlanItemSchema).required(),
+}).noUnknown();
+
+export interface BulkSetMealPlanItemsResponseSchema extends InferType<typeof YBulkSetMealPlanItemsResponseSchema> {}
+
+/**
+ * Create Meal Plan Share
+ */
+export const YCreateMealPlanShareRequestSchema = object({
+  user_kitchen_membership_id: number().required(),
+  meal_plan_id: number().required(),
+}).noUnknown();
+
+export interface CreateMealPlanShareRequestSchema extends InferType<typeof YCreateMealPlanShareRequestSchema> {}
+
+/**
+ * List MealPlan Shares
+ */
+export const YListMealPlanSharesQuerySchema = YListQuerySchema.shape({
+  targeting_self: boolean().notRequired(),
+  from_self: boolean().notRequired(),
+  user_kitchen_membership_id: number().notRequired(),
+})
+  .test("onlyOneOfTargetingSelfOrFromSelf", "Must specify only one of targeting_self or from_self", (ctx) => {
+    return !ctx.from_self || !ctx.targeting_self;
+  })
+  .noUnknown();
+
+export interface ListMealPlanSharesQuerySchema extends InferType<typeof YListMealPlanSharesQuerySchema> {}
+
+export const YListMealPlanSharesResponseSchema = generateYListQuerySchema(
+  YMealPlanShareSchema.shape({
+    meal_plan: object({
+      id: number().required(),
+      name: string().required(),
+    }).required(),
+    user_kitchen_membership: YUserKitchenMembershipSchema.required(),
+  })
+).noUnknown();
+
+export interface ListMealPlanSharesResponseSchema extends InferType<typeof YListMealPlanSharesResponseSchema> {}
