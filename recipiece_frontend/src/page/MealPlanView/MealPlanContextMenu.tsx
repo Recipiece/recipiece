@@ -1,35 +1,93 @@
-import { FC, useContext, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { DialogContext } from "../../context";
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, LoadingGroup, LoadingSpinner } from "../../component";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  LoadingGroup,
+  LoadingSpinner,
+} from "../../component";
 import { MoreVertical, Pencil, Settings, Share, ShoppingBasket, Trash } from "lucide-react";
-import { useGetSelfQuery } from "../../api";
-import { MealPlanSchema } from "@recipiece/types";
+import { useGetSelfQuery, useListShoppingListsQuery } from "../../api";
+import { MealPlanSchema, ShoppingListSchema } from "@recipiece/types";
 import { useNavigate } from "react-router-dom";
+import { useLayout } from "../../hooks";
 
 export const MealPlanContextMenu: FC<{ readonly mealPlan?: MealPlanSchema }> = ({ mealPlan }) => {
   const navigate = useNavigate();
+
+  const { isMobile } = useLayout();
   const { pushDialog, popDialog } = useContext(DialogContext);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
+  const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery(
+    {
+      page_number: 0,
+    },
+    {
+      enabled: !isMobile,
+    }
+  );
+
+  const onAddToShoppingList = useCallback((shoppingList: ShoppingListSchema) => {
+    pushDialog("addMealPlanToShoppingList", {
+      mealPlan: mealPlan,
+      shoppingList: shoppingList,
+      onClose: () => popDialog("addMealPlanToShoppingList"),
+      onSubmit: () => {
+
+      }
+    })
+  }, [pushDialog, popDialog]);
+
+  const mobileOnAddToShoppingList = useCallback(() => {
+    pushDialog("mobileShoppingLists", {
+      onClose: () => popDialog("mobileShoppingLists"),
+      onSubmit: (list: ShoppingListSchema) => {
+        popDialog("mobileShoppingLists");
+        onAddToShoppingList(list);
+      }
+    })
+  }, [pushDialog, popDialog, onAddToShoppingList]);
+
+  const onShare = useCallback(() => {
+    pushDialog("share", {
+      displayName: "Meal Plan",
+      entity_id: mealPlan!.id,
+      entity_type: "meal_plan",
+      onClose: () => popDialog("share"),
+      onSubmit: () => {
+
+      }
+    })
+  }, [pushDialog, popDialog]);
 
   const manageMealPlanItems = useMemo(() => {
     const array = [];
     if (user && mealPlan) {
       array.push(
         <DropdownMenuItem onClick={() => navigate(`/meal-plan/view/${mealPlan!.id}/configuration`)}>
-          <Settings /> <span>Configure</span>
+          <Settings /> Configure
         </DropdownMenuItem>
       );
       if (user?.id === mealPlan.user_id) {
         array.push(
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={onShare}>
             <Share /> Share
           </DropdownMenuItem>
         );
         array.push(
           <DropdownMenuItem>
-            <Pencil /> <span>Edit</span>
+            <Pencil /> Edit
           </DropdownMenuItem>
         );
       }
@@ -40,14 +98,37 @@ export const MealPlanContextMenu: FC<{ readonly mealPlan?: MealPlanSchema }> = (
   const interactionItems = useMemo(() => {
     const items = [];
     if (user && mealPlan) {
-      items.push(
-        <DropdownMenuItem>
-          <ShoppingBasket /> Add to Shopping List
-        </DropdownMenuItem>
-      );
+      if (isMobile) {
+        items.push(
+          <DropdownMenuItem onClick={mobileOnAddToShoppingList}>
+            <ShoppingBasket /> Add to Shopping List
+          </DropdownMenuItem>
+        );
+      } else {
+        items.push(
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <ShoppingBasket /> Add to Shopping List
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
+                  {(shoppingLists?.data || []).map((shoppingList) => {
+                    return (
+                      <DropdownMenuItem onClick={() => onAddToShoppingList(shoppingList)} key={shoppingList.id}>
+                        {shoppingList.name}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </LoadingGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        );
+      }
     }
     return items;
-  }, [user, mealPlan]);
+  }, [user, mealPlan, isMobile]);
 
   const deletionItems = useMemo(() => {
     const items = [];

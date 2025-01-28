@@ -2,6 +2,7 @@ export * from "./Accordion";
 export * from "./Avatar";
 export * from "./Badge";
 export * from "./Button";
+export * from "./Calendar";
 export * from "./Card";
 export * from "./Carousel";
 export * from "./Checkbox";

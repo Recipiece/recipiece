@@ -1855,11 +1855,6 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@date-fns/tz@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@date-fns/tz/-/tz-1.2.0.tgz#81cb3211693830babaf3b96aff51607e143030a6"
-  integrity sha512-LBrd7MiJZ9McsOgxqWX7AaxrDjcFVjWH/tIKJd7pnR7McaslGYOP1QmmiBXdJH/H/yLCT+rcQ7FaPBUxRGUtrg==
-
 "@discoveryjs/json-ext@^0.6.1":
   version "0.6.3"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.6.3.tgz#f13c7c205915eb91ae54c557f5e92bddd8be0e83"
@@ -8311,13 +8306,10 @@ react-app-polyfill@^3.0.0:
     regenerator-runtime "^0.13.9"
     whatwg-fetch "^3.6.2"
 
-react-day-picker@^9:
-  version "9.4.4"
-  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-9.4.4.tgz#1c514c86489ede20046eec957c68a7b31542bd49"
-  integrity sha512-1s+jA/bFYtoxhhr8M0kkFHLiMTSII6qU8UfDFprRAUStTVHljLTjg4oarvAngPlQ1cQAC+LUb0k/qMc+jjhmxw==
-  dependencies:
-    "@date-fns/tz" "^1.2.0"
-    date-fns "^4.1.0"
+react-day-picker@^8:
+  version "8.10.1"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.1.tgz#4762ec298865919b93ec09ba69621580835b8e80"
+  integrity sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==
 
 react-dev-utils@^12.0.1:
   version "12.0.1"
