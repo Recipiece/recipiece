@@ -32,7 +32,7 @@ const hashPassword = async (plainPassword: string) => {
 
 const deleteExistingUsers = async () => {
   await prisma.user.deleteMany();
-}
+};
 
 const seedDevUser = async () => {
   const user = await generateUser({
@@ -77,8 +77,8 @@ const seedDevUser = async () => {
     });
   }
 
-  const mealPlanCreatedAt = DateTime.utc().minus({days: 20});
-  const endDate = DateTime.utc().plus({days: 20});
+  const mealPlanCreatedAt = DateTime.utc().minus({ days: 20 });
+  const endDate = DateTime.utc().plus({ days: 20 });
   const hoursBetween = endDate.diff(mealPlanCreatedAt, "hours").hours;
 
   const mealPlan = await generateMealPlan({
@@ -86,11 +86,20 @@ const seedDevUser = async () => {
     created_at: mealPlanCreatedAt.toJSDate(),
   });
 
-  for(let i = 0; i < Math.ceil(hoursBetween); i += 8) {
-    generateMealPlanItem({
-      meal_plan_id: mealPlan.id,
-      start_date: mealPlanCreatedAt.plus({hours: i}).toJSDate(),
-    });
+  for (let i = 0; i < Math.ceil(hoursBetween); i += 8) {
+    if (i % 2 === 0) {
+      generateMealPlanItem({
+        meal_plan_id: mealPlan.id,
+        start_date: mealPlanCreatedAt.plus({ hours: i }).toJSDate(),
+        recipe_id: gennedRecipes[Math.floor(Math.random() * gennedRecipes.length)].id,
+      });
+    } else {
+      generateMealPlanItem({
+        meal_plan_id: mealPlan.id,
+        start_date: mealPlanCreatedAt.plus({ hours: i }).toJSDate(),
+        freeform_content: "hello world goodbye mars",
+      });
+    }
   }
 
   return user;

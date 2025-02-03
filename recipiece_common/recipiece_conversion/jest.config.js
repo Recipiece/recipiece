@@ -8,5 +8,5 @@ module.exports = {
   },
   testMatch: ["**/test/**/*.test.ts"], // Match test files
   collectCoverage: true, // Enable test coverage collection
-  collectCoverageFrom: ["src/**/*.ts"] // Include only src files in coverage report
+  collectCoverageFrom: ["src/**/*.ts"], // Include only src files in coverage report
 };

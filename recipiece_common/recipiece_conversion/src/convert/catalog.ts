@@ -100,7 +100,7 @@ export const VOLUME_UNITS: UnitConverter[] = [
       singular: "pint",
       plural: "pints",
     },
-    match_on: ["pt", "pint", "pts", "pints"],
+    match_on: ["pt", "pts", "pnt", "pnts", "pint", "pints"],
     unit_category: "volume",
   },
   {

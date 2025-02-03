@@ -1,5 +1,5 @@
+import { faker } from "@faker-js/faker";
 import { Prisma, prisma, Recipe, RecipeIngredient, RecipeShare, RecipeStep, UserKitchenMembership } from "@recipiece/database";
-import { base, faker } from "@faker-js/faker";
 import { generateUser, generateUserKitchenMembership } from "./user";
 
 export const INGREDIENT_UNIT_CHOICES = ["cups", "c", "tablespoons", "tbs", "tbsp", "teaspoons", "tsp", "tsps", "grams", "g", "kilograms", "ounces", "pounds", "lbs"];

@@ -22,7 +22,7 @@ export const NotificationConfigCard: FC = () => {
           });
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meatNotification]);
 
   const canRequestPushNotificationPermissions = "Notification" in window;

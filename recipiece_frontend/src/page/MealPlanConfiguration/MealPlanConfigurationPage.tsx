@@ -44,27 +44,30 @@ export const MealPlanConfigurationPage: FC = () => {
 
   useEffect(() => {
     form.reset({ ...defaultValues });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
-  const onSave = useCallback(async (formData: MealPlanConfigurationSchema) => {
-    try {
-      await setMealPlanConfiguration({
-        mealPlanId: mealPlanId,
-        configuration: { ...formData },
-      });
-      toast({
-        title: "Settings Updated",
-        description: "Your meal plan's settings have been updated.",
-      });
-    } catch {
-      toast({
-        title: "Error Updating Settings",
-        description: "There was an error updating your meal plan's settings. Try again later.",
-        variant: "destructive",
-      });
-    }
-  }, [mealPlanId, setMealPlanConfiguration, toast]);
+  const onSave = useCallback(
+    async (formData: MealPlanConfigurationSchema) => {
+      try {
+        await setMealPlanConfiguration({
+          mealPlanId: mealPlanId,
+          configuration: { ...formData },
+        });
+        toast({
+          title: "Settings Updated",
+          description: "Your meal plan's settings have been updated.",
+        });
+      } catch {
+        toast({
+          title: "Error Updating Settings",
+          description: "There was an error updating your meal plan's settings. Try again later.",
+          variant: "destructive",
+        });
+      }
+    },
+    [mealPlanId, setMealPlanConfiguration, toast]
+  );
 
   return (
     <LoadingGroup isLoading={isLoadingMealPlan || isLoadingUser} variant="spinner" className="h-12 w-12">

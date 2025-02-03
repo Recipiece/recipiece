@@ -30,7 +30,7 @@ describe("Meal Plan Notification Jobs", () => {
         user_id: mealPlan.user_id,
         subscription_data: {},
         device_id: "",
-      }
+      },
     });
 
     const job = await prisma.sideJob.create({

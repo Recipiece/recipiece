@@ -51,6 +51,6 @@
     "./jest.setup*.ts",
     "../recipiece_common/recipiece_types/src/**/*",
     "../recipiece_common/recipiece_database/src/**/*",
-    "../recipiece_common/recipiece_conversion/src/**/*",
+    "../recipiece_common/recipiece_conversion/src/**/*"
   ]
 }

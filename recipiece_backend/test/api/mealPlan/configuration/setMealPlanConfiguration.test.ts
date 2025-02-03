@@ -18,7 +18,7 @@ describe("Set Meal Plan Configuration", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  })
+  });
 
   it("should allow a configuration to be set by the owner", async () => {
     const mealPlan = await generateMealPlan({

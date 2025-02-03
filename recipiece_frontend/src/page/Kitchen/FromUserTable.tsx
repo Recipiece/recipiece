@@ -70,7 +70,7 @@ export const FromUserTable: FC = () => {
       <p className="text-sm">Share your kitchen with other users.</p>
       <LoadingGroup isLoading={isLoadingKitchenMemberships} variant="spinner" className="h-10 w-10">
         {hasAnyRequests && (
-          <div className="mt-2 flex flex-col gap-2 mt-2 mb-2">
+          <div className="mb-2 mt-2 flex flex-col gap-2">
             {kitchenMemberships.data.map((membership) => {
               return (
                 <div key={membership.id} className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2">
@@ -78,7 +78,9 @@ export const FromUserTable: FC = () => {
                     <AvatarFallback className="bg-primary text-lg text-white">{membership.destination_user.username.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span>{membership.destination_user.username} - {membership.status}</span>
+                    <span>
+                      {membership.destination_user.username} - {membership.status}
+                    </span>
                     <span className="text-xs">{DateTime.fromJSDate(membership.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
                   </div>
                   <span className="ml-auto" />

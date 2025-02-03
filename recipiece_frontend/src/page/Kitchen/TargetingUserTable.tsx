@@ -72,7 +72,7 @@ export const TargetingUserTable: FC = () => {
       <p className="text-sm">Allow users to share their kitchen with you.</p>
       <LoadingGroup isLoading={isLoadingTargetingUser} className="h-10 w-10" variant="spinner">
         {hasAnyTargetingRequests && (
-          <div className="mt-2 mb-2 flex flex-col gap-2">
+          <div className="mb-2 mt-2 flex flex-col gap-2">
             {kitchenMembershipsTargetingUser.data.map((membership) => {
               return (
                 <div key={membership.id} className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2">
@@ -95,7 +95,7 @@ export const TargetingUserTable: FC = () => {
             })}
           </div>
         )}
-        {!hasAnyTargetingRequests && <p className="pt-4 pb-4 text-center text-sm">You have no pending requests.</p>}
+        {!hasAnyTargetingRequests && <p className="pb-4 pt-4 text-center text-sm">You have no pending requests.</p>}
         {hasAnyTargetingRequests && <Pager page={kitchenMembershipsPage} onPage={setKitchenMembershipsPage} hasNextPage={!!kitchenMembershipsTargetingUser?.has_next_page} />}
         <PastTargetingMembershipsTable />
       </LoadingGroup>

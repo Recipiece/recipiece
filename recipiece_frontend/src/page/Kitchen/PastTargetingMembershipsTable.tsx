@@ -3,18 +3,7 @@ import { Ban, CheckCircle2, ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
 import { useListUserKitchenMembershipsQuery, useUpdatedNonPendingUserKitchenMembershipMutation } from "../../api";
-import {
-  Avatar,
-  AvatarFallback,
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  H3,
-  LoadingGroup,
-  Pager,
-  useToast
-} from "../../component";
+import { Avatar, AvatarFallback, Button, Collapsible, CollapsibleContent, CollapsibleTrigger, H3, LoadingGroup, Pager, useToast } from "../../component";
 import { useDeleteUserKitchenMembershipDialog } from "./hook";
 
 export const PastTargetingMembershipsTable: FC = () => {
@@ -96,7 +85,7 @@ export const PastTargetingMembershipsTable: FC = () => {
         <CollapsibleContent>
           <LoadingGroup isLoading={isLoadingKitchenMemberships} className="h-10 w-10" variant="spinner">
             {hasAnyRequests && (
-              <div className="flex flex-col gap-2 mt-2 mb-2">
+              <div className="mb-2 mt-2 flex flex-col gap-2">
                 {kitchenMemberships.data.map((membership) => {
                   return (
                     <div key={membership.id} className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2">
@@ -118,11 +107,7 @@ export const PastTargetingMembershipsTable: FC = () => {
                           <Ban />
                         </Button>
                       )}
-                      <Button
-                        variant="ghost"
-                        disabled={isDeletingUserKitchenMembership || isUpdatingKitchenMembership}
-                        onClick={() => deleteUserKitchenMembership(membership)}
-                      >
+                      <Button variant="ghost" disabled={isDeletingUserKitchenMembership || isUpdatingKitchenMembership} onClick={() => deleteUserKitchenMembership(membership)}>
                         <Trash className="text-destructive" />
                       </Button>
                     </div>
@@ -130,7 +115,7 @@ export const PastTargetingMembershipsTable: FC = () => {
                 })}
               </div>
             )}
-            {!hasAnyRequests && <p className="text-center text-sm pt-4 pb-4">You have no past requests.</p>}
+            {!hasAnyRequests && <p className="pb-4 pt-4 text-center text-sm">You have no past requests.</p>}
             {hasAnyRequests && <Pager page={kitchenMembershipsPage} onPage={setKitchenMembershipsPage} hasNextPage={!!kitchenMemberships?.has_next_page} />}
           </LoadingGroup>
         </CollapsibleContent>

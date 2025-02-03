@@ -11,15 +11,15 @@ export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, Li
   const user = request.user;
 
   const mealPlan = await prisma.$kysely
-      .selectFrom("meal_plans")
-      .selectAll("meal_plans")
-      .where((eb) => {
-        return eb.and([
-          eb("meal_plans.id", "=", mealPlanId),
-          eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
-        ]);
-      })
-      .executeTakeFirst();
+    .selectFrom("meal_plans")
+    .selectAll("meal_plans")
+    .where((eb) => {
+      return eb.and([
+        eb("meal_plans.id", "=", mealPlanId),
+        eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
+      ]);
+    })
+    .executeTakeFirst();
 
   if (!mealPlan) {
     return [

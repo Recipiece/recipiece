@@ -1,4 +1,3 @@
-import { KnownIngredientSchema } from "@recipiece/types";
 import convert, { Unit as ConvertUnit } from "convert-units";
 import Fraction from "fraction.js";
 import { ALL_UNITS, MASS_UNITS, VOLUME_UNITS } from "./catalog";
@@ -110,7 +109,7 @@ export const convertIngredientInSameCategory = (ingredient: ConvertableIngredien
  * @throws {Error}
  */
 export const convertIngredientInDifferentCategory = (ingredient: ConvertableIngredient, knownIngredient: ConvertableKnownIngredient, targetUnit: ConvertUnit): number => {
-  const ingredientUnit = (ingredient.unit || "unitless").toLowerCase().trim();
+  const ingredientUnit = (ingredient.unit ?? "unitless").toLowerCase().trim();
   const ingredientAmount = new Fraction(ingredient.amount!).valueOf();
 
   const matchingDesiredConverter = ALL_UNITS.find((unitDef) => {
@@ -121,9 +120,9 @@ export const convertIngredientInDifferentCategory = (ingredient: ConvertableIngr
     let fromValue: number;
     let fromUnit: ConvertUnit = matchingDesiredConverter.unit_category === "mass" ? "g" : "cup";
     if (matchingDesiredConverter.unit_category === "mass") {
-      fromValue = knownIngredient.unitless_amount! * (knownIngredient.grams / ingredientAmount);
+      fromValue = knownIngredient.unitless_amount! * (knownIngredient.grams * ingredientAmount);
     } else {
-      fromValue = knownIngredient.unitless_amount! * (knownIngredient.us_cups / ingredientAmount);
+      fromValue = knownIngredient.unitless_amount! * (knownIngredient.us_cups * ingredientAmount);
     }
     return convert(fromValue).from(fromUnit).to(matchingDesiredConverter.convert_symbol);
   };
@@ -136,11 +135,11 @@ export const convertIngredientInDifferentCategory = (ingredient: ConvertableIngr
     } else {
       let fromValue = ingredientAmount;
       let fromUnit: ConvertUnit = matchingCurrentConverter.unit_category === "mass" ? "cup" : "g";
-      if (matchingCurrentConverter.unit_category === "mass" && matchingCurrentConverter.convert_symbol !== "g") {
+      if (matchingCurrentConverter.unit_category === "mass") {
         fromValue = convert(ingredientAmount).from(matchingCurrentConverter.convert_symbol).to("g");
         fromValue = (knownIngredient.us_cups / knownIngredient.grams) * fromValue;
         fromUnit = "cup";
-      } else if (matchingCurrentConverter.unit_category === "volume" && matchingCurrentConverter.convert_symbol !== "cup") {
+      } else if (matchingCurrentConverter.unit_category === "volume") {
         fromValue = convert(ingredientAmount).from(matchingCurrentConverter.convert_symbol).to("cup");
         fromValue = (knownIngredient.grams / knownIngredient.us_cups) * fromValue;
         fromUnit = "g";

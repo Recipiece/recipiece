@@ -306,9 +306,7 @@ export const RecipieceMenubar: FC = () => {
               <LoadingGroup isLoading={isLoadingMealPlans} className="h-10 w-full">
                 {!!mealPlans?.data?.length && <Separator />}
                 {(mealPlans?.data || []).map((mealPlan) => {
-                  return (
-                    <MealPlanMenuItem onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)} key={mealPlan.id} mealPlan={mealPlan} />
-                  );
+                  return <MealPlanMenuItem onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)} key={mealPlan.id} mealPlan={mealPlan} />;
                 })}
               </LoadingGroup>
             </MenubarContent>
@@ -347,9 +345,7 @@ export const RecipieceMenubar: FC = () => {
               <LoadingGroup isLoading={isLoadingShoppingLists} className="h-10 w-full">
                 {!!shoppingLists?.data?.length && <Separator />}
                 {(shoppingLists?.data || []).map((shoppingList) => {
-                  return (
-                    <ShoppingListMenuItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)} shoppingList={shoppingList} />
-                  );
+                  return <ShoppingListMenuItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)} shoppingList={shoppingList} />;
                 })}
                 {/* {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />} */}
               </LoadingGroup>

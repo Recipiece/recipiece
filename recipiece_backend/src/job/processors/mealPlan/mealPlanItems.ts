@@ -48,14 +48,16 @@ export const processMealPlanItem = async (job: Job) => {
         const meatyIngredients = await meatyIngredientsQuery.execute();
 
         if (meatyIngredients.length > 0) {
-          console.log(`meal plan item ${mealPlanItem.id} has at least one meat like ingredient, processing thawing`)
+          console.log(`meal plan item ${mealPlanItem.id} has at least one meat like ingredient, processing thawing`);
           const knownIngredients = await tx.knownIngredient.findMany();
           return await processMeatThawing(tx, sideJob.user_id, mealPlanItem, config, meatyIngredients, knownIngredients);
         } else {
           console.log(`meal plan item ${mealPlanItem.id} has no meat-like ingredients`);
         }
       } else {
-        console.log(`configuration has send_thawing_notification=${config.meats?.send_thawing_notification} and preferred_thawing_method=${config.meats?.preferred_thawing_method}, no processing can be done.`)
+        console.log(
+          `configuration has send_thawing_notification=${config.meats?.send_thawing_notification} and preferred_thawing_method=${config.meats?.preferred_thawing_method}, no processing can be done.`
+        );
       }
     } else {
       console.log(`meal plan item ${mealPlanItem.id} has no recipe associated with it`);

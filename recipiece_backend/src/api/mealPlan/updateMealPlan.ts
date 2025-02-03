@@ -34,10 +34,13 @@ export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPla
         ...restMealPlan,
       },
     });
-    return [StatusCodes.OK, {
-      ...updatedMealPlan,
-      configuration: YMealPlanConfigurationSchema.cast(updatedMealPlan.configuration),
-    }];
+    return [
+      StatusCodes.OK,
+      {
+        ...updatedMealPlan,
+        configuration: YMealPlanConfigurationSchema.cast(updatedMealPlan.configuration),
+      },
+    ];
   } else {
     return [
       StatusCodes.BAD_REQUEST,

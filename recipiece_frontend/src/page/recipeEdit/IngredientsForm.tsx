@@ -4,7 +4,8 @@ import { FC, Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button, FormInput, Popover, PopoverContent, PopoverTrigger } from "../../component";
-import { ALL_UNITS, cn } from "../../util";
+import { cn } from "../../util";
+import { ALL_UNITS } from "@recipiece/conversion";
 
 const UNIT_AUTOCOMPLETE_OPTIONS = ALL_UNITS.map((au) => {
   return au.display_name.singular;

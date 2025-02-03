@@ -146,9 +146,9 @@ describe("Import Recipes", () => {
             file_name: path.resolve(__dirname, `${RecipeImportFiles.TMP_DIR}/${user.id}/test_data.paprikarecipes`),
           },
           user_id: user.id,
-        }
-      })
-      await importRecipes({id: sideJob.id} as Job);
+        },
+      });
+      await importRecipes({ id: sideJob.id } as Job);
 
       const firstCreatedRecipe = await prisma.recipe.findFirst({
         where: {

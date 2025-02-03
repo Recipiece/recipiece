@@ -125,7 +125,7 @@ describe("Bulk Set Meal Plan Items", () => {
 
   it("should allow shared recipes to be used for items", async () => {
     const otherUser = await generateUser();
-    const otherRecipe = await generateRecipe({user_id: otherUser.id});
+    const otherRecipe = await generateRecipe({ user_id: otherUser.id });
     const membership = await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
@@ -135,17 +135,19 @@ describe("Bulk Set Meal Plan Items", () => {
       user_kitchen_membership_id: membership.id,
       recipe_id: otherRecipe.id,
     });
-    const mealPlan = await generateMealPlan({user_id: user.id});
+    const mealPlan = await generateMealPlan({ user_id: user.id });
 
     const response = await request(server)
       .post(`/meal-plan/${mealPlan.id}/item/bulk-set`)
       .set("Authorization", `Bearer ${bearerToken}`)
       .send(<BulkSetMealPlanItemsRequestSchema>{
-        create: [{
-          recipe_id: otherRecipe.id,
-          meal_plan_id: mealPlan.id,
-          start_date: DateTime.utc().toJSDate(),
-        }],
+        create: [
+          {
+            recipe_id: otherRecipe.id,
+            meal_plan_id: mealPlan.id,
+            start_date: DateTime.utc().toJSDate(),
+          },
+        ],
         update: [],
         delete: [],
       });
@@ -155,25 +157,27 @@ describe("Bulk Set Meal Plan Items", () => {
     const dbItem = await prisma.mealPlanItem.findFirst({
       where: {
         recipe_id: otherRecipe.id,
-      }
+      },
     });
     expect(dbItem).toBeTruthy();
   });
 
   it("should not allow non shared recipes belonging to another user to be used for items", async () => {
     const otherUser = await generateUser();
-    const otherRecipe = await generateRecipe({user_id: otherUser.id});
-    const mealPlan = await generateMealPlan({user_id: user.id});
+    const otherRecipe = await generateRecipe({ user_id: otherUser.id });
+    const mealPlan = await generateMealPlan({ user_id: user.id });
 
     const response = await request(server)
       .post(`/meal-plan/${mealPlan.id}/item/bulk-set`)
       .set("Authorization", `Bearer ${bearerToken}`)
       .send(<BulkSetMealPlanItemsRequestSchema>{
-        create: [{
-          recipe_id: otherRecipe.id,
-          meal_plan_id: mealPlan.id,
-          start_date: DateTime.utc().toJSDate(),
-        }],
+        create: [
+          {
+            recipe_id: otherRecipe.id,
+            meal_plan_id: mealPlan.id,
+            start_date: DateTime.utc().toJSDate(),
+          },
+        ],
         update: [],
         delete: [],
       });
@@ -183,7 +187,7 @@ describe("Bulk Set Meal Plan Items", () => {
     const dbItem = await prisma.mealPlanItem.findFirst({
       where: {
         recipe_id: otherRecipe.id,
-      }
+      },
     });
     expect(dbItem).toBeFalsy();
   });

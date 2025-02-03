@@ -22,7 +22,11 @@ const config: Configuration = {
           },
         },
         exclude: /node_modules/,
-        include: [path.resolve(__dirname, "./src"), path.resolve(__dirname, "../recipiece_common/recipiece_types")],
+        include: [
+          path.resolve(__dirname, "./src"),
+          path.resolve(__dirname, "../recipiece_common/recipiece_types"),
+          path.resolve(__dirname, "../recipiece_common/recipiece_conversion"),
+        ],
       },
       {
         test: /\.css$/,
@@ -49,6 +53,7 @@ const config: Configuration = {
     extensions: [".tsx", ".ts", ".js", ".jsx"],
     alias: {
       "@recipiece/types": path.resolve(__dirname, "../recipiece_common/recipiece_types/src"),
+      "@recipiece/conversion": path.resolve(__dirname, "../recipiece_common/recipiece_conversion/src"),
     },
   },
   output: {
