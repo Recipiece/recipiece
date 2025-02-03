@@ -80,19 +80,14 @@ const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate,
       {target === "morningItems" && <H3>Morning</H3>}
       {target === "middayItems" && <H3>Midday</H3>}
       {target === "eveningItems" && <H3>Evening</H3>}
-      {fields.length === 0 && (
-        <p className="text-sm text-center">Nothing here yet!</p>
-      )}
+      {fields.length === 0 && <p className="text-center text-sm">Nothing here yet!</p>}
       {fields.map((item, index) => {
-        {
-          item;
-        }
         let component = undefined;
         if (item.recipe) {
           component = (
             <div>
               <H4 className="underline">
-                <a target="_blank" href={`/recipe/view/${item.recipe.id}`}>
+                <a target="_blank" rel="noreferrer" href={`/recipe/view/${item.recipe.id}`}>
                   {item.recipe.name}
                 </a>
               </H4>
@@ -117,7 +112,7 @@ const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate,
         return (
           <div key={item.id} className="flex flex-col gap-2">
             {component && (
-              <div className="pl-2 sm:pl-4 flex flex-col gap-2">
+              <div className="flex flex-col gap-2 pl-2 sm:pl-4">
                 {component}
                 {notesComponent}
               </div>
@@ -134,7 +129,7 @@ const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate,
         );
       })}
       {isEditing && (
-        <div className="flex flex-row justify-center items-center gap-2">
+        <div className="flex flex-row items-center justify-center gap-2">
           <Button onClick={onAppendRecipe} variant="outline">
             Add Recipe
           </Button>
@@ -160,9 +155,9 @@ export const MealPlanItemCard: FC<MealPlanItemCardProps> = ({ isLoading, isEditi
         <div className="flex flex-col gap-4 whitespace-normal">
           {isLoading && (
             <>
-              <Skeleton className="w-full h-8" />
-              <Skeleton className="w-full h-8" />
-              <Skeleton className="w-full h-8" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
             </>
           )}
           {!isLoading && (

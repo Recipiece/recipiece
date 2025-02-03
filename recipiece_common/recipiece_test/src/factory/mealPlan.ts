@@ -50,9 +50,9 @@ export const generateMealPlanItem = async (mealPlanItem?: Partial<Omit<MealPlanI
   }
 
   let freeformContent = mealPlanItem?.freeform_content;
-  let recipeId = undefined;
+  let recipeId = mealPlanItem?.recipe_id;
 
-  if (!mealPlanItem?.freeform_content) {
+  if (!mealPlanItem?.freeform_content && !recipeId) {
     const shouldGenRecipe = faker.number.int({ min: 0, max: 1 }) % 2 === 0;
     if (shouldGenRecipe) {
       recipeId = (await generateRecipe({ user_id: mealPlan.user_id })).id;

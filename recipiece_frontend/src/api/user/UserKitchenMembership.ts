@@ -5,6 +5,8 @@ import {
   ListUserKitchenMembershipsResponseSchema,
   UserKitchenMembershipSchema,
   UserKitchenMembershipSchemaStatus,
+  YListUserKitchenMembershipsResponseSchema,
+  YUserKitchenMembershipSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater, RcpQueryKey } from "../QueryKeys";
@@ -12,6 +14,7 @@ import { RecipeQueryKeys } from "../recipe";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { ShoppingListQueryKeys } from "../shoppingList";
 import { UserQueryKeys } from "./UserQueryKeys";
+import { MealPlanQueryKeys } from "../mealPlan";
 
 interface ShareableEntityData {
   readonly user_id: number;
@@ -151,7 +154,14 @@ const usePurgeSharedQueries = () => {
     purgeShareEntity(membership, RecipeQueryKeys.GET_RECIPE_SHARE());
   };
 
-  return { purgeRecipes, purgeShoppingLists };
+  const purgeMealPlans = (membership: UserKitchenMembershipSchema, enforceMembershipUser?: "source_user" | "destination_user") => {
+    purgeParentEntityList(membership, MealPlanQueryKeys.LIST_MEAL_PLANS(), enforceMembershipUser);
+    purgeParentEntity(membership, MealPlanQueryKeys.GET_MEAL_PLAN(), enforceMembershipUser);
+    purgeShareEntitiesList(membership, MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES());
+    purgeShareEntity(membership, MealPlanQueryKeys.GET_MEAL_PLAN_SHARE());
+  };
+
+  return { purgeRecipes, purgeShoppingLists, purgeMealPlans };
 };
 
 export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipsQuerySchema, args?: QueryArgs<ListUserKitchenMembershipsResponseSchema>) => {
@@ -159,23 +169,24 @@ export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMemb
   const queryClient = useQueryClient();
 
   const query = async () => {
-    return await getter<ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema>({
+    const data = await getter<ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema>({
       path: "/user/kitchen/membership/list",
       withAuth: "access_token",
       query: {
         ...(filters ?? { page_number: 0, page_size: 100 }),
       },
     });
+    return YListUserKitchenMembershipsResponseSchema.cast(data.data);
   };
 
   return useQuery({
     queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(filters),
     queryFn: async () => {
       const results = await query();
-      results.data.data.forEach((membership) => {
+      results.data.forEach((membership) => {
         queryClient.setQueryData(UserQueryKeys.GET_USER_KITCHEN_MEMBERSHIP(membership.id), membership);
       });
-      return results.data;
+      return results;
     },
     ...(args ?? {}),
   });
@@ -191,7 +202,7 @@ export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitch
       path: "/user/kitchen/membership",
       body: { ...body },
     });
-    return response.data;
+    return YUserKitchenMembershipSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -258,12 +269,24 @@ export const useUpdatePendingUserKitchenMembershipMutation = (
           queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
           refetchType: "inactive",
         });
+
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LISTS()),
           refetchType: "inactive",
         });
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
           refetchType: "inactive",
         });
       }
@@ -316,6 +339,7 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
         );
         queryClient.invalidateQueries({
           queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPE_SHARES()),
           refetchType: "inactive",
         });
 
@@ -335,7 +359,29 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
           }
         );
         queryClient.invalidateQueries({
-          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
+          refetchType: "inactive",
+        });
+
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+          },
+          (oldData: ListShoppingListsResponseSchema | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: (oldData.data ?? []).filter((r) => r.user_id === data.destination_user.id),
+              };
+            }
+            return undefined;
+          }
+        );
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
           refetchType: "inactive",
         });
       } else {
@@ -346,14 +392,29 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
         });
         queryClient.invalidateQueries({
           queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPE_SHARES()),
           refetchType: "inactive",
         });
+
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LISTS()),
           refetchType: "inactive",
         });
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES()),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
           refetchType: "inactive",
         });
       }
@@ -379,7 +440,7 @@ const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembe
       },
       withAuth: "access_token",
     });
-    return response.data;
+    return YUserKitchenMembershipSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -402,7 +463,7 @@ export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<Us
       path: `/user/kitchen/membership/${id}`,
       withAuth: "access_token",
     });
-    return response.data;
+    return YUserKitchenMembershipSchema.cast(response.data);
   };
 
   return useQuery({
@@ -412,7 +473,7 @@ export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<Us
   });
 };
 
-export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_user" | "destination_user", args?: MutationArgs<any, UserKitchenMembershipSchema>) => {
+export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_user" | "destination_user", args?: MutationArgs<unknown, UserKitchenMembershipSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
   const { purgeRecipes, purgeShoppingLists } = usePurgeSharedQueries();

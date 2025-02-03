@@ -5,6 +5,9 @@ export const mealPlanConfigurationQueue = new Queue("MealPlanConfigurations", {
     url: process.env.REDIS_QUEUE_URL!,
     enableOfflineQueue: false,
   },
+  defaultJobOptions: {
+    delay: 10000,
+  },
 });
 
 export const mealPlanNotificationsQueue = new Queue("MealPlanNotifications", {
@@ -12,11 +15,27 @@ export const mealPlanNotificationsQueue = new Queue("MealPlanNotifications", {
     url: process.env.REDIS_QUEUE_URL!,
     enableOfflineQueue: false,
   },
+  defaultJobOptions: {
+    delay: 10000,
+  },
 });
 
 export const recipeImportQueue = new Queue("RecipeImports", {
   connection: {
     url: process.env.REDIS_QUEUE_URL!,
     enableOfflineQueue: false,
+  },
+  defaultJobOptions: {
+    delay: 10000,
+  },
+});
+
+export const mealPlanItemQueue = new Queue("MealPlanItems", {
+  connection: {
+    url: process.env.REDIS_QUEUE_URL!,
+    enableOfflineQueue: false,
+  },
+  defaultJobOptions: {
+    delay: 10000,
   },
 });

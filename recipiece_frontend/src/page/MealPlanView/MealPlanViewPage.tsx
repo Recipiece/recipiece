@@ -1,16 +1,16 @@
-import { ArrowLeft, ArrowRight, CircleCheck, CircleX, GanttChart, Home, MoreVertical, Pencil, Settings } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleCheck, CircleX, GanttChart, Home } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
-import { useGetMealPlanByIdQuery, useGetSelfQuery, useListMealPlanItemsQuery, useBulkSetMealPlanItemsMutation } from "../../api";
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Form, H2, LoadingGroup, RecipieceMenuBarContext, SubmitButton } from "../../component";
+import { useParams } from "react-router-dom";
+import { useBulkSetMealPlanItemsMutation, useGetMealPlanByIdQuery, useListMealPlanItemsQuery } from "../../api";
+import { Button, Form, H2, LoadingGroup, RecipieceMenuBarContext, SharedAvatar, SubmitButton } from "../../component";
 import { useLayout } from "../../hooks";
 import { ceilDateToDay, floorDateToDay } from "../../util";
+import { MealPlanContextMenu } from "./MealPlanContextMenu";
 import { FormyMealPlanItem, MealPlanItemsForm } from "./MealPlanForm";
 import { MealPlanItemCard } from "./MealPlanItemCard";
-import { MealPlanContextMenu } from "./MealPlanContextMenu";
 
 const mealPlanItemSorter = (a: FormyMealPlanItem, b: FormyMealPlanItem) => {
   let stringyA = "";
@@ -41,7 +41,6 @@ const mealPlanItemSorter = (a: FormyMealPlanItem, b: FormyMealPlanItem) => {
 export const MealPlanViewPage: FC = () => {
   const params = useParams();
   const mealPlanId = +params.id!;
-  const navigate = useNavigate();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -66,7 +65,6 @@ export const MealPlanViewPage: FC = () => {
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { isMobile } = useLayout();
 
-  const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
   const { data: mealPlan, isLoading: isLoadingMealPlan } = useGetMealPlanByIdQuery(mealPlanId);
   const { data: mealPlanItems, isLoading: isLoadingMealPlanItems } = useListMealPlanItemsQuery(mealPlanId, {
     start_date: floorDateToDay(dataStartDate).toISO(),
@@ -74,6 +72,8 @@ export const MealPlanViewPage: FC = () => {
     page_number: 0,
   });
   const { mutateAsync: batchSetMealPlanItems } = useBulkSetMealPlanItemsMutation();
+
+  const sharedMembershipId = mealPlan?.shares?.[0]?.user_kitchen_membership_id;
 
   const form = useForm<MealPlanItemsForm>({
     defaultValues: {
@@ -139,6 +139,7 @@ export const MealPlanViewPage: FC = () => {
     } else if (dataArray === undefined || !isLoadingMealPlanItems) {
       setDataArray(baseArray);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [daysSpan, mealPlanItems]);
 
   /**
@@ -153,6 +154,7 @@ export const MealPlanViewPage: FC = () => {
         keepDirtyValues: isEditing,
       }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataArray]);
 
   /**
@@ -234,6 +236,7 @@ export const MealPlanViewPage: FC = () => {
     return () => {
       observer?.disconnect?.();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoadingMealPlan]);
 
   /**
@@ -263,6 +266,7 @@ export const MealPlanViewPage: FC = () => {
           });
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataArray]);
 
   const onSubmit = async (formData: MealPlanItemsForm) => {
@@ -299,9 +303,9 @@ export const MealPlanViewPage: FC = () => {
     await batchSetMealPlanItems({
       mealPlanId: mealPlanId,
       create: itemsToCreate,
-      // @ts-expect-error
+      // @ts-expect-error update items always have an id on them
       update: itemsToUpdate,
-      // @ts-expect-error
+      // @ts-expect-error delete items always have an id on them
       delete: itemsToDelete,
     });
 
@@ -314,12 +318,15 @@ export const MealPlanViewPage: FC = () => {
   }, [dataArray, form]);
 
   return (
-    <LoadingGroup isLoading={isLoadingMealPlan || isLoadingUser} variant="skeleton" className="w-full sm:w-[300px] h-11">
+    <LoadingGroup isLoading={isLoadingMealPlan} variant="skeleton" className="h-11 w-full sm:w-[300px]">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2">
             <div className="flex flex-row items-center">
-              <H2>{mealPlan?.name}</H2>
+              <div className="flex flex-row items-center gap-2">
+                <H2>{mealPlan?.name}</H2>
+                {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
+              </div>
 
               {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(<MealPlanContextMenu mealPlan={mealPlan} />, mobileMenuPortalRef.current)}
               {!isMobile && <>{<MealPlanContextMenu mealPlan={mealPlan} />}</>}
@@ -343,26 +350,26 @@ export const MealPlanViewPage: FC = () => {
               {!isEditing && (
                 <Button onClick={() => setIsEditing(true)}>
                   <GanttChart />
-                  <span className="hidden sm:inline-block ml-2">Manage Meals</span>
+                  <span className="ml-2 hidden sm:inline-block">Manage Meals</span>
                 </Button>
               )}
               {isEditing && (
                 <Button variant="outline" onClick={onCancelEditing}>
                   <CircleX />
-                  <span className="hidden sm:inline-block ml-2">Cancel</span>
+                  <span className="ml-2 hidden sm:inline-block">Cancel</span>
                 </Button>
               )}
               {isEditing && (
                 <SubmitButton>
                   <CircleCheck />
-                  <span className="hidden sm:inline-block ml-2">Save</span>
+                  <span className="ml-2 hidden sm:inline-block">Save</span>
                 </SubmitButton>
               )}
             </div>
 
             <div
               ref={scrollContainerRef}
-              className="snap-x snap-mandatory overflow-x-scroll whitespace-nowrap relative flex flex-row gap-2"
+              className="relative flex snap-x snap-mandatory flex-row gap-2 overflow-x-scroll whitespace-nowrap"
               style={{
                 scrollbarWidth: "none",
               }}
@@ -374,7 +381,7 @@ export const MealPlanViewPage: FC = () => {
                   <div
                     id={`entry:${dist}`}
                     key={dist.toString()}
-                    className="snap-start inline-block basis-full sm:basis-[calc(50%-4px)] lg:basis-[calc(33%-0.5px)] flex-grow-0 flex-shrink-0"
+                    className="inline-block flex-shrink-0 flex-grow-0 basis-full snap-start sm:basis-[calc(50%-4px)] lg:basis-[calc(33%-0.5px)]"
                   >
                     {/* Do this so that we don't flash the far left end of the view window. It's jank but like... */}
                     {daysSpan > 3 && (

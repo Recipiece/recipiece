@@ -35,7 +35,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
     `${getWebsocketUrl()}/shopping-list/modify`,
     {
       queryParams: {
-        token: wsSession?.token!,
+        token: wsSession?.token ?? "",
       },
       onError: (event) => {
         setIsError(event);
@@ -358,7 +358,7 @@ export const useUpdateShoppingListMutation = (args?: MutationArgs<ShoppingListSc
   });
 };
 
-export const useDeleteShoppingListMutation = (args?: MutationArgs<{}, ShoppingListSchema>) => {
+export const useDeleteShoppingListMutation = (args?: MutationArgs<unknown, ShoppingListSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 

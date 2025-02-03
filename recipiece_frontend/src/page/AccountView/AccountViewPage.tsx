@@ -9,7 +9,7 @@ export const AccountViewPage: FC = () => {
   return (
     <Stack>
       <Tabs defaultValue="preferences">
-        <TabsList className="w-full items-left justify-start">
+        <TabsList className="items-left w-full justify-start">
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
           <TabsTrigger value="data">Data</TabsTrigger>

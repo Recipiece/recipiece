@@ -25,7 +25,7 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
 
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-      <Card className="h-full flex flex-col hover:drop-shadow-md">
+      <Card className="flex h-full flex-col hover:drop-shadow-md">
         <CardHeader onClick={onView} className="hover:cursor-pointer">
           <Shelf>
             <CardTitle>{recipe.name}</CardTitle>
@@ -33,10 +33,10 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
           </Shelf>
         </CardHeader>
         <CardContent className="grow hover:cursor-pointer" onClick={onView}>
-          <p className="max-h-32 overflow-hidden line-clamp-3">{recipe.description}</p>
+          <p className="line-clamp-3 max-h-32 overflow-hidden">{recipe.description}</p>
         </CardContent>
         <CardFooter>
-          <div className="flex flex-row w-full items-center">
+          <div className="flex w-full flex-row items-center">
             <SharedAvatar userKitchenMembershipId={userKitchenMembershipId} />
             <DropdownMenuTrigger className="ml-auto" asChild>
               <Button variant="ghost" onClick={() => setIsMenuOpen(!isMenuOpen)}>

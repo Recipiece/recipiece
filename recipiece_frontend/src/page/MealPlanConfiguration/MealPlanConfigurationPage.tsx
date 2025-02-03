@@ -44,13 +44,14 @@ export const MealPlanConfigurationPage: FC = () => {
 
   useEffect(() => {
     form.reset({ ...defaultValues });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   const onSave = useCallback(async (formData: MealPlanConfigurationSchema) => {
     try {
       await setMealPlanConfiguration({
         mealPlanId: mealPlanId,
-        configuration: {...formData},
+        configuration: { ...formData },
       });
       toast({
         title: "Settings Updated",
@@ -63,10 +64,10 @@ export const MealPlanConfigurationPage: FC = () => {
         variant: "destructive",
       });
     }
-  }, []);
+  }, [mealPlanId, setMealPlanConfiguration, toast]);
 
   return (
-    <LoadingGroup isLoading={isLoadingMealPlan || isLoadingUser} variant="spinner" className="w-12 h-12">
+    <LoadingGroup isLoading={isLoadingMealPlan || isLoadingUser} variant="spinner" className="h-12 w-12">
       {mealPlan && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSave)}>
@@ -76,9 +77,7 @@ export const MealPlanConfigurationPage: FC = () => {
                   <ArrowLeft />
                 </Button>
                 <H2 className="mb-0 pb-0">{mealPlan.name}</H2>
-                {canEdit && (
-                  <SubmitButton className="ml-auto">Save</SubmitButton>
-                )}
+                {canEdit && <SubmitButton className="ml-auto">Save</SubmitButton>}
               </div>
 
               <GeneralConfigCard />

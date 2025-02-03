@@ -14,7 +14,7 @@ export const createMealPlan = async (request: AuthenticatedRequest<CreateMealPla
         ...mealPlanBody,
       },
     });
-    return [StatusCodes.CREATED, createdMealPlan];
+    return [StatusCodes.CREATED, createdMealPlan as MealPlanSchema];
   } catch (err) {
     console.error(err);
     return [

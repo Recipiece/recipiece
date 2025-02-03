@@ -1,4 +1,4 @@
-import { ListMealPlanSharesQuerySchema, ListMealPlanSharesResponseSchema, ListMealPlansResponseSchema, MealPlanSchema, MealPlanShareSchema } from "@recipiece/types";
+import { ListMealPlanSharesQuerySchema, ListMealPlanSharesResponseSchema, ListMealPlansResponseSchema, MealPlanSchema, MealPlanShareSchema, YListMealPlanSharesResponseSchema, YMealPlanShareSchema } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
@@ -15,7 +15,7 @@ export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShare
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YMealPlanShareSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -87,7 +87,7 @@ export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShare
   });
 };
 
-export const useDeleteMealPlanShareMutation = (args?: MutationArgs<{}, MealPlanShareSchema>) => {
+export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, MealPlanShareSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -171,11 +171,11 @@ export const useListMealPlanSharesQuery = (filters: ListMealPlanSharesQuerySchem
   const searchParams = filtersToSearchParams(filters);
 
   const query = async () => {
-    const shoppingListShares = await getter<never, ListMealPlanSharesResponseSchema>({
+    const mealPlanShares = await getter<never, ListMealPlanSharesResponseSchema>({
       path: `/meal-plan/share/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return shoppingListShares.data;
+    return YListMealPlanSharesResponseSchema.cast(mealPlanShares.data);
   };
 
   return useQuery({

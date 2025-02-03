@@ -12,7 +12,7 @@ import {
   RegisterPage,
   ResetPasswordPage,
   ShoppingListViewPage,
-  MealPlanConfigurationPage
+  MealPlanConfigurationPage,
 } from "./page";
 
 export const unauthenticatedRoutes = [

@@ -1,18 +1,20 @@
 import { prisma, RecipeIngredient } from "@recipiece/database";
-import { RecipeIngredientSchema } from "@recipiece/types";
+import { RecipeIngredientSchema, YRecipeImportJobDataSchema } from "@recipiece/types";
 import { Job } from "bullmq";
 import { createReadStream, mkdirSync, readdirSync, readFileSync, rmSync } from "fs";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import unzipper from "unzipper";
 import { gunzipSync } from "zlib";
-import { RecipeImportFiles } from "../../util/constant";
-import { sendFinishedImportJobFailedEmail, sendFinishedImportJobSuccessEmail } from "../../util/email";
-import { replaceUnicodeFractions } from "../../util/fraction";
+import { RecipeImportFiles } from "../../../util/constant";
+import { sendFinishedImportJobFailedEmail, sendFinishedImportJobSuccessEmail } from "../../../util/email";
+import { replaceUnicodeFractions } from "../../../util/fraction";
 
 const paprikaImporter = async (fileName: string, userId: number) => {
   const tmpSeed = DateTime.utc().toISO();
-  mkdirSync(`${RecipeImportFiles.TMP_DIR}/${userId}/${tmpSeed}`);
+  mkdirSync(`${RecipeImportFiles.TMP_DIR}/${userId}/${tmpSeed}`, {
+    recursive: true,
+  });
   // .paprikarecipes files are zipped, so unzip the archive
   const unzipperPromise = new Promise<void>((resolve, reject) => {
     createReadStream(fileName)
@@ -57,27 +59,35 @@ const paprikaImporter = async (fileName: string, userId: number) => {
         .filter((ing) => !!ing);
 
       const url = `${process.env.APP_RECIPE_PARSER_SERVICE_URL!}/ingredients/parse`;
-      const response = await fetch(url, {
-        method: "POST",
-        body: JSON.stringify({
-          ingredients: splitIngredients,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+      let parsedIngredients = splitIngredients.map((ing) => {
+        return {
+          name: ing,
+        };
       });
-
-      let parsedIngredients: Partial<RecipeIngredientSchema>[];
-      if (response.status !== StatusCodes.OK) {
-        console.warn("could not parse ingredients at all! someone should check the recipe importer.");
-        parsedIngredients = splitIngredients.map((ing) => {
-          return {
-            name: ing,
-          };
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          body: JSON.stringify({
+            ingredients: splitIngredients,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
-      } else {
-        parsedIngredients = ((await response.json()) as { readonly ingredients: RecipeIngredient[] }).ingredients;
+        if (response.status !== StatusCodes.OK) {
+          console.warn("could not parse ingredients at all! someone should check the recipe importer.");
+          parsedIngredients = splitIngredients.map((ing) => {
+            return {
+              name: ing,
+            };
+          });
+        } else {
+          parsedIngredients = ((await response.json()) as { readonly ingredients: RecipeIngredient[] }).ingredients;
+        }
+      } catch (err) {
+        console.error(err);
       }
+
       parsedIngredients = parsedIngredients.map((ing, idx) => {
         return {
           ...ing,
@@ -101,7 +111,6 @@ const paprikaImporter = async (fileName: string, userId: number) => {
       // strip the photo data out of the recipe, if it's there, since it's so big
       const { photo_data, photo_hash, photo_large, ...restMetadata } = item;
 
-      // const createdAt = item.created ? DateTime.fromISO(item.created, {zone: "utc"}) : DateTime.utc();
       let createdAt: DateTime;
       if (item.created?.strip?.()) {
         createdAt = DateTime.fromFormat(item.created.strip(), "yyyy-LL-dd HH-mm-ss", {
@@ -145,23 +154,39 @@ const IMPORTER_MAP: { [key: string]: (fileName: string, userId: number) => Promi
 };
 
 export const importRecipes = async (job: Job) => {
-  const { file_name, user_id, source } = job.data as { readonly file_name: string; readonly user_id: number; readonly source: string };
-  const user = await prisma.user.findFirstOrThrow({
+  const sideJob = await prisma.sideJob.findFirst({
     where: {
-      id: user_id,
+      id: job.id!,
+    },
+  });
+  if (!sideJob) {
+    console.log(`job ${job.id} not found`);
+    return;
+  }
+
+  const data = YRecipeImportJobDataSchema.cast(sideJob.job_data);
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: sideJob.user_id,
     },
   });
 
+  if (!user) {
+    console.log(`user ${sideJob.user_id} not found`);
+    return;
+  }
+
   const innerRunner = async () => {
     try {
-      const importer = IMPORTER_MAP[source];
+      const importer = IMPORTER_MAP[data.source];
 
       if (importer) {
-        await importer(file_name, user_id);
+        await importer(data.file_name, sideJob.user_id);
         return "success";
       } else {
-        console.warn(`unknown file source ${source}, refusing to parse file, and removing it.`);
-        rmSync(file_name);
+        console.warn(`unknown file source ${data.source}, refusing to parse file, and removing it.`);
+        rmSync(data.file_name);
         return "failure";
       }
     } catch (err) {

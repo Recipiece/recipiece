@@ -97,7 +97,7 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
               Select All
             </Button>
           </div>
-          <ScrollArea className="mt-2 h-40 sm:h-[250px] p-2 border-primary rounded-sm border-solid border-[1px]">
+          <ScrollArea className="mt-2 h-40 rounded-sm border-[1px] border-solid border-primary p-2 sm:h-[250px]">
             {itemsFieldArray.fields.map((fieldArrayValue, index) => {
               return (
                 <div key={fieldArrayValue.id} className="pb-3">

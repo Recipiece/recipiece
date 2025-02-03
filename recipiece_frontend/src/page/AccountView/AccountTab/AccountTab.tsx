@@ -11,7 +11,7 @@ export const AccountTab: FC = () => {
 
   return (
     <Stack>
-      <LoadingGroup isLoading={isLoadingUser} className="w-5 h-5">
+      <LoadingGroup isLoading={isLoadingUser} className="h-5 w-5">
         {user && (
           <>
             <H2>Your Account</H2>

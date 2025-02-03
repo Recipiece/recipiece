@@ -1,8 +1,8 @@
-import { ListMealPlansQuerySchema, ListMealPlansResponseSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
+import { mealPlanSharesSubquery, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { ListMealPlansQuerySchema, ListMealPlansResponseSchema, MealPlanSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
-import { mealPlanSharesSubquery, mealPlanSharesWithMemberships, Prisma, prisma } from "@recipiece/database";
-import { StatusCodes } from "http-status-codes";
 
 export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealPlansQuerySchema>): ApiResponse<ListMealPlansResponseSchema> => {
   const user = request.user;
@@ -32,12 +32,7 @@ export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealP
   return [
     StatusCodes.OK,
     {
-      data: resultsData.map((result) => {
-        return {
-          ...result,
-          configuration: YMealPlanConfigurationSchema.cast(result.configuration),
-        };
-      }),
+      data: resultsData as MealPlanSchema[],
       has_next_page: hasNextPage,
       page: page_number,
     },

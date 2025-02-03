@@ -8,7 +8,7 @@ export const ShoppingListMenuItem: FC<{ readonly shoppingList: ShoppingListSchem
 
   return (
     <MenubarItem {...restProps}>
-      <div className="flex flex-row gap-2 items-center">
+      <div className="flex flex-row items-center gap-2">
         {membershipId && <SharedAvatar size="small" userKitchenMembershipId={membershipId}></SharedAvatar>}
         {shoppingList.name}
       </div>

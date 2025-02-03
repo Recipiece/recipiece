@@ -36,8 +36,8 @@ export const ImportExportSection: FC = () => {
   return (
     <Stack>
       <H3>Import & Export</H3>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <Card className="h-full flex flex-col">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Card className="flex h-full flex-col">
           <CardHeader>
             <H4>Import Data</H4>
           </CardHeader>

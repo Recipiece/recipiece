@@ -33,7 +33,7 @@ export const MobileListCookbooksDialog: FC<MobileListCookbooksDialogProps> = ({ 
       <ResponsiveHeader>
         <ResponsiveTitle>Cookbooks</ResponsiveTitle>
       </ResponsiveHeader>
-      <div className="grid grid-cols-1 gap-2 p-2 overflow-scroll">
+      <div className="grid grid-cols-1 gap-2 overflow-scroll p-2">
         <LoadingGroup variant="spinner" isLoading={isLoadingCookbooks}>
           {(cookbooks?.data || []).map((cookbook) => {
             return (

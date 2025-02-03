@@ -156,15 +156,15 @@ export const ConvertIngredientDialog: FC<ConvertIngredientDialogProps> = ({ onCl
               })}
             </FormSelect>
 
-            <div className="flex flex-col sm:flex-row gap-2 items-center">
-              <div className="w-full sm:w-1/3 text-left">
+            <div className="flex flex-col items-center gap-2 sm:flex-row">
+              <div className="w-full text-left sm:w-1/3">
                 <Label>From:</Label>
                 <br />
                 {formatIngredientAmount(ingredient.amount ?? "")} {ingredient.unit ?? ""}
               </div>
-              <div className="w-full sm:w-1/3 flex flex-row">
-                <ArrowRight className="hidden sm:block ml-auto mr-auto" />
-                <ArrowDown className="block sm:hidden ml-auto mr-auto" />
+              <div className="flex w-full flex-row sm:w-1/3">
+                <ArrowRight className="ml-auto mr-auto hidden sm:block" />
+                <ArrowDown className="ml-auto mr-auto block sm:hidden" />
               </div>
               <div className="w-full sm:w-1/3">
                 <FormSelect label="To" name="targetUnit" required disabled={isLoadingKnownIngredients || isSussingOutIngredient}>

@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardTitle, FormSwitch, Label, PreferenceEntry, Switch } from "../../component";
+import { Card, CardContent, CardDescription, CardTitle, FormSwitch, Label, PreferenceEntry } from "../../component";
 import { PushNotificationContext } from "../../context";
 
 export const NotificationConfigCard: FC = () => {
@@ -22,6 +22,7 @@ export const NotificationConfigCard: FC = () => {
           });
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meatNotification]);
 
   const canRequestPushNotificationPermissions = "Notification" in window;

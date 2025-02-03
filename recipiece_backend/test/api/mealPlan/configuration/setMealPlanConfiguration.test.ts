@@ -1,16 +1,24 @@
-import { User } from "@recipiece/database";
+import { prisma, User } from "@recipiece/database";
 import { generateMealPlan, generateMealPlanShare, generateUserKitchenMembership } from "@recipiece/test";
-import { MealPlanConfigurationSchema, SetMealPlanConfigurationRequestSchema } from "@recipiece/types";
+import { MealPlanConfigurationSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
+import { JobType } from "../../../../src/util/constant";
+import { mealPlanConfigurationQueue } from "../../../../src/job";
 
 describe("Set Meal Plan Configuration", () => {
   let user: User;
   let bearerToken: string;
+  let addToMealPlanConfigSpy;
 
   beforeEach(async () => {
     [user, bearerToken] = await fixtures.createUserAndToken();
+    addToMealPlanConfigSpy = jest.spyOn(mealPlanConfigurationQueue, "add");
   });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
 
   it("should allow a configuration to be set by the owner", async () => {
     const mealPlan = await generateMealPlan({
@@ -20,11 +28,9 @@ describe("Set Meal Plan Configuration", () => {
     const response = await request(server)
       .put(`/meal-plan/${mealPlan.id}/configuration`)
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<SetMealPlanConfigurationRequestSchema>{
-        configuration: {
-          meats: {
-            preferred_thawing_method: "cold_water",
-          },
+      .send(<MealPlanConfigurationSchema>{
+        meats: {
+          preferred_thawing_method: "cold_water",
         },
       });
 
@@ -49,11 +55,9 @@ describe("Set Meal Plan Configuration", () => {
     const response = await request(server)
       .put(`/meal-plan/${otherMealPlan.id}/configuration`)
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<SetMealPlanConfigurationRequestSchema>{
-        configuration: {
-          meats: {
-            preferred_thawing_method: "cold_water",
-          },
+      .send(<MealPlanConfigurationSchema>{
+        meats: {
+          preferred_thawing_method: "cold_water",
         },
       });
 
@@ -67,11 +71,9 @@ describe("Set Meal Plan Configuration", () => {
     const response = await request(server)
       .put(`/meal-plan/${otherMealPlan.id}/configuration`)
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<SetMealPlanConfigurationRequestSchema>{
-        configuration: {
-          meats: {
-            preferred_thawing_method: "cold_water",
-          },
+      .send(<MealPlanConfigurationSchema>{
+        meats: {
+          preferred_thawing_method: "cold_water",
         },
       });
 
@@ -82,13 +84,41 @@ describe("Set Meal Plan Configuration", () => {
     const response = await request(server)
       .put(`/meal-plan/100000/configuration`)
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<SetMealPlanConfigurationRequestSchema>{
-        configuration: {
-          meats: {
-            preferred_thawing_method: "cold_water",
-          },
+      .send(<MealPlanConfigurationSchema>{
+        meats: {
+          preferred_thawing_method: "cold_water",
         },
       });
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+  });
+
+  it("should create a job to process future meal plan items", async () => {
+    const mealPlan = await generateMealPlan({
+      user_id: user.id,
+    });
+
+    const response = await request(server)
+      .put(`/meal-plan/${mealPlan.id}/configuration`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send(<MealPlanConfigurationSchema>{
+        meats: {
+          preferred_thawing_method: "cold_water",
+        },
+      });
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+
+    const job = await prisma.sideJob.findFirst({
+      where: {
+        type: JobType.MEAL_PLAN_CONFIGURATION,
+        job_data: {
+          path: ["meal_plan_id"],
+          equals: mealPlan.id,
+        },
+      },
+    });
+
+    expect(job).toBeTruthy();
+    expect(addToMealPlanConfigSpy!).toHaveBeenCalled();
   });
 });

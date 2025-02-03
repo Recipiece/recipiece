@@ -35,7 +35,8 @@
     "paths": {
       "@recipiece/types": ["../recipiece_common/recipiece_types/src/index.ts"],
       "@recipiece/database": ["../recipiece_common/recipiece_database/src/index.ts"],
-      "@recipiece/test": ["../recipiece_common/recipiece_test/src/index.ts"]
+      "@recipiece/test": ["../recipiece_common/recipiece_test/src/index.ts"],
+      "@recipiece/conversion": ["../recipiece_common/recipiece_conversion/src/index.ts"]
     }
   },
   "ts-node": {
@@ -49,6 +50,7 @@
     "./jest.config.ts",
     "./jest.setup*.ts",
     "../recipiece_common/recipiece_types/src/**/*",
-    "../recipiece_common/recipiece_database/src/**/*"
+    "../recipiece_common/recipiece_database/src/**/*",
+    "../recipiece_common/recipiece_conversion/src/**/*",
   ]
 }

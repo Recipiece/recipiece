@@ -2,8 +2,12 @@ import { ListItemsForMealPlanQuerySchema, ListMealPlanSharesQuerySchema, ListMea
 import { RcpQueryKey } from "../QueryKeys";
 
 export class MealPlanQueryKeys {
-  public static readonly GET_MEAL_PLAN = (mealPlanId: number): RcpQueryKey => {
-    return ["mealPlan", { id: mealPlanId }];
+  public static readonly GET_MEAL_PLAN = (mealPlanId?: number): RcpQueryKey => {
+    const base: RcpQueryKey = ["mealPlan"];
+    if (mealPlanId) {
+      base.push({ id: mealPlanId });
+    }
+    return base;
   };
 
   public static readonly LIST_MEAL_PLANS = (filters?: ListMealPlansQuerySchema): RcpQueryKey => {

@@ -10,15 +10,6 @@ export const UserKitchenMembershipStatus = {
     pending: "pending"
 } as const;
 export type UserKitchenMembershipStatus = (typeof UserKitchenMembershipStatus)[keyof typeof UserKitchenMembershipStatus];
-export type BackgroundJob = {
-    id: string;
-    created_at: Generated<Timestamp>;
-    finished_at: Timestamp | null;
-    result: Generated<string>;
-    purpose: string;
-    args: unknown | null;
-    user_id: number;
-};
 export type Cookbook = {
     id: Generated<number>;
     user_id: number;
@@ -93,14 +84,6 @@ export type RecipeStep = {
     duration_ms: number | null;
     recipe_id: number;
 };
-export type ScheduledNotification = {
-    id: Generated<number>;
-    created_at: Generated<Timestamp>;
-    to_be_run_at: Timestamp;
-    purpose: string;
-    args: unknown | null;
-    recipe_id: number;
-};
 export type ShoppingList = {
     id: Generated<number>;
     name: string;
@@ -121,11 +104,12 @@ export type ShoppingListShare = {
     shopping_list_id: number;
     user_kitchen_membership_id: number;
 };
-export type Timer = {
-    id: Generated<number>;
+export type SideJob = {
+    id: string;
     created_at: Generated<Timestamp>;
-    duration_ms: number;
+    type: string;
     user_id: number;
+    job_data: unknown;
 };
 export type User = {
     id: Generated<number>;
@@ -176,7 +160,6 @@ export type UserValidationToken = {
     user_id: number;
 };
 export type DB = {
-    background_jobs: BackgroundJob;
     cookbooks: Cookbook;
     known_ingredients: KnownIngredient;
     meal_plan_items: MealPlanItem;
@@ -187,11 +170,10 @@ export type DB = {
     recipe_shares: RecipeShare;
     recipe_steps: RecipeStep;
     recipes: Recipe;
-    scheduled_notifications: ScheduledNotification;
     shopping_list_items: ShoppingListItem;
     shopping_list_shares: ShoppingListShare;
     shopping_lists: ShoppingList;
-    timers: Timer;
+    side_jobs: SideJob;
     user_access_records: UserAccessRecord;
     user_credentials: UserCredentials;
     user_kitchen_memberships: UserKitchenMembership;

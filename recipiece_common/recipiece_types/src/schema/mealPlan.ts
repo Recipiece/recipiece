@@ -116,7 +116,6 @@ export const YCreateMealPlanItemRequestSchema = object({
   freeform_content: string().notRequired().nullable(),
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
-  label: string().notRequired().nullable(),
 })
   .test("oneOfFreeformContentOrRecipeId", (ctx) => {
     return ctx.freeform_content !== undefined || !!ctx.recipe_id;
@@ -135,7 +134,6 @@ export const YUpdateMealPlanItemRequestSchema = object({
   freeform_content: string().notRequired().nullable(),
   notes: string().notRequired().nullable(),
   recipe_id: number().notRequired().nullable(),
-  label: string().notRequired().nullable(),
 }).noUnknown();
 
 export interface UpdateMealPlanItemRequestSchema extends InferType<typeof YUpdateMealPlanItemRequestSchema> {}
@@ -143,11 +141,11 @@ export interface UpdateMealPlanItemRequestSchema extends InferType<typeof YUpdat
 /**
  * Meal Plan Configuration
  */
-export const YSetMealPlanConfigurationRequestSchema = object({
-  configuration: YMealPlanConfigurationSchema,
-});
+// export const YSetMealPlanConfigurationRequestSchema = object({
+//   configuration: YMealPlanConfigurationSchema,
+// });
 
-export interface SetMealPlanConfigurationRequestSchema extends InferType<typeof YSetMealPlanConfigurationRequestSchema> {}
+// export interface SetMealPlanConfigurationRequestSchema extends InferType<typeof YSetMealPlanConfigurationRequestSchema> {}
 
 /**
  * Bulk set items

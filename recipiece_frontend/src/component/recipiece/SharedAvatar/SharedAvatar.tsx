@@ -34,7 +34,7 @@ export const SharedAvatar: FC<SharedAvatarProps> = ({ userKitchenMembershipId, s
     <Tooltip>
       {isMembershipTargetingSource && (
         <TooltipTrigger asChild>
-          <div className={cn(W_H_SIZES[size], "bg-primary flex items-center justify-center text-white rounded-full")}>
+          <div className={cn(W_H_SIZES[size], "flex items-center justify-center rounded-full bg-primary text-white")}>
             <Waypoints size={ICON_SIZES[size]} />
           </div>
         </TooltipTrigger>

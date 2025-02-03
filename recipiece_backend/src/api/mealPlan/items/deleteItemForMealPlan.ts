@@ -1,6 +1,6 @@
+import { mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
 
 export const deleteItemForMealPlan = async (request: AuthenticatedRequest): ApiResponse<{}> => {
   const user = request.user;
@@ -28,10 +28,19 @@ export const deleteItemForMealPlan = async (request: AuthenticatedRequest): ApiR
     ];
   }
 
-  await prisma.mealPlanItem.delete({
-    where: {
-      id: +mealPlanItemId,
-    },
-  });
+  try {
+    await prisma.mealPlanItem.delete({
+      where: { id: mealPlanItem.id! },
+    });
+  } catch (err) {
+    console.error(err);
+    return [
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      {
+        message: "Unable to delete meal plan item",
+      },
+    ];
+  }
+
   return [StatusCodes.OK, {}];
 };

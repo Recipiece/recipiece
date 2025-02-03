@@ -1,15 +1,18 @@
+import { mealPlanSharesSubquery, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { MealPlanSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
-import { MealPlanSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getMealPlanById = async (request: AuthenticatedRequest): ApiResponse<MealPlanSchema> => {
+export const getMealPlan = async (request: AuthenticatedRequest): ApiResponse<MealPlanSchema> => {
   const user = request.user;
   const mealPlanId = +request.params.id;
 
   const mealPlan = await prisma.$kysely
       .selectFrom("meal_plans")
       .selectAll("meal_plans")
+      .select((eb) => {
+        return [mealPlanSharesSubquery(eb, user.id).as("shares")]
+      })
       .where((eb) => {
         return eb.and([
           eb("meal_plans.id", "=", mealPlanId),
@@ -26,8 +29,5 @@ export const getMealPlanById = async (request: AuthenticatedRequest): ApiRespons
       },
     ];
   }
-  return [StatusCodes.OK, {
-    ...mealPlan,
-    configuration: YMealPlanConfigurationSchema.cast(mealPlan.configuration),
-  }];
+  return [StatusCodes.OK, mealPlan as MealPlanSchema];
 };

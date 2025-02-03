@@ -1,6 +1,6 @@
 import { User, prisma } from "@recipiece/database";
 import { generateShoppingList, generateShoppingListShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
-import { CreateMealPlanShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
+import { CreateMealPlanShareRequestSchema, CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
@@ -25,7 +25,7 @@ describe("Create Shopping List Share", () => {
     const response = await request(server)
       .post("/shopping-list/share")
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<CreateMealPlanShareRequestSchema>{
+      .send(<CreateShoppingListShareRequestSchema>{
         shopping_list_id: shoppingList.id,
         user_kitchen_membership_id: membership.id,
       });
@@ -59,7 +59,7 @@ describe("Create Shopping List Share", () => {
     const response = await request(server)
       .post("/shopping-list/share")
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<CreateMealPlanShareRequestSchema>{
+      .send(<CreateShoppingListShareRequestSchema>{
         shopping_list_id: shoppingList.id,
         user_kitchen_membership_id: membership.id,
       });
@@ -78,7 +78,7 @@ describe("Create Shopping List Share", () => {
     const response = await request(server)
       .post("/shopping-list/share")
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<CreateMealPlanShareRequestSchema>{
+      .send(<CreateShoppingListShareRequestSchema>{
         shopping_list_id: shoppingList.id,
         user_kitchen_membership_id: membership.id,
       });
@@ -99,7 +99,7 @@ describe("Create Shopping List Share", () => {
     const response = await request(server)
       .post("/shopping-list/share")
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<CreateMealPlanShareRequestSchema>{
+      .send(<CreateShoppingListShareRequestSchema>{
         shopping_list_id: shoppingList.id,
         user_kitchen_membership_id: 100000,
       });
@@ -123,7 +123,7 @@ describe("Create Shopping List Share", () => {
     const response = await request(server)
       .post("/shopping-list/share")
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<CreateMealPlanShareRequestSchema>{
+      .send(<CreateShoppingListShareRequestSchema>{
         shopping_list_id: 1000000,
         user_kitchen_membership_id: membership.id,
       });
@@ -149,7 +149,7 @@ describe("Create Shopping List Share", () => {
     const response = await request(server)
       .post("/shopping-list/share")
       .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<CreateMealPlanShareRequestSchema>{
+      .send(<CreateShoppingListShareRequestSchema>{
         shopping_list_id: shoppingList.id,
         user_kitchen_membership_id: membership.id,
       });

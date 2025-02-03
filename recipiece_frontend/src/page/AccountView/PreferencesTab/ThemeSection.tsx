@@ -27,7 +27,7 @@ export const ThemeSection: FC = () => {
   return (
     <>
       <H3>Theme</H3>
-      <div className="flex flex-row items-top">
+      <div className="items-top flex flex-row">
         <div className="basis-9/12 sm:basis-1/2">
           <Label>Use Theme</Label>
           <p className="text-xs">Select your preferred theme for this device.</p>

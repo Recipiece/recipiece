@@ -40,7 +40,7 @@ export const PrivacySection: FC<PrivacySectionProps> = ({ user, isLoading }) => 
   return (
     <>
       <H3>Privacy</H3>
-      <div className="flex flex-row items-top">
+      <div className="items-top flex flex-row">
         <div className="basis-9/12 sm:basis-1/2">
           <Label>Account Visibility</Label>
           <p className="text-xs">

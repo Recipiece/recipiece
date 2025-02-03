@@ -14,15 +14,14 @@ import {
   YMealPlanItemSchema,
   YMealPlanSchema,
   YMealPlanShareSchema,
-  YSetMealPlanConfigurationRequestSchema,
   YUpdateMealPlanItemRequestSchema,
-  YUpdateMealPlanRequestSchema
+  YUpdateMealPlanRequestSchema,
 } from "@recipiece/types";
 import { Route } from "../../types";
 import { setMealPlanConfiguration } from "./configuration/setMealPlanConfiguration";
 import { createMealPlan } from "./createMealPlan";
 import { deleteMealPlan } from "./deleteMealPlan";
-import { getMealPlanById } from "./getMealPlanById";
+import { getMealPlan } from "./getMealPlan";
 import { bulkSetMealPlanItems, createItemForMealPlan, deleteItemForMealPlan, listItemsForMealPlan, updateItemForMealPlan } from "./items";
 import { listMealPlans } from "./listMealPlans";
 import { createMealPlanShare, deleteMealPlanShare, listMealPlanShares } from "./share";
@@ -57,7 +56,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     path: "/meal-plan/:id(\\d+)",
     authentication: "access_token",
     method: "GET",
-    function: getMealPlanById,
+    function: getMealPlan,
     responseSchema: YMealPlanSchema,
   },
   {
@@ -103,7 +102,7 @@ export const MEAL_PLAN_ROUTES: Route[] = [
     authentication: "access_token",
     method: "PUT",
     function: setMealPlanConfiguration,
-    requestSchema: YSetMealPlanConfigurationRequestSchema,
+    requestSchema: YMealPlanConfigurationSchema,
     responseSchema: YMealPlanConfigurationSchema,
   },
   {

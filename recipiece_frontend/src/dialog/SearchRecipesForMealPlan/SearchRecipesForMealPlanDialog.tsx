@@ -58,7 +58,7 @@ export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<RecipeSchema>> =
       </ResponsiveHeader>
       <Stack>
         <Input type="text" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
-        <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="w-6 h-6">
+        <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="h-6 w-6">
           {(recipeData?.data || []).map((recipe) => {
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>

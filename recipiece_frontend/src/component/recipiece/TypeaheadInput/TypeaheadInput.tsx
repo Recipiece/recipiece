@@ -34,7 +34,7 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, o
         <PopoverContent
           alignOffset={-16}
           align="start"
-          className="p-1 min-w-[200px]"
+          className="min-w-[200px] p-1"
           side="bottom"
           sideOffset={-14}
           onOpenAutoFocus={(event) => event.preventDefault()}
@@ -44,7 +44,7 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, o
           <div className="grid grid-cols-1">
             {currentAutoCompleteOptions.map((item) => {
               return (
-                <Button className="justify-start p-1 h-auto" variant="ghost" key={item} onClick={() => onSelectAutocompleteItem(item)}>
+                <Button className="h-auto justify-start p-1" variant="ghost" key={item} onClick={() => onSelectAutocompleteItem(item)}>
                   {item}
                 </Button>
               );

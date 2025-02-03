@@ -6,8 +6,9 @@ import fetch from "jest-fetch-mock";
 import { DateTime } from "luxon";
 import path from "path";
 import { gzipSync } from "zlib";
-import { importRecipes } from "../../src/job/processors/recipeImports";
-import { RecipeImportFiles } from "../../src/util/constant";
+import { JobType, RecipeImportFiles } from "../../../../src/util/constant";
+import { importRecipes } from "../../../../src/job/processors";
+import { RecipeImportJobDataSchema } from "@recipiece/types";
 
 describe("Import Recipes", () => {
   describe("From Paprika", () => {
@@ -127,8 +128,7 @@ describe("Import Recipes", () => {
     });
 
     afterEach(() => {
-      // restore the mocks
-      jest.restoreAllMocks();
+      jest.clearAllMocks();
     });
 
     it("should parse the recipes", async () => {
@@ -138,14 +138,17 @@ describe("Import Recipes", () => {
         });
       });
 
-      const job = {
+      const sideJob = await prisma.sideJob.create({
         data: {
-          file_name: path.resolve(__dirname, `${RecipeImportFiles.TMP_DIR}/${user.id}/test_data.paprikarecipes`),
+          type: JobType.RECIPE_IMPORT,
+          job_data: <RecipeImportJobDataSchema>{
+            source: "paprika",
+            file_name: path.resolve(__dirname, `${RecipeImportFiles.TMP_DIR}/${user.id}/test_data.paprikarecipes`),
+          },
           user_id: user.id,
-          source: "paprika",
-        },
-      };
-      await importRecipes(job as Job);
+        }
+      })
+      await importRecipes({id: sideJob.id} as Job);
 
       const firstCreatedRecipe = await prisma.recipe.findFirst({
         where: {

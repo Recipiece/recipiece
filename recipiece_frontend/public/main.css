@@ -1663,6 +1663,10 @@ body {
   border-color: transparent;
 }
 
+.border-b-primary {
+  border-bottom-color: hsl(var(--primary));
+}
+
 .border-l-transparent {
   border-left-color: transparent;
 }
@@ -1890,6 +1894,10 @@ body {
   padding-right: 0.625rem;
 }
 
+.pr-4 {
+  padding-right: 1rem;
+}
+
 .pr-8 {
   padding-right: 2rem;
 }
@@ -2044,6 +2052,10 @@ body {
 
 .text-foreground\/50 {
   color: hsl(var(--foreground) / 0.5);
+}
+
+.text-muted {
+  color: hsl(var(--muted));
 }
 
 .text-muted-foreground {
@@ -3144,6 +3156,10 @@ body {
 
   .sm\:h-\[250px\] {
     height: 250px;
+  }
+
+  .sm\:h-\[480px\] {
+    height: 480px;
   }
 
   .sm\:w-1\/3 {

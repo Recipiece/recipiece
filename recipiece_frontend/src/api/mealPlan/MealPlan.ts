@@ -50,7 +50,26 @@ export const useSetMealPlanConfigurationMutation = (
         }
         return undefined;
       });
-      // queryClient.setQueriesData
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+        },
+        (oldData: ListMealPlansResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: (oldData.data ?? []).map((mealPlan) => {
+                if (mealPlan.id === vars.mealPlanId) {
+                  return { ...mealPlan, configuration: { ...data } };
+                }
+                return { ...mealPlan };
+              }),
+            };
+          }
+          return undefined;
+        }
+      );
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,
@@ -121,7 +140,12 @@ export const useCreateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Pa
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataCreator(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+        },
+        oldDataCreator(data)
+      );
       queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(data.id), data);
       onSuccess?.(data, vars, ctx);
     },
@@ -147,7 +171,12 @@ export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Pa
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataUpdater(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+        },
+        oldDataUpdater(data)
+      );
       queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(data.id), data);
       onSuccess?.(data, vars, ctx);
     },
@@ -155,7 +184,7 @@ export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Pa
   });
 };
 
-export const useDeleteMealPlanMutation = (args?: MutationArgs<{}, MealPlanSchema>) => {
+export const useDeleteMealPlanMutation = (args?: MutationArgs<unknown, MealPlanSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -174,6 +203,20 @@ export const useDeleteMealPlanMutation = (args?: MutationArgs<{}, MealPlanSchema
     onSuccess: (data, mealPlan, ctx) => {
       queryClient.invalidateQueries({ queryKey: MealPlanQueryKeys.GET_MEAL_PLAN(mealPlan.id) });
       queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataDeleter({ id: mealPlan.id }));
+      (mealPlan.shares ?? []).forEach((mealPlanShare) => {
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(
+            MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES({
+              user_kitchen_membership_id: mealPlanShare.user_kitchen_membership_id,
+            })
+          ),
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.GET_MEAL_PLAN_SHARE(mealPlanShare.id),
+        });
+      });
+
       onSuccess?.(data, mealPlan, ctx);
     },
     ...restArgs,
@@ -199,7 +242,7 @@ export const useListMealPlanItemsQuery = (mealPlanId: number, filters: ListItems
   });
 };
 
-export const useBulkSetMealPlanItemsMutation = (args?: MutationArgs<any, any>) => {
+export const useBulkSetMealPlanItemsMutation = (args?: MutationArgs<BulkSetMealPlanItemsResponseSchema, { mealPlanId: number } & BulkSetMealPlanItemsRequestSchema>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
@@ -305,7 +348,7 @@ export const useUpdateMealPlanItemMutation = (args?: MutationArgs<MealPlanItemSc
   });
 };
 
-export const useDeleteMealPlanItemMutation = (args?: MutationArgs<{}, MealPlanItemSchema>) => {
+export const useDeleteMealPlanItemMutation = (args?: MutationArgs<unknown, MealPlanItemSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -328,5 +371,3 @@ export const useDeleteMealPlanItemMutation = (args?: MutationArgs<{}, MealPlanIt
     ...restArgs,
   });
 };
-
-

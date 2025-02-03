@@ -1,19 +1,19 @@
-import { MealPlan, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
-import { MealPlanConfigurationSchema, SetMealPlanConfigurationRequestSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
-import { Job } from "bullmq";
+import { KyselySql, MealPlan, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { MealPlanConfigurationJobDataSchema, MealPlanConfigurationSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanConfigurationQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { JobType } from "../../../util/constant";
 
 /**
  * Set the configuration for a meal plan.
  * This will also set a task in the meal plan configurations queue that will scan any and all future meal plan
  * items in the meal plan and take the appropriate actions based on the configuration.
  */
-export const setMealPlanConfiguration = async (request: AuthenticatedRequest<SetMealPlanConfigurationRequestSchema>): ApiResponse<MealPlanConfigurationSchema> => {
+export const setMealPlanConfiguration = async (request: AuthenticatedRequest<MealPlanConfigurationSchema>): ApiResponse<MealPlanConfigurationSchema> => {
   const user = request.user;
   const mealPlanId = +request.params.id!;
-  const { configuration } = request.body;
+  const configuration = request.body;
 
   const query = prisma.$kysely
     .selectFrom("meal_plans")
@@ -38,13 +38,39 @@ export const setMealPlanConfiguration = async (request: AuthenticatedRequest<Set
 
   let updatedMealPlan: MealPlan;
   try {
-    updatedMealPlan = await prisma.mealPlan.update({
-      where: {
-        id: mealPlan.id,
-      },
-      data: {
-        configuration: { ...(configuration ?? {}) },
-      },
+    updatedMealPlan = await prisma.$transaction(async (tx) => {
+      const updated = await tx.mealPlan.update({
+        where: {
+          id: mealPlan.id,
+        },
+        data: {
+          configuration: { ...(configuration ?? {}) },
+        },
+      });
+
+      // kill any meal plan config jobs that are pending
+      await tx.$kysely
+        .deleteFrom("side_jobs")
+        .where("side_jobs.type", "=", JobType.MEAL_PLAN_CONFIGURATION)
+        .where(() => {
+          return KyselySql`(side_jobs.job_data->>'meal_plan_id')::int = ${mealPlan.id}`;
+        })
+        .execute();
+
+      // enqueue a new config job
+      const job = await tx.sideJob.create({
+        data: {
+          user_id: user.id,
+          type: JobType.MEAL_PLAN_CONFIGURATION,
+          job_data: <MealPlanConfigurationJobDataSchema>{
+            meal_plan_id: mealPlan.id,
+          },
+        },
+      });
+
+      await mealPlanConfigurationQueue.add(job.id, {}, { jobId: job.id });
+
+      return updated;
     });
   } catch (err) {
     console.error(err);
@@ -54,32 +80,6 @@ export const setMealPlanConfiguration = async (request: AuthenticatedRequest<Set
         message: "Unable to update meal plan",
       },
     ];
-  }
-
-  try {
-    const jobId = `mealPlanConfiguration:${user.id}:${mealPlan.id}`;
-    const existingJob: Job = await mealPlanConfigurationQueue.getJob(jobId);
-    if (existingJob) {
-      const isActive = await existingJob.isActive();
-      if (!isActive) {
-        existingJob.remove();
-      }
-    }
-
-    await mealPlanConfigurationQueue.add(
-      jobId,
-      {
-        meal_plan_id: mealPlan.id,
-      },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-        jobId: jobId,
-      }
-    );
-  } catch (err) {
-    console.error(err);
-    // we don't fail here, they'll just be out of luck :shrug:
   }
 
   return [StatusCodes.OK, YMealPlanConfigurationSchema.cast(updatedMealPlan.configuration)];

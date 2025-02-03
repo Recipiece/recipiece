@@ -5,6 +5,7 @@ export default {
     "@recipiece/database": "<rootDir>/../recipiece_common/recipiece_database/src",
     "@recipiece/types": "<rootDir>/../recipiece_common/recipiece_types/src",
     "@recipiece/test": "<rootDir>/../recipiece_common/recipiece_test/src",
+    "@recipiece/conversion": "<rootDir>/../recipiece_common/recipiece_conversion/src",
   },
   resolver: "ts-jest-resolver",
   transform: {

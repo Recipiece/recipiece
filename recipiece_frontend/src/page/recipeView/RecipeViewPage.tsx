@@ -110,7 +110,7 @@ export const RecipeViewPage: FC = () => {
       if (prev) {
         return {
           ...prev,
-          servings: !!prev?.servings ? prev.servings * scaleFactor : undefined,
+          servings: prev?.servings ? prev.servings * scaleFactor : undefined,
           ingredients: (prev?.ingredients || []).map((ing) => {
             if (ing.amount) {
               try {
@@ -191,14 +191,14 @@ export const RecipeViewPage: FC = () => {
         </div>
 
         {recipe && (
-          <div className="flex flex-col-reverse gap-2 mt-2 sm:flex-row">
-            <Card className="p-2 sm:p-4 basis-0 sm:basis-8/12">
+          <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row">
+            <Card className="basis-0 p-2 sm:basis-8/12 sm:p-4">
               <CardTitle>Steps</CardTitle>
               <CardContent className="p-1 sm:p-4">
                 <div className="flex flex-col gap-2">
                   {(recipe?.steps || []).map((step) => {
                     return (
-                      <div key={step.id} className="flex flex-row gap-1 items-top">
+                      <div key={step.id} className="items-top flex flex-row gap-1">
                         <Checkbox checked={checkedOffSteps.includes(step.id)} onClick={() => onStepChecked(step.id)} className="mt-1" />
                         <span>{step.order + 1}. </span>
                         <p onClick={() => onStepChecked(step.id)} className={`inline cursor-pointer ${checkedOffSteps.includes(step.id) ? "line-through" : ""}`}>
@@ -210,13 +210,13 @@ export const RecipeViewPage: FC = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="p-2 sm:p-4 basis-0 sm:basis-4/12">
+            <Card className="basis-0 p-2 sm:basis-4/12 sm:p-4">
               <CardTitle className="mb-1">Ingredients</CardTitle>
               <CardContent>
                 <div className="flex flex-col gap-1">
                   {(recipe?.ingredients ?? []).map((ing) => {
                     return (
-                      <div key={ing.id} className="flex flex-row gap-2 items-center">
+                      <div key={ing.id} className="flex flex-row items-center gap-2">
                         <Checkbox checked={checkedOffIngredients.includes(ing.id)} onClick={() => onIngredientChecked(ing.id)} />
                         <span className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`} onClick={() => onIngredientChecked(ing.id)}>
                           {(!!ing.amount || !!ing.unit) && (

@@ -58,3 +58,10 @@ export class UserKitchenInvitationStatus {
     UserKitchenInvitationStatus.ACCEPTED,
   ];
 }
+
+export class JobType {
+  public static readonly MEAL_PLAN_ITEM = "meal_plan_item";
+  public static readonly MEAL_PLAN_CONFIGURATION = "meal_plan_configuration";
+  public static readonly MEAL_PLAN_NOTIFICATION = "meal_plan_notification";
+  public static readonly RECIPE_IMPORT = "recipe_import";
+}

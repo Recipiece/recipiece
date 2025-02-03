@@ -29,7 +29,7 @@ export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPla
       where: {
         id: mealPlanId,
       },
-      // @ts-ignore
+      // @ts-expect-error prisma types suck
       data: {
         ...restMealPlan,
       },
