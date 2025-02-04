@@ -244,7 +244,7 @@ describe("Meal Plan Item Jobs", () => {
         configuration: (<MealPlanConfigurationSchema>{
           meats: {
             send_thawing_notification: true,
-            preferred_thawing_method: "cold_water",
+            preferred_thawing_method: "refrigerator",
           },
         }) as any,
         user_id: recipe.user_id,

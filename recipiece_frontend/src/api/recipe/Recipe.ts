@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema, YListRecipesResponseSchema, YRecipeSchema } from "@recipiece/types";
@@ -23,14 +23,6 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeS
 };
 
 export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponseSchema>) => {
-  // const searchParams = new URLSearchParams();
-  // if (search) {
-  //   searchParams.set("search", search);
-  // }
-  // searchParams.set("cookbook_id", cookbook_id.toString());
-  // searchParams.set("cookbook_attachments", "exclude");
-  // searchParams.set("page_number", "0");
-  // searchParams.set("page_size", "5");
   let filters: Partial<ListRecipesQuerySchema> = {
     cookbook_id: cookbook_id,
     cookbook_attachments: "exclude",
@@ -65,6 +57,7 @@ export const useListRecipesForMealPlanQuery = (filters: ListRecipesQuerySchema, 
 
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
+  searchParams.append("page_size", "5");
 
   if (filters.search) {
     searchParams.append("search", filters.search);
@@ -186,7 +179,7 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<RecipeSchema, Partia
   });
 };
 
-export const useDeleteRecipeMutation = (args?: MutationArgs<{}, RecipeSchema>) => {
+export const useDeleteRecipeMutation = (args?: MutationArgs<unknown, RecipeSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -204,7 +197,13 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<{}, RecipeSchema>) =
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, recipe, ctx) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataDeleter({ id: recipe.id }));
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        oldDataDeleter(recipe)
+      );
       queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE(recipe.id) });
       onSuccess?.(data, recipe, ctx);
     },

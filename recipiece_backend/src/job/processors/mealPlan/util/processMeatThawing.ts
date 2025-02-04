@@ -3,7 +3,7 @@ import { KnownIngredient, MealPlanItem, PrismaTransaction, RecipeIngredient } fr
 import { MealPlanConfigurationSchema, MealPlanNotificationJobDataSchema } from "@recipiece/types";
 import { search as fuzzySearch } from "fast-fuzzy";
 import Fraction from "fraction.js";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { JobType } from "../../../../util/constant";
 import { mealPlanNotificationsQueue } from "../../../queues";
 
@@ -76,9 +76,12 @@ export const processMeatThawing = async (
     const worstCaseIngredient = heaviestToLightestLbsIngredients[0];
     const ceiledIngredientAmount = Math.ceil(worstCaseIngredient.amount);
     let delayDate: DateTime;
+    let delayDuration: Duration;
     if (thawingMethod === "refrigerator") {
       // assume at worst, a day per lb
       delayDate = itemStartDate.minus({ days: ceiledIngredientAmount });
+      //calculate the diff here rather than when we're rounding it out
+      delayDuration = delayDate.diff(DateTime.utc());
       // set the hour of the date to 0800 so as to not spam the user at like 2 AM or something.
       delayDate = DateTime.fromObject({
         hour: 8,
@@ -91,9 +94,8 @@ export const processMeatThawing = async (
     } else {
       // assume at worst, 30 mins per lb
       delayDate = itemStartDate.minus({ hours: ceiledIngredientAmount / 0.5 });
+      delayDuration = delayDate.diff(DateTime.utc());
     }
-
-    const delayDuration = delayDate.diff(DateTime.utc());
 
     let shouldEnqueueNotification = false;
     if (thawingMethod === "refrigerator") {
@@ -104,12 +106,14 @@ export const processMeatThawing = async (
 
     if (shouldEnqueueNotification) {
       const delayMillis = delayDuration.as("milliseconds");
+      const originalIngredient = ingredients.find((ing) => ing.id === worstCaseIngredient.id)!;
+
       const notificationData: MealPlanNotificationJobDataSchema = {
         meal_plan_id: mealPlanItem.meal_plan_id,
         meal_plan_item_id: mealPlanItem.id,
-        ingredient_name: worstCaseIngredient.name,
-        ingredient_amount: new Fraction(worstCaseIngredient.amount).toString(),
-        ingredient_unit: worstCaseIngredient.unit!,
+        ingredient_name: originalIngredient.name,
+        ingredient_amount: new Fraction(originalIngredient.amount!).toString(),
+        ingredient_unit: originalIngredient.unit!,
       };
       const notificationJob = await transaction.sideJob.create({
         data: {

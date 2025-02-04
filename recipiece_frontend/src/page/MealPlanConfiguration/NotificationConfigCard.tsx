@@ -42,14 +42,14 @@ export const NotificationConfigCard: FC = () => {
         </CardDescription>
         <CardContent>
           <div className="flex flex-col gap-2">
-            <PreferenceEntry>
+            {/* <PreferenceEntry>
               <>
                 <Label>Meal Notifications</Label>
                 <p className="text-xs">Send notifications for starting meals.</p>
               </>
 
               <FormSwitch disabled={!canRequestPushNotificationPermissions || hasDeniedPushNotifications} name="general.send_recipe_notification" />
-            </PreferenceEntry>
+            </PreferenceEntry> */}
 
             <PreferenceEntry>
               <>

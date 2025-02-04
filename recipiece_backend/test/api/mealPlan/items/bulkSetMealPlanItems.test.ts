@@ -260,13 +260,15 @@ describe("Bulk Set Meal Plan Items", () => {
     const itemToDelete = await generateMealPlanItem({ meal_plan_id: mealPlan.id });
     const itemToUpdate = await generateMealPlanItem({ meal_plan_id: mealPlan.id, freeform_content: "old" });
 
+    const attemptedRecipe = await generateRecipe({ user_id: user.id });
+
     const response = await request(server)
       .post(`/meal-plan/${mealPlan.id}/item/bulk-set`)
       .set("Authorization", `Bearer ${otherBearerToken}`)
       .send(<BulkSetMealPlanItemsRequestSchema>{
         create: [
           {
-            recipe_id: (await generateRecipe({ user_id: user.id })).id,
+            recipe_id: attemptedRecipe.id,
             start_date: DateTime.utc().toJSDate(),
             meal_plan_id: mealPlan.id,
           },
@@ -285,9 +287,7 @@ describe("Bulk Set Meal Plan Items", () => {
     const createdItem = await prisma.mealPlanItem.findFirst({
       where: {
         meal_plan_id: mealPlan.id,
-        recipe_id: {
-          not: null,
-        },
+        recipe_id: attemptedRecipe.id,
       },
     });
     expect(createdItem).toBeFalsy();

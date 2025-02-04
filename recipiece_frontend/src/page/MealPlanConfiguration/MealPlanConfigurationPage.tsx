@@ -83,7 +83,7 @@ export const MealPlanConfigurationPage: FC = () => {
                 {canEdit && <SubmitButton className="ml-auto">Save</SubmitButton>}
               </div>
 
-              <GeneralConfigCard />
+              {/* <GeneralConfigCard /> */}
               <NotificationConfigCard />
               <MeatConfigCard />
             </div>
