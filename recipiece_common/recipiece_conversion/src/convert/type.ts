@@ -1,8 +1,16 @@
-import { KnownIngredientSchema, RecipeIngredientSchema } from "@recipiece/types";
 import { Unit as ConvertUnit } from "convert-units";
-
-export type ConvertableIngredient = Omit<RecipeIngredientSchema, "id" | "created_at" | "order" | "recipe_id">;
-export type ConvertableKnownIngredient = Omit<KnownIngredientSchema, "id" | "created_at">;
+export interface ConvertableIngredient {
+  readonly name: string;
+  readonly amount?: string;
+  readonly unit?: string;
+}
+export interface ConvertableKnownIngredient {
+  readonly ingredient_name: string;
+  readonly grams: number;
+  readonly us_cups: number;
+  readonly unitless_amount?: number;
+  readonly preferred_measure?: string;
+}
 
 export interface UnitConverter {
   readonly convert_symbol: ConvertUnit;

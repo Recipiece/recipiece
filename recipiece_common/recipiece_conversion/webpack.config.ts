@@ -12,15 +12,12 @@ const config: Configuration = {
         test: /\.tsx?$/,
         use: "ts-loader",
         exclude: /node_modules/,
-        include: [path.resolve(__dirname, "./src"), path.resolve(__dirname, "../recipiece_types")],
+        include: [path.resolve(__dirname, "./src")],
       },
     ],
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
-    alias: {
-      "@recipiece/types": path.resolve(__dirname, "../recipiece_types/src"),
-    },
   },
   output: {
     path: path.resolve(__dirname, "dist", isProduction ? "prod" : "dev"),

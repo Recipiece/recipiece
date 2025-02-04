@@ -1,15 +1,7 @@
 {
   "extends": ["../tsconfig.common.json"],
   "compilerOptions": {
-    "outDir": "./dist/dev",
-    "paths": {
-      "@recipiece/types": ["../recipiece_types/src/index.ts"]
-    }
+    "outDir": "./dist/dev"
   },
-  "include": ["./src/**/*", "./test/**/*", "../recipiece_types/src/**/*"],
-  "references": [
-    {
-      "path": "../recipiece_types"
-    }
-  ]
+  "include": ["./src/**/*", "./test/**/*"]
 }

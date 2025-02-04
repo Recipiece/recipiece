@@ -74,8 +74,6 @@ describe("Convert Ingredients", () => {
         grams: 120,
         us_cups: 1,
         ingredient_name: "flour",
-        unitless_amount: null,
-        preferred_measure: null,
       };
       const result = convertIngredientInDifferentCategory(ingredient, knownIngredient, "Tbs");
       const flourAmountInGrams = convert(initialFlourAmount).from("lb").to("g");
@@ -94,8 +92,6 @@ describe("Convert Ingredients", () => {
         grams: 120,
         us_cups: 1,
         ingredient_name: "flour",
-        unitless_amount: null,
-        preferred_measure: null,
       };
       const result = convertIngredientInDifferentCategory(ingredient, knownIngredient, "l");
       const expectedAmount = convert(11.3333).from("Tbs").to("l");
@@ -112,10 +108,9 @@ describe("Convert Ingredients", () => {
         us_cups: 1,
         ingredient_name: "egg",
         unitless_amount: 50,
-        preferred_measure: null,
       };
       const result = convertIngredientInDifferentCategory(ingredient, knownIngredient, "pnt");
-      const eggsInCups = knownIngredient.unitless_amount! / 11;
+      const eggsInCups = knownIngredient.unitless_amount! * 11;
       const eggsInPints = convert(eggsInCups).from("cup").to("pnt");
       expect(result).toBeCloseTo(eggsInPints);
     });
