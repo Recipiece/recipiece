@@ -9,7 +9,7 @@ export const PreferencesTab: FC = () => {
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
 
   return (
-    <LoadingGroup isLoading={isLoadingUser} className="w-5 h-5">
+    <LoadingGroup isLoading={isLoadingUser} className="h-5 w-5">
       <Stack>
         {user && <H2>Preferences</H2>}
         <p>Manage your account preferences</p>

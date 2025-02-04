@@ -39,12 +39,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
   const onSelectUser = useCallback(
     async (membership: UserKitchenMembershipSchema) => {
       setIsDisabled(true);
-      try {
-        onSubmit && (await onSubmit?.(membership));
-      } catch {
-        // noop
-      }
-      setIsDisabled(false);
+      onSubmit?.(membership)?.then?.(() => setIsDisabled(false));
     },
     [onSubmit]
   );
@@ -53,17 +48,17 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
     <ResponsiveContent className="p-6">
       <ResponsiveHeader>
         <ResponsiveTitle>Share {displayName}</ResponsiveTitle>
-        <ResponsiveDescription>Share {displayName} to another user.</ResponsiveDescription>
+        <ResponsiveDescription>Share your {displayName} with another user.</ResponsiveDescription>
       </ResponsiveHeader>
-      <LoadingGroup isLoading={isLoadingUserKitchenMemberships} className="w-full h-9">
+      <LoadingGroup isLoading={isLoadingUserKitchenMemberships} className="h-9 w-full">
         {userKitchenMemberships && (
           <ScrollArea className="w-full">
             {userKitchenMemberships!.data.length > 0 && (
               <div className="flex flex-row gap-2">
                 {userKitchenMemberships!.data.map((membership) => {
                   return (
-                    <Button disabled={isDisabled} onClick={() => onSelectUser(membership)} key={membership.id} variant="ghost" className="w-fit h-fit">
-                      <div className="flex flex-col gap-1 justify-center items-center">
+                    <Button disabled={isDisabled} onClick={() => onSelectUser(membership)} key={membership.id} variant="ghost" className="h-fit w-fit">
+                      <div className="flex flex-col items-center justify-center gap-1">
                         <Avatar>
                           <AvatarFallback className="bg-primary text-white">{membership.destination_user.username.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
@@ -77,7 +72,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         )}
-        {userKitchenMemberships?.data.length === 0 && <>There&apos;s no one in your kitchen!</>}
+        {userKitchenMemberships?.data.length === 0 && <>There&apos;s no one to share with!</>}
       </LoadingGroup>
       <ResponsiveFooter>
         <Button disabled={isDisabled} onClick={() => onClose?.()} variant="secondary">

@@ -1,24 +1,10 @@
+import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { Ban, CheckCircle2, ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
 import { useListUserKitchenMembershipsQuery, useUpdatedNonPendingUserKitchenMembershipMutation } from "../../api";
-import {
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  H3,
-  LoadingGroup,
-  Pager,
-  StaticTable,
-  StaticTableBody,
-  StaticTableHeader,
-  StaticTableRow,
-  useToast,
-} from "../../component";
-import { KitchenMembershipStatusMap } from "../../util";
+import { Avatar, AvatarFallback, Button, Collapsible, CollapsibleContent, CollapsibleTrigger, H3, LoadingGroup, Pager, useToast } from "../../component";
 import { useDeleteUserKitchenMembershipDialog } from "./hook";
-import { UserKitchenMembershipSchema } from "@recipiece/types";
 
 export const PastTargetingMembershipsTable: FC = () => {
   const { toast } = useToast();
@@ -86,7 +72,7 @@ export const PastTargetingMembershipsTable: FC = () => {
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <div>
-            <div className="flex flex-row items-center cursor-pointer">
+            <div className="flex cursor-pointer flex-row items-center">
               <H3>Past Requests</H3>
               <Button className="ml-auto" variant="ghost">
                 {!isOpen && <ChevronUp />}
@@ -97,50 +83,39 @@ export const PastTargetingMembershipsTable: FC = () => {
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <LoadingGroup isLoading={isLoadingKitchenMemberships} className="w-10 h-10" variant="spinner">
-            <StaticTable>
-              <StaticTableHeader>
-                <>From</>
-                <>On</>
-                <>Status</>
-                <>Action</>
-              </StaticTableHeader>
-              {hasAnyRequests && (
-                <StaticTableBody>
-                  {kitchenMemberships.data.map((membership) => {
-                    return (
-                      <StaticTableRow key={membership.id}>
-                        <>{membership.source_user.username}</>
-                        <>{DateTime.fromJSDate(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
-                        <>{KitchenMembershipStatusMap[membership.status]}</>
-                        <div className="flex flex-row gap-2">
-                          {membership.status !== "accepted" && (
-                            <Button disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)}>
-                              <CheckCircle2 className="sm:mr-2" />
-                              <p className="hidden sm:block">Accept</p>
-                            </Button>
-                          )}
-                          {membership.status !== "denied" && (
-                            <Button disabled={isUpdatingKitchenMembership} variant="secondary" onClick={() => onDeny(membership)}>
-                              <Ban className="sm:mr-2" />
-                              <p className="hidden sm:block">Deny</p>
-                            </Button>
-                          )}
-                          <Button
-                            variant="destructive"
-                            disabled={isDeletingUserKitchenMembership || isUpdatingKitchenMembership}
-                            onClick={() => deleteUserKitchenMembership(membership)}
-                          >
-                            <Trash className="sm:mr-2" /> <p className="hidden sm:block">Delete</p>
-                          </Button>
-                        </div>
-                      </StaticTableRow>
-                    );
-                  })}
-                </StaticTableBody>
-              )}
-            </StaticTable>
-            {!hasAnyRequests && <p className="text-sm text-center">You have no past requests.</p>}
+          <LoadingGroup isLoading={isLoadingKitchenMemberships} className="h-10 w-10" variant="spinner">
+            {hasAnyRequests && (
+              <div className="mb-2 mt-2 flex flex-col gap-2">
+                {kitchenMemberships.data.map((membership) => {
+                  return (
+                    <div key={membership.id} className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2">
+                      <Avatar className="h-12 w-12">
+                        <AvatarFallback className="bg-primary text-lg text-white">{membership.source_user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span>{membership.source_user.username}</span>
+                        <span className="text-xs">{DateTime.fromJSDate(membership.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                      </div>
+                      <span className="ml-auto" />
+                      {membership.status !== "accepted" && (
+                        <Button variant="ghost" disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)}>
+                          <CheckCircle2 className="text-primary" />
+                        </Button>
+                      )}
+                      {membership.status !== "denied" && (
+                        <Button disabled={isUpdatingKitchenMembership} variant="ghost" onClick={() => onDeny(membership)}>
+                          <Ban />
+                        </Button>
+                      )}
+                      <Button variant="ghost" disabled={isDeletingUserKitchenMembership || isUpdatingKitchenMembership} onClick={() => deleteUserKitchenMembership(membership)}>
+                        <Trash className="text-destructive" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {!hasAnyRequests && <p className="pb-4 pt-4 text-center text-sm">You have no past requests.</p>}
             {hasAnyRequests && <Pager page={kitchenMembershipsPage} onPage={setKitchenMembershipsPage} hasNextPage={!!kitchenMemberships?.has_next_page} />}
           </LoadingGroup>
         </CollapsibleContent>

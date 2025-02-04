@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "@recipiece/database";
-import { MealPlanSchema, UpdateMealPlanRequestSchema } from "@recipiece/types";
+import { MealPlanSchema, UpdateMealPlanRequestSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPlanRequestSchema>): ApiResponse<MealPlanSchema> => {
@@ -29,12 +29,18 @@ export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPla
       where: {
         id: mealPlanId,
       },
-      // @ts-ignore
+      // @ts-expect-error prisma types suck
       data: {
         ...restMealPlan,
       },
     });
-    return [StatusCodes.OK, updatedMealPlan];
+    return [
+      StatusCodes.OK,
+      {
+        ...updatedMealPlan,
+        configuration: YMealPlanConfigurationSchema.cast(updatedMealPlan.configuration),
+      },
+    ];
   } else {
     return [
       StatusCodes.BAD_REQUEST,

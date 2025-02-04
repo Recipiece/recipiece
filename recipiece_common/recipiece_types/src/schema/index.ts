@@ -6,6 +6,7 @@ export * from "./knownIngredient";
 export * from "./mealPlan";
 export * from "./recipe";
 export * from "./shoppingList";
+export * from "./sideJob";
 export * from "./timer";
 export * from "./user";
 export * from "./websocket";

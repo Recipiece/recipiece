@@ -1,10 +1,10 @@
-import { ExternalLink } from "lucide-react";
+import { ShoppingListShareSchema, UserKitchenMembershipSchema } from "@recipiece/types";
+import { Ban, ExternalLink } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeleteShoppingListShareMutation, useListShoppingListSharesQuery } from "../../api";
-import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
-import { ShoppingListShareSchema, UserKitchenMembershipSchema } from "@recipiece/types";
+import { Button, LoadingGroup, Pager, useToast } from "../../component";
 
 export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembershipSchema }> = ({ membership }) => {
   const navigate = useNavigate();
@@ -44,43 +44,32 @@ export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembe
   );
 
   return (
-    <>
-      <H3>Shopping Lists</H3>
-      <LoadingGroup isLoading={isLoadingShoppingListShares} variant="spinner" className="h-10 w-10">
-        {(shoppingListShares?.data?.length ?? 0) > 0 && (
-          <>
-            <StaticTable>
-              <StaticTableHeader>
-                <>Shopping List</>
-                <>On</>
-                <>Actions</>
-              </StaticTableHeader>
-              <StaticTableBody>
-                {shoppingListShares?.data.map((share) => {
-                  return (
-                    <StaticTableRow key={share.id}>
-                      <div className="flex flex-row items-center">
-                        {share.shopping_list.name}
-                        <Button size="sm" variant="link" onClick={() => navigate(`/shopping-list/${share.shopping_list_id}`, {})}>
-                          <ExternalLink />
-                        </Button>
-                      </div>
-                      <>{DateTime.fromJSDate(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
-                      <>
-                        <Button size="sm" variant="destructive" onClick={() => onUnshareShoppingList(share)} disabled={isDeletingShoppingListShare}>
-                          Un-Share
-                        </Button>
-                      </>
-                    </StaticTableRow>
-                  );
-                })}
-              </StaticTableBody>
-            </StaticTable>
-            <Pager page={shoppingListSharesPage} onPage={setShoppingListSharesPage} hasNextPage={!!shoppingListShares?.has_next_page} />
-          </>
-        )}
-        {(shoppingListShares?.data?.length ?? 0) === 0 && <p className="text-sm text-center">You haven&apos;t shared any shopping lists with this user.</p>}
-      </LoadingGroup>
-    </>
+    <LoadingGroup isLoading={isLoadingShoppingListShares} variant="spinner" className="h-10 w-10">
+      {(shoppingListShares?.data?.length ?? 0) > 0 && (
+        <>
+          <div className="mb-2 mt-2 flex flex-col">
+            {shoppingListShares!.data.map((share) => {
+              return (
+                <div className="flex flex-row gap-2 border-b-[1px] border-b-primary pb-2" key={share.id}>
+                  <div className="flex flex-col">
+                    <span>{share.shopping_list.name}</span>
+                    <span className="text-xs">{DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                  </div>
+                  <Button size="sm" variant="link" onClick={() => navigate(`/shopping-list/${share.shopping_list_id}`, {})}>
+                    <ExternalLink />
+                  </Button>
+                  <span className="ml-auto" />
+                  <Button variant="ghost" onClick={() => onUnshareShoppingList(share)} disabled={isDeletingShoppingListShare}>
+                    <Ban className="text-destructive" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+          <Pager page={shoppingListSharesPage} onPage={setShoppingListSharesPage} hasNextPage={!!shoppingListShares?.has_next_page} />
+        </>
+      )}
+      {(shoppingListShares?.data?.length ?? 0) === 0 && <p className="text-center text-sm">You haven&apos;t shared any shopping lists with this user.</p>}
+    </LoadingGroup>
   );
 };

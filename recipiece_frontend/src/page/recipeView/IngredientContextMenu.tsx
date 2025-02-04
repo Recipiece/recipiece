@@ -3,7 +3,7 @@ import { MoreVertical, PencilRuler, Scale } from "lucide-react";
 import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../component";
 import { DialogContext } from "../../context";
-import { RelativeScaleIngredientSubmit } from "../../dialog";
+import { ConvertIngredientDialogSubmit, RelativeScaleIngredientSubmit } from "../../dialog";
 import { RecipeIngredientSchema } from "@recipiece/types";
 
 export interface IngredientContextMenuProps {
@@ -36,7 +36,6 @@ export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredie
     pushDialog("convertIngredient", {
       ingredient: ingredient,
       onClose: () => popDialog("convertIngredient"),
-      // @ts-ignore
       onSubmit: (value: ConvertIngredientDialogSubmit) => {
         popDialog("convertIngredient");
         onIngredientConverted(ingredient, value.amount.toString(), value.unit.toString());

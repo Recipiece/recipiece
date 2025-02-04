@@ -4,7 +4,8 @@ import { FC, Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button, FormInput, Popover, PopoverContent, PopoverTrigger } from "../../component";
-import { ALL_UNITS, cn } from "../../util";
+import { cn } from "../../util";
+import { ALL_UNITS } from "@recipiece/conversion";
 
 const UNIT_AUTOCOMPLETE_OPTIONS = ALL_UNITS.map((au) => {
   return au.display_name.singular;
@@ -109,7 +110,7 @@ const IngredientFormUnitInput: FC<{ readonly isDragging: boolean; index: number;
           <PopoverContent
             alignOffset={-16}
             align="start"
-            className="p-1 min-w-[200px]"
+            className="min-w-[200px] p-1"
             side="bottom"
             sideOffset={-14}
             onOpenAutoFocus={(event) => event.preventDefault()}
@@ -119,7 +120,7 @@ const IngredientFormUnitInput: FC<{ readonly isDragging: boolean; index: number;
             <div className="grid grid-cols-1">
               {currentAutocompleteItems.map((item) => {
                 return (
-                  <Button className="justify-start p-1 h-auto" variant="ghost" key={item} onClick={() => onSelectItem(item)}>
+                  <Button className="h-auto justify-start p-1" variant="ghost" key={item} onClick={() => onSelectItem(item)}>
                     {item}
                   </Button>
                 );
@@ -172,25 +173,25 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
   }, [isOver, isDragging]);
 
   return (
-    // @ts-ignore
+    // @ts-expect-error merge refs type def is funky
     <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
       <div ref={dragRef} className="flex flex-row sm:block">
-        {draggable && <Grip className="h-full m-0 p-0 cursor-grab text-primary flex-shrink" />}
-        <Button className="block sm:hidden m-0 p-0 ml-auto" type="button" variant="link" onClick={() => onRemove(index)}>
+        {draggable && <Grip className="m-0 h-full flex-shrink cursor-grab p-0 text-primary" />}
+        <Button className="m-0 ml-auto block p-0 sm:hidden" type="button" variant="link" onClick={() => onRemove(index)}>
           <Minus className="text-destructive" />
         </Button>
       </div>
       <IngredientFormNameInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
       <IngredientFormAmountInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
       <IngredientFormUnitInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
-      <Button className="hidden sm:block m-0 p-0" type="button" variant="link" onClick={() => onRemove(index)}>
+      <Button className="m-0 hidden p-0 sm:block" type="button" variant="link" onClick={() => onRemove(index)}>
         <Minus className="text-destructive" />
       </Button>
     </div>
   );
 };
 
-export const IngredientsForm: FC<IngredientsFormProps> = ({ isLoading }) => {
+export const IngredientsForm: FC<IngredientsFormProps> = () => {
   const form = useFormContext();
 
   const ingredientsFieldArray = useFieldArray({
@@ -232,7 +233,7 @@ export const IngredientsForm: FC<IngredientsFormProps> = ({ isLoading }) => {
 
   return (
     <div>
-      <div className="flex flex-row items-center mb-4">
+      <div className="mb-4 flex flex-row items-center">
         <h1 className="inline text-lg">Ingredients</h1>
         <Button type="button" onClick={addIngredient} variant="secondary" className="ml-auto">
           <PlusIcon />

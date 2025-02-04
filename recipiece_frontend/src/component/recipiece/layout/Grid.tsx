@@ -18,9 +18,9 @@ export const Grid: FC<GridProps> = ({ children, className }) => {
 };
 
 export const GridRow: FC<PropsWithChildren> = ({ children }) => {
-  return <div className="col-span-1 sm:col-span-4 md:col-span-6 lg:col-span-12 auto-rows-fr">{children}</div>;
+  return <div className="col-span-1 auto-rows-fr sm:col-span-4 md:col-span-6 lg:col-span-12">{children}</div>;
 };
 
 export const GridHalfRow: FC<PropsWithChildren> = ({ children }) => {
-  return <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-6 auto-rows-fr">{children}</div>;
+  return <div className="col-span-1 auto-rows-fr sm:col-span-2 md:col-span-3 lg:col-span-6">{children}</div>;
 };

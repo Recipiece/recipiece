@@ -1,0 +1,18 @@
+{
+  "name": "recipiece",
+  "version": "1.0.0",
+  "repository": "git@github.com:sjyn/Recipiece.git",
+  "author": "Steven Rosendahl <steven.ak.rosendahl@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "serve:backend": "yarn --cwd ./recipiece_backend run:dev",
+    "serve:frontend": "yarn --cwd ./recipiece_frontend run:dev",
+    "serve:local-db": "docker compose -f ./docker-compose.dev.yaml up",
+    "serve:recipe-importer": "cd ./recipiece_recipe_importer && fastapi dev src/main.py --host 0.0.0.0 --port 8081",
+    "serve:dev": "concurrently \"yarn serve:local-db\" \"yarn serve:backend\" \"yarn serve:frontend\" \"yarn serve:recipe-importer\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

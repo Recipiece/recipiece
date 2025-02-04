@@ -54,7 +54,7 @@ export const ModifyMealPlanDialog: FC<ModifyMealPlanDialogProps> = ({ onSubmit, 
         <form onSubmit={form.handleSubmit(onModifyMealPlan)}>
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>{isEditing ? "Edit" : "Create"} Meal Plan</ResponsiveTitle>
-            <ResponsiveDescription>Configure a meal plan.</ResponsiveDescription>
+            <ResponsiveDescription>{isEditing ? "Edit your meal plan" : "Create a new meal plan"}</ResponsiveDescription>
           </ResponsiveHeader>
 
           <Stack>

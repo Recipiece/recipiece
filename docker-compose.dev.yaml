@@ -1,16 +1,4 @@
 services:
-  recipiece_frontend:
-    build:
-      context: .
-      dockerfile: ./recipiece_frontend/Dockerfile
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
-    depends_on:
-      - recipiece_backend
-    volumes:
-      - ./recipiece_frontend:/recipiece_frontend
-      - ./recipiece_common/recipiece_types:/recipiece_common/recipiece_types
   recipiece_database:
     image: postgres:16
     restart: always
@@ -36,28 +24,3 @@ services:
       POSTGRES_USER: 'recipiece'
     ports:
       - "5433:5432"
-  recipiece_backend:
-    build:
-      context: .
-      dockerfile: ./recipiece_backend/Dockerfile
-    ports:
-      - "8080:8080"
-    restart: unless-stopped
-    depends_on:
-      - recipiece_database
-      - recipiece_redis
-      - recipiece_recipe_importer
-    volumes:
-      - ./recipiece_backend:/recipiece_backend
-      - ./recipiece_common:/recipiece_common
-  recipiece_recipe_importer:
-    build:
-      context: ./recipiece_recipe_importer
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
-    restart: unless-stopped
-    environment:
-      - WATCHFILES_FORCE_POLLING=true
-    volumes:
-      - ./recipiece_recipe_importer:/home

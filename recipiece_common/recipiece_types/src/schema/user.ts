@@ -210,7 +210,7 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
     }),
   entity_id: number().notRequired(),
   entity: string().oneOf(["include", "exclude"]).notRequired(),
-  entity_type: string().oneOf(["shopping_list", "recipe"]).notRequired(),
+  entity_type: string().oneOf(["shopping_list", "recipe", "meal_plan"]).notRequired(),
 })
   .test("oneOfTargetingSelfOrFromSelf", "Must specify at least one of targeting_self or from_self", (ctx) => {
     return !!ctx.from_self || !!ctx.targeting_self;

@@ -1,1 +1,1 @@
-export * from "./MobileListMealPlans";
+export * from "./MobileListMealPlansDialog";

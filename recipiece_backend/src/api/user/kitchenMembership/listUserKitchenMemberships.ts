@@ -66,6 +66,21 @@ export const listUserKitchenMemberships = async (
           };
         }
         break;
+      case "meal_plan":
+        if (entity === "include") {
+          where.meal_plan_shares = {
+            some: {
+              meal_plan_id: entity_id,
+            },
+          };
+        } else if (entity === "exclude") {
+          where.meal_plan_shares = {
+            none: {
+              meal_plan_id: entity_id,
+            },
+          };
+        }
+        break;
       default:
         return [
           StatusCodes.BAD_REQUEST,

@@ -1,19 +1,80 @@
 import {
+  BulkSetMealPlanItemsRequestSchema,
+  BulkSetMealPlanItemsResponseSchema,
   ListItemsForMealPlanQuerySchema,
   ListItemsForMealPlanResponseSchema,
-  ListMealPlanQuerySchema,
-  ListMealPlanResponseSchema,
+  ListMealPlansQuerySchema,
+  ListMealPlansResponseSchema,
+  MealPlanConfigurationSchema,
   MealPlanItemSchema,
   MealPlanSchema,
+  YBulkSetMealPlanItemsRequestSchema,
+  YBulkSetMealPlanItemsResponseSchema,
   YListItemsForMealPlanResponseSchema,
-  YListMealPlanResponseSchema,
+  YListMealPlansResponseSchema,
+  YMealPlanConfigurationSchema,
   YMealPlanItemSchema,
   YMealPlanSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { MealPlanQueryKeys } from "./MealPlanQueryKeys";
+
+export const useSetMealPlanConfigurationMutation = (
+  args?: MutationArgs<MealPlanConfigurationSchema, { readonly mealPlanId: number; readonly configuration: MealPlanConfigurationSchema }>
+) => {
+  const { putter } = usePut();
+  const queryClient = useQueryClient();
+
+  const mutation = async (body: { mealPlanId: number; configuration: MealPlanConfigurationSchema }) => {
+    const response = await putter({
+      path: `/meal-plan/${body.mealPlanId}/configuration`,
+      withAuth: "access_token",
+      body: { ...body.configuration },
+    });
+    return YMealPlanConfigurationSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(vars.mealPlanId), (oldData: MealPlanSchema) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            configuration: { ...data },
+          };
+        }
+        return undefined;
+      });
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+        },
+        (oldData: ListMealPlansResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: (oldData.data ?? []).map((mealPlan) => {
+                if (mealPlan.id === vars.mealPlanId) {
+                  return { ...mealPlan, configuration: { ...data } };
+                }
+                return { ...mealPlan };
+              }),
+            };
+          }
+          return undefined;
+        }
+      );
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
 
 export const useGetMealPlanByIdQuery = (listId: number, args?: QueryArgs<MealPlanSchema>) => {
   const { getter } = useGet();
@@ -33,23 +94,19 @@ export const useGetMealPlanByIdQuery = (listId: number, args?: QueryArgs<MealPla
   });
 };
 
-export const useListMealPlansQuery = (filters: ListMealPlanQuerySchema, args?: QueryArgs<ListMealPlanResponseSchema>) => {
+export const useListMealPlansQuery = (filters: ListMealPlansQuerySchema, args?: QueryArgs<ListMealPlansResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
 
-  // if (filters.search) {
-  //   searchParams.append("search", filters.search);
-  // }
-
   const query = async () => {
-    const mealPlans = await getter<never, ListMealPlanResponseSchema>({
+    const mealPlans = await getter<never, ListMealPlansResponseSchema>({
       path: `/meal-plan/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return YListMealPlanResponseSchema.cast(mealPlans.data);
+    return YListMealPlansResponseSchema.cast(mealPlans.data);
   };
 
   return useQuery({
@@ -83,7 +140,12 @@ export const useCreateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Pa
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataCreator(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+        },
+        oldDataCreator(data)
+      );
       queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(data.id), data);
       onSuccess?.(data, vars, ctx);
     },
@@ -109,7 +171,12 @@ export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Pa
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataUpdater(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+        },
+        oldDataUpdater(data)
+      );
       queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(data.id), data);
       onSuccess?.(data, vars, ctx);
     },
@@ -117,7 +184,7 @@ export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Pa
   });
 };
 
-export const useDeleteMealPlanMutation = (args?: MutationArgs<{}, MealPlanSchema>) => {
+export const useDeleteMealPlanMutation = (args?: MutationArgs<unknown, MealPlanSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -136,24 +203,29 @@ export const useDeleteMealPlanMutation = (args?: MutationArgs<{}, MealPlanSchema
     onSuccess: (data, mealPlan, ctx) => {
       queryClient.invalidateQueries({ queryKey: MealPlanQueryKeys.GET_MEAL_PLAN(mealPlan.id) });
       queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataDeleter({ id: mealPlan.id }));
+      (mealPlan.shares ?? []).forEach((mealPlanShare) => {
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(
+            MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES({
+              user_kitchen_membership_id: mealPlanShare.user_kitchen_membership_id,
+            })
+          ),
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.GET_MEAL_PLAN_SHARE(mealPlanShare.id),
+        });
+      });
+
       onSuccess?.(data, mealPlan, ctx);
     },
     ...restArgs,
   });
 };
 
-export const useListItemsForMealPlanQuery = (mealPlanId: number, filters: ListItemsForMealPlanQuerySchema, args?: QueryArgs<ListItemsForMealPlanResponseSchema>) => {
+export const useListMealPlanItemsQuery = (mealPlanId: number, filters: ListItemsForMealPlanQuerySchema, args?: QueryArgs<ListItemsForMealPlanResponseSchema>) => {
   const { getter } = useGet();
   const searchParams = filtersToSearchParams(filters);
-  // const searchParams = new URLSearchParams();
-
-  // if (filters.start_date) {
-  //   searchParams.append("start_date", filters.start_date);
-  // }
-
-  // if (filters.end_date) {
-  //   searchParams.append("end_date", filters.end_date);
-  // }
 
   const query = async () => {
     const mealPlans = await getter<never, ListItemsForMealPlanResponseSchema>({
@@ -167,6 +239,62 @@ export const useListItemsForMealPlanQuery = (mealPlanId: number, filters: ListIt
     queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId, filters),
     queryFn: query,
     ...(args ?? {}),
+  });
+};
+
+export const useBulkSetMealPlanItemsMutation = (args?: MutationArgs<BulkSetMealPlanItemsResponseSchema, { mealPlanId: number } & BulkSetMealPlanItemsRequestSchema>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (data: { mealPlanId: number } & BulkSetMealPlanItemsRequestSchema) => {
+    const { mealPlanId, ...restRequest } = data;
+    const response = await poster<BulkSetMealPlanItemsRequestSchema, BulkSetMealPlanItemsResponseSchema>({
+      path: `/meal-plan/${mealPlanId}/item/bulk-set`,
+      withAuth: "access_token",
+      body: YBulkSetMealPlanItemsRequestSchema.cast({ ...restRequest }),
+    });
+    return YBulkSetMealPlanItemsResponseSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, variables, context) => {
+      const { created, updated } = data;
+      const { delete: deleted, mealPlanId } = variables;
+
+      deleted.forEach((deletedItem) => {
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId)),
+          },
+          oldDataDeleter(deletedItem)
+        );
+      });
+      updated.forEach((updatedItem) => {
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId)),
+          },
+          oldDataUpdater(updatedItem)
+        );
+      });
+      created.forEach((createdItem) => {
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId)),
+          },
+          oldDataCreator(createdItem)
+        );
+      });
+
+      onSuccess?.(data, variables, context);
+    },
+    ...restArgs,
   });
 };
 
@@ -220,7 +348,7 @@ export const useUpdateMealPlanItemMutation = (args?: MutationArgs<MealPlanItemSc
   });
 };
 
-export const useDeleteMealPlanItemMutation = (args?: MutationArgs<{}, MealPlanItemSchema>) => {
+export const useDeleteMealPlanItemMutation = (args?: MutationArgs<unknown, MealPlanItemSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 

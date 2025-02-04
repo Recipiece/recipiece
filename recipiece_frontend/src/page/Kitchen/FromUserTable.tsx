@@ -4,10 +4,9 @@ import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateKitchenMembershipMutation, useListUserKitchenMembershipsQuery } from "../../api";
-import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
+import { Avatar, AvatarFallback, Button, H3, LoadingGroup, Pager, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ExtendKitchenInvitationForm } from "../../dialog";
-import { KitchenMembershipStatusMap } from "../../util";
 import { useDeleteUserKitchenMembershipDialog } from "./hook";
 
 export const FromUserTable: FC = () => {
@@ -61,47 +60,46 @@ export const FromUserTable: FC = () => {
 
   return (
     <div>
-      <div className="flex flex-row mb-2 items-center">
+      <div className="mb-2 flex flex-row items-center">
         <H3>Invitations from You</H3>
         <Button variant="secondary" className="ml-auto" disabled={isCreatingKitchenMembership} onClick={onExtendInvitation}>
           <Handshake className="sm:mr-2" />
-          <p className="hidden sm:block">Extend an Invitation</p>
+          <p className="hidden sm:block">Invite Users</p>
         </Button>
       </div>
       <p className="text-sm">Share your kitchen with other users.</p>
-      <LoadingGroup isLoading={isLoadingKitchenMemberships} variant="spinner" className="w-10 h-10">
-        <StaticTable>
-          <StaticTableHeader>
-            <>To</>
-            <>On</>
-            <>Status</>
-            <>Action</>
-          </StaticTableHeader>
-          {hasAnyRequests && (
-            <StaticTableBody>
-              {kitchenMemberships.data.map((membership) => {
-                return (
-                  <StaticTableRow key={membership.id}>
-                    <>{membership.destination_user.username}</>
-                    <>{DateTime.fromJSDate(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
-                    <>{KitchenMembershipStatusMap[membership.status]}</>
-                    <div className="flex flex-row gap-2">
-                      {membership.status === "accepted" && (
-                        <Button variant="secondary" onClick={() => navigate(`/kitchen/${membership.id}`)} disabled={isDeletingUserKitchenMembership}>
-                          <SquareArrowOutUpRight className="mr-2" /> Manage
-                        </Button>
-                      )}
-                      <Button variant="destructive" onClick={() => deleteUserKitchenMembership(membership)} disabled={isDeletingUserKitchenMembership}>
-                        <Trash className="mr-2" /> Delete
-                      </Button>
-                    </div>
-                  </StaticTableRow>
-                );
-              })}
-            </StaticTableBody>
-          )}
-        </StaticTable>
-        {!hasAnyRequests && <p className="text-sm text-center">There are no requests.</p>}
+      <LoadingGroup isLoading={isLoadingKitchenMemberships} variant="spinner" className="h-10 w-10">
+        {hasAnyRequests && (
+          <div className="mb-2 mt-2 flex flex-col gap-2">
+            {kitchenMemberships.data.map((membership) => {
+              return (
+                <div key={membership.id} className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className="bg-primary text-lg text-white">{membership.destination_user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span>
+                      {membership.destination_user.username} - {membership.status}
+                    </span>
+                    <span className="text-xs">{DateTime.fromJSDate(membership.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                  </div>
+                  <span className="ml-auto" />
+                  {membership.status === "accepted" && (
+                    <Button variant="ghost" onClick={() => navigate(`/kitchen/${membership.id}`)} disabled={isDeletingUserKitchenMembership}>
+                      <SquareArrowOutUpRight className="text-primary" />
+                    </Button>
+                  )}
+                  {membership.status !== "accepted" && (
+                    <Button variant="ghost" onClick={() => deleteUserKitchenMembership(membership)} disabled={isDeletingUserKitchenMembership}>
+                      <Trash className="text-destructive" />
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {!hasAnyRequests && <p className="text-center text-sm">You haven&apos;t invited anyone to your kitchen.</p>}
         {hasAnyRequests && <Pager page={kitchenMembershipsPage} onPage={setKitchenMembershipsPage} hasNextPage={!!kitchenMemberships?.has_next_page} />}
       </LoadingGroup>
     </div>

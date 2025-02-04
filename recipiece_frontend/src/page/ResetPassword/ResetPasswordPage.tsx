@@ -55,7 +55,7 @@ export const ResetPasswordPage: FC = () => {
           description: "You password was successfully reset. You may login with your new password.",
         });
         navigate("/login");
-      } catch (err) {
+      } catch {
         toast({
           title: "Error resetting password",
           description: "There was an error resetting your password. Please try again later.",

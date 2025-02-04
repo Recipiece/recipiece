@@ -25,8 +25,10 @@ def parse_freetext_ingredients(ingredients: List[str]) -> List[ParsedIngredient]
                 ing_amount = None
                 ing_unit = None
                 if parsed_ingredient.amount:
-                    ing_amount = str(parsed_ingredient.amount[0].quantity)
-                    ing_unit = str(parsed_ingredient.amount[0].unit)
+                    if hasattr(parsed_ingredient.amount[0], "quantity") and parsed_ingredient.amount[0].quantity:
+                        ing_amount = str(parsed_ingredient.amount[0].quantity)
+                    if hasattr(parsed_ingredient.amount[0], "unit") and parsed_ingredient.amount[0].unit:
+                        ing_unit = str(parsed_ingredient.amount[0].unit)
 
                 parsed_ingredients.append({
                     "name": ing_name,

@@ -119,7 +119,7 @@ export const DashboardPage: FC = () => {
           <p>{cookbook?.description}</p>
         </LoadingGroup>
       )}
-      <Label className="grow w-full sm:w-auto">
+      <Label className="w-full grow sm:w-auto">
         Search
         <Input disabled={isLoadingRecipes || isFetchingRecipes} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
       </Label>

@@ -35,12 +35,11 @@ model User {
   credentials UserCredentials?
   user_access_records UserAccessRecord[]
   user_sessions UserSession[]
-  background_jobs BackgroundJob[]
-  timers Timer[]
   meal_plans MealPlan[]
   user_push_notification_subscriptions UserPushNotificationSubscription[]
   source_user_kitchen_memberships UserKitchenMembership[] @relation(name: "source_user")
   destination_user_kitchen_memberships UserKitchenMembership[] @relation(name: "destination_user")
+  side_jobs SideJob[]
 }
 
 enum UserKitchenMembershipStatus {
@@ -64,6 +63,7 @@ model UserKitchenMembership {
 
   recipe_shares RecipeShare[]
   shopping_list_shares ShoppingListShare[]
+  meal_plan_shares MealPlanShare[]
 
   @@index([status, destination_user_id])
   @@index([status, source_user_id])
@@ -164,7 +164,6 @@ model Recipe {
   steps RecipeStep[]
   recipe_cookbook_attachments RecipeCookbookAttachment[]
   meal_plan_items MealPlanItem[]
-  scheduled_notifications ScheduledNotification[]
   recipe_shares RecipeShare[]
 
   @@index([user_id, name])
@@ -283,42 +282,34 @@ model KnownIngredient {
   preferred_measure String?
 }
 
-model BackgroundJob {
-  @@map("background_jobs")
-
-  id String @id @default(uuid())
-  created_at DateTime @default(now())
-  finished_at DateTime?
-  result String @default("pending")
-  purpose String
-  args Json?
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id Int
-}
-
-model Timer {
-  @@map("timers")
-
-  id Int @id @default(autoincrement())
-  created_at DateTime @default(now())
-  duration_ms Int
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id Int
-}
-
 model MealPlan {
   @@map("meal_plans")
 
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
   name String
+  configuration Json @default("{}")
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
 
   meal_plan_items MealPlanItem[]
+  meal_plan_shares MealPlanShare[]
+}
+
+model MealPlanShare {
+  @@map("meal_plan_shares")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  meal_plan_id Int
+  meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([meal_plan_id, user_kitchen_membership_id])
 }
 
 model MealPlanItem {
@@ -331,21 +322,24 @@ model MealPlanItem {
   freeform_content String?
   notes String?
   recipe_id Int?
-  label String?
+  leftover_of_meal_plan_item_id Int? @unique
 
   meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe Recipe? @relation(fields: [recipe_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  leftover_of_meal_plan_item MealPlanItem? @relation("leftover_of_meal_plan_item", fields: [leftover_of_meal_plan_item_id], references: [id],  onDelete: Cascade, onUpdate: Cascade)
+  leftover MealPlanItem? @relation("leftover_of_meal_plan_item")
 }
 
-model ScheduledNotification {
-  @@map("scheduled_notifications")
+model SideJob {
+  @@map("side_jobs")
 
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   created_at DateTime @default(now())
-  to_be_run_at DateTime
-  purpose String
-  args Json?
+  type String
+  user_id Int
+  job_data Json
 
-  recipe_id Int
-  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([type])
 }

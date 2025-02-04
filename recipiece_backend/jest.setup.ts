@@ -81,16 +81,8 @@ globalThis.fixtures = {
   },
 };
 
-jest.mock("bullmq", () => {
-  return {
-    Queue: jest.fn().mockImplementation(() => {
-      return {
-        add: jest.fn(),
-      };
-    }),
-    Worker: jest.fn().mockImplementation(),
-  };
-});
+// mock bullmq so that we don't actually enqueue anything
+jest.mock("bullmq");
 
 // just in case there's any extra users hanging around.
 beforeAll(async () => {

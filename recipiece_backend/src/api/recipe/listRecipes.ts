@@ -32,13 +32,12 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
       .innerJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "recipes.id")
       .where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id);
   } else if (cookbook_id && cookbook_attachments === "exclude") {
-    query = query.leftJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "recipes.id").where((eb) => {
-      return eb
-        .case()
-        .when("recipe_cookbook_attachments.recipe_id", "is not", null)
-        .then(eb("recipe_cookbook_attachments.cookbook_id", "!=", cookbook_id))
-        .else(true)
-        .end();
+    query = query.where((eb) => {
+      return eb(
+        "recipes.id",
+        "not in",
+        eb.selectFrom("recipe_cookbook_attachments").select("recipe_cookbook_attachments.recipe_id").where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id)
+      );
     });
   }
 

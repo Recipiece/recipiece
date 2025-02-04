@@ -56,12 +56,12 @@ const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggabl
   }, [isDragging, isOver]);
 
   return (
-    // @ts-ignore
+    // @ts-expect-error mergeRefs has slightly off type definition
     <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
       <div className="flex flex-row items-center gap-2">
         {draggable && (
           <div ref={dragRef}>
-            <Grip className="text-primary cursor-grab" />
+            <Grip className="cursor-grab text-primary" />
           </div>
         )}
         <p className="mr-auto leading-6">Step {index + 1}</p>
@@ -74,7 +74,7 @@ const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggabl
   );
 };
 
-export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
+export const StepsForm: FC<StepsFormProps> = () => {
   const form = useFormContext();
 
   const stepsFieldArray = useFieldArray({
@@ -104,7 +104,7 @@ export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
 
   return (
     <div>
-      <div className="flex flex-row items-center mb-2">
+      <div className="mb-2 flex flex-row items-center">
         <h1 className="inline text-lg">Steps</h1>
         <Button type="button" onClick={addStep} variant="secondary" className="ml-auto">
           <PlusIcon />

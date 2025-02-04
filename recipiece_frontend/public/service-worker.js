@@ -49,6 +49,10 @@ self.addEventListener("notificationclick", (event) => {
     destinationUrl = `/recipe/view/${data.id}`;
   } else if (tag.startsWith("shoppingListShare")) {
     destinationUrl = `/shopping-list/${data.id}`;
+  } else if (tag.startsWith("mealPlanShare")) {
+    destinationUrl = `/meal-plan/view/${data.id}`;
+  } else if (tag.startsWith("thawMeatTimer")) {
+    destinationUrl = `/recipe/view/${data.id}`;
   }
 
   if (destinationUrl.length > 0) {
@@ -69,4 +73,4 @@ self.addEventListener("push", (event) => {
   }
 });
 
-self.addEventListener("pushsubscriptionchange", (event) => {});
+// self.addEventListener("pushsubscriptionchange", (event) => {});

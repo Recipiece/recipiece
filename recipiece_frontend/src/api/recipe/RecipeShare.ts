@@ -138,7 +138,7 @@ export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShareSche
   });
 };
 
-export const useDeleteRecipeShareMutation = (args?: MutationArgs<{}, RecipeShareSchema>) => {
+export const useDeleteRecipeShareMutation = (args?: MutationArgs<unknown, RecipeShareSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 

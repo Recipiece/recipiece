@@ -1,6 +1,6 @@
 import { User } from "@recipiece/database";
 import { generateShoppingList, generateShoppingListShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
-import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
+import { ListMealPlanSharesQuerySchema, ListMealPlanSharesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
@@ -29,7 +29,7 @@ describe("List Shopping List Shares", () => {
 
     const response = await request(server)
       .get(`/shopping-list/share/list`)
-      .query(<ListShoppingListSharesQuerySchema>{
+      .query(<ListMealPlanSharesQuerySchema>{
         page_number: 0,
         targeting_self: true,
       })
@@ -37,7 +37,7 @@ describe("List Shopping List Shares", () => {
       .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: ListShoppingListSharesResponseSchema = response.body;
+    const responseData: ListMealPlanSharesResponseSchema = response.body;
     expect(responseData.data.length).toBe(1);
     expect(responseData.data[0].id).toBe(share.id);
   });
@@ -56,7 +56,7 @@ describe("List Shopping List Shares", () => {
 
     const response = await request(server)
       .get(`/shopping-list/share/list`)
-      .query(<ListShoppingListSharesQuerySchema>{
+      .query(<ListMealPlanSharesQuerySchema>{
         page_number: 0,
         from_self: true,
       })
@@ -64,7 +64,7 @@ describe("List Shopping List Shares", () => {
       .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: ListShoppingListSharesResponseSchema = response.body;
+    const responseData: ListMealPlanSharesResponseSchema = response.body;
     expect(responseData.data.length).toBe(1);
     expect(responseData.data[0].id).toBe(share.id);
   });
@@ -93,7 +93,7 @@ describe("List Shopping List Shares", () => {
 
     const response = await request(server)
       .get(`/shopping-list/share/list`)
-      .query(<ListShoppingListSharesQuerySchema>{
+      .query(<ListMealPlanSharesQuerySchema>{
         page_number: 0,
         from_self: true,
         user_kitchen_membership_id: userToOtherMembership.id,
@@ -102,7 +102,7 @@ describe("List Shopping List Shares", () => {
       .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: ListShoppingListSharesResponseSchema = response.body;
+    const responseData: ListMealPlanSharesResponseSchema = response.body;
     expect(responseData.data.length).toBe(1);
     expect(responseData.data[0].id).toBe(userToOtherShare.id);
   });
@@ -121,7 +121,7 @@ describe("List Shopping List Shares", () => {
 
     const response = await request(server)
       .get(`/shopping-list/share/list`)
-      .query(<ListShoppingListSharesQuerySchema>{
+      .query(<ListMealPlanSharesQuerySchema>{
         page_number: 0,
         from_self: true,
       })
@@ -129,7 +129,7 @@ describe("List Shopping List Shares", () => {
       .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: ListShoppingListSharesResponseSchema = response.body;
+    const responseData: ListMealPlanSharesResponseSchema = response.body;
     expect(responseData.data.length).toBe(0);
   });
 });

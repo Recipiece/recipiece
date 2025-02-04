@@ -12,6 +12,7 @@ import {
   RegisterPage,
   ResetPasswordPage,
   ShoppingListViewPage,
+  MealPlanConfigurationPage,
 } from "./page";
 
 export const unauthenticatedRoutes = [
@@ -65,6 +66,10 @@ export const authenticatedRoutes = [
   {
     path: "/meal-plan/view/:id",
     element: MealPlanViewPage,
+  },
+  {
+    path: "/meal-plan/view/:id/configuration",
+    element: MealPlanConfigurationPage,
   },
   {
     path: "/kitchen",

@@ -1,8 +1,8 @@
-import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
-import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { StatusCodes } from "http-status-codes";
-import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
 import { Prisma, prisma } from "@recipiece/database";
+import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
 
 /**
  * List shoppingLists shares that are targeting the requesting user or the requesting user has sent.

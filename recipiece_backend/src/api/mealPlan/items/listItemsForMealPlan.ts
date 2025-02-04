@@ -1,20 +1,25 @@
-import { ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
+import { DEFAULT_PAGE_SIZE, ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { Prisma, prisma } from "@recipiece/database";
+import { mealPlanSharesWithMemberships, Prisma, prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>): ApiResponse<ListItemsForMealPlanResponseSchema> => {
-  const { start_date, end_date } = request.query;
+  const { start_date, end_date, page_number, page_size } = request.query;
+  const pageSize = page_size ?? DEFAULT_PAGE_SIZE;
   const mealPlanId = +request.params.id;
-  const { id: userId } = request.user;
+  const user = request.user;
 
-  const mealPlan = await prisma.mealPlan.findFirst({
-    where: {
-      user_id: userId,
-      id: mealPlanId,
-    },
-  });
+  const mealPlan = await prisma.$kysely
+    .selectFrom("meal_plans")
+    .selectAll("meal_plans")
+    .where((eb) => {
+      return eb.and([
+        eb("meal_plans.id", "=", mealPlanId),
+        eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
+      ]);
+    })
+    .executeTakeFirst();
 
   if (!mealPlan) {
     return [
@@ -51,11 +56,15 @@ export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, Li
     },
   };
 
+  const offset = page_number * pageSize;
+
   const items = await prisma.mealPlanItem.findMany({
     where: filters,
     orderBy: {
       created_at: "asc",
     },
+    skip: offset,
+    take: pageSize + 1,
     include: {
       recipe: {
         include: {
@@ -66,10 +75,15 @@ export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, Li
     },
   });
 
+  const hasNextPage = items.length > pageSize;
+  const resultsData = items.splice(0, pageSize);
+
   return [
     StatusCodes.OK,
     {
-      meal_plan_items: items,
+      data: resultsData,
+      has_next_page: hasNextPage,
+      page: page_number,
     },
   ];
 };

@@ -301,7 +301,7 @@ export const ShoppingListViewPage: FC = () => {
   return (
     <Popover open={isAutoCompleteOpen}>
       <Stack>
-        <LoadingGroup isLoading={isLoadingShoppingList} className="w-[200px] h-6">
+        <LoadingGroup isLoading={isLoadingShoppingList} className="h-6 w-[200px]">
           <Shelf>
             <div className="flex flex-row items-center gap-2">
               <H2>{shoppingList?.name}</H2>
@@ -319,11 +319,11 @@ export const ShoppingListViewPage: FC = () => {
         <div className="p-2">
           <Stack>
             <div className="flex-col">
-              <div className="w-full inline-flex flex-row gap-4">
+              <div className="inline-flex w-full flex-row gap-4">
                 <Input
                   ref={newItemRef}
                   disabled={isPerformingAction}
-                  className="border-y-0 border-b-[1px] border-l-[1px] border-r-0 w-full p-1 rounded-none ring-0 outline-none focus-visible:ring-0 focus-visible:outline-none rounded-bl-md"
+                  className="w-full rounded-none rounded-bl-md border-y-0 border-b-[1px] border-l-[1px] border-r-0 p-1 outline-none ring-0 focus-visible:outline-none focus-visible:ring-0"
                   placeholder="Add an item..."
                   value={newestShoppingListItem}
                   onChange={onNewestItemTextChange}
@@ -340,7 +340,7 @@ export const ShoppingListViewPage: FC = () => {
                 <PopoverContent
                   alignOffset={-16}
                   align="start"
-                  className="p-1 min-w-[200px]"
+                  className="min-w-[200px] p-1"
                   side="bottom"
                   sideOffset={-14}
                   onOpenAutoFocus={(event) => event.preventDefault()}
@@ -350,7 +350,7 @@ export const ShoppingListViewPage: FC = () => {
                   <div className="grid grid-cols-1">
                     {autocompleteSuggestions.map((item) => {
                       return (
-                        <Button className="justify-start p-1 h-auto" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
+                        <Button className="h-auto justify-start p-1" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
                           {item.content}
                         </Button>
                       );
@@ -362,7 +362,7 @@ export const ShoppingListViewPage: FC = () => {
             <div className="grid grid-cols-1 gap-4">
               {sortedIncompleteItems.map((item) => {
                 return (
-                  <div className="inline-flex flex-row gap-2 w-full items-center" key={item.id}>
+                  <div className="inline-flex w-full flex-row items-center gap-2" key={item.id}>
                     <CheckableShoppingListItemInput
                       className="flex-grow"
                       isDraggable
@@ -389,7 +389,7 @@ export const ShoppingListViewPage: FC = () => {
 
             {completeShoppingListItems.map((item) => {
               return (
-                <div key={item.id} className="flex flex-row gap-2 opacity-70 items-center">
+                <div key={item.id} className="flex flex-row items-center gap-2 opacity-70">
                   <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} readOnly />
                   <Button onClick={() => onDeleteItem(item)} variant="ghost">
                     <Minus className="text-destructive" />
@@ -400,7 +400,7 @@ export const ShoppingListViewPage: FC = () => {
           </Stack>
         </div>
         {isLoadingShoppingListItems && (
-          <div className="fixed p-2 bottom-16 sm:bottom-0 right-0">
+          <div className="fixed bottom-16 right-0 p-2 sm:bottom-0">
             <LoadingSpinner width={40} height={40} />
           </div>
         )}

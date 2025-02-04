@@ -293,7 +293,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
-                <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingCookbook}>
+                <LoadingGroup variant="spinner" className="h-7 w-7" isLoading={isLoadingCookbook}>
                   {(cookbooks?.data || []).map((cookbook) => {
                     return (
                       <DropdownMenuItem onClick={() => onAddToCookbook(cookbook)} key={cookbook.id}>
@@ -325,7 +325,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
-                <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
+                <LoadingGroup variant="spinner" className="h-7 w-7" isLoading={isLoadingShoppingLists}>
                   {(shoppingLists?.data || []).map((list) => {
                     return (
                       <DropdownMenuItem key={list.id} onClick={() => onAddToShoppingList(list.id)}>

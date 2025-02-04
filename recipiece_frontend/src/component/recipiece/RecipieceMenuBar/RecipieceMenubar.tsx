@@ -32,6 +32,7 @@ import {
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
 import { ShoppingListMenuItem } from "./ShoppingListMenuItem";
+import { MealPlanMenuItem } from "./MealPlanMenuItem";
 
 export const RecipieceMenuBarContext = createContext<{
   readonly mobileMenuPortalRef: undefined | RefObject<HTMLSpanElement>;
@@ -260,8 +261,8 @@ export const RecipieceMenubar: FC = () => {
 
   return (
     <>
-      <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 sm:bg-primary text-white">
-        <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white dark:text-white" />
+      <Menubar className="h-12 rounded-none border-0 p-2 text-white sm:h-16 sm:bg-primary sm:p-4">
+        <RecipieceHeader className="mr-auto w-full text-start text-primary dark:text-white sm:text-center sm:text-white md:w-auto" />
         <span className="ml-auto block sm:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -278,13 +279,13 @@ export const RecipieceMenubar: FC = () => {
           </DropdownMenu>
         </span>
         <span className="ml-auto block sm:hidden" ref={mobileMenuPortalRef} />
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
             <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
             <MenubarTrigger>Recipes</MenubarTrigger>
             <MenubarContent>
@@ -294,7 +295,7 @@ export const RecipieceMenubar: FC = () => {
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
             <MenubarTrigger>Meal Plans</MenubarTrigger>
             <MenubarContent>
@@ -302,28 +303,24 @@ export const RecipieceMenubar: FC = () => {
                 <Plus size={16} className="mr-2" />
                 New Meal Plan
               </MenubarItem>
-              <LoadingGroup isLoading={isLoadingMealPlans} className="w-full h-10">
+              <LoadingGroup isLoading={isLoadingMealPlans} className="h-10 w-full">
                 {!!mealPlans?.data?.length && <Separator />}
                 {(mealPlans?.data || []).map((mealPlan) => {
-                  return (
-                    <MenubarItem onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)} key={mealPlan.id}>
-                      {mealPlan.name}
-                    </MenubarItem>
-                  );
+                  return <MealPlanMenuItem onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)} key={mealPlan.id} mealPlan={mealPlan} />;
                 })}
               </LoadingGroup>
             </MenubarContent>
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
             <MenubarTrigger>Cookbooks</MenubarTrigger>
             <MenubarContent>
               <MenubarItem onClick={onStartCreateCookbook}>
                 <Plus size={16} className="mr-2" /> New Cookbook
               </MenubarItem>
-              <LoadingGroup isLoading={isLoadingCookbooks} className="w-full h-10">
+              <LoadingGroup isLoading={isLoadingCookbooks} className="h-10 w-full">
                 {!!cookbooks?.data?.length && <Separator />}
                 {(cookbooks?.data || []).map((cookbook) => {
                   return (
@@ -338,22 +335,17 @@ export const RecipieceMenubar: FC = () => {
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
             <MenubarTrigger>Shopping Lists</MenubarTrigger>
             <MenubarContent>
               <MenubarItem onClick={onStartCreateShoppingList}>
                 <Plus size={16} className="mr-2" /> New Shopping List
               </MenubarItem>
-              <LoadingGroup isLoading={isLoadingShoppingLists} className="w-full h-10">
+              <LoadingGroup isLoading={isLoadingShoppingLists} className="h-10 w-full">
                 {!!shoppingLists?.data?.length && <Separator />}
                 {(shoppingLists?.data || []).map((shoppingList) => {
-                  return (
-                    <ShoppingListMenuItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)} shoppingList={shoppingList} />
-                    // <MenubarItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}>
-                    //   {shoppingList.name}
-                    // </MenubarItem>
-                  );
+                  return <ShoppingListMenuItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)} shoppingList={shoppingList} />;
                 })}
                 {/* {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />} */}
               </LoadingGroup>
@@ -361,27 +353,7 @@ export const RecipieceMenubar: FC = () => {
           </MenubarMenu>
         </span>
 
-        {/* <span className="hidden w-0 sm:w-auto sm:block">
-          <MenubarMenu>
-            <MenubarTrigger>Timers</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem onClick={onStartCreateTimer}>
-                <Plus size={16} className="mr-2" />
-                New Timer
-              </MenubarItem>
-              {activeTimers.length > 0 && <Separator />}
-              {activeTimers.map((activeTimer) => {
-                return (
-                  <Fragment key={activeTimer.id}>
-                    <TimerMenuItem timer={activeTimer} />
-                  </Fragment>
-                );
-              })}
-            </MenubarContent>
-          </MenubarMenu>
-        </span> */}
-
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
             <MenubarTrigger>Account</MenubarTrigger>
             <MenubarContent>
@@ -394,25 +366,25 @@ export const RecipieceMenubar: FC = () => {
         </span>
       </Menubar>
 
-      <footer className="visible sm:invisible w-full fixed bottom-0 left-0 h-16 z-50 bg-primary text-white">
-        <div className="h-full flex flex-row justify-center items-center">
-          <Button onClick={() => navigate("/")} variant="link" className="text-white grow">
+      <footer className="visible fixed bottom-0 left-0 z-50 h-16 w-full bg-primary text-white sm:invisible">
+        <div className="flex h-full flex-row items-center justify-center">
+          <Button onClick={() => navigate("/")} variant="link" className="grow text-white">
             <Home />
           </Button>
 
-          <Button className="text-white grow" onClick={onMobileViewCookbooks}>
+          <Button className="grow text-white" onClick={onMobileViewCookbooks}>
             <Book />
           </Button>
 
-          <Button onClick={onCreatePressed} variant="link" className="text-white grow">
+          <Button onClick={onCreatePressed} variant="link" className="grow text-white">
             <CirclePlus />
           </Button>
 
-          <Button onClick={onMobileViewShoppingLists} className="text-white grow">
+          <Button onClick={onMobileViewShoppingLists} className="grow text-white">
             <ShoppingBasket />
           </Button>
 
-          <Button onClick={onMobileViewMealPlans} className="text-white grow">
+          <Button onClick={onMobileViewMealPlans} className="grow text-white">
             <GanttChart />
           </Button>
         </div>

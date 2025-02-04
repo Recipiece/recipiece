@@ -224,6 +224,12 @@ describe("List Recipes", () => {
       cookbook_id: cookbook.id,
     });
 
+    const otherCookbook = await generateCookbook({user_id: user.id});
+    await generateRecipeCookbookAttachment({
+      recipe_id: recipeToAttach.id,
+      cookbook_id: otherCookbook.id,
+    });
+
     const response = await request(server)
       .get("/recipe/list")
       .query(<ListRecipesQuerySchema>{
@@ -236,6 +242,7 @@ describe("List Recipes", () => {
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseRecipes = (response.body as ListRecipesResponseSchema).data;
+
     expect(responseRecipes.length).toBe(10);
     responseRecipes.forEach((rcp) => {
       expect(rcp.id).not.toBe(attachment.recipe_id);

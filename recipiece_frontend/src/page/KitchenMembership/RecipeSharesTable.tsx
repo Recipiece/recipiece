@@ -1,23 +1,23 @@
-import { FC, useCallback, useState } from "react";
-import { useDeleteRecipeShareMutation, useListRecipeSharesQuery } from "../../api";
-import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
-import { ExternalLink } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { DateTime } from "luxon";
 import { RecipeShareSchema, UserKitchenMembershipSchema } from "@recipiece/types";
+import { Ban, ExternalLink } from "lucide-react";
+import { DateTime } from "luxon";
+import { FC, useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDeleteRecipeShareMutation, useListRecipeSharesQuery } from "../../api";
+import { Button, LoadingGroup, Pager, useToast } from "../../component";
 
 export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipSchema }> = ({ membership }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [recipeSharesPage, setRecipeSharesPage] = useState(0);
+  const [mealPlanSharesPage, setRecipeSharesPage] = useState(0);
 
   const { mutateAsync: deleteRecipeShare, isPending: isDeletingRecipeShare } = useDeleteRecipeShareMutation();
 
-  const { data: recipeShares, isLoading: isLoadingRecipeShares } = useListRecipeSharesQuery(
+  const { data: mealPlanShares, isLoading: isLoadingRecipeShares } = useListRecipeSharesQuery(
     {
       user_kitchen_membership_id: membership?.id,
       from_self: true,
-      page_number: recipeSharesPage,
+      page_number: mealPlanSharesPage,
     },
     {
       enabled: !!membership,
@@ -44,43 +44,32 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipS
   );
 
   return (
-    <>
-      <H3>Recipes</H3>
-      <LoadingGroup isLoading={isLoadingRecipeShares} variant="spinner" className="h-10 w-10">
-        {(recipeShares?.data?.length ?? 0) > 0 && (
-          <>
-            <StaticTable>
-              <StaticTableHeader>
-                <>Recipe</>
-                <>On</>
-                <>Actions</>
-              </StaticTableHeader>
-              <StaticTableBody>
-                {recipeShares?.data.map((share) => {
-                  return (
-                    <StaticTableRow key={share.id}>
-                      <div className="flex flex-row items-center">
-                        {share.recipe.name}
-                        <Button size="sm" variant="link" onClick={() => navigate(`/recipe/view/${share.recipe_id}`, {})}>
-                          <ExternalLink />
-                        </Button>
-                      </div>
-                      <>{DateTime.fromJSDate(share.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
-                      <>
-                        <Button size="sm" variant="destructive" onClick={() => onUnshareRecipe(share)} disabled={isDeletingRecipeShare}>
-                          Un-Share
-                        </Button>
-                      </>
-                    </StaticTableRow>
-                  );
-                })}
-              </StaticTableBody>
-            </StaticTable>
-            <Pager page={recipeSharesPage} onPage={setRecipeSharesPage} hasNextPage={!!recipeShares?.has_next_page} />
-          </>
-        )}
-        {(recipeShares?.data?.length ?? 0) === 0 && <p className="text-sm text-center">You haven&apos;t shared any recipes with this user.</p>}
-      </LoadingGroup>
-    </>
+    <LoadingGroup isLoading={isLoadingRecipeShares} variant="spinner" className="h-10 w-10">
+      {(mealPlanShares?.data?.length ?? 0) > 0 && (
+        <>
+          <div className="mb-2 mt-2 flex flex-col">
+            {mealPlanShares!.data.map((share) => {
+              return (
+                <div className="flex flex-row gap-2 border-b-[1px] border-b-primary pb-2" key={share.id}>
+                  <div className="flex flex-col">
+                    <span>{share.recipe.name}</span>
+                    <span className="text-xs">{DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                  </div>
+                  <Button size="sm" variant="link" onClick={() => navigate(`/recipe/view/${share.recipe_id}`, {})}>
+                    <ExternalLink />
+                  </Button>
+                  <span className="ml-auto" />
+                  <Button variant="ghost" onClick={() => onUnshareRecipe(share)} disabled={isDeletingRecipeShare}>
+                    <Ban className="text-destructive" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+          <Pager page={mealPlanSharesPage} onPage={setRecipeSharesPage} hasNextPage={!!mealPlanShares?.has_next_page} />
+        </>
+      )}
+      {(mealPlanShares?.data?.length ?? 0) === 0 && <p className="text-center text-sm">You haven&apos;t shared any recipes with this user.</p>}
+    </LoadingGroup>
   );
 };

@@ -1,9 +1,10 @@
-import { Ban, CheckCircle2 } from "lucide-react";
+import { UserKitchenMembershipSchema } from "@recipiece/types";
+import { Check, X } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useState } from "react";
 import { useListUserKitchenMembershipsQuery, useUpdatePendingUserKitchenMembershipMutation } from "../../api";
-import { Button, H3, LoadingGroup, Pager, StaticTable, StaticTableBody, StaticTableHeader, StaticTableRow, useToast } from "../../component";
-import { UserKitchenMembershipSchema } from "@recipiece/types";
+import { Avatar, AvatarFallback, Button, H3, LoadingGroup, Pager, useToast } from "../../component";
+import { PastTargetingMembershipsTable } from "./PastTargetingMembershipsTable";
 
 export const TargetingUserTable: FC = () => {
   const { toast } = useToast();
@@ -69,39 +70,34 @@ export const TargetingUserTable: FC = () => {
     <div>
       <H3>Join a Brigade</H3>
       <p className="text-sm">Allow users to share their kitchen with you.</p>
-      <LoadingGroup isLoading={isLoadingTargetingUser} className="w-10 h-10" variant="spinner">
-        <StaticTable>
-          <StaticTableHeader>
-            <>From</>
-            <>On</>
-            <>Action</>
-          </StaticTableHeader>
-          {hasAnyTargetingRequests && (
-            <StaticTableBody>
-              {kitchenMembershipsTargetingUser.data.map((membership) => {
-                return (
-                  <StaticTableRow key={membership.id}>
-                    <>{membership.source_user.username}</>
-                    <>{DateTime.fromJSDate(membership.created_at).toLocaleString(DateTime.DATE_SHORT)}</>
-                    <div className="flex flex-row gap-2">
-                      <Button disabled={isUpdatingKitchenMembership} onClick={() => onAccept(membership)}>
-                        <CheckCircle2 className="sm:mr-2" />
-                        <p className="hidden sm:block">Accept</p>
-                      </Button>
-
-                      <Button disabled={isUpdatingKitchenMembership} variant="destructive" onClick={() => onDeny(membership)}>
-                        <Ban className="sm:mr-2" />
-                        <p className="hidden sm:block">Deny</p>
-                      </Button>
-                    </div>
-                  </StaticTableRow>
-                );
-              })}
-            </StaticTableBody>
-          )}
-        </StaticTable>
-        {!hasAnyTargetingRequests && <p className="text-sm text-center">You have no pending requests.</p>}
+      <LoadingGroup isLoading={isLoadingTargetingUser} className="h-10 w-10" variant="spinner">
+        {hasAnyTargetingRequests && (
+          <div className="mb-2 mt-2 flex flex-col gap-2">
+            {kitchenMembershipsTargetingUser.data.map((membership) => {
+              return (
+                <div key={membership.id} className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className="bg-primary text-lg text-white">{membership.source_user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span>{membership.source_user.username}</span>
+                    <span className="text-xs">{DateTime.fromJSDate(membership.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                  </div>
+                  <span className="ml-auto" />
+                  <Button disabled={isUpdatingKitchenMembership} variant="ghost" onClick={() => onDeny(membership)}>
+                    <X className="text-destructive" />
+                  </Button>
+                  <Button disabled={isUpdatingKitchenMembership} variant="ghost" onClick={() => onAccept(membership)}>
+                    <Check className="text-primary" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {!hasAnyTargetingRequests && <p className="pb-4 pt-4 text-center text-sm">You have no pending requests.</p>}
         {hasAnyTargetingRequests && <Pager page={kitchenMembershipsPage} onPage={setKitchenMembershipsPage} hasNextPage={!!kitchenMembershipsTargetingUser?.has_next_page} />}
+        <PastTargetingMembershipsTable />
       </LoadingGroup>
     </div>
   );

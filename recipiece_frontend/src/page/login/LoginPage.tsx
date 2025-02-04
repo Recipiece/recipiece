@@ -74,7 +74,7 @@ export const LoginPage: FC = () => {
         <Stack>
           <FormInput required autoCapitalize="none" name="username" type="text" label="Username or Email" />
           <FormInput required name="password" type="password" label="Password" />
-          <FormCheckbox className="mt-1 mb-1" name="remember" label="Remember Me" />
+          <FormCheckbox className="mb-1 mt-1" name="remember" label="Remember Me" />
           <SubmitButton type="submit">Login</SubmitButton>
           <Button onClick={() => navigate("/create-account")} variant="link">
             Register Now

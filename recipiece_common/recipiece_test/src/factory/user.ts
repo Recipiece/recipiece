@@ -11,7 +11,7 @@ export const generateUserKitchenMembership = async (membership?: Partial<Omit<Us
       source_user_id: sourceUserId,
       destination_user_id: destUserId,
       status: status,
-      created_at: membership?.created_at,
+      created_at: membership?.created_at ?? new Date(),
     },
   });
 };
@@ -23,7 +23,7 @@ export const generateUserCredentials = async (userCredentials?: Partial<Omit<Use
     data: {
       user_id: userId,
       password_hash: userCredentials?.password_hash ?? faker.internet.password(),
-      created_at: userCredentials?.created_at,
+      created_at: userCredentials?.created_at ?? new Date(),
     },
   });
 };
@@ -33,7 +33,7 @@ export const generateUser = async (user?: Partial<Omit<User, "id">>): Promise<Us
     data: {
       username: user?.username ?? faker.internet.username(),
       email: user?.email ?? faker.internet.email(),
-      created_at: user?.created_at,
+      created_at: user?.created_at ?? new Date(),
       validated: user?.validated ?? false,
       preferences: user?.preferences ?? {
         account_visibility: "protected",

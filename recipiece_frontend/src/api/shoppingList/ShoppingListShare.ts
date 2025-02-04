@@ -4,6 +4,7 @@ import {
   ListShoppingListsResponseSchema,
   ShoppingListSchema,
   ShoppingListShareSchema,
+  YListShoppingListSharesResponseSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
@@ -183,7 +184,7 @@ export const useListShoppingListSharesQuery = (filters: ListShoppingListSharesQu
       path: `/shopping-list/share/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return shoppingListShares.data;
+    return YListShoppingListSharesResponseSchema.cast(shoppingListShares.data);
   };
 
   return useQuery({

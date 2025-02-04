@@ -16,7 +16,7 @@ export const NotificationsSection: FC = () => {
     <>
       <H3>Notifications</H3>
       <div className="flex flex-row">
-        <div className="basis-9/12 sm:basis-1/2 flex-col">
+        <div className="basis-9/12 flex-col sm:basis-1/2">
           <Label>Allow Push Notifications on this Device</Label>
           {hasGrantedPushNotifications && (
             <p className="text-xs">You have already granted push notifications on this device. To disable push notifications, look in your system settings.</p>

@@ -108,7 +108,7 @@ export const RecipeEditPage: FC = () => {
         response = await updateRecipe(sanitizedFormData);
       }
       navigate(`/recipe/view/${response.id}`);
-    } catch (err) {
+    } catch {
       toast({
         title: "Unable to Save Recipe",
         description: "This recipe could not be saved. Please try again later.",
@@ -133,7 +133,7 @@ export const RecipeEditPage: FC = () => {
         ingredients: (recipe.ingredients ?? []).map((ing) => {
           return {
             ...ing,
-            amount: !!ing.amount ? formatIngredientAmount(ing.amount) : undefined,
+            amount: ing.amount ? formatIngredientAmount(ing.amount) : undefined,
             unit: ing.unit === null ? undefined : ing.unit,
           };
         }),
@@ -214,7 +214,7 @@ export const RecipeEditPage: FC = () => {
             ></FormTextarea>
 
             {(isCreatingNewRecipe || !!recipe) && (
-              <div className="grid gap-4 grid-cols-1">
+              <div className="grid grid-cols-1 gap-4">
                 <Divider />
                 <IngredientsForm isLoading={isLoading} />
                 <Divider />
@@ -223,7 +223,7 @@ export const RecipeEditPage: FC = () => {
             )}
 
             {(isCreatingNewRecipe || !!recipe) && (
-              <div className="flex flex-row justify-end mt-2">
+              <div className="mt-2 flex flex-row justify-end">
                 <Button disabled={form?.formState?.isSubmitting} onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
                   Cancel
                 </Button>

@@ -5,11 +5,11 @@ import "./UnauthenticatedLayout.css";
 
 export const UnauthenticatedLayout: FC = () => {
   return (
-    <div className="flex flex-row h-full overflow-hidden">
-      <div className="hidden lg:inline-block basis-1/2 flex-grow-0 flex-shrink-0 recipiece-striped"></div>
-      <div className="basis-full lg:basis-1/2 flex flex-col shadow-md p-8 md:p-6 sm:p-4 flex-grow-0 flex-shrink-0 bg-card">
-        <div className="mt-auto mb-auto">
-          <RecipieceHeader className="text-primary dark:text-white mb-4" />
+    <div className="flex h-full flex-row overflow-hidden">
+      <div className="recipiece-striped hidden flex-shrink-0 flex-grow-0 basis-1/2 lg:inline-block"></div>
+      <div className="flex flex-shrink-0 flex-grow-0 basis-full flex-col bg-card p-8 shadow-md sm:p-4 md:p-6 lg:basis-1/2">
+        <div className="mb-auto mt-auto">
+          <RecipieceHeader className="mb-4 text-primary dark:text-white" />
           <Outlet />
         </div>
       </div>

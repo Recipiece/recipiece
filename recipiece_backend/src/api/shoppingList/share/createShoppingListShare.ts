@@ -1,6 +1,6 @@
+import { prisma } from "@recipiece/database";
 import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { sendShoppingListSharedPushNotification } from "../../../util/pushNotification";
 
@@ -43,7 +43,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
     return [
       StatusCodes.NOT_FOUND,
       {
-        message: `Shopping List ${shopping_list_id} not found`,
+        message: `Shopping list ${shopping_list_id} not found`,
       },
     ];
   }
@@ -84,7 +84,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
       return [
         StatusCodes.INTERNAL_SERVER_ERROR,
         {
-          message: "Unable to create shopping list",
+          message: "Unable to share shopping list",
         },
       ];
     }

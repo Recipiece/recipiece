@@ -1,6 +1,6 @@
 import { User, prisma } from "@recipiece/database";
 import { generateShoppingList, generateShoppingListShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
-import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
+import { CreateMealPlanShareRequestSchema, CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 

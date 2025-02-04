@@ -114,11 +114,11 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
   }, [isDraggable, isMobile, dragRef]);
 
   const nonDraggingView = (
-    // @ts-ignore
+    // @ts-expect-error mergeRefs has slightly off type
     <div className={wrapperClassName} ref={outerRef}>
       {isDraggable && <Grip ref={innerRef} />}
       <Checkbox disabled={disabled} checked={shoppingListItem.completed} onClick={() => onCheck(shoppingListItem)} />
-      <div className="border-y-0 border-b-[1px] border-l-[1px] border-r-0 w-full p-1 rounded-bl-md">
+      <div className="w-full rounded-bl-md border-y-0 border-b-[1px] border-l-[1px] border-r-0 p-1">
         <Input
           type="text"
           placeholder="what do you need to get?"

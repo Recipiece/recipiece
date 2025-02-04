@@ -1,4 +1,4 @@
-import { prisma, Recipe, ShoppingList, Timer, User, UserPushNotificationSubscription } from "@recipiece/database";
+import { MealPlan, prisma, Recipe, ShoppingList, User, UserPushNotificationSubscription } from "@recipiece/database";
 import webpush, { PushSubscription, WebPushError } from "web-push";
 
 if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
@@ -6,7 +6,7 @@ if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
   webpush.setVapidDetails(`mailto:${APP_EMAIL_ADDRESS}`, APP_VAPID_PUBLIC_KEY!, APP_VAPID_PRIVATE_KEY!);
 }
 
-const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
+export const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
   try {
     if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
       await webpush.sendNotification(subscription.subscription_data as unknown as PushSubscription, JSON.stringify(payload));
@@ -44,6 +44,18 @@ export const sendShoppingListSharedPushNotification = async (subscription: UserP
   await sendPushNotification(subscription, message);
 };
 
+export const sendMealPlanSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, mealPlan: MealPlan) => {
+  const message = {
+    title: "Meal Plan Shared",
+    body: `${sourceUser.username} shared their meal plan ${mealPlan.name} with you`,
+    type: "mealPlanShare",
+    data: { ...mealPlan },
+    requiresInteraction: true,
+    tag: `mealPlanShare${mealPlan.id}`,
+  };
+  await sendPushNotification(subscription, message);
+};
+
 export const sendRecipeSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, recipe: Recipe) => {
   const message = {
     title: "Recipe Shared",
@@ -52,19 +64,6 @@ export const sendRecipeSharedPushNotification = async (subscription: UserPushNot
     data: { ...recipe },
     requiresInteraction: true,
     tag: `recipeShare${recipe.id}`,
-  };
-  await sendPushNotification(subscription, message);
-};
-
-export const sendTimerFinishedPushNotification = async (subscription: UserPushNotificationSubscription, timer: Timer) => {
-  const message = {
-    title: "Time's Up!",
-    body: "Your timer is done!",
-    type: "timer",
-    data: { ...timer },
-    requiresInteraction: true,
-    tag: `timer${timer.id}`,
-    vibrate: [200, 100, 200, 100, 200, 100, 200],
   };
   await sendPushNotification(subscription, message);
 };
