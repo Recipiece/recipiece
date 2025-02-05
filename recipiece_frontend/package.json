@@ -121,7 +121,7 @@
     "build:prod": "NODE_ENV=production webpack build",
     "build:dev": "NODE_ENV=development webpack build",
     "serve:dev": "NODE_ENV=development BROWSER=none webpack serve",
-    "run:dev": "dotenvx run --env-file .env.dev -- concurrently --names tailwind,serve \"yarn tw-watch\" \"yarn serve:dev\"",
+    "run:dev": "dotenvx run --env-file .env.dev -- concurrently --names tailwind,frontend \"yarn tw-watch\" \"yarn serve:dev\"",
     "tw-watch": "tailwindcss -i ./src/style/globals.css -o ./public/main.css --watch"
   },
   "browserslist": {
