@@ -1,6 +1,4 @@
-import { TimerSchema } from "@recipiece/types";
 import Fraction from "fraction.js";
-import { DateTime } from "luxon";
 
 export function isDecimal(value: string) {
   if (isNaN(parseFloat(value))) {
@@ -26,25 +24,12 @@ export function millisToHoursMinuteSeconds(ms: number) {
   let seconds = Math.floor(ms / 1000);
 
   // 2- Extract hours:
-  let hours = Math.floor(seconds / 3600);
+  const hours = Math.floor(seconds / 3600);
   seconds = seconds % 3600;
 
   // 3- Extract minutes:
-  let minutes = Math.floor(seconds / 60);
+  const minutes = Math.floor(seconds / 60);
   seconds = seconds % 60;
 
   return [hours, minutes, seconds];
 }
-
-export const calculateRemainingTimerMillis = (timer: TimerSchema): number => {
-  const absoluteDuration = DateTime.fromJSDate(timer.created_at).toMillis() + timer.duration_ms;
-  return absoluteDuration - DateTime.now().toMillis();
-};
-
-export const getTimerDisplay = (timer: TimerSchema) => {
-  const remainingMs = calculateRemainingTimerMillis(timer);
-  const [hours, minutes, seconds] = millisToHoursMinuteSeconds(remainingMs).map((item) => {
-    return String(item).padStart(2, "0");
-  });
-  return `${hours}:${minutes}:${seconds}`;
-};

@@ -36,12 +36,12 @@ export const useGetSelfQuery = (args?: QueryArgs<UserSchema>) => {
   });
 };
 
-export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }, any>) => {
+export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }, unknown>) => {
   const { poster } = usePost();
 
   const mutation = async (data: { readonly username: string; readonly password: string }) => {
     const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
-    const response = await poster<{}, { readonly access_token: string; readonly refresh_token: string }>({
+    const response = await poster<unknown, { readonly access_token: string; readonly refresh_token: string }>({
       path: "/user/login",
       body: {},
       extraHeaders: {
@@ -57,14 +57,14 @@ export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token
   });
 };
 
-export const useChangePasswordMutation = (args?: MutationArgs<void, any>) => {
+export const useChangePasswordMutation = (args?: MutationArgs<void, unknown>) => {
   const { poster } = usePost({
     autoLogoutOnCodes: [],
   });
 
   const mutation = async (data: { readonly username: string; readonly password: string; readonly new_password: string }) => {
     const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
-    const response = await poster<{}, never>({
+    const response = await poster<unknown, never>({
       path: "/user/change-password",
       body: { new_password: data.new_password },
       extraHeaders: {
@@ -86,7 +86,7 @@ export const useLogoutUserMutation = (args?: MutationArgs<void, void>) => {
   const queryClient = useQueryClient();
 
   const mutation = async () => {
-    const response = await poster<{}, never>({
+    const response = await poster<unknown, never>({
       path: "/user/logout",
       body: {},
       withAuth: "access_token",
@@ -159,7 +159,7 @@ export const useUpdateUserMutation = (args?: MutationArgs<UserSchema, UpdateUser
   });
 };
 
-export const useVerifyAccountMutation = (args?: MutationArgs<{}, {}>) => {
+export const useVerifyAccountMutation = (args?: MutationArgs<unknown, unknown>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
@@ -200,15 +200,13 @@ export const useRequestVerifyAccountMutation = (args?: MutationArgs) => {
     return response.data;
   };
 
-  const { onSuccess, ...restArgs } = args ?? {};
-
   return useMutation({
     mutationFn: mutation,
-    ...restArgs,
+    ...(args ?? {}),
   });
 };
 
-export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, any>) => {
+export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, unknown>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly username: string }) => {
@@ -225,7 +223,7 @@ export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, any>)
   });
 };
 
-export const useResetPasswordMutation = (args?: MutationArgs<void, any>) => {
+export const useResetPasswordMutation = (args?: MutationArgs<void, unknown>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly token: string; readonly password: string }) => {

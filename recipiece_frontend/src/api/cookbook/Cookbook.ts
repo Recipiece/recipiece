@@ -128,7 +128,7 @@ export const useUpdateCookbookMutation = (args?: MutationArgs<CookbookSchema, Pa
   });
 };
 
-export const useDeleteCookbookMutation = (args?: MutationArgs<{}, CookbookSchema>) => {
+export const useDeleteCookbookMutation = (args?: MutationArgs<unknown, CookbookSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -220,7 +220,7 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { re
   });
 };
 
-export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<{}, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
+export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<unknown, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 

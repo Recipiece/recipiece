@@ -8,6 +8,7 @@ import { useListMealPlanItemsQuery } from "../../api";
 import { Button, Calendar, Form, FormCheckbox, LoadingGroup, ScrollArea, SubmitButton } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export interface AddMealPlanToShoppingListDialogProps extends BaseDialogProps<AddMealPlanToShoppingListForm> {
   readonly mealPlan: MealPlanSchema;
@@ -27,13 +28,14 @@ const AddMealPlanToShoppingListFormSchema = z.object({
 
 export type AddMealPlanToShoppingListForm = z.infer<typeof AddMealPlanToShoppingListFormSchema>;
 
-export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialogProps> = ({ onSubmit, onClose, mealPlan }) => {
+export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialogProps> = ({ onSubmit, mealPlan }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [page, setPage] = useState<"date_select" | "items_select">("date_select");
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: DateTime.utc().toLocal().toJSDate(),
     to: DateTime.utc().plus({ days: 1 }).toLocal().toJSDate(),
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dataStartDate = useMemo(() => {
     const dateFrom = dateRange?.from;
@@ -96,6 +98,7 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
   }, [mealPlanItems]);
 
   const form = useForm<AddMealPlanToShoppingListForm>({
+    resolver: zodResolver(AddMealPlanToShoppingListFormSchema),
     defaultValues: { ...defaultValues },
   });
 
@@ -106,6 +109,7 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
 
   useEffect(() => {
     form.reset({ ...defaultValues });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   const onSelectAll = useCallback(() => {
@@ -129,8 +133,15 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
   }, [form, defaultValues]);
 
   const onAddToShoppingList = useCallback(
-    (formData: AddMealPlanToShoppingListForm) => {
-      onSubmit?.(formData);
+    async (formData: AddMealPlanToShoppingListForm) => {
+      setIsSubmitting(true);
+      try {
+        await onSubmit?.(formData);
+      } catch {
+        // noop
+      } finally {
+        setIsSubmitting(false);
+      }
     },
     [onSubmit]
   );
@@ -201,10 +212,10 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
             )}
             {page === "items_select" && (
               <>
-                <Button type="button" variant="outline" onClick={() => setPage("date_select")}>
+                <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => setPage("date_select")}>
                   Back
                 </Button>
-                <SubmitButton disabled={fields.length === 0 || form.formState.isSubmitting}>Add Items</SubmitButton>
+                <SubmitButton disabled={fields.length === 0 || isSubmitting}>Add Items</SubmitButton>
               </>
             )}
           </ResponsiveFooter>

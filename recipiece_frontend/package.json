@@ -14,6 +14,7 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-menubar": "^1.1.2",
     "@radix-ui/react-popover": "^1.1.2",
+    "@radix-ui/react-progress": "^1.1.1",
     "@radix-ui/react-scroll-area": "^1.2.1",
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-separator": "^1.1.0",
@@ -120,7 +121,7 @@
     "build:prod": "NODE_ENV=production webpack build",
     "build:dev": "NODE_ENV=development webpack build",
     "serve:dev": "NODE_ENV=development BROWSER=none webpack serve",
-    "run:dev": "dotenvx run --env-file .env.dev -- concurrently \"yarn tw-watch\" \"yarn serve:dev\"",
+    "run:dev": "dotenvx run --env-file .env.dev -- concurrently --names tailwind,frontend \"yarn tw-watch\" \"yarn serve:dev\"",
     "tw-watch": "tailwindcss -i ./src/style/globals.css -o ./public/main.css --watch"
   },
   "browserslist": {

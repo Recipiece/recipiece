@@ -10,7 +10,14 @@
     "serve:frontend": "yarn --cwd ./recipiece_frontend run:dev",
     "serve:local-db": "docker compose -f ./docker-compose.dev.yaml up",
     "serve:recipe-importer": "cd ./recipiece_recipe_importer && fastapi dev src/main.py --host 0.0.0.0 --port 8081",
-    "serve:dev": "concurrently \"yarn serve:local-db\" \"yarn serve:backend\" \"yarn serve:frontend\" \"yarn serve:recipe-importer\""
+    "serve:dev": "concurrently names=database,backend,frontend,importer \"yarn serve:local-db\" \"yarn serve:backend\" \"yarn serve:frontend\" \"yarn serve:recipe-importer\"",
+    "lint:backend": "yarn --cwd ./recipiece_backend lint",
+    "lint:frontend": "yarn --cwd ./recipiece_frontend lint",
+    "lint:types": "yarn --cwd ./recipiece_common/recipiece_types lint",
+    "lint:database": "yarn --cwd ./recipiece_common/recipiece_database lint",
+    "lint:conversion": "yarn --cwd ./recipiece_common/recipiece_conversion lint",
+    "lint:test": "yarn --cwd ./recipiece_common/recipiece_test lint",
+    "lint": "yarn lint:backend && yarn lint:frontend && yarn lint:types && yarn lint:database && yarn lint:conversion && yarn lint:test"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

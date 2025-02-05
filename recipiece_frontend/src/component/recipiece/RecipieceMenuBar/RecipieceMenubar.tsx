@@ -60,7 +60,6 @@ export const RecipieceMenubar: FC = () => {
   const { toast } = useToast();
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
-  // const { activeTimers, createTimer } = useContext(TimerContext);
   const [cookbooksPage, setCookbooksPage] = useState(0);
   const [shoppingListsPage, setShoppingListsPage] = useState(0);
   const [mealPlansPage, setMealPlansPage] = useState(0);
@@ -146,34 +145,6 @@ export const RecipieceMenubar: FC = () => {
     });
   }, [pushDialog, popDialog, createShoppingList, navigate, toast]);
 
-  // const onStartCreateTimer = useCallback(() => {
-  //   pushDialog("createTimer", {
-  //     onSubmit: async (timerData: CreateTimerForm) => {
-  //       const hoursMs = timerData.hours * 60 * 60 * 1000;
-  //       const minutesMs = timerData.minutes * 60 * 1000;
-  //       const secondsMs = timerData.seconds * 1000;
-  //       try {
-  //         await createTimer({
-  //           duration_ms: hoursMs + minutesMs + secondsMs,
-  //         });
-  //         toast({
-  //           title: "Timer Created",
-  //           description: "Your timer has been created",
-  //         });
-  //       } catch {
-  //         toast({
-  //           title: "Could Not Create Timer",
-  //           description: "This timer couldn't be created. Try again later.",
-  //           variant: "destructive",
-  //         });
-  //       } finally {
-  //         popDialog("createTimer");
-  //       }
-  //     },
-  //     onClose: () => popDialog("createTimer"),
-  //   });
-  // }, [createTimer, popDialog, pushDialog, toast]);
-
   const onStartCreateMealPlan = useCallback(() => {
     pushDialog("modifyMealPlan", {
       onClose: () => popDialog("modifyMealPlan"),
@@ -218,9 +189,6 @@ export const RecipieceMenubar: FC = () => {
           case "shopping_list":
             onStartCreateShoppingList();
             break;
-          // case "timer":
-          //   onStartCreateTimer();
-          //   break;
           case "meal_plan":
             onStartCreateMealPlan();
             break;
@@ -366,7 +334,7 @@ export const RecipieceMenubar: FC = () => {
         </span>
       </Menubar>
 
-      <footer className="visible fixed bottom-0 left-0 z-50 h-16 w-full bg-primary text-white sm:invisible">
+      <footer className="visible fixed bottom-0 left-0 z-50 h-16 w-full bg-primary pb-4 text-white sm:invisible">
         <div className="flex h-full flex-row items-center justify-center">
           <Button onClick={() => navigate("/")} variant="link" className="grow text-white">
             <Home />

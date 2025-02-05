@@ -70,3 +70,8 @@ const mealPlanItemsWorker = new Worker("MealPlanItems", jobWrapper(processMealPl
   concurrency: 20,
 });
 attachLogging(mealPlanItemsWorker);
+
+export const closeWorkers = async () => {
+  const closePromises = [configsWorker, mealPlanItemsWorker, mealPlanNotificationsWorker, recipeImportWorker].map((worker) => worker.close());
+  return Promise.all(closePromises);
+};

@@ -1,5 +1,6 @@
 import { Query } from "@tanstack/react-query";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RcpQueryKey = [string, ...{ readonly [key: string]: any }[]];
 
 export function oldDataUpdater<DataArrayType extends { id: number }>(updatedItem: DataArrayType) {

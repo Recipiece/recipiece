@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
@@ -28,6 +28,13 @@ export const AppRoutes: FC = () => {
     return isMobile ? TouchBackend : HTML5Backend;
   }, [isMobile]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleRefresh = useCallback(async () => {
+    if (isMobile) {
+      window.location.reload();
+    }
+  }, [isMobile]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
@@ -36,7 +43,6 @@ export const AppRoutes: FC = () => {
             <ToastProvider>
               <DndProvider backend={dndBackend}>
                 <DialogContextProvider>
-                  {/* <TimerContextProvider> */}
                   <Routes>
                     <Route element={<UnauthenticatedLayout />}>
                       {unauthenticatedRoutes.map((r) => {
@@ -49,7 +55,6 @@ export const AppRoutes: FC = () => {
                       })}
                     </Route>
                   </Routes>
-                  {/* </TimerContextProvider> */}
                 </DialogContextProvider>
               </DndProvider>
               <Toaster />
