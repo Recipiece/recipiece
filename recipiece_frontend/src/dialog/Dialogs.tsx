@@ -1,10 +1,8 @@
 import { AddMealPlanToShoppingListDialog } from "./AddMealPlanToShoppingList";
 import { AddRecipeToShoppingListDialog } from "./AddRecipeToShoppingList";
-import { AddTimeToTimerDialog } from "./AddTimeToTimer";
 import { ConvertIngredientDialog } from "./ConvertIngredient";
 import { CreateCookbookDialog } from "./CreateCookbook";
 import { CreateShoppingListDialog } from "./CreateShoppingList";
-import { CreateTimerDialog } from "./CreateTimer";
 import { DeleteAccountDialog } from "./DeleteAccount";
 import { DeleteMealPlanDialog } from "./DeleteMealPlan";
 import { DeleteRecipeDialog } from "./DeleteRecipe";
@@ -55,12 +53,6 @@ export const Dialogs = {
   },
   importRecipes: {
     component: ImportRecipesDialog,
-  },
-  createTimer: {
-    component: CreateTimerDialog,
-  },
-  addTimeToTimer: {
-    component: AddTimeToTimerDialog,
   },
   addRecipeToShoppingList: {
     component: AddRecipeToShoppingListDialog,

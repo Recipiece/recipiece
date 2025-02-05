@@ -12,6 +12,7 @@ export const getWebsocketUrl = (): string => {
   return process.env.RECIPIECE_WEBSOCKET_URL!;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const filtersToSearchParams = (filters: Record<string, any>) => {
   const searchParams = new URLSearchParams();
   Object.keys(filters).forEach((filterKey) => {
@@ -266,7 +267,7 @@ export const useDelete = (args?: HookArgs) => {
         navigate("/login");
         return Promise.reject();
       } else {
-        return response as AxiosResponse<{}>;
+        return response as AxiosResponse<unknown>;
       }
     } catch (error) {
       const statusCode = (error as AxiosError)?.status;

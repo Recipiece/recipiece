@@ -10,7 +10,7 @@
     "serve:frontend": "yarn --cwd ./recipiece_frontend run:dev",
     "serve:local-db": "docker compose -f ./docker-compose.dev.yaml up",
     "serve:recipe-importer": "cd ./recipiece_recipe_importer && fastapi dev src/main.py --host 0.0.0.0 --port 8081",
-    "serve:dev": "concurrently \"yarn serve:local-db\" \"yarn serve:backend\" \"yarn serve:frontend\" \"yarn serve:recipe-importer\""
+    "serve:dev": "concurrently names=database,backend,frontend,importer \"yarn serve:local-db\" \"yarn serve:backend\" \"yarn serve:frontend\" \"yarn serve:recipe-importer\""
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RecipeSchema } from "@recipiece/types";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormCheckbox, ScrollArea, SubmitButton } from "../../component";
@@ -25,6 +25,7 @@ export type AddRecipeToShoppingListForm = z.infer<typeof AddRecipeToShoppingList
 
 export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProps> = ({ onSubmit, onClose, recipe }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AddRecipeToShoppingListForm>({
     resolver: zodResolver(AddRecipeToShoppingListFormSchema),
@@ -52,8 +53,15 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
   });
 
   const onAddToShoppingList = useCallback(
-    async (formData: AddRecipeToShoppingListForm) => {
-      onSubmit?.(formData);
+    async (data: AddRecipeToShoppingListForm) => {
+      setIsSubmitting(true);
+      try {
+        await onSubmit?.(data);
+      } catch {
+        // noop
+      } finally {
+        setIsSubmitting(false);
+      }
     },
     [onSubmit]
   );
@@ -90,10 +98,10 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
           </ResponsiveHeader>
 
           <div>
-            <Button variant="link" onClick={onDeselectAll}>
+            <Button disabled={isSubmitting} variant="link" onClick={onDeselectAll}>
               Deselect All
             </Button>
-            <Button variant="link" onClick={onSelectAll}>
+            <Button disabled={isSubmitting} variant="link" onClick={onSelectAll}>
               Select All
             </Button>
           </div>
@@ -101,17 +109,17 @@ export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProp
             {itemsFieldArray.fields.map((fieldArrayValue, index) => {
               return (
                 <div key={fieldArrayValue.id} className="pb-3">
-                  <FormCheckbox name={`items.${index}.selected`} label={fieldArrayValue.name} />
+                  <FormCheckbox disabled={isSubmitting} name={`items.${index}.selected`} label={fieldArrayValue.name} />
                 </div>
               );
             })}
           </ScrollArea>
 
           <ResponsiveFooter className="mt-4 flex-col-reverse">
-            <Button type="button" variant="outline" onClick={() => onClose?.()}>
+            <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => onClose?.()}>
               Cancel
             </Button>
-            <SubmitButton>Add Ingredients</SubmitButton>
+            <SubmitButton disabled={isSubmitting}>Add Ingredients</SubmitButton>
           </ResponsiveFooter>
         </form>
       </Form>

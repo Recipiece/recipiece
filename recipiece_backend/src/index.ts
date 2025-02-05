@@ -1,33 +1,42 @@
-import { prisma } from "@recipiece/database";
+import { prisma, Redis } from "@recipiece/database";
 import app from "./app";
+import { closeWorkers } from "./job/workers";
 
 const server = app.listen(+process.env.APP_PORT!, () => {
   console.log(`listening for connections on ${process.env.APP_PORT}`);
 });
 
-const shutdown = () => {
-  let redisPromise = Promise.resolve();
+const shutdown = async () => {
+  try {
+    const redisInstance = await Redis.getInstance();
+    await redisInstance.disconnect();
+    console.log("redis connection closed");
+  } catch (err) {
+    console.error(err);
+  }
 
-  // if(Redis.getInstance()) {
-  //   redisPromise = redis.disconnect()
-  //     .then(() => {
-  //       console.log("redis connection closed");
-  //     })
-  //     .catch(console.error);
-  // }
+  try {
+    await prisma.$disconnect();
+    console.log("database connection closed");
+  } catch (err) {
+    console.error(err);
+  }
 
-  const prismaPromise = prisma
-    .$disconnect()
-    .then(() => {
-      console.log("database connection closed");
-    })
-    .catch(console.error);
+  try {
+    await closeWorkers();
+    console.log("workers closed");
+  } catch (err) {
+    console.error(err);
+  }
 
-  Promise.all([redisPromise, prismaPromise]).finally(() => {
-    server.close(() => {
-      console.log("goodbye!");
-    });
+  server.close((err) => {
+    if(err) {
+      console.error(err);
+    }
+    console.log("recipe book closed");
   });
+
+  process.exit();
 };
 
 process.on("SIGTERM", () => {
@@ -35,7 +44,7 @@ process.on("SIGTERM", () => {
   shutdown();
 });
 
-process.on("exit", () => {
-  console.log("exit received, shutting down server");
+process.on("SIGINT", () => {
+  console.log("SIGINT received, shutting down server");
   shutdown();
 });

@@ -37,7 +37,7 @@ export const MobileListCookbooksDialog: FC<MobileListCookbooksDialogProps> = ({ 
         <LoadingGroup variant="spinner" isLoading={isLoadingCookbooks}>
           {(cookbooks?.data || []).map((cookbook) => {
             return (
-              <Button key={cookbook.id} variant="link" onClick={() => onSubmit?.(cookbook)}>
+              <Button key={cookbook.id} variant="outline" onClick={() => onSubmit?.(cookbook)}>
                 {cookbook.name}
               </Button>
             );

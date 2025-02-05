@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
@@ -28,37 +28,44 @@ export const AppRoutes: FC = () => {
     return isMobile ? TouchBackend : HTML5Backend;
   }, [isMobile]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleRefresh = useCallback(async () => {
+    if(isMobile) {
+      window.location.reload();
+    }
+  }, [isMobile]);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthContextProvider>
-        <PushNotificationContextProvider>
-          <TooltipProvider>
-            <ToastProvider>
-              <DndProvider backend={dndBackend}>
-                <DialogContextProvider>
-                  {/* <TimerContextProvider> */}
-                  <Routes>
-                    <Route element={<UnauthenticatedLayout />}>
-                      {unauthenticatedRoutes.map((r) => {
-                        return <Route key={r.path} path={r.path} element={<r.element />} />;
-                      })}
-                    </Route>
-                    <Route element={<AuthenticatedLayout />}>
-                      {authenticatedRoutes.map((r) => {
-                        return <Route key={r.path} path={r.path} element={<r.element />} />;
-                      })}
-                    </Route>
-                  </Routes>
-                  {/* </TimerContextProvider> */}
-                </DialogContextProvider>
-              </DndProvider>
-              <Toaster />
-            </ToastProvider>
-          </TooltipProvider>
-        </PushNotificationContextProvider>
-      </AuthContextProvider>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-    </QueryClientProvider>
+    // <PullToRefresh onRefresh={handleRefresh} refreshingContent={<div className="flex flex-row items-center justify-center"><LoadingSpinner className="w-6 h-6" /></div>}>
+      <QueryClientProvider client={queryClient}>
+        <AuthContextProvider>
+          <PushNotificationContextProvider>
+            <TooltipProvider>
+              <ToastProvider>
+                <DndProvider backend={dndBackend}>
+                  <DialogContextProvider>
+                    <Routes>
+                      <Route element={<UnauthenticatedLayout />}>
+                        {unauthenticatedRoutes.map((r) => {
+                          return <Route key={r.path} path={r.path} element={<r.element />} />;
+                        })}
+                      </Route>
+                      <Route element={<AuthenticatedLayout />}>
+                        {authenticatedRoutes.map((r) => {
+                          return <Route key={r.path} path={r.path} element={<r.element />} />;
+                        })}
+                      </Route>
+                    </Routes>
+                  </DialogContextProvider>
+                </DndProvider>
+                <Toaster />
+              </ToastProvider>
+            </TooltipProvider>
+          </PushNotificationContextProvider>
+        </AuthContextProvider>
+        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      </QueryClientProvider>
+    // </PullToRefresh>
   );
 };
 

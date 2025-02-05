@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useContext } from "react";
+import { FC, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button, Form, FormInput, FormTextarea, Stack, SubmitButton } from "../../component";
@@ -17,6 +17,7 @@ export type CreateCookbookForm = z.infer<typeof CreateCookbookFormSchema>;
 export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
   const { popDialog } = useContext(DialogContext);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateCookbookForm>({
     resolver: zodResolver(CreateCookbookFormSchema),
@@ -26,13 +27,14 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
     },
   });
 
-  const { isSubmitting } = form.formState;
-
   const onCreateCookbook = async (formData: CreateCookbookForm) => {
+    setIsSubmitting(true);
     try {
-      await Promise.resolve(onSubmit?.(formData));
-    } catch (error) {
-      console.error(error);
+      await onSubmit?.(formData);
+    } catch {
+      // noop
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -46,15 +48,15 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
           </ResponsiveHeader>
 
           <Stack>
-            <FormInput placeholder="What do you want to call your cookbook?" name="name" type="text" label="Name" />
-            <FormTextarea placeholder="What is this cookbook all about?" name="description" label="Description" />
+            <FormInput disabled={isSubmitting} placeholder="What do you want to call your cookbook?" name="name" type="text" label="Name" />
+            <FormTextarea disabled={isSubmitting} placeholder="What is this cookbook all about?" name="description" label="Description" />
           </Stack>
 
           <ResponsiveFooter className="mt-4 flex-col-reverse">
             <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => popDialog("createCookbook")}>
               Cancel
             </Button>
-            <SubmitButton>Create Cookbook</SubmitButton>
+            <SubmitButton disabled={isSubmitting}>Create Cookbook</SubmitButton>
           </ResponsiveFooter>
         </form>
       </Form>

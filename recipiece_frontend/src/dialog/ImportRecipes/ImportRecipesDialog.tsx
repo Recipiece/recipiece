@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button, Form, FormFile, FormSelect, SelectItem, Stack, SubmitButton } from "../../component";
+import { Button, Form, FormFile, FormSelect, LoadingSpinner, SelectItem, Stack, SubmitButton } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
@@ -28,6 +28,7 @@ export type ImportRecipesForm = z.infer<typeof ImportRecipesFormSchema>;
 
 export const ImportRecipesDialog: FC<BaseDialogProps<ImportRecipesForm>> = ({ onSubmit, onClose }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ImportRecipesForm>({
     resolver: zodResolver(ImportRecipesFormSchema),
@@ -35,10 +36,15 @@ export const ImportRecipesDialog: FC<BaseDialogProps<ImportRecipesForm>> = ({ on
   });
 
   const onRequestRecipesImport = async (data: ImportRecipesForm) => {
-    onSubmit?.(data);
+    setIsSubmitting(true);
+    try {
+      await onSubmit?.(data);
+    } catch {
+      // noop
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  const { isSubmitting } = form.formState;
 
   const selectedSource = form.watch("source");
 
@@ -56,7 +62,7 @@ export const ImportRecipesDialog: FC<BaseDialogProps<ImportRecipesForm>> = ({ on
               <ResponsiveDescription>Import a recipe archive from another application.</ResponsiveDescription>
             </ResponsiveHeader>
 
-            <FormSelect name="source" label="Source Application">
+            <FormSelect disabled={isSubmitting} name="source" label="Source Application">
               {SUPPORTED_FILES.map((entry, idx) => {
                 return (
                   <SelectItem key={idx} value={entry.format}>
@@ -65,13 +71,16 @@ export const ImportRecipesDialog: FC<BaseDialogProps<ImportRecipesForm>> = ({ on
                 );
               })}
             </FormSelect>
-            <FormFile required type="file" name="file" label="File" accept={availableExtensions} />
+            <FormFile disabled={isSubmitting} required type="file" name="file" label="File" accept={availableExtensions} />
 
             <ResponsiveFooter>
               <Button variant="outline" disabled={isSubmitting} onClick={() => onClose?.()}>
                 Cancel
               </Button>
-              <SubmitButton>Upload</SubmitButton>
+              <SubmitButton disabled={isSubmitting} className="min-w-20">
+                {!isSubmitting && "Upload"}
+                {isSubmitting && <LoadingSpinner className="h-5 w-5" />}
+              </SubmitButton>
             </ResponsiveFooter>
           </Stack>
         </form>

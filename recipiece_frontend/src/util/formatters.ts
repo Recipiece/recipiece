@@ -26,11 +26,11 @@ export function millisToHoursMinuteSeconds(ms: number) {
   let seconds = Math.floor(ms / 1000);
 
   // 2- Extract hours:
-  let hours = Math.floor(seconds / 3600);
+  const hours = Math.floor(seconds / 3600);
   seconds = seconds % 3600;
 
   // 3- Extract minutes:
-  let minutes = Math.floor(seconds / 60);
+  const minutes = Math.floor(seconds / 60);
   seconds = seconds % 60;
 
   return [hours, minutes, seconds];
