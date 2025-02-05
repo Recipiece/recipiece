@@ -224,7 +224,7 @@ describe("List Recipes", () => {
       cookbook_id: cookbook.id,
     });
 
-    const otherCookbook = await generateCookbook({user_id: user.id});
+    const otherCookbook = await generateCookbook({ user_id: user.id });
     await generateRecipeCookbookAttachment({
       recipe_id: recipeToAttach.id,
       cookbook_id: otherCookbook.id,

@@ -30,7 +30,7 @@ const shutdown = async () => {
   }
 
   server.close((err) => {
-    if(err) {
+    if (err) {
       console.error(err);
     }
     console.log("recipe book closed");

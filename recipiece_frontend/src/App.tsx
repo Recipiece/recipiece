@@ -30,42 +30,40 @@ export const AppRoutes: FC = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleRefresh = useCallback(async () => {
-    if(isMobile) {
+    if (isMobile) {
       window.location.reload();
     }
   }, [isMobile]);
 
   return (
-    // <PullToRefresh onRefresh={handleRefresh} refreshingContent={<div className="flex flex-row items-center justify-center"><LoadingSpinner className="w-6 h-6" /></div>}>
-      <QueryClientProvider client={queryClient}>
-        <AuthContextProvider>
-          <PushNotificationContextProvider>
-            <TooltipProvider>
-              <ToastProvider>
-                <DndProvider backend={dndBackend}>
-                  <DialogContextProvider>
-                    <Routes>
-                      <Route element={<UnauthenticatedLayout />}>
-                        {unauthenticatedRoutes.map((r) => {
-                          return <Route key={r.path} path={r.path} element={<r.element />} />;
-                        })}
-                      </Route>
-                      <Route element={<AuthenticatedLayout />}>
-                        {authenticatedRoutes.map((r) => {
-                          return <Route key={r.path} path={r.path} element={<r.element />} />;
-                        })}
-                      </Route>
-                    </Routes>
-                  </DialogContextProvider>
-                </DndProvider>
-                <Toaster />
-              </ToastProvider>
-            </TooltipProvider>
-          </PushNotificationContextProvider>
-        </AuthContextProvider>
-        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-      </QueryClientProvider>
-    // </PullToRefresh>
+    <QueryClientProvider client={queryClient}>
+      <AuthContextProvider>
+        <PushNotificationContextProvider>
+          <TooltipProvider>
+            <ToastProvider>
+              <DndProvider backend={dndBackend}>
+                <DialogContextProvider>
+                  <Routes>
+                    <Route element={<UnauthenticatedLayout />}>
+                      {unauthenticatedRoutes.map((r) => {
+                        return <Route key={r.path} path={r.path} element={<r.element />} />;
+                      })}
+                    </Route>
+                    <Route element={<AuthenticatedLayout />}>
+                      {authenticatedRoutes.map((r) => {
+                        return <Route key={r.path} path={r.path} element={<r.element />} />;
+                      })}
+                    </Route>
+                  </Routes>
+                </DialogContextProvider>
+              </DndProvider>
+              <Toaster />
+            </ToastProvider>
+          </TooltipProvider>
+        </PushNotificationContextProvider>
+      </AuthContextProvider>
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+    </QueryClientProvider>
   );
 };
 

@@ -10,7 +10,7 @@
     "migrate:test": "dotenvx run -f .env.test -- yarn --cwd ../recipiece_common/recipiece_database run migrate",
     "migrate:dev": "dotenvx run -f .env.dev -- yarn --cwd ../recipiece_common/recipiece_database run migrate",
     "serve:dev": "dotenvx run -f .env.dev -- nodemon ./dist/dev/index.js",
-    "run:dev": "concurrently \"yarn build:dev --watch\" \"yarn serve:dev\"",
+    "run:dev": "concurrently --names build,serve \"yarn build:dev --watch\" \"yarn serve:dev\"",
     "build:dev": "NODE_ENV=development webpack",
     "build:prod": "NODE_ENV=production webpack"
   },

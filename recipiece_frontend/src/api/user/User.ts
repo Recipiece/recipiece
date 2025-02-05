@@ -6,7 +6,7 @@ import {
   UserSchema,
   YCreateUserResponseSchema,
   YLoginResponseSchema,
-  YUserSchema
+  YUserSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
