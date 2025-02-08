@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "./dist/dev"
   },
-  "exclude": ["prisma"]
+  "exclude": ["prisma", "sql"]
 }

@@ -1,13 +1,13 @@
 import { faker } from "@faker-js/faker";
-import { Cookbook, prisma, RecipeCookbookAttachment } from "@recipiece/database";
+import { Cookbook, prisma, PrismaTransaction, RecipeCookbookAttachment } from "@recipiece/database";
 import { generateRecipe } from "./recipe";
 import { generateUser } from "./user";
 
-export const generateRecipeCookbookAttachment = async (attachment?: Partial<RecipeCookbookAttachment>) => {
-  const recipeId = attachment?.recipe_id ?? (await generateRecipe()).id;
-  const cookbookId = attachment?.cookbook_id ?? (await generateCookbook()).id;
+export const generateRecipeCookbookAttachment = async (attachment?: Partial<RecipeCookbookAttachment>, tx?: PrismaTransaction) => {
+  const recipeId = attachment?.recipe_id ?? (await generateRecipe(undefined, tx)).id;
+  const cookbookId = attachment?.cookbook_id ?? (await generateCookbook(undefined, tx)).id;
 
-  return prisma.recipeCookbookAttachment.create({
+  return (tx ?? prisma).recipeCookbookAttachment.create({
     data: {
       recipe_id: recipeId,
       cookbook_id: cookbookId,
@@ -15,10 +15,10 @@ export const generateRecipeCookbookAttachment = async (attachment?: Partial<Reci
   });
 };
 
-export const generateCookbook = async (cookbook?: Partial<Omit<Cookbook, "id">>) => {
-  const userId = cookbook?.user_id ?? (await generateUser()).id;
+export const generateCookbook = async (cookbook?: Partial<Omit<Cookbook, "id">>, tx?: PrismaTransaction) => {
+  const userId = cookbook?.user_id ?? (await generateUser(undefined, tx)).id;
 
-  return prisma.cookbook.create({
+  return (tx ?? prisma).cookbook.create({
     data: {
       name: cookbook?.name ?? faker.book.title(),
       user_id: userId,

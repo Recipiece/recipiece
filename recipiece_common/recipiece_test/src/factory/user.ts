@@ -1,12 +1,24 @@
 import { faker } from "@faker-js/faker";
-import { prisma, User, UserCredentials, UserKitchenMembership } from "@recipiece/database";
+import { Prisma, prisma, PrismaTransaction, User, UserCredentials, UserKitchenMembership, UserTag } from "@recipiece/database";
 
-export const generateUserKitchenMembership = async (membership?: Partial<Omit<UserKitchenMembership, "id">>) => {
-  const sourceUserId = membership?.source_user_id ?? (await generateUser()).id;
-  const destUserId = membership?.destination_user_id ?? (await generateUser()).id;
+export const generateUserTag = async (tag?: Partial<Omit<UserTag, "id">>, tx?: PrismaTransaction) => {
+  const userId = tag?.user_id ?? (await generateUser(undefined, tx)).id;
+
+  return (tx ?? prisma).userTag.create({
+    data: {
+      user_id: userId,
+      content: tag?.content ?? faker.word.words({ count: 1 }),
+      created_at: tag?.created_at,
+    },
+  });
+};
+
+export const generateUserKitchenMembership = async (membership?: Partial<Omit<UserKitchenMembership, "id">>, tx?: PrismaTransaction) => {
+  const sourceUserId = membership?.source_user_id ?? (await generateUser(undefined, tx)).id;
+  const destUserId = membership?.destination_user_id ?? (await generateUser(undefined, tx)).id;
   const status = membership?.status ?? faker.helpers.arrayElement(["accepted", "pending", "denied"]);
 
-  return prisma.userKitchenMembership.create({
+  return (tx ?? prisma).userKitchenMembership.create({
     data: {
       source_user_id: sourceUserId,
       destination_user_id: destUserId,
@@ -16,10 +28,10 @@ export const generateUserKitchenMembership = async (membership?: Partial<Omit<Us
   });
 };
 
-export const generateUserCredentials = async (userCredentials?: Partial<Omit<UserCredentials, "id">>) => {
-  const userId = userCredentials?.user_id ?? (await generateUser()).id;
+export const generateUserCredentials = async (userCredentials?: Partial<Omit<UserCredentials, "id">>, tx?: PrismaTransaction) => {
+  const userId = userCredentials?.user_id ?? (await generateUser(undefined, tx)).id;
 
-  return prisma.userCredentials.create({
+  return (tx ?? prisma).userCredentials.create({
     data: {
       user_id: userId,
       password_hash: userCredentials?.password_hash ?? faker.internet.password(),
@@ -28,8 +40,8 @@ export const generateUserCredentials = async (userCredentials?: Partial<Omit<Use
   });
 };
 
-export const generateUser = async (user?: Partial<Omit<User, "id">>): Promise<User> => {
-  return prisma.user.create({
+export const generateUser = async (user?: Partial<Omit<User, "id">>, tx?: PrismaTransaction): Promise<User> => {
+  return (tx ?? prisma).user.create({
     data: {
       username: user?.username ?? faker.internet.username(),
       email: user?.email ?? faker.internet.email(),

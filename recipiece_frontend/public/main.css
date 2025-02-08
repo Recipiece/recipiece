@@ -648,6 +648,10 @@ body {
   visibility: hidden;
 }
 
+.collapse {
+  visibility: collapse;
+}
+
 .static {
   position: static;
 }
@@ -794,6 +798,10 @@ body {
   margin: 0px;
 }
 
+.m-1 {
+  margin: 0.25rem;
+}
+
 .-mx-1 {
   margin-left: -0.25rem;
   margin-right: -0.25rem;
@@ -802,6 +810,11 @@ body {
 .mx-2 {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
+}
+
+.mx-3 {
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
 }
 
 .mx-3\.5 {
@@ -817,6 +830,11 @@ body {
 .my-1 {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
+}
+
+.my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .my-6 {
@@ -992,6 +1010,10 @@ body {
   height: 0.625rem;
 }
 
+.h-3 {
+  height: 0.75rem;
+}
+
 .h-3\.5 {
   height: 0.875rem;
 }
@@ -1096,6 +1118,14 @@ body {
   min-height: 0px;
 }
 
+.min-h-10 {
+  min-height: 2.5rem;
+}
+
+.min-h-6 {
+  min-height: 1.5rem;
+}
+
 .min-h-\[80px\] {
   min-height: 80px;
 }
@@ -1126,6 +1156,10 @@ body {
 
 .w-2\.5 {
   width: 0.625rem;
+}
+
+.w-3 {
+  width: 0.75rem;
 }
 
 .w-3\.5 {
@@ -1240,6 +1274,10 @@ body {
   max-width: var(--skeleton-width);
 }
 
+.max-w-full {
+  max-width: 100%;
+}
+
 .max-w-lg {
   max-width: 32rem;
 }
@@ -1333,6 +1371,22 @@ body {
 
 .transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8,0,1,1);
+  }
+
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0,0,0.2,1);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
 }
 
 @keyframes pulse {
@@ -1655,6 +1709,10 @@ body {
   border-color: hsl(var(--destructive));
 }
 
+.border-foreground\/10 {
+  border-color: hsl(var(--foreground) / 0.1);
+}
+
 .border-input {
   border-color: hsl(var(--input));
 }
@@ -1709,6 +1767,10 @@ body {
 
 .bg-destructive {
   background-color: hsl(var(--destructive));
+}
+
+.bg-inherit {
+  background-color: inherit;
 }
 
 .bg-muted {
@@ -2248,8 +2310,16 @@ body {
   transition-duration: 150ms;
 }
 
+.delay-150 {
+  transition-delay: 150ms;
+}
+
 .duration-200 {
   transition-duration: 200ms;
+}
+
+.duration-300 {
+  transition-duration: 300ms;
 }
 
 .ease-in-out {
@@ -2294,6 +2364,14 @@ body {
 
 .duration-200 {
   animation-duration: 200ms;
+}
+
+.duration-300 {
+  animation-duration: 300ms;
+}
+
+.delay-150 {
+  animation-delay: 150ms;
 }
 
 .ease-in-out {
@@ -2382,6 +2460,17 @@ body {
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 
+.hover\:-translate-y-1:hover {
+  --tw-translate-y: -0.25rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.hover\:scale-110:hover {
+  --tw-scale-x: 1.1;
+  --tw-scale-y: 1.1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .hover\:cursor-pointer:hover {
   cursor: pointer;
 }
@@ -2390,12 +2479,20 @@ body {
   background-color: hsl(var(--accent));
 }
 
+.hover\:bg-card\/80:hover {
+  background-color: hsl(var(--card) / 0.8);
+}
+
 .hover\:bg-destructive\/80:hover {
   background-color: hsl(var(--destructive) / 0.8);
 }
 
 .hover\:bg-destructive\/90:hover {
   background-color: hsl(var(--destructive) / 0.9);
+}
+
+.hover\:bg-inherit:hover {
+  background-color: inherit;
 }
 
 .hover\:bg-primary:hover {
@@ -2420,6 +2517,10 @@ body {
 
 .hover\:bg-sidebar-accent:hover {
   background-color: hsl(var(--sidebar-accent));
+}
+
+.hover\:bg-transparent:hover {
+  background-color: transparent;
 }
 
 .hover\:text-accent-foreground:hover {
@@ -3532,6 +3633,14 @@ body {
 
 .\[\&_svg\]\:pointer-events-none svg {
   pointer-events: none;
+}
+
+.\[\&_svg\]\:pointer-events-auto svg {
+  pointer-events: auto;
+}
+
+.\[\&_svg\]\:invisible svg {
+  visibility: hidden;
 }
 
 .\[\&_svg\]\:size-4 svg {

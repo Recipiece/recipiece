@@ -15,7 +15,7 @@ export class RecipeQueryKeys {
   public static readonly LIST_RECIPES = (filters?: Partial<ListRecipesQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listRecipes"];
     if (filters) {
-      const { page_number, cookbook_id, search, cookbook_attachments, shared_recipes } = filters;
+      const { page_number, cookbook_id, search, cookbook_attachments, shared_recipes, ingredients, tags } = filters;
       if (page_number) {
         base.push({ page_number });
       }
@@ -34,6 +34,14 @@ export class RecipeQueryKeys {
 
       if (search) {
         base.push({ search });
+      }
+
+      if(ingredients && ingredients.length > 0) {
+        base.push({ ingredients: ingredients.join(",") });
+      }
+
+      if(tags && tags.length > 0) {
+        base.push({tags: tags.join(",")});
       }
     }
 

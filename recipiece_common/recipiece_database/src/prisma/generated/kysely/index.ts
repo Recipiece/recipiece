@@ -84,6 +84,10 @@ export type RecipeStep = {
     duration_ms: number | null;
     recipe_id: number;
 };
+export type RecipeTagAttachment = {
+    recipe_id: number;
+    user_tag_id: number;
+};
 export type ShoppingList = {
     id: Generated<number>;
     name: string;
@@ -153,6 +157,12 @@ export type UserSession = {
     scope: string;
     user_id: number;
 };
+export type UserTag = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    user_id: number;
+    content: string;
+};
 export type UserValidationToken = {
     id: string;
     created_at: Generated<Timestamp>;
@@ -169,6 +179,7 @@ export type DB = {
     recipe_ingredients: RecipeIngredient;
     recipe_shares: RecipeShare;
     recipe_steps: RecipeStep;
+    recipe_tag_attachments: RecipeTagAttachment;
     recipes: Recipe;
     shopping_list_items: ShoppingListItem;
     shopping_list_shares: ShoppingListShare;
@@ -179,6 +190,7 @@ export type DB = {
     user_kitchen_memberships: UserKitchenMembership;
     user_push_notification_subscriptions: UserPushNotificationSubscription;
     user_sessions: UserSession;
+    user_tags: UserTag;
     user_validation_tokens: UserValidationToken;
     users: User;
 };

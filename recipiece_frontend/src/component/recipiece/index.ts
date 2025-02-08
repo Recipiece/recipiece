@@ -1,3 +1,4 @@
+export * from "./RecipeSearch";
 export * from "./AuthenticatedLayout";
 export * from "./Divider";
 export * from "./Form";

@@ -1,6 +1,6 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQuerySchema, YListQuerySchema } from "./list";
-import { YUserKitchenMembershipSchema } from "./user";
+import { YUserKitchenMembershipSchema, YUserTagSchema } from "./user";
 
 export const YRecipeIngredientSchema = object({
   id: number().required(),
@@ -36,6 +36,7 @@ export const YRecipeSchema = object({
   ingredients: array().of(YRecipeIngredientSchema).notRequired(),
   steps: array().of(YRecipeStepSchema).notRequired(),
   shares: array().of(YRecipeShareSchema).notRequired(),
+  tags: array().of(YUserTagSchema).notRequired(),
 }).noUnknown();
 
 export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
@@ -134,13 +135,18 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
   cookbook_id: number().notRequired(),
   cookbook_attachments: string().oneOf(["include", "exclude"]).notRequired(),
   shared_recipes: string().oneOf(["include", "exclude"]).notRequired(),
+  ingredients: array(string()).notRequired(),
+  tags: array(string()).notRequired(),
 })
   .transform((val) => {
     return {
       ...val,
+      ingredients: val.ingredients ? val.ingredients.split(",") : undefined,
+      tags: val.tags ? val.tags.split(",") : undefined,
       shared_recipes: val.shared_recipes ?? "include",
     };
   })
+  .strict()
   .noUnknown();
 
 export interface ListRecipesQuerySchema extends InferType<typeof YListRecipesQuerySchema> {}

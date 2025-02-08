@@ -81,25 +81,26 @@ export const useListRecipesForMealPlanQuery = (filters: ListRecipesQuerySchema, 
 export const useListRecipesQuery = (filters: ListRecipesQuerySchema, args?: QueryArgs<ListRecipesResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
+  const searchParams = filtersToSearchParams(filters);
 
-  const searchParams = new URLSearchParams();
-  searchParams.append("page_number", filters.page_number.toString());
+  // const searchParams = new URLSearchParams();
+  // searchParams.append("page_number", filters.page_number.toString());
 
-  if (filters.cookbook_id) {
-    searchParams.append("cookbook_id", filters.cookbook_id.toString());
-  }
+  // if (filters.cookbook_id) {
+  //   searchParams.append("cookbook_id", filters.cookbook_id.toString());
+  // }
 
-  if (filters.cookbook_attachments) {
-    searchParams.append("cookbook_attachments", filters.cookbook_attachments);
-  }
+  // if (filters.cookbook_attachments) {
+  //   searchParams.append("cookbook_attachments", filters.cookbook_attachments);
+  // }
 
-  if (filters.shared_recipes) {
-    searchParams.append("shared_recipes", filters.shared_recipes);
-  }
+  // if (filters.shared_recipes) {
+  //   searchParams.append("shared_recipes", filters.shared_recipes);
+  // }
 
-  if (filters.search) {
-    searchParams.append("search", filters.search);
-  }
+  // if (filters.search) {
+  //   searchParams.append("search", filters.search);
+  // }
 
   const query = async () => {
     const recipes = await getter<never, ListRecipesResponseSchema>({

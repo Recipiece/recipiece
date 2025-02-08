@@ -40,6 +40,23 @@ model User {
   source_user_kitchen_memberships UserKitchenMembership[] @relation(name: "source_user")
   destination_user_kitchen_memberships UserKitchenMembership[] @relation(name: "destination_user")
   side_jobs SideJob[]
+  user_tags UserTag[]
+}
+
+model UserTag {
+  @@map("user_tags")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  user_id Int
+  content String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  recipe_tag_attachments RecipeTagAttachment[]
+
+  @@unique([user_id, content])
 }
 
 enum UserKitchenMembershipStatus {
@@ -165,6 +182,7 @@ model Recipe {
   recipe_cookbook_attachments RecipeCookbookAttachment[]
   meal_plan_items MealPlanItem[]
   recipe_shares RecipeShare[]
+  recipe_tag_attachments RecipeTagAttachment[]
 
   @@index([user_id, name])
 }
@@ -192,6 +210,18 @@ model RecipeStep {
 
   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe_id Int
+}
+
+model RecipeTagAttachment {
+  @@map("recipe_tag_attachments")
+
+  recipe_id Int
+  user_tag_id Int
+  
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_tag UserTag @relation(fields: [user_tag_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id(name: "id", [recipe_id, user_tag_id])
 }
 
 model Cookbook {
