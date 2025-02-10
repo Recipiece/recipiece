@@ -7,7 +7,7 @@ import { Badge, FormField, FormItem, FormLabel } from "../../shadcn";
 import { TypeaheadInput } from "../TypeaheadInput";
 import { RecipeSearchForm } from "./RecipeSearchFormSchema";
 
-export const TagSearch: FC<{readonly disabled: boolean}> = ({disabled}) => {
+export const TagSearch: FC<{ readonly disabled: boolean }> = ({ disabled }) => {
   const [filters, setFilters] = useState<ListUserTagsQuerySchema>({
     page_number: 0,
   });
@@ -82,7 +82,15 @@ export const TagSearch: FC<{readonly disabled: boolean}> = ({disabled}) => {
           return (
             <FormItem>
               <FormLabel>Tagged As</FormLabel>
-              <TypeaheadInput disabled={disabled} placeholder="Enter a tag..." onKeyDown={onKeyDown} autocompleteOptions={autocompleteOptions} isLoading={isLoadingUserTags} onSelectItem={onSelectItem} {...field} />
+              <TypeaheadInput
+                disabled={disabled}
+                placeholder="Enter a tag..."
+                onKeyDown={onKeyDown}
+                autocompleteOptions={autocompleteOptions}
+                isLoading={isLoadingUserTags}
+                onSelectItem={onSelectItem}
+                {...field}
+              />
             </FormItem>
           );
         }}
@@ -92,7 +100,7 @@ export const TagSearch: FC<{readonly disabled: boolean}> = ({disabled}) => {
           return (
             <Badge key={field.id} className="cursor-pointer dark:text-white" onClick={() => remove(index)}>
               {field.content}
-              <XIcon className="ml-2" size={12}/>
+              <XIcon className="ml-2" size={12} />
             </Badge>
           );
         })}

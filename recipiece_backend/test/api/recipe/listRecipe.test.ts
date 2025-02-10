@@ -95,7 +95,7 @@ describe("List Recipes", () => {
       await generateRecipe({ user_id: user.id });
     }
 
-    const expectedRecipe = await generateRecipe({user_id: user.id});
+    const expectedRecipe = await generateRecipe({ user_id: user.id });
     const tag = await generateUserTag({
       user_id: user.id,
       content: "test tag",

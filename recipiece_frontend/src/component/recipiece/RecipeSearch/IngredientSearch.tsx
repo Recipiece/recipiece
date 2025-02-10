@@ -5,7 +5,7 @@ import { Badge } from "../../shadcn";
 import { FormInput } from "../Form";
 import { RecipeSearchForm } from "./RecipeSearchFormSchema";
 
-export const IngredientSearch: FC<{readonly disabled?: boolean}> = ({disabled}) => {
+export const IngredientSearch: FC<{ readonly disabled?: boolean }> = ({ disabled }) => {
   const form = useFormContext<RecipeSearchForm>();
 
   const { fields, append, remove } = useFieldArray({

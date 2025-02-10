@@ -12,11 +12,10 @@ import { TagSearch } from "./TagSearch";
 
 export interface RecipeSearchProps {
   readonly onSubmit: (filters: Omit<ListRecipesQuerySchema, "cookbook_id" | "cookbook_attachments" | "page_number" | "page_size">) => Promise<void>;
-  readonly className?: string;
   readonly isLoading: boolean;
 }
 
-export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, className, isLoading }) => {
+export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading }) => {
   const location = useLocation();
 
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
@@ -81,7 +80,7 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, className, isLoa
    */
   useEffect(() => {
     form.reset({ ...DefaultRecipeSearchFormValues });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   return (

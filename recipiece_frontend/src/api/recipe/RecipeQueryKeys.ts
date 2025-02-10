@@ -36,12 +36,12 @@ export class RecipeQueryKeys {
         base.push({ search });
       }
 
-      if(ingredients && ingredients.length > 0) {
+      if (ingredients && ingredients.length > 0) {
         base.push({ ingredients: ingredients.join(",") });
       }
 
-      if(tags && tags.length > 0) {
-        base.push({tags: tags.join(",")});
+      if (tags && tags.length > 0) {
+        base.push({ tags: tags.join(",") });
       }
     }
 

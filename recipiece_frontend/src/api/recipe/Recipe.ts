@@ -1,8 +1,17 @@
+import {
+  CreateRecipeRequestSchema,
+  ListRecipesQuerySchema,
+  ListRecipesResponseSchema,
+  RecipeSchema,
+  UpdateRecipeRequestSchema,
+  YListRecipesResponseSchema,
+  YRecipeSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { UserQueryKeys } from "../user";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
-import { CreateRecipeRequestSchema, ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema, UpdateRecipeRequestSchema, YListRecipesResponseSchema, YRecipeSchema } from "@recipiece/types";
 
 export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeSchema>) => {
   const { getter } = useGet();
@@ -83,25 +92,6 @@ export const useListRecipesQuery = (filters: ListRecipesQuerySchema, args?: Quer
   const { getter } = useGet();
   const searchParams = filtersToSearchParams(filters);
 
-  // const searchParams = new URLSearchParams();
-  // searchParams.append("page_number", filters.page_number.toString());
-
-  // if (filters.cookbook_id) {
-  //   searchParams.append("cookbook_id", filters.cookbook_id.toString());
-  // }
-
-  // if (filters.cookbook_attachments) {
-  //   searchParams.append("cookbook_attachments", filters.cookbook_attachments);
-  // }
-
-  // if (filters.shared_recipes) {
-  //   searchParams.append("shared_recipes", filters.shared_recipes);
-  // }
-
-  // if (filters.search) {
-  //   searchParams.append("search", filters.search);
-  // }
-
   const query = async () => {
     const recipes = await getter<never, ListRecipesResponseSchema>({
       path: `/recipe/list?${searchParams.toString()}`,
@@ -148,6 +138,10 @@ export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, Create
         oldDataCreator(data)
       );
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_TAGS(),
+        predicate: generatePartialMatchPredicate(UserQueryKeys.LIST_USER_TAGS()),
+      });
       onSuccess?.(data, variables, context);
     },
     ...restArgs,
@@ -172,8 +166,18 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<RecipeSchema, Update
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataUpdater(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        oldDataUpdater(data)
+      );
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_TAGS(),
+        predicate: generatePartialMatchPredicate(UserQueryKeys.LIST_USER_TAGS()),
+      });
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,

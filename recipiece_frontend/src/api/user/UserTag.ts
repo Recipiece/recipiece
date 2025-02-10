@@ -1,8 +1,9 @@
-import { ListUserTagsQuerySchema, ListUserTagsResponseSchema, UserTagSchema, YListUserTagsResponseSchema } from "@recipiece/types";
+import { ListRecipesResponseSchema, ListUserTagsQuerySchema, ListUserTagsResponseSchema, RecipeSchema, UserTagSchema, YListUserTagsResponseSchema } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataDeleter } from "../QueryKeys";
 import { MutationArgs, QueryArgs, useDelete, useGet } from "../Request";
 import { UserQueryKeys } from "./UserQueryKeys";
+import { RecipeQueryKeys } from "../recipe";
 
 export const useListUserTagsQuery = (filters?: ListUserTagsQuerySchema, args?: QueryArgs<ListUserTagsResponseSchema>) => {
   const { getter } = useGet();
@@ -49,6 +50,43 @@ export const useDeleteUserTagMutation = (args?: MutationArgs<unknown, UserTagSch
         },
         oldDataDeleter(vars)
       );
+
+      // kill the tag on any recipes that may have been tagged with this
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        (oldData: ListRecipesResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: oldData.data.map((recipe) => {
+                return {
+                  ...recipe,
+                  tags: [...(recipe.tags ?? [])].filter((t) => t.id !== vars.id),
+                };
+              }),
+            };
+          }
+        }
+      );
+
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.GET_RECIPE(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.GET_RECIPE()),
+        },
+        (oldData: RecipeSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              tags: [...(oldData.tags ?? [])].filter((t) => t.id !== vars.id),
+            };
+          }
+        }
+      );
+
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,
