@@ -1,5 +1,5 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
-import { generateYListQuerySchema, YListQuerySchema } from "./list";
+import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YUserKitchenMembershipSchema, YUserTagSchema } from "./user";
 
 export const YRecipeIngredientSchema = object({
@@ -72,6 +72,7 @@ export const YCreateRecipeRequestSchema = object({
       })
     )
     .notRequired(),
+  tags: array(string().required()).notRequired(),
 }).noUnknown();
 
 export interface CreateRecipeRequestSchema extends InferType<typeof YCreateRecipeRequestSchema> {}
@@ -123,6 +124,7 @@ export const YUpdateRecipeRequestSchema = object({
       })
     )
     .notRequired(),
+  tags: array(string().required()).notRequired(),
 }).noUnknown();
 
 export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecipeRequestSchema> {}
@@ -151,7 +153,7 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
 
 export interface ListRecipesQuerySchema extends InferType<typeof YListRecipesQuerySchema> {}
 
-export const YListRecipesResponseSchema = generateYListQuerySchema(YRecipeSchema);
+export const YListRecipesResponseSchema = generateYListQueryResponseSchema(YRecipeSchema);
 
 export interface ListRecipesResponseSchema extends InferType<typeof YListRecipesResponseSchema> {}
 
@@ -189,7 +191,7 @@ export const YListRecipeSharesQuerySchema = YListQuerySchema.shape({
 
 export interface ListRecipeSharesQuerySchema extends InferType<typeof YListRecipeSharesQuerySchema> {}
 
-export const YListRecipeSharesResponseSchema = generateYListQuerySchema(
+export const YListRecipeSharesResponseSchema = generateYListQueryResponseSchema(
   YRecipeShareSchema.shape({
     recipe: object({
       id: number().required(),

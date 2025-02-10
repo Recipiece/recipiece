@@ -3283,6 +3283,10 @@ body {
     width: auto;
   }
 
+  .sm\:max-w-\[200px\] {
+    max-width: 200px;
+  }
+
   .sm\:max-w-sm {
     max-width: 24rem;
   }

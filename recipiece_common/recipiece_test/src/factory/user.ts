@@ -7,7 +7,7 @@ export const generateUserTag = async (tag?: Partial<Omit<UserTag, "id">>, tx?: P
   return (tx ?? prisma).userTag.create({
     data: {
       user_id: userId,
-      content: tag?.content ?? faker.word.words({ count: 1 }),
+      content: (tag?.content ?? faker.word.words({ count: 1 })).toLowerCase().trim(),
       created_at: tag?.created_at,
     },
   });

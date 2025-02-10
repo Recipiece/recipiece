@@ -1,11 +1,11 @@
+import { ALL_UNITS } from "@recipiece/conversion";
 import { Grip, Minus, PlusIcon } from "lucide-react";
 import mergeRefs from "merge-refs";
 import { FC, Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Button, FormInput, Popover, PopoverContent, PopoverTrigger } from "../../component";
+import { Button, FormField, FormInput, FormItem, TypeaheadInput } from "../../component";
 import { cn } from "../../util";
-import { ALL_UNITS } from "@recipiece/conversion";
 
 const UNIT_AUTOCOMPLETE_OPTIONS = ALL_UNITS.map((au) => {
   return au.display_name.singular;
@@ -68,7 +68,6 @@ const IngredientFormUnitInput: FC<{ readonly isDragging: boolean; index: number;
   const form = useFormContext();
   const currentUnit = form.watch(`ingredients.${index}.unit`);
   const [currentAutocompleteItems, setCurrentAutocompleteItems] = useState<string[]>([]);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
     if (currentUnit?.length >= 1) {
@@ -76,60 +75,40 @@ const IngredientFormUnitInput: FC<{ readonly isDragging: boolean; index: number;
         return opt.toLowerCase().startsWith(currentUnit.toLowerCase().trim()) && opt.toLowerCase() !== currentUnit.toLowerCase().trim();
       });
       setCurrentAutocompleteItems(newUnits);
-      setIsPopoverOpen(newUnits.length > 0);
     } else {
       setCurrentAutocompleteItems([]);
-      setIsPopoverOpen(false);
     }
   }, [currentUnit]);
 
   const onSelectItem = useCallback(
     (item: string) => {
       form.setValue(`ingredients.${index}.unit`, item);
-      setIsPopoverOpen(false);
     },
     [form, index]
   );
 
   return (
-    <Popover open={isPopoverOpen}>
-      <div>
-        <FormInput
-          onKeyDown={(event) => {
-            onKeyDown(event);
-          }}
-          className="flex-grow"
-          autoComplete="off"
-          readOnly={isDragging}
-          name={`ingredients.${index}.unit`}
-          key={`unit.${index}`}
-          placeholder="Unit"
-        />
-        <div className="ml-4 h-0 w-0">
-          <PopoverTrigger className="h-0 w-0" />
-          <PopoverContent
-            alignOffset={-16}
-            align="start"
-            className="min-w-[200px] p-1"
-            side="bottom"
-            sideOffset={-14}
-            onOpenAutoFocus={(event) => event.preventDefault()}
-            onCloseAutoFocus={(event) => event.preventDefault()}
-            avoidCollisions={false}
-          >
-            <div className="grid grid-cols-1">
-              {currentAutocompleteItems.map((item) => {
-                return (
-                  <Button className="h-auto justify-start p-1" variant="ghost" key={item} onClick={() => onSelectItem(item)}>
-                    {item}
-                  </Button>
-                );
-              })}
-            </div>
-          </PopoverContent>
-        </div>
-      </div>
-    </Popover>
+    <FormField
+      control={form.control}
+      name={`ingredients.${index}.unit`}
+      render={({ field }) => {
+        return (
+          <FormItem>
+            <TypeaheadInput
+              popoverClassName="sm:max-w-[200px]"
+              autocompleteOptions={currentAutocompleteItems}
+              onSelectItem={onSelectItem}
+              className="flex-grow"
+              autoComplete="off"
+              readOnly={isDragging}
+              placeholder="Unit"
+              onKeyDown={onKeyDown}
+              {...field}
+            />
+          </FormItem>
+        );
+      }}
+    />
   );
 };
 

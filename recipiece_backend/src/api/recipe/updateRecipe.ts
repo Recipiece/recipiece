@@ -1,7 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import { Prisma, prisma } from "@recipiece/database";
+import { Prisma, prisma, UserTag } from "@recipiece/database";
 import { RecipeSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { lazyAttachTags } from "./util";
 
 export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequestSchema>): ApiResponse<RecipeSchema> => {
   const recipeBody = req.body;
@@ -86,10 +87,23 @@ export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequest
         },
       });
 
+      // handle the tags. We'll just basically obliterate any existing tags and re-attach them all
+      // rather than trying to play the create-update-delete game
+      await tx.recipeTagAttachment.deleteMany({
+        where: {
+          recipe_id: recipe.id,
+        },
+      });
+      let tags: UserTag[] = [];
+      if (recipeBody.tags && recipeBody.tags.length > 0) {
+        tags = await lazyAttachTags(updatedRecipe, recipeBody.tags, tx);
+      }
+
       return {
         ...updatedRecipe,
         steps: newSteps,
         ingredients: newIngredients,
+        tags: tags,
       };
     });
     return [StatusCodes.OK, { ...transaction }];

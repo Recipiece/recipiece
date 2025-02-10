@@ -1,6 +1,6 @@
 import { array, boolean, date, InferType, mixed, number, object, string } from "yup";
 import { RecipeImportFiles, UserKitchenInvitationStatus } from "../util";
-import { generateYListQuerySchema, YListQuerySchema } from "./list";
+import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 
 export const YUserTagSchema = object({
   id: number().required(),
@@ -235,6 +235,19 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
 
 export interface ListUserKitchenMembershipsQuerySchema extends InferType<typeof YListUserKitchenMembershipsQuerySchema> {}
 
-export const YListUserKitchenMembershipsResponseSchema = generateYListQuerySchema(YUserKitchenMembershipSchema);
+export const YListUserKitchenMembershipsResponseSchema = generateYListQueryResponseSchema(YUserKitchenMembershipSchema);
 
 export interface ListUserKitchenMembershipsResponseSchema extends InferType<typeof YListUserKitchenMembershipsResponseSchema> {}
+
+/**
+ * List user tags
+ */
+export const YListUserTagsQuerySchema = YListQuerySchema.shape({
+  search: string().notRequired(),
+});
+
+export interface ListUserTagsQuerySchema extends InferType<typeof YListUserTagsQuerySchema> {}
+
+export const YListUserTagsResponseSchema = generateYListQueryResponseSchema(YUserTagSchema);
+
+export interface ListUserTagsResponseSchema extends InferType<typeof YListUserTagsResponseSchema> {}

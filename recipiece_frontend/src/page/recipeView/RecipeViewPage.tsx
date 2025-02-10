@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useParams } from "react-router-dom";
 import { useGetRecipeByIdQuery, useGetSelfQuery } from "../../api";
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -57,7 +58,6 @@ export const RecipeViewPage: FC = () => {
     return () => {
       setRecipe(undefined);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalRecipe]);
 
   const onStepChecked = useCallback(
@@ -165,7 +165,7 @@ export const RecipeViewPage: FC = () => {
   }, [currentUser, onResetChanges, onScaleIngredients, recipe]);
 
   return (
-    <div className="p-4">
+    <div>
       <div>
         <div className="grid gap-3">
           <LoadingGroup isLoading={isLoading} className="h-[40px] w-full">
@@ -181,12 +181,23 @@ export const RecipeViewPage: FC = () => {
             </div>
           </LoadingGroup>
           <LoadingGroup isLoading={isLoading} className="h-[96px] w-full">
-            <p>{recipe?.description}</p>
-            {recipe?.servings && (
-              <p className="text-xs">
-                Makes {recipe.servings} serving{recipe.servings > 1 ? "s" : ""}
-              </p>
-            )}
+            <div className="flex flex-col gap-2">
+              <div>
+                <p>{recipe?.description}</p>
+                {recipe?.servings && (
+                  <p className="text-xs">
+                    Makes {recipe.servings} serving{recipe.servings > 1 ? "s" : ""}
+                  </p>
+                )}
+              </div>
+              {recipe?.tags && (
+                <div className="flex flex-row flex-wrap gap-2">
+                  {recipe.tags.map((tag) => {
+                    return <Badge key={tag.id}>{tag.content}</Badge>;
+                  })}
+                </div>
+              )}
+            </div>
           </LoadingGroup>
         </div>
 

@@ -1,7 +1,8 @@
-import { ingredientsSubquery, prisma, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery } from "@recipiece/database";
+import { prisma } from "@recipiece/database";
 import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery, tagsSubquery } from "./util";
 
 /**
  * Get a recipe by id.
@@ -17,7 +18,12 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSc
     .selectFrom("recipes")
     .selectAll("recipes")
     .select((eb) => {
-      return [stepsSubquery(eb).as("steps"), ingredientsSubquery(eb).as("ingredients"), recipeSharesSubquery(eb, user.id).as("shares")];
+      return [
+        stepsSubquery(eb).as("steps"),
+        ingredientsSubquery(eb).as("ingredients"),
+        recipeSharesSubquery(eb, user.id).as("shares"),
+        tagsSubquery(eb).as("tags"),
+      ];
     })
     .where((eb) => {
       return eb.and([

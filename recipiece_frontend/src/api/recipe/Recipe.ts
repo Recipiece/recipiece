@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
-import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema, YListRecipesResponseSchema, YRecipeSchema } from "@recipiece/types";
+import { CreateRecipeRequestSchema, ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema, UpdateRecipeRequestSchema, YListRecipesResponseSchema, YRecipeSchema } from "@recipiece/types";
 
 export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeSchema>) => {
   const { getter } = useGet();
@@ -123,12 +123,12 @@ export const useListRecipesQuery = (filters: ListRecipesQuerySchema, args?: Quer
   });
 };
 
-export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, Partial<RecipeSchema>>) => {
+export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, CreateRecipeRequestSchema>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: Partial<RecipeSchema>) => {
-    const response = await poster<Partial<RecipeSchema>, RecipeSchema>({
+  const mutation = async (data: CreateRecipeRequestSchema) => {
+    const response = await poster({
       path: "/recipe",
       body: data,
       withAuth: "access_token",
@@ -154,12 +154,12 @@ export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, Partia
   });
 };
 
-export const useUpdateRecipeMutation = (args?: MutationArgs<RecipeSchema, Partial<RecipeSchema>>) => {
+export const useUpdateRecipeMutation = (args?: MutationArgs<RecipeSchema, UpdateRecipeRequestSchema>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
-  const mutation = async (data: Partial<RecipeSchema>) => {
-    const response = await putter<Partial<RecipeSchema>, RecipeSchema>({
+  const mutation = async (data: UpdateRecipeRequestSchema) => {
+    const response = await putter({
       path: `/recipe`,
       body: data,
       withAuth: "access_token",

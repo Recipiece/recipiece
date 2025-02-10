@@ -1,4 +1,4 @@
-import { KyselySql, MealPlan, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { KyselyCore, MealPlan, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
 import { MealPlanConfigurationJobDataSchema, MealPlanConfigurationSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanConfigurationQueue } from "../../../job";
@@ -53,7 +53,7 @@ export const setMealPlanConfiguration = async (request: AuthenticatedRequest<Mea
         .deleteFrom("side_jobs")
         .where("side_jobs.type", "=", JobType.MEAL_PLAN_CONFIGURATION)
         .where(() => {
-          return KyselySql`(side_jobs.job_data->>'meal_plan_id')::int = ${mealPlan.id}`;
+          return KyselyCore.sql`(side_jobs.job_data->>'meal_plan_id')::int = ${mealPlan.id}`;
         })
         .execute();
 

@@ -1,8 +1,9 @@
-import { ingredientsSubquery, KyselySql, Prisma, prisma, Recipe, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery } from "@recipiece/database";
+import { KyselyCore, prisma, Recipe } from "@recipiece/database";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
+import { ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery, tagsSubquery } from "./util";
 
 export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>): ApiResponse<ListRecipesResponseSchema> => {
   const { page_number, page_size, shared_recipes, search, cookbook_id, cookbook_attachments, ingredients, tags } = request.query;
@@ -14,7 +15,7 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
       .selectFrom("recipes")
       .selectAll("recipes")
       .select((eb) => {
-        const base: any[] = [stepsSubquery(eb).as("steps"), ingredientsSubquery(eb).as("ingredients"), recipeSharesSubquery(eb, user.id).as("shares")];
+        const base: any[] = [stepsSubquery(eb).as("steps"), ingredientsSubquery(eb).as("ingredients"), recipeSharesSubquery(eb, user.id).as("shares"), tagsSubquery(eb).as("tags")];
 
         if (ingredients) {
           base.push(
@@ -23,8 +24,8 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
               .select("recipe_ingredients.id")
               .whereRef("recipe_ingredients.recipe_id", "=", "recipes.id")
               .where(() => {
-                const joined = KyselySql.raw(ingredients.join("|"));
-                return KyselySql`lower(recipe_ingredients.name) ~* '(${joined})'`;
+                const joined = KyselyCore.sql.raw(ingredients.join("|"));
+                return KyselyCore.sql`lower(recipe_ingredients.name) ~* '(${joined})'`;
               })
               .limit(1)
               .as("test_ingredient")
@@ -39,8 +40,8 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
               .innerJoin("recipe_tag_attachments", "recipe_tag_attachments.user_tag_id", "user_tags.id")
               .whereRef("recipe_tag_attachments.recipe_id", "=", "recipes.id")
               .where(() => {
-                const joined = KyselySql.raw(tags.join("|"));
-                return KyselySql`lower(user_tags.content) ~* '(${joined})'`;
+                const joined = KyselyCore.sql.raw(tags.join("|"));
+                return KyselyCore.sql`lower(user_tags.content) ~* '(${joined})'`;
               })
               .limit(1)
               .as("test_tag")

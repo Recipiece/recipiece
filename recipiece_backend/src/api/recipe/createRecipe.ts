@@ -1,7 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import { Prisma, prisma } from "@recipiece/database";
+import { Prisma, prisma, UserTag } from "@recipiece/database";
 import { CreateRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { lazyAttachTags } from "./util";
 
 export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequestSchema>): ApiResponse<RecipeSchema> => {
   const recipeBody = req.body;
@@ -29,15 +30,25 @@ export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequest
       },
     };
 
-    const recipe = await prisma.recipe.create({
-      data: {
-        ...createInput,
-      },
-      include: {
-        ingredients: true,
-        steps: true,
-      },
+    const recipe = await prisma.$transaction(async (tx) => {
+      const createdRecipe = await tx.recipe.create({
+        data: {
+          ...createInput,
+        },
+        include: {
+          ingredients: true,
+          steps: true,
+        },
+      });
+
+      let tags: UserTag[] = [];
+      if (recipeBody.tags && recipeBody.tags.length > 0) {
+        tags = await lazyAttachTags(createdRecipe, recipeBody.tags, tx);
+      }
+
+      return { ...createdRecipe, tags: [...tags] };
     });
+
     return [StatusCodes.OK, recipe];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {

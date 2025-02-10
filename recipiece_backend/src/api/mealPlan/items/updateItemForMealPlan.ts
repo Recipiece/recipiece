@@ -1,4 +1,4 @@
-import { KyselySql, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { KyselyCore, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
 import { MealPlanItemJobDataSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanItemQueue } from "../../../job";
@@ -55,7 +55,7 @@ export const updateItemForMealPlan = async (request: AuthenticatedRequest): ApiR
           return eb.or([eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM), eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION)]);
         })
         .where(() => {
-          return KyselySql`side_jobs.job_data->>'meal_plan_item_id' = ${item.id}`;
+          return KyselyCore.sql`side_jobs.job_data->>'meal_plan_item_id' = ${item.id}`;
         })
         .execute();
 

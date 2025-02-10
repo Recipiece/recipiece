@@ -1,10 +1,11 @@
-import { recipeImportUploader } from "../../middleware";
 import {
   YChangePasswordRequestSchema,
   YCreatePushNotificationRequestSchema,
   YCreateUserRequestSchema,
   YCreateUserResponseSchema,
   YIssueForgotPasswordTokenRequestSchema,
+  YListUserTagsQuerySchema,
+  YListUserTagsResponseSchema,
   YLoginResponseSchema,
   YRefreshTokenResponseSchema,
   YResetPasswordRequestSchema,
@@ -13,6 +14,7 @@ import {
   YValidateUserRequestSchema,
   YValidateUserResponseSchema,
 } from "@recipiece/types";
+import { recipeImportUploader } from "../../middleware";
 import { Route } from "../../types";
 import { changePassword } from "./changePassword";
 import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
@@ -27,6 +29,7 @@ import { logoutUser } from "./logoutUser";
 import { refreshToken } from "./refreshToken";
 import { requestImportRecipes } from "./requestImportRecipes";
 import { resetPassword } from "./resetPassword";
+import { deleteUserTag, listUserTags } from "./tag";
 import { updateUser } from "./updateUser";
 import { validateUser } from "./validateUser";
 
@@ -128,6 +131,20 @@ export const LOGIN_ROUTES: Route[] = [
     function: createPushNotificationSubscription,
     authentication: "access_token",
     requestSchema: YCreatePushNotificationRequestSchema,
+  },
+  {
+    path: "/user/tag/list",
+    method: "GET",
+    function: listUserTags,
+    authentication: "access_token",
+    requestSchema: YListUserTagsQuerySchema,
+    responseSchema: YListUserTagsResponseSchema,
+  },
+  {
+    path: "/user/tag/:id",
+    method: "DELETE",
+    function: deleteUserTag,
+    authentication: "access_token",
   },
   ...USER_KITCHEN_MEMBERSHIP_ROUTES,
 ];
