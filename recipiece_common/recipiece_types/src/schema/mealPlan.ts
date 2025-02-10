@@ -1,5 +1,5 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
-import { generateYListQuerySchema, YListQuerySchema } from "./list";
+import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YRecipeSchema } from "./recipe";
 import { YUserKitchenMembershipSchema } from "./user";
 
@@ -89,7 +89,7 @@ export const YListMealPlansQuerySchema = YListQuerySchema.shape({
 
 export interface ListMealPlansQuerySchema extends InferType<typeof YListMealPlansQuerySchema> {}
 
-export const YListMealPlansResponseSchema = generateYListQuerySchema(YMealPlanSchema);
+export const YListMealPlansResponseSchema = generateYListQueryResponseSchema(YMealPlanSchema);
 
 export interface ListMealPlansResponseSchema extends InferType<typeof YListMealPlansResponseSchema> {}
 
@@ -103,7 +103,7 @@ export const YListItemsForMealPlanQuerySchema = YListQuerySchema.shape({
 
 export interface ListItemsForMealPlanQuerySchema extends InferType<typeof YListItemsForMealPlanQuerySchema> {}
 
-export const YListItemsForMealPlanResponseSchema = generateYListQuerySchema(YMealPlanItemSchema);
+export const YListItemsForMealPlanResponseSchema = generateYListQueryResponseSchema(YMealPlanItemSchema);
 
 export interface ListItemsForMealPlanResponseSchema extends InferType<typeof YListItemsForMealPlanResponseSchema> {}
 
@@ -190,7 +190,7 @@ export const YListMealPlanSharesQuerySchema = YListQuerySchema.shape({
 
 export interface ListMealPlanSharesQuerySchema extends InferType<typeof YListMealPlanSharesQuerySchema> {}
 
-export const YListMealPlanSharesResponseSchema = generateYListQuerySchema(
+export const YListMealPlanSharesResponseSchema = generateYListQueryResponseSchema(
   YMealPlanShareSchema.shape({
     meal_plan: object({
       id: number().required(),

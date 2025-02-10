@@ -476,7 +476,7 @@ export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<Us
 export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_user" | "destination_user", args?: MutationArgs<unknown, UserKitchenMembershipSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
-  const { purgeRecipes, purgeShoppingLists } = usePurgeSharedQueries();
+  const { purgeRecipes, purgeShoppingLists, purgeMealPlans } = usePurgeSharedQueries();
 
   const mutation = async (membership: UserKitchenMembershipSchema) => {
     return await deleter({
@@ -503,6 +503,7 @@ export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_
       });
       purgeRecipes(params, deletionContext);
       purgeShoppingLists(params, deletionContext);
+      purgeMealPlans(params, deletionContext);
       onSuccess?.(data, params, ctx);
     },
     ...restArgs,

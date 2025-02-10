@@ -1,12 +1,17 @@
 import { array, boolean, date, InferType, mixed, number, object, string } from "yup";
 import { RecipeImportFiles, UserKitchenInvitationStatus } from "../util";
-import { generateYListQuerySchema, YListQuerySchema } from "./list";
+import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
+
+export const YUserTagSchema = object({
+  id: number().required(),
+  content: string().required(),
+  created_at: date().required(),
+  user_id: number().required(),
+}).noUnknown();
 
 export const YUserPreferencesSchema = object({
   account_visibility: string().oneOf(["protected", "private"]),
 });
-
-export interface UserPreferencesSchema extends InferType<typeof YUserPreferencesSchema> {}
 
 export const YUserSchema = object({
   email: string().required(),
@@ -16,8 +21,6 @@ export const YUserSchema = object({
   id: number().required(),
   preferences: YUserPreferencesSchema,
 }).noUnknown();
-
-export interface UserSchema extends InferType<typeof YUserSchema> {}
 
 export const YUserKitchenMembershipSchema = object({
   id: number().required(),
@@ -33,7 +36,13 @@ export const YUserKitchenMembershipSchema = object({
   status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED, UserKitchenInvitationStatus.PENDING]).required(),
 }).noUnknown();
 
+export interface UserSchema extends InferType<typeof YUserSchema> {}
+
 export interface UserKitchenMembershipSchema extends InferType<typeof YUserKitchenMembershipSchema> {}
+
+export interface UserPreferencesSchema extends InferType<typeof YUserPreferencesSchema> {}
+
+export interface UserTagSchema extends InferType<typeof YUserTagSchema> {}
 
 export type UserKitchenMembershipSchemaStatus = UserKitchenMembershipSchema["status"];
 
@@ -226,6 +235,19 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
 
 export interface ListUserKitchenMembershipsQuerySchema extends InferType<typeof YListUserKitchenMembershipsQuerySchema> {}
 
-export const YListUserKitchenMembershipsResponseSchema = generateYListQuerySchema(YUserKitchenMembershipSchema);
+export const YListUserKitchenMembershipsResponseSchema = generateYListQueryResponseSchema(YUserKitchenMembershipSchema);
 
 export interface ListUserKitchenMembershipsResponseSchema extends InferType<typeof YListUserKitchenMembershipsResponseSchema> {}
+
+/**
+ * List user tags
+ */
+export const YListUserTagsQuerySchema = YListQuerySchema.shape({
+  search: string().notRequired(),
+});
+
+export interface ListUserTagsQuerySchema extends InferType<typeof YListUserTagsQuerySchema> {}
+
+export const YListUserTagsResponseSchema = generateYListQueryResponseSchema(YUserTagSchema);
+
+export interface ListUserTagsResponseSchema extends InferType<typeof YListUserTagsResponseSchema> {}

@@ -15,7 +15,7 @@ export const YListQuerySchema = object({
 
 export interface ListQuerySchema extends InferType<typeof YListQuerySchema> {}
 
-export function generateYListQuerySchema<T extends Maybe<AnyObject>>(dataSchema: ObjectSchema<T>) {
+export function generateYListQueryResponseSchema<T extends Maybe<AnyObject>>(dataSchema: ObjectSchema<T>) {
   return object({
     data: array(dataSchema).required(),
     has_next_page: boolean().required(),

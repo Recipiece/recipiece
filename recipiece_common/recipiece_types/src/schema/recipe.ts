@@ -1,6 +1,6 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
-import { generateYListQuerySchema, YListQuerySchema } from "./list";
-import { YUserKitchenMembershipSchema } from "./user";
+import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
+import { YUserKitchenMembershipSchema, YUserTagSchema } from "./user";
 
 export const YRecipeIngredientSchema = object({
   id: number().required(),
@@ -36,6 +36,7 @@ export const YRecipeSchema = object({
   ingredients: array().of(YRecipeIngredientSchema).notRequired(),
   steps: array().of(YRecipeStepSchema).notRequired(),
   shares: array().of(YRecipeShareSchema).notRequired(),
+  tags: array().of(YUserTagSchema).notRequired(),
 }).noUnknown();
 
 export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
@@ -71,6 +72,7 @@ export const YCreateRecipeRequestSchema = object({
       })
     )
     .notRequired(),
+  tags: array(string().required()).notRequired(),
 }).noUnknown();
 
 export interface CreateRecipeRequestSchema extends InferType<typeof YCreateRecipeRequestSchema> {}
@@ -122,6 +124,7 @@ export const YUpdateRecipeRequestSchema = object({
       })
     )
     .notRequired(),
+  tags: array(string().required()).notRequired(),
 }).noUnknown();
 
 export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecipeRequestSchema> {}
@@ -134,18 +137,23 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
   cookbook_id: number().notRequired(),
   cookbook_attachments: string().oneOf(["include", "exclude"]).notRequired(),
   shared_recipes: string().oneOf(["include", "exclude"]).notRequired(),
+  ingredients: array(string()).notRequired(),
+  tags: array(string()).notRequired(),
 })
   .transform((val) => {
     return {
       ...val,
+      ingredients: val.ingredients ? val.ingredients.split(",") : undefined,
+      tags: val.tags ? val.tags.split(",") : undefined,
       shared_recipes: val.shared_recipes ?? "include",
     };
   })
+  .strict()
   .noUnknown();
 
 export interface ListRecipesQuerySchema extends InferType<typeof YListRecipesQuerySchema> {}
 
-export const YListRecipesResponseSchema = generateYListQuerySchema(YRecipeSchema);
+export const YListRecipesResponseSchema = generateYListQueryResponseSchema(YRecipeSchema);
 
 export interface ListRecipesResponseSchema extends InferType<typeof YListRecipesResponseSchema> {}
 
@@ -183,7 +191,7 @@ export const YListRecipeSharesQuerySchema = YListQuerySchema.shape({
 
 export interface ListRecipeSharesQuerySchema extends InferType<typeof YListRecipeSharesQuerySchema> {}
 
-export const YListRecipeSharesResponseSchema = generateYListQuerySchema(
+export const YListRecipeSharesResponseSchema = generateYListQueryResponseSchema(
   YRecipeShareSchema.shape({
     recipe: object({
       id: number().required(),

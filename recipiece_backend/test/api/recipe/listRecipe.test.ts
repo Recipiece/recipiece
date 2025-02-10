@@ -1,5 +1,15 @@
 import { Recipe, User } from "@recipiece/database";
-import { generateCookbook, generateRecipe, generateRecipeCookbookAttachment, generateRecipeShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import {
+  generateCookbook,
+  generateRecipe,
+  generateRecipeCookbookAttachment,
+  generateRecipeShare,
+  generateRecipeTagAttachment,
+  generateRecipeWithIngredientsAndSteps,
+  generateUser,
+  generateUserKitchenMembership,
+  generateUserTag,
+} from "@recipiece/test";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -49,6 +59,65 @@ describe("List Recipes", () => {
     const results = response.body.data as Recipe[];
     expect(results.length).toEqual(1);
     expect(results[0].name).toEqual(filterRecipe.name);
+  });
+
+  it("should allow ingredient filtering", async () => {
+    for (let i = 0; i < 10; i++) {
+      await generateRecipe({ user_id: user.id });
+    }
+
+    const expectedRecipe = await generateRecipeWithIngredientsAndSteps({
+      user_id: user.id,
+      ingredients: [
+        {
+          name: "test ingredient",
+        },
+      ],
+    });
+
+    const response = await request(server)
+      .get("/recipe/list")
+      .query(<ListRecipesQuerySchema>{
+        ingredients: `${expectedRecipe.ingredients[0].name.toUpperCase()},asdf` as unknown as ListRecipesQuerySchema["ingredients"],
+        page_number: 0,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toEqual(StatusCodes.OK);
+    const results = response.body.data as Recipe[];
+    expect(results.length).toEqual(1);
+    expect(results[0].id).toEqual(expectedRecipe.id);
+  });
+
+  it("should allow tag filtering", async () => {
+    for (let i = 0; i < 10; i++) {
+      await generateRecipe({ user_id: user.id });
+    }
+
+    const expectedRecipe = await generateRecipe({ user_id: user.id });
+    const tag = await generateUserTag({
+      user_id: user.id,
+      content: "test tag",
+    });
+    await generateRecipeTagAttachment({
+      user_tag_id: tag.id,
+      recipe_id: expectedRecipe.id,
+    });
+
+    const response = await request(server)
+      .get("/recipe/list")
+      .query(<ListRecipesQuerySchema>{
+        tags: `${tag.content.toUpperCase()},nonsense` as unknown as ListRecipesQuerySchema["tags"],
+        page_number: 0,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toEqual(StatusCodes.OK);
+    const results = response.body.data as Recipe[];
+    expect(results.length).toEqual(1);
+    expect(results[0].id).toEqual(expectedRecipe.id);
   });
 
   it("should page", async () => {

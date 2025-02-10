@@ -2,7 +2,7 @@ import { User, prisma } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { RecipeSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
-import { generateRecipeWithIngredientsAndSteps } from "@recipiece/test";
+import { generateRecipeTagAttachment, generateRecipeWithIngredientsAndSteps, generateUserTag, randomWord } from "@recipiece/test";
 
 describe("Update Recipes", () => {
   let user: User;
@@ -16,37 +16,6 @@ describe("Update Recipes", () => {
     const existingRecipe = await generateRecipeWithIngredientsAndSteps({
       user_id: user.id,
     });
-    // const existingRecipe = await prisma.recipe.create({
-    //   data: {
-    //     name: "My Cool Recipe",
-    //     description: "A recipe",
-    //     user_id: user.id,
-    //     ingredients: {
-    //       createMany: {
-    //         data: [
-    //           {
-    //             name: "old ingredient 01",
-    //             order: 0,
-    //           },
-    //           {
-    //             name: "old ingredient 02",
-    //             order: 1,
-    //           },
-    //         ],
-    //       },
-    //     },
-    //     steps: {
-    //       createMany: {
-    //         data: [
-    //           {
-    //             content: "asdfqwer",
-    //             order: 0,
-    //           },
-    //         ],
-    //       },
-    //     },
-    //   },
-    // });
 
     const response = await request(server)
       .put("/recipe")
@@ -132,5 +101,85 @@ describe("Update Recipes", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
+  });
+
+  it("should attach the provided user tags", async () => {
+    const existingRecipe = await generateRecipeWithIngredientsAndSteps({
+      user_id: user.id,
+    });
+    const existingAttachedTag = await generateUserTag({
+      user_id: user.id,
+    });
+    await generateRecipeTagAttachment({
+      recipe_id: existingRecipe.id,
+      user_tag_id: existingAttachedTag.id,
+    });
+
+    const existingUnattachedTag = await generateUserTag({
+      user_id: user.id,
+    });
+
+    const newTagContent = randomWord().toUpperCase();
+
+    const response = await request(server)
+      .put("/recipe")
+      .send(<UpdateRecipeRequestSchema>{
+        id: existingRecipe.id,
+        tags: [newTagContent, existingUnattachedTag.content],
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+
+    // the existing attachment should have been deleted, but the tag should remain
+    const existingAttachment = await prisma.recipeTagAttachment.findFirst({
+      where: {
+        recipe_id: existingRecipe.id,
+        user_tag_id: existingAttachedTag.id,
+      },
+    });
+    expect(existingAttachment).toBeFalsy();
+
+    const existingTag = await prisma.userTag.findFirst({
+      where: {
+        id: existingAttachedTag.id,
+      },
+    });
+    expect(existingTag).toBeTruthy();
+
+    // the new content should've resulted in a new tag, and a new attachment
+    const newTag = await prisma.userTag.findFirst({
+      where: {
+        user_id: user.id,
+        content: newTagContent.toLowerCase().trim(),
+      },
+    });
+    expect(newTag).toBeTruthy();
+
+    const newAttachment = await prisma.recipeTagAttachment.findFirst({
+      where: {
+        recipe_id: existingRecipe.id,
+        user_tag_id: newTag!.id,
+      },
+    });
+    expect(newAttachment).toBeTruthy();
+
+    // the existing tag should have just been attached
+    const matchingExistingTags = await prisma.userTag.findMany({
+      where: {
+        user_id: user.id,
+        content: existingUnattachedTag.content.toLowerCase().trim(),
+      },
+    });
+    expect(matchingExistingTags.length).toBe(1);
+
+    const unattachedTagAttachment = await prisma.recipeTagAttachment.findFirst({
+      where: {
+        recipe_id: existingRecipe.id,
+        user_tag_id: existingUnattachedTag.id,
+      },
+    });
+    expect(unattachedTagAttachment).toBeTruthy();
   });
 });

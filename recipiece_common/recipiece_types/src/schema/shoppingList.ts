@@ -1,5 +1,5 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
-import { generateYListQuerySchema, YListQuerySchema } from "./list";
+import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YUserKitchenMembershipSchema } from "./user";
 
 export const YShoppingListItemSchema = object({
@@ -68,7 +68,7 @@ export const YListShoppingListsQuerySchema = YListQuerySchema.shape({
 
 export interface ListShoppingListsQuerySchema extends InferType<typeof YListShoppingListsQuerySchema> {}
 
-export const YListShoppingListsResponseSchema = generateYListQuerySchema(YShoppingListSchema);
+export const YListShoppingListsResponseSchema = generateYListQueryResponseSchema(YShoppingListSchema);
 
 export interface ListShoppingListsResponseSchema extends InferType<typeof YListShoppingListsResponseSchema> {}
 
@@ -151,7 +151,7 @@ export const YListShoppingListSharesQuerySchema = YListQuerySchema.shape({
 
 export interface ListShoppingListSharesQuerySchema extends InferType<typeof YListShoppingListSharesQuerySchema> {}
 
-export const YListShoppingListSharesResponseSchema = generateYListQuerySchema(
+export const YListShoppingListSharesResponseSchema = generateYListQueryResponseSchema(
   YShoppingListShareSchema.shape({
     shopping_list: object({
       id: number().required(),

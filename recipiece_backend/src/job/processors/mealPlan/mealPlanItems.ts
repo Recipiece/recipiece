@@ -1,4 +1,4 @@
-import { KyselySql, prisma } from "@recipiece/database";
+import { KyselyCore, prisma } from "@recipiece/database";
 import { YMealPlanConfigurationSchema, YMealPlanItemJobDataSchema } from "@recipiece/types";
 import { Job } from "bullmq";
 import { MEAT_LIKE_INGREDIENTS, processMeatThawing } from "./util";
@@ -43,8 +43,8 @@ export const processMealPlanItem = async (job: Job) => {
             .leftJoin("meal_plan_items", "meal_plan_items.recipe_id", "recipes.id")
             .where("meal_plan_items.id", "=", mealPlanItem.id)
             .where(() => {
-              const joined = KyselySql.raw(MEAT_LIKE_INGREDIENTS.join("|"));
-              return KyselySql`lower(recipe_ingredients.name) ~* '(${joined})'`;
+              const joined = KyselyCore.sql.raw(MEAT_LIKE_INGREDIENTS.join("|"));
+              return KyselyCore.sql`lower(recipe_ingredients.name) ~* '(${joined})'`;
             });
           const meatyIngredients = await meatyIngredientsQuery.execute();
 

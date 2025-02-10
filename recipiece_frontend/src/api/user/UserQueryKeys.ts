@@ -1,4 +1,4 @@
-import { ListUserKitchenMembershipsQuerySchema } from "@recipiece/types";
+import { ListUserKitchenMembershipsQuerySchema, ListUserTagsQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class UserQueryKeys {
@@ -35,5 +35,22 @@ export class UserQueryKeys {
 
   public static GET_USER_KITCHEN_MEMBERSHIP = (id: number): RcpQueryKey => {
     return ["getKitchenMembership", { id }];
+  };
+
+  public static LIST_USER_TAGS = (filters?: Partial<ListUserTagsQuerySchema>): RcpQueryKey => {
+    const base: RcpQueryKey = ["listUserTags"];
+    const { page_number, page_size, search } = filters ?? {};
+
+    if (search) {
+      base.push({ search });
+    }
+    if (page_number) {
+      base.push({ page_number });
+    }
+    if (page_size) {
+      base.push({ page_size });
+    }
+
+    return base;
   };
 }

@@ -1,10 +1,10 @@
+import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { Plus } from "lucide-react";
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
-import { Button, Grid, H2, Input, Label, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
+import { RecipeSearch, Button, Grid, H2, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
 import { DialogContext } from "../../context";
-import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 
 export const DashboardPage: FC = () => {
   const { cookbookId } = useParams();
@@ -29,28 +29,17 @@ export const DashboardPage: FC = () => {
   }, [cookbookId]);
 
   const [filters, setFilters] = useState<ListRecipesQuerySchema>({ ...defaultFilters });
-  const [searchTerm, setSearchTerm] = useState("");
 
   const { toast } = useToast();
 
-  /**
-   * Handle debouncing the search term
-   */
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setFilters((prev) => {
-        return {
-          ...prev,
-          search: searchTerm,
-          page_number: 0,
-        };
-      });
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm]);
+  const onSearch = async (filters: Partial<ListRecipesQuerySchema>) => {
+    setFilters((prev) => {
+      return {
+        ...prev,
+        ...filters,
+      };
+    });
+  };
 
   /**
    * Handle changing to a cookbook view
@@ -119,10 +108,7 @@ export const DashboardPage: FC = () => {
           <p>{cookbook?.description}</p>
         </LoadingGroup>
       )}
-      <Label className="w-full grow sm:w-auto">
-        Search
-        <Input disabled={isLoadingRecipes || isFetchingRecipes} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
-      </Label>
+      <RecipeSearch isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)} onSubmit={onSearch} />
       <LoadingGroup variant="spinner" isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}>
         <Stack>
           {!isLoadingRecipes && recipes.length === 0 && (

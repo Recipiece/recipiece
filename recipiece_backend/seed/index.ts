@@ -11,6 +11,8 @@ import {
   generateUser,
   generateUserCredentials,
   generateUserKitchenMembership,
+  generateUserTag,
+  randomInt,
 } from "@recipiece/test";
 import argon2 from "argon2";
 import { DateTime } from "luxon";
@@ -88,18 +90,22 @@ const seedDevUser = async () => {
 
   for (let i = 0; i < Math.ceil(hoursBetween); i += 8) {
     if (i % 2 === 0) {
-      generateMealPlanItem({
+      await generateMealPlanItem({
         meal_plan_id: mealPlan.id,
         start_date: mealPlanCreatedAt.plus({ hours: i }).toJSDate(),
         recipe_id: gennedRecipes[Math.floor(Math.random() * gennedRecipes.length)].id,
       });
     } else {
-      generateMealPlanItem({
+      await generateMealPlanItem({
         meal_plan_id: mealPlan.id,
         start_date: mealPlanCreatedAt.plus({ hours: i }).toJSDate(),
         freeform_content: "hello world goodbye mars",
       });
     }
+  }
+
+  for (let i = 0; i < randomInt({ min: 5, max: 20 }); i++) {
+    await generateUserTag({ user_id: user.id });
   }
 
   return user;

@@ -9,6 +9,7 @@ export * from "./shoppingList";
 export * from "./sideJob";
 export * from "./user";
 export * from "./websocket";
+export * from "./list";
 
 export const YEmptySchema = object({}).strict().noUnknown();
 

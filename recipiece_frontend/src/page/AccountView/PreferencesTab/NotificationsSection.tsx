@@ -23,7 +23,7 @@ export const NotificationsSection: FC = () => {
           )}
         </div>
         <div className="ml-auto sm:ml-0">
-          <Switch checked={hasGrantedPushNotifications} onCheckedChange={onChangePushNotifications} disabled={canRequestPushNotifications || hasGrantedPushNotifications} />
+          <Switch checked={hasGrantedPushNotifications} onCheckedChange={onChangePushNotifications} disabled={!canRequestPushNotifications || hasGrantedPushNotifications} />
         </div>
       </div>
     </>

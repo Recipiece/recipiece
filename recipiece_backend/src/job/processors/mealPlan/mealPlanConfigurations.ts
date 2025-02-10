@@ -1,4 +1,4 @@
-import { KyselySql, prisma } from "@recipiece/database";
+import { KyselyCore, prisma } from "@recipiece/database";
 import { MealPlanItemJobDataSchema, YMealPlanConfigurationJobDataSchema } from "@recipiece/types";
 import { Job } from "bullmq";
 import { DateTime } from "luxon";
@@ -37,7 +37,7 @@ export const processMealPlanConfigurationUpdate = async (job: Job) => {
         return eb.or([eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM), eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION)]);
       })
       .where(() => {
-        return KyselySql`(side_jobs.job_data->>'meal_plan_id')::int = ${mealPlan.id}`;
+        return KyselyCore.sql`(side_jobs.job_data->>'meal_plan_id')::int = ${mealPlan.id}`;
       })
       .execute();
 

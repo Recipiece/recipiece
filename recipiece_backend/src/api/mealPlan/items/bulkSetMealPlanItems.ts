@@ -1,4 +1,4 @@
-import { KyselySql, MealPlanItem, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { KyselyCore, MealPlanItem, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
 import { BulkSetMealPlanItemsRequestSchema, BulkSetMealPlanItemsResponseSchema, MealPlanItemJobDataSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
@@ -141,7 +141,7 @@ export const bulkSetMealPlanItems = async (request: AuthenticatedRequest<BulkSet
             return eb.or([eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM), eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION)]);
           })
           .where(() => {
-            return KyselySql`(side_jobs.job_data->>'meal_plan_item_id')::int = any(${updatedIds})`;
+            return KyselyCore.sql`(side_jobs.job_data->>'meal_plan_item_id')::int = any(${updatedIds})`;
           })
           .execute();
 
