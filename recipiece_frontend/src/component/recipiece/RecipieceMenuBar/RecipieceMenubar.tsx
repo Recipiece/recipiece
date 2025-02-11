@@ -255,7 +255,7 @@ export const RecipieceMenubar: FC = () => {
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Recipes</MenubarTrigger>
+            <MenubarTrigger>Create</MenubarTrigger>
             <MenubarContent>
               <MenubarItem onClick={() => navigate("/recipe/edit/new?source=url")}>Recipe From URL</MenubarItem>
               <MenubarItem onClick={() => navigate("/recipe/edit/new")}>Recipe From Scratch</MenubarItem>
