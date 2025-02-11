@@ -2,8 +2,8 @@ import { YCreatePushNotificationRequestSubscriptionDataSchema } from "@recipiece
 import { createContext, FC, PropsWithChildren, useCallback, useEffect } from "react";
 import { v4 } from "uuid";
 import { TokenManager, useOptIntoPushNotificationsMutation } from "../../api";
-import { useLocalStorage } from "../../hooks";
 import { StorageKeys } from "../../util";
+import { AxiosError } from "axios";
 
 const generateServiceWorkerPushNotificationSubscription = async () => {
   if (process.env.NODE_ENV !== "development") {
@@ -12,7 +12,7 @@ const generateServiceWorkerPushNotificationSubscription = async () => {
     const registration = await navigator.serviceWorker.ready;
     return await registration.pushManager.subscribe(options);
   } else {
-    return Promise.resolve({} as PushSubscription);
+    return Promise.resolve(undefined);
   }
 };
 
@@ -65,52 +65,85 @@ export const PushNotificationContext = createContext({
 });
 
 export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [pushNotificationDeviceId, setPushNotificationDeviceId] = useLocalStorage<string | undefined>(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID, undefined);
+  const pushNotificationDeviceId = localStorage.getItem(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID)
+    ? JSON.parse(localStorage.getItem(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID)!)
+    : undefined;
   const { mutateAsync: optIntoPushNotifications } = useOptIntoPushNotificationsMutation();
   const tokenManager = TokenManager.getInstance();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const promiseQueue: Promise<any>[] = [];
 
   const requestAndSaveNotificationPermissions = useCallback(
     async (evenWhenDenied = false) => {
-      const deviceId = pushNotificationDeviceId ?? v4();
+      let deviceId = pushNotificationDeviceId ?? v4();
       let grantResult = "unknown";
       try {
         grantResult = await lazyRequestNotificationsPermissions(evenWhenDenied);
         if (grantResult === "granted") {
           const subscription = await generateServiceWorkerPushNotificationSubscription();
-          await optIntoPushNotifications({
-            device_id: deviceId,
-            subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema.cast(subscription.toJSON()),
-          });
+          if (subscription) {
+            await optIntoPushNotifications({
+              device_id: deviceId,
+              subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema.cast(subscription.toJSON()),
+            })
+              .catch((err: AxiosError) => {
+                if (err.status === 410) {
+                  deviceId = v4();
+                  return optIntoPushNotifications({
+                    device_id: deviceId,
+                    subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema.cast(subscription.toJSON()),
+                  });
+                }
+              })
+              .then(() => {
+                localStorage.setItem(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID, deviceId);
+              })
+              .catch(() => {
+                // nothing we can do here :(
+              });
+          }
         }
-      } catch {
-        // noop
+      } catch (err) {
+        console.log(err);
       }
-      setPushNotificationDeviceId(deviceId);
+      localStorage.setItem(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID, JSON.stringify(deviceId));
       return grantResult;
     },
-    [optIntoPushNotifications, pushNotificationDeviceId, setPushNotificationDeviceId]
+    [optIntoPushNotifications, pushNotificationDeviceId]
   );
 
   const initialize = useCallback(async () => {
-    const deviceId = pushNotificationDeviceId ?? v4();
+    let deviceId = pushNotificationDeviceId ?? v4();
     if ("Notification" in window) {
       const hasBeenGranted = Notification.permission === "granted";
       if (hasBeenGranted) {
         // go ahead and create a new subscription for this device id
         const subscription = await generateServiceWorkerPushNotificationSubscription();
-        try {
+        if (subscription) {
           await optIntoPushNotifications({
             device_id: deviceId,
             subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema.cast(subscription.toJSON()),
-          });
-        } catch {
-          // noop
+          })
+            .catch((err: AxiosError) => {
+              if (err.status === 410) {
+                deviceId = v4();
+                return optIntoPushNotifications({
+                  device_id: deviceId,
+                  subscription_data: YCreatePushNotificationRequestSubscriptionDataSchema.cast(subscription.toJSON()),
+                });
+              }
+            })
+            .then(() => {
+              localStorage.setItem(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID, deviceId);
+            })
+            .catch(() => {
+              // nothing we can do here :(
+            });
         }
       }
-      setPushNotificationDeviceId(deviceId);
+      localStorage.setItem(StorageKeys.PUSH_NOTIFICATION_DEVICE_ID, JSON.stringify(deviceId));
     }
-  }, [pushNotificationDeviceId, setPushNotificationDeviceId, optIntoPushNotifications]);
+  }, [pushNotificationDeviceId, optIntoPushNotifications]);
 
   /**
    * When we load in, create a push notification subscription

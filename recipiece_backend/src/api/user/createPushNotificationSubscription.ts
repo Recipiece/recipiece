@@ -7,6 +7,28 @@ export const createPushNotificationSubscription = async (request: AuthenticatedR
   const { subscription_data, device_id } = request.body;
   const userId = request.user.id;
 
+  /**
+   * This should handle the case where
+   * 1. User A logged into a device
+   * 2. User A enabled push notifications
+   * 3. User A logged out of the device
+   * 4. User B logged into the device
+   * 5. Uh oh, now user B is getting push notifications meant for user A
+   */
+  const existingSubscription = await prisma.userPushNotificationSubscription.findFirst({
+    where: {
+      device_id: device_id,
+    },
+  });
+  if (existingSubscription && existingSubscription.user_id !== userId) {
+    return [
+      StatusCodes.GONE,
+      {
+        message: "Subscription gone.",
+      },
+    ];
+  }
+
   await prisma.userPushNotificationSubscription.upsert({
     where: {
       user_id_device_id: {

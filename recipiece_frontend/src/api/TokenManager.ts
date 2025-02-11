@@ -9,7 +9,9 @@ import { StorageKeys } from "../util";
  * We want to lazily make a refresh token call when the access token is about to expire,
  * BUT we don't want to send that call a bunch of times, we only want it once when needed.
  *
- * I also wrote this at 2330 on a weeknight over a holiday so probably a little janky but it works
+ * I also wrote this at 2330 on a weeknight over a holiday so probably a little janky but it works.
+ *
+ * The past has come back to bite me. Using Promise.race was a bad idea. Instead, we'll just hold onto one single promise.
  */
 export class TokenManager {
   public static instance: TokenManager;
@@ -62,7 +64,10 @@ export class TokenManager {
     return this.instance;
   }
 
-  private constructor(private promiseStack: Promise<any>[] = []) {}
+  private constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private refreshPromise: Promise<any> | null = null
+  ) {}
 
   private async runRefresh() {
     const headers = new AxiosHeaders();
@@ -98,14 +103,10 @@ export class TokenManager {
         });
         const isWithinFiveMinutesOfExpiry = expiry.diff(DateTime.utc()).toMillis() < 5 * 60 * 1000;
         if (isWithinFiveMinutesOfExpiry && !!this.refreshToken) {
-          if (this.promiseStack.length === 0) {
-            const refreshPromise = this.runRefresh().finally(() => {
-              this.promiseStack.pop();
-            });
-            this.promiseStack.push(refreshPromise);
-          } else {
-            return Promise.race(this.promiseStack);
+          if (this.refreshPromise === null) {
+            this.refreshPromise = this.runRefresh().finally(() => (this.refreshPromise = null));
           }
+          return this.refreshPromise;
         } else if (expiry.diffNow().toMillis() > 0) {
           // their access token wasn't expired, so move them along
           return { access_token: this.accessToken, refresh_token: this.refreshToken };
@@ -118,15 +119,10 @@ export class TokenManager {
         const expiry = DateTime.fromSeconds(decodedRefreshToken.exp);
         if (expiry.diffNow().toMillis() > 0) {
           // it wasn't expired! send the request
-          if (this.promiseStack.length === 0) {
-            const refreshPromise = this.runRefresh().finally(() => {
-              this.promiseStack.pop();
-            });
-            this.promiseStack.push(refreshPromise);
-            return refreshPromise;
-          } else {
-            return Promise.race(this.promiseStack);
+          if (this.refreshPromise === null) {
+            this.refreshPromise = this.runRefresh().finally(() => (this.refreshPromise = null));
           }
+          return this.refreshPromise;
         }
       }
     }
