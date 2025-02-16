@@ -17,7 +17,10 @@ export const createUserKitchenMembership = async (
   const targetUsername = request.body.username;
   const targetUser = await tx.user.findFirst({
     where: {
-      username: targetUsername,
+      username: {
+        equals: targetUsername.trim(),
+        mode: "insensitive",
+      },
       preferences: {
         path: ["account_visibility"],
         not: "private",

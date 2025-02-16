@@ -51,8 +51,8 @@ export type UserKitchenMembershipSchemaStatus = UserKitchenMembershipSchema["sta
  */
 export const YCreateUserRequestSchema = object({
   email: string().required(),
-  username: string().required(),
-  password: string().required(),
+  username: string().required().min(5),
+  password: string().required().min(8),
 }).noUnknown();
 
 export interface CreateUserRequestSchema extends InferType<typeof YCreateUserRequestSchema> {}
@@ -185,7 +185,7 @@ export interface ChangePasswordRequestSchema extends InferType<typeof YChangePas
  * Invite user to kitchen
  */
 export const YCreateUserKitchenMembershipRequestSchema = object({
-  username: string().required(),
+  username: string().required().min(5),
 }).noUnknown();
 
 export interface CreateUserKitchenMembershipRequestSchema extends InferType<typeof YCreateUserKitchenMembershipRequestSchema> {}
