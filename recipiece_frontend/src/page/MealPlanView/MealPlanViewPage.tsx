@@ -152,6 +152,7 @@ export const MealPlanViewPage: FC = () => {
       },
       {
         keepDirtyValues: isEditing,
+        keepValues: isEditing,
       }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
