@@ -1,17 +1,18 @@
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { CreateShoppingListShareRequestSchema, ShoppingListShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { sendShoppingListSharedPushNotification } from "../../../util/pushNotification";
+import { ConflictError } from "../../../util/error";
 
 /**
  * Allow a user to share a shopping list they own with another user.
  */
-export const createShoppingListShare = async (request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>): ApiResponse<ShoppingListShareSchema> => {
+export const createShoppingListShare = async (request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>, tx: PrismaTransaction): ApiResponse<ShoppingListShareSchema> => {
   const { shopping_list_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 
-  const membership = await prisma.userKitchenMembership.findUnique({
+  const membership = await tx.userKitchenMembership.findUnique({
     where: {
       id: user_kitchen_membership_id,
       source_user_id: user.id,
@@ -32,7 +33,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
     ];
   }
 
-  const shoppingList = await prisma.shoppingList.findUnique({
+  const shoppingList = await tx.shoppingList.findUnique({
     where: {
       id: shopping_list_id,
       user_id: user.id,
@@ -49,7 +50,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
   }
 
   try {
-    const share = await prisma.shoppingListShare.create({
+    const share = await tx.shoppingListShare.create({
       data: {
         shopping_list_id: shoppingList.id,
         user_kitchen_membership_id: user_kitchen_membership_id,
@@ -59,7 +60,7 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
       },
     });
 
-    const subscriptions = await prisma.userPushNotificationSubscription.findMany({
+    const subscriptions = await tx.userPushNotificationSubscription.findMany({
       where: {
         user_id: membership.destination_user_id,
       },
@@ -73,20 +74,8 @@ export const createShoppingListShare = async (request: AuthenticatedRequest<Crea
     return [StatusCodes.OK, share];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {
-      return [
-        StatusCodes.CONFLICT,
-        {
-          message: "Shopping list has already been shared",
-        },
-      ];
-    } else {
-      console.error(err);
-      return [
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        {
-          message: "Unable to share shopping list",
-        },
-      ];
+      throw new ConflictError("Shopping list has already been shared");
     }
+    throw err;
   }
 };

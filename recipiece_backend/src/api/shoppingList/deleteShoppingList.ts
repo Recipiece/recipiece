@@ -1,12 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 
-export const deleteShoppingList = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+export const deleteShoppingList = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const listId = +request.params.id;
   const user = request.user;
 
-  const shoppingList = await prisma.shoppingList.findUnique({
+  const shoppingList = await tx.shoppingList.findUnique({
     where: {
       id: listId,
       user_id: user.id,
@@ -22,7 +22,7 @@ export const deleteShoppingList = async (request: AuthenticatedRequest): ApiResp
     ];
   }
 
-  await prisma.shoppingList.delete({
+  await tx.shoppingList.delete({
     where: {
       id: listId,
     },

@@ -1,13 +1,13 @@
+import { PrismaTransaction } from "@recipiece/database";
 import { RemoveRecipeFromCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>): ApiResponse<{}> => {
+export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const removeBody = req.body;
   const user = req.user;
 
-  const cookbook = await prisma.cookbook.findFirst({
+  const cookbook = await tx.cookbook.findFirst({
     where: {
       id: removeBody.cookbook_id,
     },
@@ -35,24 +35,14 @@ export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveR
     ];
   }
 
-  try {
-    await prisma.recipeCookbookAttachment.delete({
-      where: {
-        id: {
-          recipe_id: removeBody.recipe_id,
-          cookbook_id: removeBody.cookbook_id,
-        },
+  await tx.recipeCookbookAttachment.delete({
+    where: {
+      id: {
+        recipe_id: removeBody.recipe_id,
+        cookbook_id: removeBody.cookbook_id,
       },
-    });
+    },
+  });
 
-    return [StatusCodes.OK, {}];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Unable to create recipe",
-      },
-    ];
-  }
+  return [StatusCodes.OK, {}];
 };

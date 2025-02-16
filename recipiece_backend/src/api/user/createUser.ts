@@ -1,4 +1,4 @@
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { CreateUserRequestSchema, UserPreferencesSchema, UserSchema } from "@recipiece/types";
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
@@ -7,10 +7,10 @@ import { ApiResponse } from "../../types";
 import { VERSION_ACCESS_LEVELS } from "../../util/constant";
 import { hashPassword } from "../../util/password";
 
-export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<UserSchema> => {
+export const createUser = async (request: Request<any, any, CreateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<UserSchema> => {
   const { username, email, password } = request.body;
 
-  const existingUser = await prisma.user.findFirst({
+  const existingUser = await tx.user.findFirst({
     where: {
       OR: [
         {
@@ -38,56 +38,42 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
     ];
   }
 
-  try {
-    const hashedPassword = await hashPassword(password);
-    if (!hashedPassword) {
-      return [
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        {
-          message: "Unable to create account",
-        },
-      ];
-    }
-
-    const insertedUser = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email: email,
-          username: username,
-          preferences: {
-            account_visibility: "protected",
-          },
-          credentials: {
-            create: {
-              password_hash: hashedPassword!,
-            },
-          },
-          user_access_records: {
-            create: {
-              access_levels: VERSION_ACCESS_LEVELS[process.env.APP_VERSION!] ?? ["free"],
-              start_date: DateTime.utc().toJSDate(),
-            },
-          },
-        },
-      });
-
-      return user;
-    });
-
+  const hashedPassword = await hashPassword(password);
+  if (!hashedPassword) {
     return [
-      StatusCodes.CREATED,
-      {
-        ...insertedUser,
-        preferences: insertedUser.preferences as UserPreferencesSchema,
-      },
-    ];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.BAD_REQUEST,
+      StatusCodes.INTERNAL_SERVER_ERROR,
       {
         message: "Unable to create account",
       },
     ];
   }
+
+  const user = await tx.user.create({
+    data: {
+      email: email,
+      username: username,
+      preferences: {
+        account_visibility: "protected",
+      },
+      credentials: {
+        create: {
+          password_hash: hashedPassword!,
+        },
+      },
+      user_access_records: {
+        create: {
+          access_levels: VERSION_ACCESS_LEVELS[process.env.APP_VERSION!] ?? ["free"],
+          start_date: DateTime.utc().toJSDate(),
+        },
+      },
+    },
+  });
+
+  return [
+    StatusCodes.CREATED,
+    {
+      ...user,
+      preferences: user.preferences as UserPreferencesSchema,
+    },
+  ];
 };

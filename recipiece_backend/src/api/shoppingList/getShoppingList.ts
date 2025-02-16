@@ -1,13 +1,13 @@
-import { prisma, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
+import { PrismaTransaction, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getShoppingList = async (request: AuthenticatedRequest): ApiResponse<ShoppingListSchema> => {
+export const getShoppingList = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<ShoppingListSchema> => {
   const user = request.user;
   const listId = +request.params.id;
 
-  const query = prisma.$kysely
+  const query = tx.$kysely
     .selectFrom("shopping_lists")
     .selectAll("shopping_lists")
     .select((eb) => {

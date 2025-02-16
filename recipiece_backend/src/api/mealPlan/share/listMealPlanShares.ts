@@ -2,13 +2,16 @@ import { ListMealPlanSharesQuerySchema, ListMealPlanSharesResponseSchema } from 
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { StatusCodes } from "http-status-codes";
 import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
-import { Prisma, prisma } from "@recipiece/database";
+import { Prisma, PrismaTransaction } from "@recipiece/database";
 
 /**
  * List meal plan shares that are targeting the requesting user or the requesting user has sent.
  * Only user_kitchen_memberships with a status of "accepted" will be considered.
  */
-export const listMealPlanShares = async (request: AuthenticatedRequest<any, ListMealPlanSharesQuerySchema>): ApiResponse<ListMealPlanSharesResponseSchema> => {
+export const listMealPlanShares = async (
+  request: AuthenticatedRequest<any, ListMealPlanSharesQuerySchema>,
+  tx: PrismaTransaction
+): ApiResponse<ListMealPlanSharesResponseSchema> => {
   const { page_number, page_size, targeting_self, from_self, user_kitchen_membership_id } = request.query;
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
 
@@ -45,7 +48,7 @@ export const listMealPlanShares = async (request: AuthenticatedRequest<any, List
 
   const offset = page_number * actualPageSize;
 
-  const mealPlanShares = await prisma.mealPlanShare.findMany({
+  const mealPlanShares = await tx.mealPlanShare.findMany({
     where: {
       ...where,
       user_kitchen_membership: {

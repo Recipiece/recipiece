@@ -1,16 +1,19 @@
 import { DEFAULT_PAGE_SIZE, ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { mealPlanSharesWithMemberships, Prisma, prisma } from "@recipiece/database";
+import { mealPlanSharesWithMemberships, Prisma, PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>): ApiResponse<ListItemsForMealPlanResponseSchema> => {
+export const listItemsForMealPlan = async (
+  request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>,
+  tx: PrismaTransaction
+): ApiResponse<ListItemsForMealPlanResponseSchema> => {
   const { start_date, end_date, page_number, page_size } = request.query;
   const pageSize = page_size ?? DEFAULT_PAGE_SIZE;
   const mealPlanId = +request.params.id;
   const user = request.user;
 
-  const mealPlan = await prisma.$kysely
+  const mealPlan = await tx.$kysely
     .selectFrom("meal_plans")
     .selectAll("meal_plans")
     .where((eb) => {
@@ -58,7 +61,7 @@ export const listItemsForMealPlan = async (request: AuthenticatedRequest<any, Li
 
   const offset = page_number * pageSize;
 
-  const items = await prisma.mealPlanItem.findMany({
+  const items = await tx.mealPlanItem.findMany({
     where: filters,
     orderBy: {
       created_at: "asc",

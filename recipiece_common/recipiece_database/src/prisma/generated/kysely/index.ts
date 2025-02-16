@@ -10,6 +10,11 @@ export const UserKitchenMembershipStatus = {
     pending: "pending"
 } as const;
 export type UserKitchenMembershipStatus = (typeof UserKitchenMembershipStatus)[keyof typeof UserKitchenMembershipStatus];
+export const NotificationStatus = {
+    read: "read",
+    unread: "unread"
+} as const;
+export type NotificationStatus = (typeof NotificationStatus)[keyof typeof NotificationStatus];
 export type Cookbook = {
     id: Generated<number>;
     user_id: number;
@@ -48,6 +53,17 @@ export type MealPlanShare = {
     created_at: Generated<Timestamp>;
     meal_plan_id: number;
     user_kitchen_membership_id: number;
+};
+export type Notification = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    user_id: number;
+    title: string;
+    type: string;
+    status: Generated<NotificationStatus>;
+    content: string;
+    read_at: Timestamp | null;
+    read_by_user_id: number | null;
 };
 export type Recipe = {
     id: Generated<number>;
@@ -144,6 +160,11 @@ export type UserKitchenMembership = {
     destination_user_id: number;
     status: UserKitchenMembershipStatus;
 };
+export type UserKitchenMembershipNotificationAttachment = {
+    created_at: Generated<Timestamp>;
+    user_kitchen_membership_id: number;
+    notification_id: number;
+};
 export type UserPushNotificationSubscription = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
@@ -175,6 +196,7 @@ export type DB = {
     meal_plan_items: MealPlanItem;
     meal_plan_shares: MealPlanShare;
     meal_plans: MealPlan;
+    notifications: Notification;
     recipe_cookbook_attachments: RecipeCookbookAttachment;
     recipe_ingredients: RecipeIngredient;
     recipe_shares: RecipeShare;
@@ -187,6 +209,7 @@ export type DB = {
     side_jobs: SideJob;
     user_access_records: UserAccessRecord;
     user_credentials: UserCredentials;
+    user_kitchen_membership_notification_attachments: UserKitchenMembershipNotificationAttachment;
     user_kitchen_memberships: UserKitchenMembership;
     user_push_notification_subscriptions: UserPushNotificationSubscription;
     user_sessions: UserSession;

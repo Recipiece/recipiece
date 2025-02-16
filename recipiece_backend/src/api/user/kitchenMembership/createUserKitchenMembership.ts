@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { UserKitchenInvitationStatus } from "../../../util/constant";
@@ -10,9 +10,12 @@ import { UserKitchenInvitationStatus } from "../../../util/constant";
  *
  * Users can only send an invitation to another user once, to prevent spamming.
  */
-export const createUserKitchenMembership = async (request: AuthenticatedRequest<CreateUserKitchenMembershipRequestSchema>): ApiResponse<UserKitchenMembershipSchema> => {
+export const createUserKitchenMembership = async (
+  request: AuthenticatedRequest<CreateUserKitchenMembershipRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<UserKitchenMembershipSchema> => {
   const targetUsername = request.body.username;
-  const targetUser = await prisma.user.findFirst({
+  const targetUser = await tx.user.findFirst({
     where: {
       username: targetUsername,
       preferences: {
@@ -40,7 +43,7 @@ export const createUserKitchenMembership = async (request: AuthenticatedRequest<
     ];
   }
 
-  const existingInvitation = await prisma.userKitchenMembership.findFirst({
+  const existingInvitation = await tx.userKitchenMembership.findFirst({
     where: {
       destination_user_id: targetUser.id,
       source_user_id: request.user.id,
@@ -56,32 +59,22 @@ export const createUserKitchenMembership = async (request: AuthenticatedRequest<
     ];
   }
 
-  try {
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: request.user.id,
-        destination_user_id: targetUser.id,
-        status: UserKitchenInvitationStatus.PENDING,
-      },
-      include: {
-        source_user: true,
-        destination_user: true,
-      },
-    });
-    return [
-      StatusCodes.OK,
-      {
-        ...membership,
-        status: membership.status as typeof UserKitchenInvitationStatus.PENDING | typeof UserKitchenInvitationStatus.ACCEPTED | typeof UserKitchenInvitationStatus.DENIED,
-      },
-    ];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Internal server error",
-      },
-    ];
-  }
+  const membership = await tx.userKitchenMembership.create({
+    data: {
+      source_user_id: request.user.id,
+      destination_user_id: targetUser.id,
+      status: UserKitchenInvitationStatus.PENDING,
+    },
+    include: {
+      source_user: true,
+      destination_user: true,
+    },
+  });
+  return [
+    StatusCodes.OK,
+    {
+      ...membership,
+      status: membership.status as typeof UserKitchenInvitationStatus.PENDING | typeof UserKitchenInvitationStatus.ACCEPTED | typeof UserKitchenInvitationStatus.DENIED,
+    },
+  ];
 };

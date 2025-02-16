@@ -1,14 +1,14 @@
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";
 import { sendAccountVerificationEmail } from "../../util/email";
 
-export const issueEmailVerificationToken = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+export const issueEmailVerificationToken = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const user = request.user;
 
-  const accountToken = await prisma.userValidationToken.findFirst({
+  const accountToken = await tx.userValidationToken.findFirst({
     where: {
       user_id: user.id,
       purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
@@ -32,15 +32,13 @@ export const issueEmailVerificationToken = async (request: AuthenticatedRequest)
     }
   }
 
-  await prisma.$transaction(async (tx) => {
-    const createdToken = await tx.userValidationToken.create({
-      data: {
-        user_id: user.id,
-        purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
-      },
-    });
-    await sendAccountVerificationEmail(user, createdToken);
+  const createdToken = await tx.userValidationToken.create({
+    data: {
+      user_id: user.id,
+      purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
+    },
   });
+  await sendAccountVerificationEmail(user, createdToken);
 
   return [StatusCodes.CREATED, {}];
 };

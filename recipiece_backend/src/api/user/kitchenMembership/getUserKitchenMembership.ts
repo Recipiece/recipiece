@@ -1,13 +1,13 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const getUserKitchenMembership = async (request: AuthenticatedRequest): ApiResponse<UserKitchenMembershipSchema> => {
+export const getUserKitchenMembership = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<UserKitchenMembershipSchema> => {
   const membershipId = +request.params.id;
   const user = request.user;
 
-  const membership = await prisma.userKitchenMembership.findFirst({
+  const membership = await tx.userKitchenMembership.findFirst({
     where: {
       OR: [{ source_user_id: user.id }, { destination_user_id: user.id }],
       id: membershipId,

@@ -1,15 +1,15 @@
-import { prisma, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
+import { PrismaTransaction, shoppingListItemsSubquery, shoppingListSharesSubquery, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { ListShoppingListsQuerySchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { AuthenticatedRequest } from "../../types";
 import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
-export const listShoppingLists = async (request: AuthenticatedRequest<any, ListShoppingListsQuerySchema>) => {
+export const listShoppingLists = async (request: AuthenticatedRequest<any, ListShoppingListsQuerySchema>, tx: PrismaTransaction) => {
   const { shared_shopping_lists, page_number, page_size } = request.query;
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
   const user = request.user;
 
-  let query = prisma.$kysely
+  let query = tx.$kysely
     .selectFrom("shopping_lists")
     .selectAll("shopping_lists")
     .select((eb) => {

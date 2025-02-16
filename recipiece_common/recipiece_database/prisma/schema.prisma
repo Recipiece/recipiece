@@ -41,6 +41,8 @@ model User {
   destination_user_kitchen_memberships UserKitchenMembership[] @relation(name: "destination_user")
   side_jobs SideJob[]
   user_tags UserTag[]
+  notifications Notification[] @relation(name: "user")
+  read_by_notifications Notification[] @relation("read_by_user")
 }
 
 model UserTag {
@@ -81,6 +83,7 @@ model UserKitchenMembership {
   recipe_shares RecipeShare[]
   shopping_list_shares ShoppingListShare[]
   meal_plan_shares MealPlanShare[]
+  user_kitchen_membership_notification_attachments UserKitchenMembershipNotificationAttachment[]
 
   @@index([status, destination_user_id])
   @@index([status, source_user_id])
@@ -146,6 +149,43 @@ model UserValidationToken {
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int
+}
+
+enum NotificationStatus {
+  read
+  unread
+}
+
+model Notification {
+  @@map("notifications")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  user_id Int
+  title String
+  type String
+  status NotificationStatus @default(unread)
+  content String
+  read_at DateTime?
+  read_by_user_id Int?
+
+  user_kitchen_membership_notification_attachments UserKitchenMembershipNotificationAttachment[]
+
+  user User @relation(name: "user", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  read_by_user User? @relation(name: "read_by_user", fields: [read_by_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+}
+
+model UserKitchenMembershipNotificationAttachment {
+  @@map("user_kitchen_membership_notification_attachments")
+  @@id([user_kitchen_membership_id, notification_id])
+
+  created_at DateTime @default(now())
+  user_kitchen_membership_id Int
+  notification_id Int
+
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model RecipeShare {

@@ -1,4 +1,4 @@
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
@@ -10,11 +10,11 @@ import { ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships,
  * This endpoint will return a recipe that you either own or has been shared to you.
  * If neither of those conditions are met, the endpoint will 404.
  */
-export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSchema> => {
+export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const recipeId = +req.params.id;
   const user = req.user;
 
-  const query = prisma.$kysely
+  const query = tx.$kysely
     .selectFrom("recipes")
     .selectAll("recipes")
     .select((eb) => {

@@ -2,13 +2,13 @@ import { ListRecipeSharesQuerySchema, ListRecipeSharesResponseSchema } from "@re
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { StatusCodes } from "http-status-codes";
 import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
-import { Prisma, prisma } from "@recipiece/database";
+import { Prisma, PrismaTransaction } from "@recipiece/database";
 
 /**
  * List recipes shares that are targeting the requesting user or the requesting user has sent.
  * Only user_kitchen_memberships with a status of "accepted" will be considered.
  */
-export const listRecipeShares = async (request: AuthenticatedRequest<any, ListRecipeSharesQuerySchema>): ApiResponse<ListRecipeSharesResponseSchema> => {
+export const listRecipeShares = async (request: AuthenticatedRequest<any, ListRecipeSharesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipeSharesResponseSchema> => {
   const { page_number, page_size, targeting_self, from_self, user_kitchen_membership_id } = request.query;
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
 
@@ -45,7 +45,7 @@ export const listRecipeShares = async (request: AuthenticatedRequest<any, ListRe
 
   const offset = page_number * actualPageSize;
 
-  const recipes = await prisma.recipeShare.findMany({
+  const recipes = await tx.recipeShare.findMany({
     where: {
       ...where,
       user_kitchen_membership: {

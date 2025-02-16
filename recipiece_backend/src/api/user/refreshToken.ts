@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { RefreshTokenResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserSessions } from "../../util/constant";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { randomUUID } from "crypto";
 import { StatusCodes } from "http-status-codes";
 import { generateToken } from "../../util/token";
@@ -10,7 +10,7 @@ import { generateToken } from "../../util/token";
 /**
  * Refresh a user's access token, and also potentially refresh their session if they are close to expiry on that.
  */
-export const refreshToken = async (request: AuthenticatedRequest): ApiResponse<RefreshTokenResponseSchema> => {
+export const refreshToken = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<RefreshTokenResponseSchema> => {
   let session = request.user_session;
   const sessionExpiry = DateTime.fromJSDate(session.created_at).plus(UserSessions.REFRESH_TOKEN_EXP_LUXON);
   const isCloseToExpiry = sessionExpiry.diff(DateTime.utc()).milliseconds < UserSessions.REFRESH_CLOSE_TO_EXPIRY_THRESHOLD_MS;
@@ -18,14 +18,12 @@ export const refreshToken = async (request: AuthenticatedRequest): ApiResponse<R
   if (isCloseToExpiry) {
     console.log(`session ${session.id} is close to expiry, issuing a new session`);
 
-    session = await prisma.$transaction(async (tx) => {
-      await tx.userSession.delete({ where: { id: session.id } });
-      return tx.userSession.create({
-        data: {
-          user_id: request.user.id,
-          scope: UserSessions.REFRESH_TOKEN_SCOPE,
-        },
-      });
+    await tx.userSession.delete({ where: { id: session.id } });
+    session = await tx.userSession.create({
+      data: {
+        user_id: request.user.id,
+        scope: UserSessions.REFRESH_TOKEN_SCOPE,
+      },
     });
   }
 

@@ -1,16 +1,16 @@
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { IssueForgotPasswordTokenRequestSchema } from "@recipiece/types";
 import { ApiResponse } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";
 import { sendForgotPasswordEmail } from "../../util/email";
 
-export const issueForgotPasswordToken = async (request: Request<any, any, IssueForgotPasswordTokenRequestSchema>): ApiResponse<{}> => {
+export const issueForgotPasswordToken = async (request: Request<any, any, IssueForgotPasswordTokenRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const { username_or_email } = request.body;
 
-  const matchingUser = await prisma.user.findFirst({
+  const matchingUser = await tx.user.findFirst({
     where: {
       OR: [
         {
@@ -27,7 +27,7 @@ export const issueForgotPasswordToken = async (request: Request<any, any, IssueF
     return [StatusCodes.CREATED, {}];
   }
 
-  const accountToken = await prisma.userValidationToken.findFirst({
+  const accountToken = await tx.userValidationToken.findFirst({
     where: {
       user_id: matchingUser.id,
       purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
@@ -51,15 +51,13 @@ export const issueForgotPasswordToken = async (request: Request<any, any, IssueF
     }
   }
 
-  await prisma.$transaction(async (tx) => {
-    const createdToken = await tx.userValidationToken.create({
-      data: {
-        user_id: matchingUser.id,
-        purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
-      },
-    });
-    await sendForgotPasswordEmail(matchingUser, createdToken);
+  const createdToken = await tx.userValidationToken.create({
+    data: {
+      user_id: matchingUser.id,
+      purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+    },
   });
+  await sendForgotPasswordEmail(matchingUser, createdToken);
 
   return [StatusCodes.CREATED, {}];
 };

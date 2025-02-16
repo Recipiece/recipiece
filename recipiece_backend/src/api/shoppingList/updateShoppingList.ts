@@ -1,13 +1,13 @@
 import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateShoppingList = async (request: AuthenticatedRequest): ApiResponse<ShoppingListSchema> => {
+export const updateShoppingList = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<ShoppingListSchema> => {
   const user = request.user;
   const { id, ...restBody } = request.body;
 
-  const shoppingList = await prisma.shoppingList.findUnique({
+  const shoppingList = await tx.shoppingList.findUnique({
     where: {
       id: id,
       user_id: user.id,
@@ -23,7 +23,7 @@ export const updateShoppingList = async (request: AuthenticatedRequest): ApiResp
     ];
   }
 
-  const updatedList = await prisma.shoppingList.update({
+  const updatedList = await tx.shoppingList.update({
     where: {
       id: id,
     },

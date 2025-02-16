@@ -1,13 +1,14 @@
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { AddRecipeToCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { ConflictError } from "../../util/error";
 
-export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>): ApiResponse<{}> => {
+export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const attachBody = req.body;
   const user = req.user;
 
-  const cookbook = await prisma.cookbook.findFirst({
+  const cookbook = await tx.cookbook.findFirst({
     where: {
       id: attachBody.cookbook_id,
     },
@@ -22,7 +23,7 @@ export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToC
     ];
   }
 
-  const recipe = await prisma.recipe.findFirst({
+  const recipe = await tx.recipe.findFirst({
     where: {
       id: attachBody.recipe_id,
     },
@@ -64,7 +65,7 @@ export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToC
   }
 
   try {
-    await prisma.recipeCookbookAttachment.create({
+    await tx.recipeCookbookAttachment.create({
       data: {
         cookbook: {
           connect: {
@@ -81,20 +82,8 @@ export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToC
     return [StatusCodes.CREATED, {}];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {
-      return [
-        StatusCodes.CONFLICT,
-        {
-          message: "This recipe is already in this cookbook",
-        },
-      ];
-    } else {
-      console.error(err);
-      return [
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        {
-          message: "Unable to create recipe",
-        },
-      ];
+      throw new ConflictError("This recipe is already in this cookbook");
     }
+    throw err;
   }
 };

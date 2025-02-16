@@ -1,13 +1,13 @@
 import { CookbookSchema, UpdateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateCookbook = async (req: AuthenticatedRequest<UpdateCookbookRequestSchema>): ApiResponse<CookbookSchema> => {
+export const updateCookbook = async (req: AuthenticatedRequest<UpdateCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<CookbookSchema> => {
   const cookbookBody = req.body;
   const user = req.user;
 
-  const cookbook = await prisma.cookbook.findUnique({
+  const cookbook = await tx.cookbook.findUnique({
     where: {
       id: cookbookBody.id,
     },
@@ -32,26 +32,16 @@ export const updateCookbook = async (req: AuthenticatedRequest<UpdateCookbookReq
     ];
   }
 
-  try {
-    const { id, ...restData } = cookbookBody;
+  const { id, ...restData } = cookbookBody;
 
-    const updatedCookbook = await prisma.cookbook.update({
-      // @ts-ignore
-      data: {
-        ...restData,
-      },
-      where: {
-        id: id,
-      },
-    });
-    return [StatusCodes.OK, updatedCookbook];
-  } catch (error) {
-    console.error(error);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Unable to update recipe",
-      },
-    ];
-  }
+  const updatedCookbook = await tx.cookbook.update({
+    // @ts-ignore
+    data: {
+      ...restData,
+    },
+    where: {
+      id: id,
+    },
+  });
+  return [StatusCodes.OK, updatedCookbook];
 };

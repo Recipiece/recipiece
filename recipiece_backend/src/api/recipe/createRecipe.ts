@@ -1,10 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { Prisma, prisma, UserTag } from "@recipiece/database";
+import { Prisma, PrismaTransaction, UserTag } from "@recipiece/database";
 import { CreateRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { lazyAttachTags } from "./util";
+import { ConflictError } from "../../util/error";
 
-export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequestSchema>): ApiResponse<RecipeSchema> => {
+export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const recipeBody = req.body;
   const user = req.user;
 
@@ -30,42 +31,26 @@ export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequest
       },
     };
 
-    const recipe = await prisma.$transaction(async (tx) => {
-      const createdRecipe = await tx.recipe.create({
-        data: {
-          ...createInput,
-        },
-        include: {
-          ingredients: true,
-          steps: true,
-        },
-      });
-
-      let tags: UserTag[] = [];
-      if (recipeBody.tags && recipeBody.tags.length > 0) {
-        tags = await lazyAttachTags(createdRecipe, recipeBody.tags, tx);
-      }
-
-      return { ...createdRecipe, tags: [...tags] };
+    const createdRecipe = await tx.recipe.create({
+      data: {
+        ...createInput,
+      },
+      include: {
+        ingredients: true,
+        steps: true,
+      },
     });
 
-    return [StatusCodes.OK, recipe];
+    let tags: UserTag[] = [];
+    if (recipeBody.tags && recipeBody.tags.length > 0) {
+      tags = await lazyAttachTags(createdRecipe, recipeBody.tags, tx);
+    }
+
+    return [StatusCodes.OK, { ...createdRecipe, tags: [...tags] }];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {
-      return [
-        StatusCodes.CONFLICT,
-        {
-          message: "You already have a recipe with this name",
-        },
-      ];
-    } else {
-      console.error(err);
-      return [
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        {
-          message: "Unable to create recipe",
-        },
-      ];
+      throw new ConflictError("You already have a recipe with this name");
     }
+    throw err;
   }
 };

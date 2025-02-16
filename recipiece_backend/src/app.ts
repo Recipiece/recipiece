@@ -21,6 +21,8 @@ import {
 } from "./middleware";
 import { WebsocketRequest } from "./types";
 import { Logger } from "./util/logger";
+import { prisma } from "@recipiece/database";
+import { ApiError } from "./util/error";
 
 const app = new WebSocketExpress();
 const logger = Logger.getLogger({
@@ -87,9 +89,24 @@ ROUTES.forEach((route) => {
   }
 
   routeHandlers.push(async (req: Request, res: Response) => {
-    // @ts-ignore
-    const [statusCode, responseBody] = await route.function(req);
-    res.status(statusCode).send(responseBody);
+    try {
+      const [statusCode, responseBody] = await prisma.$transaction(async (tx) => {
+        // @ts-expect-error AuthenticatedRequest is hard to type match against
+        return await route.function(req, tx);
+      });
+      res.status(statusCode).send(responseBody);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ApiError) {
+        res.status(err.statusCode).send({
+          message: err.message,
+        });
+      } else {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+          message: "Internal Error",
+        });
+      }
+    }
   });
 
   if (route.postMiddleware) {

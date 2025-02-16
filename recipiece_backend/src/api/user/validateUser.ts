@@ -1,14 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ValidateUserRequestSchema, ValidateUserResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserValidationTokenTypes } from "../../util/constant";
 
-export const validateUser = async (request: AuthenticatedRequest<ValidateUserRequestSchema>): ApiResponse<ValidateUserResponseSchema> => {
+export const validateUser = async (request: AuthenticatedRequest<ValidateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<ValidateUserResponseSchema> => {
   const { token } = request.body;
 
-  const accountToken = await prisma.userValidationToken.findUnique({
+  const accountToken = await tx.userValidationToken.findUnique({
     where: {
       id: token,
       purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
@@ -32,7 +32,7 @@ export const validateUser = async (request: AuthenticatedRequest<ValidateUserReq
 
   if (now > tokenExpiry) {
     console.log(`${token} was expired!`);
-    await prisma.userValidationToken.delete({
+    await tx.userValidationToken.delete({
       where: {
         id: token,
       },
@@ -47,24 +47,22 @@ export const validateUser = async (request: AuthenticatedRequest<ValidateUserReq
   }
 
   // they passed all the validations, lets verify the account now
-  await prisma.$transaction(async (tx) => {
-    // verify the user
-    await tx.user.update({
-      where: {
-        id: accountToken.user_id,
-      },
-      data: {
-        validated: true,
-      },
-    });
+  // verify the user
+  await tx.user.update({
+    where: {
+      id: accountToken.user_id,
+    },
+    data: {
+      validated: true,
+    },
+  });
 
-    // clear out any account verification tokens they may have
-    await tx.userValidationToken.deleteMany({
-      where: {
-        user_id: accountToken.user_id,
-        purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
-      },
-    });
+  // clear out any account verification tokens they may have
+  await tx.userValidationToken.deleteMany({
+    where: {
+      user_id: accountToken.user_id,
+      purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
+    },
   });
 
   return [

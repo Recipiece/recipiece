@@ -16,7 +16,7 @@ describe("List User Tags", () => {
     const tags: UserTag[] = [];
 
     for (let i = 0; i < 20; i++) {
-      tags.push(await generateUserTag({ user_id: user.id }));
+      tags.push(await generateUserTag({ user_id: user.id, content: `tag ${i}` }));
     }
 
     // generate some extra tags that don't belong to the user
@@ -47,7 +47,7 @@ describe("List User Tags", () => {
 
   it("should page", async () => {
     for (let i = 0; i < 20; i++) {
-      await generateUserTag({ user_id: user.id });
+      await generateUserTag({ user_id: user.id, content: `tag ${i}` });
     }
 
     const response = await request(server)

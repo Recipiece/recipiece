@@ -1,9 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import { UpdateUserRequestSchema, UserPreferencesSchema, UserSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { Prisma, prisma } from "@recipiece/database";
+import { Prisma, PrismaTransaction } from "@recipiece/database";
+import { BadRequestError } from "../../util/error";
 
-export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequestSchema>): ApiResponse<UserSchema> => {
+export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<UserSchema> => {
   const requestUser = request.user;
   const { id: updateId, ...restBody } = request.body;
 
@@ -18,7 +19,7 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
 
   const updateBody: Prisma.UserUpdateInput = {};
   if ("username" in restBody) {
-    const matchingUser = await prisma.user.findFirst({
+    const matchingUser = await tx.user.findFirst({
       where: {
         username: {
           equals: restBody.username,
@@ -37,7 +38,7 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
     updateBody.username = restBody.username;
   }
   if ("email" in restBody) {
-    const matchingUser = await prisma.user.findFirst({
+    const matchingUser = await tx.user.findFirst({
       where: {
         email: {
           equals: restBody.email,
@@ -60,7 +61,7 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
   }
 
   try {
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await tx.user.update({
       where: {
         id: updateId,
       },
@@ -76,12 +77,6 @@ export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequest
       },
     ];
   } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.BAD_REQUEST,
-      {
-        message: "Cannot update user",
-      },
-    ];
+    throw new BadRequestError("Cannot update user");
   }
 };

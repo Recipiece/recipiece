@@ -1,11 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const deleteRecipeShare = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+export const deleteRecipeShare = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const shareId = +request.params.id;
 
-  const share = await prisma.recipeShare.findFirst({
+  const share = await tx.recipeShare.findFirst({
     where: {
       id: shareId,
       user_kitchen_membership: {
@@ -26,20 +26,10 @@ export const deleteRecipeShare = async (request: AuthenticatedRequest): ApiRespo
     ];
   }
 
-  try {
-    await prisma.recipeShare.delete({
-      where: {
-        id: share.id,
-      },
-    });
-    return [StatusCodes.OK, {}];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Internal server error",
-      },
-    ];
-  }
+  await tx.recipeShare.delete({
+    where: {
+      id: share.id,
+    },
+  });
+  return [StatusCodes.OK, {}];
 };
