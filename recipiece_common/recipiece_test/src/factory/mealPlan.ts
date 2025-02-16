@@ -38,14 +38,13 @@ export const generateMealPlanShare = async (share?: Partial<Omit<MealPlanShare, 
 };
 
 export const generateMealPlanItem = async (mealPlanItem?: Partial<Omit<MealPlanItem, "id">>, tx?: PrismaTransaction): Promise<MealPlanItem> => {
-  let mealPlan: MealPlan | undefined = undefined;
+  let mealPlan: MealPlan | null | undefined = undefined;
   if (mealPlanItem?.meal_plan_id) {
-    mealPlan =
-      (await (tx ?? prisma).mealPlan.findFirst({
-        where: {
-          id: mealPlanItem.meal_plan_id!,
-        },
-      })) ?? undefined;
+    mealPlan = await (tx ?? prisma).mealPlan.findFirst({
+      where: {
+        id: mealPlanItem.meal_plan_id,
+      },
+    });
   }
 
   if (!mealPlan) {

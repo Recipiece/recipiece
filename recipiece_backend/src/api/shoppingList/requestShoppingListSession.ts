@@ -1,14 +1,14 @@
-import { prisma, Redis, shoppingListSharesWithMemberships } from "@recipiece/database";
+import { PrismaTransaction, Redis, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { RequestShoppingListSessionResponseSchema } from "@recipiece/types";
 import { randomUUID } from "crypto";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const requestShoppingListSession = async (req: AuthenticatedRequest): ApiResponse<RequestShoppingListSessionResponseSchema> => {
+export const requestShoppingListSession = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<RequestShoppingListSessionResponseSchema> => {
   const user = req.user;
   const shoppingListId = +req.params.id;
 
-  const shoppingList = await prisma.$kysely
+  const shoppingList = await tx.$kysely
     .selectFrom("shopping_lists")
     .selectAll("shopping_lists")
     .where((eb) => {

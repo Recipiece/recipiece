@@ -1,13 +1,13 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { MealPlanSchema, UpdateMealPlanRequestSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPlanRequestSchema>): ApiResponse<MealPlanSchema> => {
+export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPlanRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanSchema> => {
   const { id: userId } = request.user;
   const { id: mealPlanId, ...restMealPlan } = request.body;
 
-  const mealPlan = await prisma.mealPlan.findFirst({
+  const mealPlan = await tx.mealPlan.findFirst({
     where: {
       user_id: userId,
       id: mealPlanId,
@@ -25,7 +25,7 @@ export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPla
 
   const anythingToUpdate = !!Object.values(restMealPlan).find((v) => !!v);
   if (anythingToUpdate) {
-    const updatedMealPlan = await prisma.mealPlan.update({
+    const updatedMealPlan = await tx.mealPlan.update({
       where: {
         id: mealPlanId,
       },

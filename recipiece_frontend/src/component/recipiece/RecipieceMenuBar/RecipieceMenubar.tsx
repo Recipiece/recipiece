@@ -239,8 +239,9 @@ export const RecipieceMenubar: FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => navigate("/kitchen")}>My Kitchen</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/account")}>My Account</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/kitchen")}>Kitchen</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/account")}>Account</DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => navigate("/notifications")}>Notifications</DropdownMenuItem> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onLogout}>Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
@@ -325,8 +326,9 @@ export const RecipieceMenubar: FC = () => {
           <MenubarMenu>
             <MenubarTrigger>Account</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={() => navigate("/kitchen")}>My Kitchen</MenubarItem>
-              <MenubarItem onClick={() => navigate("/account")}>My Account</MenubarItem>
+              <MenubarItem onClick={() => navigate("/kitchen")}>Kitchen</MenubarItem>
+              <MenubarItem onClick={() => navigate("/account")}>Settings</MenubarItem>
+              {/* <MenubarItem onClick={() => navigate("/notifications")}>Notifications</MenubarItem> */}
               <MenubarSeparator />
               <MenubarItem onClick={onLogout}>Sign Out</MenubarItem>
             </MenubarContent>

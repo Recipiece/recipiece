@@ -13,3 +13,4 @@ export * from "./Register";
 export * from "./ResetPassword";
 export * from "./ShoppingListView";
 export * from "./VerifyAccount";
+export * from "./NotificationsView";

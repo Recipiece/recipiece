@@ -1,8 +1,10 @@
+import { PrismaTransaction } from "@recipiece/database";
 import { ParseRecipeFromURLRequestSchema, ParsedFromURLRecipe, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { UnprocessableEntityError } from "../../util/error";
 
-export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>): ApiResponse<RecipeSchema> => {
+export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>, _: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const recipeBody = req.body;
 
   try {
@@ -45,20 +47,10 @@ export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFr
       ];
     } else {
       console.error("failed to parse recipe", responseBody);
-      return [
-        StatusCodes.UNPROCESSABLE_ENTITY,
-        {
-          message: "Unable to parse recipe",
-        },
-      ];
+      throw new UnprocessableEntityError("Unable to parse recipe");
     }
   } catch (err) {
     console.error(err);
-    return [
-      StatusCodes.UNPROCESSABLE_ENTITY,
-      {
-        message: "Unable to parse recipe",
-      },
-    ];
+    throw new UnprocessableEntityError("Unable to parse recipe");
   }
 };

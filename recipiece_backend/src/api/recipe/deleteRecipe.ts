@@ -1,12 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const deleteRecipe = async (req: AuthenticatedRequest): ApiResponse<{ readonly deleted: boolean }> => {
+export const deleteRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{ readonly deleted: boolean }> => {
   const recipeId = +req.params.id;
   const user = req.user;
 
-  const recipe = await prisma.recipe.findUnique({
+  const recipe = await tx.recipe.findUnique({
     where: {
       id: recipeId,
     },
@@ -31,15 +31,10 @@ export const deleteRecipe = async (req: AuthenticatedRequest): ApiResponse<{ rea
     ];
   }
 
-  try {
-    await prisma.recipe.delete({
-      where: {
-        id: recipeId,
-      },
-    });
-    return [StatusCodes.OK, { deleted: true }];
-  } catch (error) {
-    console.error(error);
-    return [StatusCodes.BAD_REQUEST, { deleted: false }];
-  }
+  await tx.recipe.delete({
+    where: {
+      id: recipeId,
+    },
+  });
+  return [StatusCodes.OK, { deleted: true }];
 };

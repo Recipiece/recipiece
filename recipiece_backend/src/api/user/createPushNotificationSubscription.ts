@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { CreatePushNotificationRequestSchema, EmptySchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const createPushNotificationSubscription = async (request: AuthenticatedRequest<CreatePushNotificationRequestSchema>): ApiResponse<EmptySchema> => {
+export const createPushNotificationSubscription = async (request: AuthenticatedRequest<CreatePushNotificationRequestSchema>, tx: PrismaTransaction): ApiResponse<EmptySchema> => {
   const { subscription_data, device_id } = request.body;
   const userId = request.user.id;
 
@@ -15,7 +15,7 @@ export const createPushNotificationSubscription = async (request: AuthenticatedR
    * 4. User B logged into the device
    * 5. Uh oh, now user B is getting push notifications meant for user A
    */
-  const existingSubscription = await prisma.userPushNotificationSubscription.findFirst({
+  const existingSubscription = await tx.userPushNotificationSubscription.findFirst({
     where: {
       device_id: device_id,
     },
@@ -29,7 +29,7 @@ export const createPushNotificationSubscription = async (request: AuthenticatedR
     ];
   }
 
-  await prisma.userPushNotificationSubscription.upsert({
+  await tx.userPushNotificationSubscription.upsert({
     where: {
       user_id_device_id: {
         user_id: userId,

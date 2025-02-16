@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { SetUserKitchenMembershipStatusRequestSchema, SetUserKitchenMembershipStatusResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { UserKitchenInvitationStatus } from "../../../util/constant";
@@ -9,11 +9,12 @@ import { UserKitchenInvitationStatus } from "../../../util/constant";
  * The requesting user can flip the status to confirmed or denied at any time they feel.
  */
 export const setUserKitchenMembershipStatus = async (
-  request: AuthenticatedRequest<SetUserKitchenMembershipStatusRequestSchema>
+  request: AuthenticatedRequest<SetUserKitchenMembershipStatusRequestSchema>,
+  tx: PrismaTransaction
 ): ApiResponse<SetUserKitchenMembershipStatusResponseSchema> => {
   const { id, status } = request.body;
 
-  const membership = await prisma.userKitchenMembership.findFirst({
+  const membership = await tx.userKitchenMembership.findFirst({
     where: {
       id: id,
       destination_user_id: request.user.id,
@@ -29,34 +30,24 @@ export const setUserKitchenMembershipStatus = async (
     ];
   }
 
-  try {
-    const updatedRecord = await prisma.userKitchenMembership.update({
-      where: {
-        id: id,
-        destination_user_id: request.user.id,
-      },
-      data: {
-        status: status,
-      },
-      include: {
-        destination_user: true,
-        source_user: true,
-      },
-    });
-    return [
-      StatusCodes.OK,
-      {
-        ...updatedRecord,
-        status: updatedRecord.status as typeof UserKitchenInvitationStatus.ACCEPTED | typeof UserKitchenInvitationStatus.DENIED,
-      },
-    ];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Internal server error",
-      },
-    ];
-  }
+  const updatedRecord = await tx.userKitchenMembership.update({
+    where: {
+      id: id,
+      destination_user_id: request.user.id,
+    },
+    data: {
+      status: status,
+    },
+    include: {
+      destination_user: true,
+      source_user: true,
+    },
+  });
+  return [
+    StatusCodes.OK,
+    {
+      ...updatedRecord,
+      status: updatedRecord.status as typeof UserKitchenInvitationStatus.ACCEPTED | typeof UserKitchenInvitationStatus.DENIED,
+    },
+  ];
 };

@@ -1,13 +1,13 @@
 import { ForkRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequestSchema>): ApiResponse<RecipeSchema> => {
+export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const { original_recipe_id } = request.body;
   const user = request.user;
-  const originalRecipe = await prisma.recipe.findFirst({
+  const originalRecipe = await tx.recipe.findFirst({
     where: {
       id: original_recipe_id,
       recipe_shares: {
@@ -55,7 +55,7 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
     return restStep;
   });
 
-  const forkedRecipe = await prisma.recipe.create({
+  const forkedRecipe = await tx.recipe.create({
     data: {
       ...restRecipe,
       user_id: user.id,

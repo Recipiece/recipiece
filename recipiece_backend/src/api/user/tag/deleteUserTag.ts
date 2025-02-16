@@ -1,41 +1,31 @@
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { StatusCodes } from "http-status-codes";
 
-export const deleteUserTag = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+export const deleteUserTag = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const tagId = +request.params.id;
 
-  try {
-    const tag = await prisma.userTag.findFirst({
-      where: {
-        user_id: request.user.id,
-        id: tagId,
-      },
-    });
+  const tag = await tx.userTag.findFirst({
+    where: {
+      user_id: request.user.id,
+      id: tagId,
+    },
+  });
 
-    if (!tag) {
-      return [
-        StatusCodes.NOT_FOUND,
-        {
-          message: `Tag ${tagId} not found`,
-        },
-      ];
-    }
-
-    await prisma.userTag.delete({
-      where: {
-        id: tag.id,
-      },
-    });
-
-    return [StatusCodes.OK, {}];
-  } catch (err) {
-    console.error(err);
+  if (!tag) {
     return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
+      StatusCodes.NOT_FOUND,
       {
-        message: "Unable to delete tag",
+        message: `Tag ${tagId} not found`,
       },
     ];
   }
+
+  await tx.userTag.delete({
+    where: {
+      id: tag.id,
+    },
+  });
+
+  return [StatusCodes.OK, {}];
 };

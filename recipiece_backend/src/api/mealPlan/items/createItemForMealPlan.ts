@@ -1,15 +1,15 @@
-import { mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
 import { CreateMealPlanItemRequestSchema, MealPlanItemJobDataSchema, MealPlanItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanItemQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { JobType } from "../../../util/constant";
 
-export const createItemForMealPlan = async (request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>): ApiResponse<MealPlanItemSchema> => {
+export const createItemForMealPlan = async (request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanItemSchema> => {
   const user = request.user;
   const { meal_plan_id, ...restMealPlanItem } = request.body;
 
-  const mealPlan = await prisma.$kysely
+  const mealPlan = await tx.$kysely
     .selectFrom("meal_plans")
     .selectAll("meal_plans")
     .where((eb) => {
@@ -31,14 +31,14 @@ export const createItemForMealPlan = async (request: AuthenticatedRequest<Create
 
   // check the recipe ownership
   if (restMealPlanItem.recipe_id) {
-    const ownedRecipe = await prisma.$kysely
+    const ownedRecipe = await tx.$kysely
       .selectFrom("recipes")
       .select("recipes.id")
       .where("recipes.user_id", "=", user.id)
       .where("recipes.id", "=", restMealPlanItem.recipe_id)
       .executeTakeFirst();
     if (!ownedRecipe) {
-      const sharedRecipe = await prisma.$kysely
+      const sharedRecipe = await tx.$kysely
         .selectFrom("recipe_shares")
         .select("recipe_shares.recipe_id")
         .leftJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "recipe_shares.user_kitchen_membership_id")
@@ -60,55 +60,42 @@ export const createItemForMealPlan = async (request: AuthenticatedRequest<Create
     }
   }
 
-  try {
-    return await prisma.$transaction(async (tx) => {
-      // create the item
-      const item = await tx.mealPlanItem.create({
-        data: {
-          ...restMealPlanItem,
-          meal_plan_id: mealPlan.id,
-        },
+  const item = await tx.mealPlanItem.create({
+    data: {
+      ...restMealPlanItem,
+      meal_plan_id: mealPlan.id,
+    },
+    include: {
+      recipe: {
         include: {
-          recipe: {
-            include: {
-              ingredients: true,
-              steps: true,
-            },
-          },
+          ingredients: true,
+          steps: true,
         },
-      });
-
-      // create a job for processing the item
-      const job = await tx.sideJob.create({
-        data: {
-          type: JobType.MEAL_PLAN_ITEM,
-          user_id: user.id,
-          job_data: <MealPlanItemJobDataSchema>{
-            meal_plan_id: mealPlan.id,
-            meal_plan_item_id: item.id,
-          },
-        },
-      });
-
-      // enqueue the job
-      await mealPlanItemQueue.add(
-        job.id,
-        {},
-        {
-          jobId: job.id,
-          delay: 10000,
-        }
-      );
-
-      return [StatusCodes.OK, item];
-    });
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Unable to create meal plan item",
       },
-    ];
-  }
+    },
+  });
+
+  // create a job for processing the item
+  const job = await tx.sideJob.create({
+    data: {
+      type: JobType.MEAL_PLAN_ITEM,
+      user_id: user.id,
+      job_data: <MealPlanItemJobDataSchema>{
+        meal_plan_id: mealPlan.id,
+        meal_plan_item_id: item.id,
+      },
+    },
+  });
+
+  // enqueue the job
+  await mealPlanItemQueue.add(
+    job.id,
+    {},
+    {
+      jobId: job.id,
+      delay: 10000,
+    }
+  );
+
+  return [StatusCodes.OK, item];
 };

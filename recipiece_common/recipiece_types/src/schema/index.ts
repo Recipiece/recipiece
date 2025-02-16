@@ -10,6 +10,7 @@ export * from "./sideJob";
 export * from "./user";
 export * from "./websocket";
 export * from "./list";
+export * from "./notification";
 
 export const YEmptySchema = object({}).strict().noUnknown();
 

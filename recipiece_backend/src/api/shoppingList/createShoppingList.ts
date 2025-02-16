@@ -1,27 +1,17 @@
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { CreateShoppingListRequestSchema, ShoppingListSchema } from "@recipiece/types";
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 
-export const createShoppingList = async (request: AuthenticatedRequest<CreateShoppingListRequestSchema>): ApiResponse<ShoppingListSchema> => {
+export const createShoppingList = async (request: AuthenticatedRequest<CreateShoppingListRequestSchema>, tx: PrismaTransaction): ApiResponse<ShoppingListSchema> => {
   const user = request.user;
   const body = request.body;
 
-  try {
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        ...body,
-        user_id: user.id,
-      },
-    });
-    return [StatusCodes.CREATED, shoppingList];
-  } catch (error) {
-    console.error(error);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Unable to create shopping list",
-      },
-    ];
-  }
+  const shoppingList = await tx.shoppingList.create({
+    data: {
+      ...body,
+      user_id: user.id,
+    },
+  });
+  return [StatusCodes.CREATED, shoppingList];
 };

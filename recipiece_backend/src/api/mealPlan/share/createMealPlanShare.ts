@@ -1,17 +1,18 @@
-import { prisma } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { CreateMealPlanShareRequestSchema, MealPlanShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { sendMealPlanSharedPushNotification } from "../../../util/pushNotification";
+import { ConflictError } from "../../../util/error";
 
 /**
  * Allow a user to share a meal plan they own with another user.
  */
-export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMealPlanShareRequestSchema>): ApiResponse<MealPlanShareSchema> => {
+export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMealPlanShareRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanShareSchema> => {
   const { meal_plan_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 
-  const membership = await prisma.userKitchenMembership.findUnique({
+  const membership = await tx.userKitchenMembership.findUnique({
     where: {
       id: user_kitchen_membership_id,
       source_user_id: user.id,
@@ -32,7 +33,7 @@ export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMe
     ];
   }
 
-  const mealPlan = await prisma.mealPlan.findUnique({
+  const mealPlan = await tx.mealPlan.findUnique({
     where: {
       id: meal_plan_id,
       user_id: user.id,
@@ -49,7 +50,7 @@ export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMe
   }
 
   try {
-    const share = await prisma.mealPlanShare.create({
+    const share = await tx.mealPlanShare.create({
       data: {
         meal_plan_id: mealPlan.id,
         user_kitchen_membership_id: user_kitchen_membership_id,
@@ -59,7 +60,7 @@ export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMe
       },
     });
 
-    const subscriptions = await prisma.userPushNotificationSubscription.findMany({
+    const subscriptions = await tx.userPushNotificationSubscription.findMany({
       where: {
         user_id: membership.destination_user_id,
       },
@@ -73,20 +74,8 @@ export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMe
     return [StatusCodes.OK, share];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {
-      return [
-        StatusCodes.CONFLICT,
-        {
-          message: "Meal plan has already been shared",
-        },
-      ];
-    } else {
-      console.error(err);
-      return [
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        {
-          message: "Unable to share meal plan",
-        },
-      ];
+      throw new ConflictError("Meal plan has already been shared");
     }
+    throw err;
   }
 };

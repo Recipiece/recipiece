@@ -1,14 +1,17 @@
-import { collapseOrders, MAX_NUM_ITEMS, prisma, shoppingListSharesWithMemberships } from "@recipiece/database";
+import { collapseOrders, MAX_NUM_ITEMS, PrismaTransaction, shoppingListSharesWithMemberships } from "@recipiece/database";
 import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { broadcastMessageViaEntityId } from "../../middleware";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const appendShoppingListItems = async (request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>): ApiResponse<AppendShoppingListItemsResponseSchema> => {
+export const appendShoppingListItems = async (
+  request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<AppendShoppingListItemsResponseSchema> => {
   const shoppingListId = request.body.shopping_list_id;
   const user = request.user;
 
-  const shoppingList = await prisma.$kysely
+  const shoppingList = await tx.$kysely
     .selectFrom("shopping_lists")
     .selectAll("shopping_lists")
     .where((eb) => {
@@ -37,11 +40,11 @@ export const appendShoppingListItems = async (request: AuthenticatedRequest<Appe
     };
   });
 
-  await prisma.shoppingListItem.createMany({
+  await tx.shoppingListItem.createMany({
     data: sanitizedItems,
   });
 
-  const collapsed = await collapseOrders(shoppingListId);
+  const collapsed = await collapseOrders(shoppingListId, tx);
   const websocketMessage = {
     responding_to_action: "append_from_recipe",
     items: collapsed,

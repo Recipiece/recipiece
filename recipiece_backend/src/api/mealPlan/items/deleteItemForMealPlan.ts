@@ -1,12 +1,12 @@
-import { mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const deleteItemForMealPlan = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+export const deleteItemForMealPlan = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const user = request.user;
   const { id: mealPlanId, itemId: mealPlanItemId } = request.params;
 
-  const mealPlanItem = await prisma.$kysely
+  const mealPlanItem = await tx.$kysely
     .selectFrom("meal_plans")
     .leftJoin("meal_plan_items", "meal_plan_items.meal_plan_id", "meal_plans.id")
     .selectAll("meal_plan_items")
@@ -28,19 +28,9 @@ export const deleteItemForMealPlan = async (request: AuthenticatedRequest): ApiR
     ];
   }
 
-  try {
-    await prisma.mealPlanItem.delete({
-      where: { id: mealPlanItem.id! },
-    });
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Unable to delete meal plan item",
-      },
-    ];
-  }
+  await tx.mealPlanItem.delete({
+    where: { id: mealPlanItem.id! },
+  });
 
   return [StatusCodes.OK, {}];
 };

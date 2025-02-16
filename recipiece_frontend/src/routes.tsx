@@ -6,13 +6,13 @@ import {
   KitchenMembershipPage,
   KitchenPage,
   LoginPage,
+  MealPlanConfigurationPage,
   MealPlanViewPage,
   RecipeEditPage,
   RecipeViewPage,
   RegisterPage,
   ResetPasswordPage,
-  ShoppingListViewPage,
-  MealPlanConfigurationPage,
+  ShoppingListViewPage
 } from "./page";
 
 export const unauthenticatedRoutes = [
@@ -79,6 +79,10 @@ export const authenticatedRoutes = [
     path: "/kitchen/:kitchenMembershipId",
     element: KitchenMembershipPage,
   },
+  // {
+  //   path: "/notifications",
+  //   element: NotificationsViewPage,
+  // },
 ];
 
 export const unauthenticatedPaths = unauthenticatedRoutes.map((r) => r.path);

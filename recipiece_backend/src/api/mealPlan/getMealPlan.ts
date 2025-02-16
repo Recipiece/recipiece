@@ -1,13 +1,13 @@
-import { mealPlanSharesSubquery, mealPlanSharesWithMemberships, prisma } from "@recipiece/database";
+import { mealPlanSharesSubquery, mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
 import { MealPlanSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getMealPlan = async (request: AuthenticatedRequest): ApiResponse<MealPlanSchema> => {
+export const getMealPlan = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<MealPlanSchema> => {
   const user = request.user;
   const mealPlanId = +request.params.id;
 
-  const mealPlan = await prisma.$kysely
+  const mealPlan = await tx.$kysely
     .selectFrom("meal_plans")
     .selectAll("meal_plans")
     .select((eb) => {
