@@ -8,7 +8,10 @@ import { Prisma, PrismaTransaction } from "@recipiece/database";
  * List meal plan shares that are targeting the requesting user or the requesting user has sent.
  * Only user_kitchen_memberships with a status of "accepted" will be considered.
  */
-export const listMealPlanShares = async (request: AuthenticatedRequest<any, ListMealPlanSharesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListMealPlanSharesResponseSchema> => {
+export const listMealPlanShares = async (
+  request: AuthenticatedRequest<any, ListMealPlanSharesQuerySchema>,
+  tx: PrismaTransaction
+): ApiResponse<ListMealPlanSharesResponseSchema> => {
   const { page_number, page_size, targeting_self, from_self, user_kitchen_membership_id } = request.query;
   const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
 

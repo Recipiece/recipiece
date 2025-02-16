@@ -38,15 +38,11 @@ describe("Get Notification", () => {
       notification_id: notification.id,
     });
 
-    const response = await request(server)
-      .get(`/notification/${notification.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/notification/${notification.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const returnedNotification = response.body as NotificationSchema;
     expect(returnedNotification.id).toBe(notification.id);
-
   });
 
   it("should not get a notification attached to a non-accepted user kitchen membership", async () => {
@@ -66,10 +62,7 @@ describe("Get Notification", () => {
       notification_id: notification.id,
     });
 
-    const response = await request(server)
-      .get(`/notification/${notification.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/notification/${notification.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
@@ -82,10 +75,7 @@ describe("Get Notification", () => {
       read_by_user_id: null,
     });
 
-    const response = await request(server)
-      .get(`/notification/${notification.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).get(`/notification/${notification.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

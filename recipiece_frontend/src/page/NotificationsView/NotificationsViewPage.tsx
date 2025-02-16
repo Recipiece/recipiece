@@ -8,21 +8,17 @@ export const NotificationsViewPage: FC = () => {
     page_number: 0,
   });
 
-  const { data: notifications, isLoading: isLoadingNotifications } = useListNotificationsQuery({...filters});
+  const { data: notifications, isLoading: isLoadingNotifications } = useListNotificationsQuery({ ...filters });
   const { mutateAsync: setNotificationStatus } = useSetNotificationStatusMutation();
 
-  const onAccordionItemToggled = useCallback((values: string[]) => {
-    
-  }, []);
+  const onAccordionItemToggled = useCallback((values: string[]) => {}, []);
 
   return (
     <Stack>
       <H2>Notifications</H2>
       <LoadingGroup isLoading={isLoadingNotifications} variant="spinner" className="h-8 w-8">
         <Accordion type="multiple" onValueChange={onAccordionItemToggled}>
-          {(notifications?.data ?? []).length === 0 && (
-            <p className="text-center">Your kitchen&apos;s all clean!</p>
-          )}
+          {(notifications?.data ?? []).length === 0 && <p className="text-center">Your kitchen&apos;s all clean!</p>}
           {(notifications?.data ?? []).map((notification) => {
             return (
               <AccordionItem key={notification.id} value={`${notification.id}`}>

@@ -34,7 +34,7 @@ export const generateNotification = async (notification?: Partial<Omit<Notificat
       content: notification?.content ?? faker.word.words({ count: { min: 2, max: 15 } }),
       read_by_user_id: readByUserId,
       read_at: readAt,
-      title: notification?.title ?? faker.word.words({count: {min: 2, max: 5}}),
+      title: notification?.title ?? faker.word.words({ count: { min: 2, max: 5 } }),
     },
   });
 };

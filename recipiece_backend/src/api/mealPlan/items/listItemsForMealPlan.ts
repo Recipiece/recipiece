@@ -6,7 +6,7 @@ import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const listItemsForMealPlan = async (
   request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>,
-  tx: PrismaTransaction,
+  tx: PrismaTransaction
 ): ApiResponse<ListItemsForMealPlanResponseSchema> => {
   const { start_date, end_date, page_number, page_size } = request.query;
   const pageSize = page_size ?? DEFAULT_PAGE_SIZE;
