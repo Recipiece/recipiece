@@ -1,6 +1,8 @@
+import { faker } from "@faker-js/faker";
 import { prisma } from "@recipiece/database";
 import {
   generateCookbook,
+  generateHashedPassword,
   generateMealPlan,
   generateMealPlanItem,
   generateRecipe,
@@ -12,25 +14,8 @@ import {
   generateUserCredentials,
   generateUserKitchenMembership,
   generateUserTag,
-  randomInt,
 } from "@recipiece/test";
-import argon2 from "argon2";
 import { DateTime } from "luxon";
-
-const hashPassword = async (plainPassword: string) => {
-  try {
-    const hash = await argon2.hash(plainPassword, {
-      type: argon2.argon2id, // Argon2id variant is the most secure
-      memoryCost: 2 ** 16, // Memory cost parameter (e.g., 64 MB)
-      timeCost: 5, // Time cost (e.g., 5 iterations)
-      parallelism: 1, // Parallelism factor (e.g., single-threaded)
-    });
-    return hash;
-  } catch (err) {
-    console.error(err);
-    return undefined;
-  }
-};
 
 const deleteExistingUsers = async () => {
   await prisma.user.deleteMany();
@@ -47,7 +32,7 @@ const seedDevUser = async () => {
   });
   await generateUserCredentials({
     user_id: user.id,
-    password_hash: (await hashPassword("password"))!,
+    password_hash: (await generateHashedPassword("password"))!,
   });
 
   const gennedRecipes = [];
@@ -104,8 +89,10 @@ const seedDevUser = async () => {
     }
   }
 
-  for (let i = 0; i < randomInt({ min: 5, max: 20 }); i++) {
-    await generateUserTag({ user_id: user.id });
+  const numTags = faker.number.int({ min: 5, max: 20 });
+  const tagContents = faker.helpers.uniqueArray(faker.word.words, numTags);
+  for (let i = 0; i < numTags; i++) {
+    await generateUserTag({ user_id: user.id, content: tagContents.pop() });
   }
 
   return user;
@@ -122,7 +109,7 @@ const seedEmptyUser = async () => {
   });
   await generateUserCredentials({
     user_id: user.id,
-    password_hash: (await hashPassword("password"))!,
+    password_hash: (await generateHashedPassword("password"))!,
   });
 
   return user;
@@ -139,7 +126,7 @@ const seedOtherUser = async () => {
   });
   await generateUserCredentials({
     user_id: user.id,
-    password_hash: (await hashPassword("password"))!,
+    password_hash: (await generateHashedPassword("password"))!,
   });
 
   await generateRecipe({

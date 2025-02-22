@@ -26,6 +26,7 @@ const config: Configuration = {
           path.resolve(__dirname, "./src"),
           path.resolve(__dirname, "../recipiece_common/recipiece_types"),
           path.resolve(__dirname, "../recipiece_common/recipiece_conversion"),
+          path.resolve(__dirname, "../recipiece_common/recipiece_constant"),
         ],
       },
       {
@@ -54,6 +55,7 @@ const config: Configuration = {
     alias: {
       "@recipiece/types": path.resolve(__dirname, "../recipiece_common/recipiece_types/src"),
       "@recipiece/conversion": path.resolve(__dirname, "../recipiece_common/recipiece_conversion/src"),
+      "@recipiece/constant": path.resolve(__dirname, "../recipiece_common/recipiece_constant/src"),
     },
   },
   output: {

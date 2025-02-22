@@ -1,5 +1,6 @@
+import { faker } from "@faker-js/faker";
 import { prisma, User } from "@recipiece/database";
-import { generateUserTag, randomWord } from "@recipiece/test";
+import { generateUserTag } from "@recipiece/test";
 import { CreateRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -50,10 +51,11 @@ describe("Create Recipe", () => {
   });
 
   it("should attach the provided user tags", async () => {
-    const existingTagToAttach = await generateUserTag({ user_id: user.id });
+    const tagContents = faker.helpers.uniqueArray(faker.word.words, 5);
+    const existingTagToAttach = await generateUserTag({ user_id: user.id, content: tagContents.pop() });
     // generate an extra one just to make some noise
-    const extraTag = await generateUserTag({ user_id: user.id });
-    const newTagContent = randomWord();
+    const extraTag = await generateUserTag({ user_id: user.id, content: tagContents.pop() });
+    const newTagContent = tagContents.join(" ");
 
     const expectedBody = <CreateRecipeRequestSchema>{
       name: "My Test Recipe",

@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { Prisma, prisma, PrismaTransaction, User, UserCredentials, UserKitchenMembership, UserTag } from "@recipiece/database";
+import { prisma, PrismaTransaction, User, UserCredentials, UserKitchenMembership, UserTag } from "@recipiece/database";
+import argon2 from "argon2";
 
 export const generateUserTag = async (tag?: Partial<Omit<UserTag, "id">>, tx?: PrismaTransaction) => {
   const userId = tag?.user_id ?? (await generateUser(undefined, tx)).id;
@@ -38,6 +39,21 @@ export const generateUserCredentials = async (userCredentials?: Partial<Omit<Use
       created_at: userCredentials?.created_at ?? new Date(),
     },
   });
+};
+
+export const generateHashedPassword = async (plainPassword: string): Promise<string | undefined> => {
+  try {
+    const hash = await argon2.hash(plainPassword, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16,
+      timeCost: 5,
+      parallelism: 1,
+    });
+    return hash;
+  } catch (err) {
+    console.error(err);
+    return undefined;
+  }
 };
 
 export const generateUser = async (user?: Partial<Omit<User, "id">>, tx?: PrismaTransaction): Promise<User> => {

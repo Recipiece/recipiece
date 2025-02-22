@@ -1,0 +1,25 @@
+{
+  "name": "recipiece_e2e",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.13.5",
+    "dotenv": "^16.4.7",
+    "eslint-plugin-playwright": "^2.2.0",
+    "prettier": "^3.5.1"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:ios": "playwright test --project=ios",
+    "test:android": "playwright test --project=android",
+    "test:safari": "playwright test --project=webkit",
+    "test:firefox": "playwright test --project=firefox",
+    "test:chrome": "playwright test --project=chromium",
+    "lint": "prettier . --write"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.5.0"
+  }
+}

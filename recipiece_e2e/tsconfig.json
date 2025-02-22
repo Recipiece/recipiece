@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@recipiece/test": ["../recipiece_common/recipiece_test/src"],
+      "@recipiece/database": ["../recipiece_common/recipiece_database/src"],
+      "@recipiece/constant": ["../recipiece_common/recipiece_constant/src"]
+    }
+  },
+  "references": [{ "path": "../recipiece_common/recipiece_test" }, { "path": "../recipiece_common/recipiece_database" }, { "path": "../recipiece_common/recipiece_constant" }]
+}

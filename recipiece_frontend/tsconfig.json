@@ -19,8 +19,9 @@
     "jsx": "react-jsx",
     "paths": {
       "@recipiece/types": ["../recipiece_common/recipiece_types/src/index.ts"],
-      "@recipiece/conversion": ["../recipiece_common/recipiece_conversion/src/index.ts"]
+      "@recipiece/conversion": ["../recipiece_common/recipiece_conversion/src/index.ts"],
+      "@recipiece/constant": ["../recipiece_common/recipiece_constant/src/index.ts"],
     }
   },
-  "include": ["./src/**/*", "../recipiece_common/recipiece_types/src/**/*", "../recipiece_common/recipiece_conversion/src/**/*"]
+  "include": ["./src/**/*", "../recipiece_common/recipiece_types/src/**/*", "../recipiece_common/recipiece_conversion/src/**/*", "../recipiece_common/recipiece_constant/src/**/*"]
 }
