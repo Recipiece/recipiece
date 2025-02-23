@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DataTestId } from "@recipiece/constant";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useCreateUserMutation } from "../../api";
 import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../component";
-import { DataTestID } from "@recipiece/constant";
 
 const CreateAccountFormSchema = z
   .object({
@@ -56,7 +56,7 @@ export const CreateAccountPage: FC = () => {
       toast({
         title: "Account Created!",
         description: "You can now log into Recipiece with the email and password you provided",
-        dataTestId: DataTestID.RegisterPage.TOAST_SUCCESS,
+        dataTestId: DataTestId.RegisterPage.TOAST_SUCCESS,
       });
       navigate("/login");
     } catch {
@@ -64,7 +64,7 @@ export const CreateAccountPage: FC = () => {
         title: "Unable to create account",
         description: "Recipiece couldn't create an account with the provided information. Please try again later.",
         variant: "destructive",
-        dataTestId: DataTestID.RegisterPage.TOAST_FAILURE,
+        dataTestId: DataTestId.RegisterPage.TOAST_FAILURE,
       });
     }
   };
@@ -74,13 +74,13 @@ export const CreateAccountPage: FC = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Stack>
-            <FormInput data-testid={DataTestID.RegisterPage.INPUT_EMAIL} type="text" name="email" label="Email" />
-            <FormInput data-testid={DataTestID.RegisterPage.INPUT_USERNAME} type="text" name="username" label="Username" />
-            <FormInput data-testid={DataTestID.RegisterPage.INPUT_PASSWORD} type="password" name="password" label="Password" />
-            <FormInput data-testid={DataTestID.RegisterPage.INPUT_CONFIRM_PASSWORD} type="password" name="confirmPassword" label="Confirm Password" />
-            <SubmitButton data-testid={DataTestID.RegisterPage.BUTTON_CREATE_ACCOUNT}>Create Account</SubmitButton>
+            <FormInput data-testid={DataTestId.RegisterPage.INPUT_EMAIL} type="text" name="email" label="Email" />
+            <FormInput data-testid={DataTestId.RegisterPage.INPUT_USERNAME} type="text" name="username" label="Username" />
+            <FormInput data-testid={DataTestId.RegisterPage.INPUT_PASSWORD} type="password" name="password" label="Password" />
+            <FormInput data-testid={DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD} type="password" name="confirmPassword" label="Confirm Password" />
+            <SubmitButton data-testid={DataTestId.RegisterPage.BUTTON_CREATE_ACCOUNT}>Create Account</SubmitButton>
             <Button
-              data-testid={DataTestID.RegisterPage.BUTTON_LOGIN}
+              data-testid={DataTestId.RegisterPage.BUTTON_LOGIN}
               variant="link"
               onClick={() => {
                 navigate("/login");

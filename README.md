@@ -5,9 +5,6 @@ A recipe webapp.
 The current release is `stand_mixer`
 The next release will be `slotted_spatula`
 
-# Serving
-
-
 # About
 Recipiece is a progressive webapp written using React and NodeJS primarily.
 

@@ -1,6 +1,5 @@
-import { faker } from "@faker-js/faker";
 import { User, prisma } from "@recipiece/database";
-import { generateRecipeTagAttachment, generateRecipeWithIngredientsAndSteps, generateUserTag } from "@recipiece/test";
+import { generateRecipeTagAttachment, generateRecipeWithIngredientsAndSteps, generateUserTag, tagGenerator } from "@recipiece/test";
 import { RecipeSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -120,7 +119,7 @@ describe("Update Recipes", () => {
       user_id: user.id,
     });
 
-    const newTagContent = faker.word.words({ count: { min: 1, max: 5 } }).toUpperCase();
+    const newTagContent = [tagGenerator.next().value, tagGenerator.next().value].join(" ").toUpperCase();
 
     const response = await request(server)
       .put("/recipe")

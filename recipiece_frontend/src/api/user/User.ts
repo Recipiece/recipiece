@@ -2,6 +2,7 @@ import {
   CreatePushNotificationRequestSchema,
   CreateUserRequestSchema,
   CreateUserResponseSchema,
+  IssueForgotPasswordTokenRequestSchema,
   UpdateUserRequestSchema,
   UserSchema,
   YCreateUserResponseSchema,
@@ -206,10 +207,10 @@ export const useRequestVerifyAccountMutation = (args?: MutationArgs) => {
   });
 };
 
-export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, unknown>) => {
+export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, IssueForgotPasswordTokenRequestSchema>) => {
   const { poster } = usePost();
 
-  const mutation = async (body: { readonly username: string }) => {
+  const mutation = async (body: IssueForgotPasswordTokenRequestSchema) => {
     const response = await poster<typeof body, never>({
       path: "/user/request-token/forgot-password",
       body: { ...body },

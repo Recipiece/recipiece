@@ -1,1 +1,2 @@
-export * as DataTestID from "./dataTestId";
+export * as DataTestId from "./dataTestId";
+export * as Data from "./data";

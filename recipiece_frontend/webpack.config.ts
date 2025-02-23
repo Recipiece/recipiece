@@ -89,7 +89,7 @@ const config: Configuration = {
     }),
   ],
   devServer: {
-    port: 3000,
+    port: process.env.DEV_PORT ? +process.env.DEV_PORT : 3000,
     historyApiFallback: true,
     liveReload: true,
     static: {

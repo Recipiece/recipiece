@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { PrismaTransaction } from "@recipiece/database";
 import { ValidateUserRequestSchema, ValidateUserResponseSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { UserValidationTokenTypes } from "../../util/constant";
+import { Data } from "@recipiece/constant";
 
 export const validateUser = async (request: AuthenticatedRequest<ValidateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<ValidateUserResponseSchema> => {
   const { token } = request.body;
@@ -11,7 +11,7 @@ export const validateUser = async (request: AuthenticatedRequest<ValidateUserReq
   const accountToken = await tx.userValidationToken.findUnique({
     where: {
       id: token,
-      purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
+      purpose: Data.UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
     },
   });
 
@@ -27,7 +27,7 @@ export const validateUser = async (request: AuthenticatedRequest<ValidateUserReq
 
   const now = DateTime.utc();
   const tokenExpiry = DateTime.fromJSDate(accountToken.created_at).plus({
-    milliseconds: UserValidationTokenTypes.ACCOUNT_VERIFICATION.duration_ms,
+    milliseconds: Data.UserValidationTokenTypes.ACCOUNT_VERIFICATION.duration_ms,
   });
 
   if (now > tokenExpiry) {
@@ -61,7 +61,7 @@ export const validateUser = async (request: AuthenticatedRequest<ValidateUserReq
   await tx.userValidationToken.deleteMany({
     where: {
       user_id: accountToken.user_id,
-      purpose: UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
+      purpose: Data.UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose,
     },
   });
 

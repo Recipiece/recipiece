@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { Cookbook, prisma, PrismaTransaction, RecipeCookbookAttachment } from "@recipiece/database";
 import { generateRecipe } from "./recipe";
 import { generateUser } from "./user";
+import { cookbookNameGenerator } from "../generator";
 
 export const generateRecipeCookbookAttachment = async (attachment?: Partial<RecipeCookbookAttachment>, tx?: PrismaTransaction) => {
   const recipeId = attachment?.recipe_id ?? (await generateRecipe(undefined, tx)).id;
@@ -20,7 +21,7 @@ export const generateCookbook = async (cookbook?: Partial<Omit<Cookbook, "id">>,
 
   return (tx ?? prisma).cookbook.create({
     data: {
-      name: cookbook?.name ?? faker.book.title(),
+      name: cookbook?.name ?? cookbookNameGenerator.next().value,
       user_id: userId,
       description: cookbook?.description ?? faker.word.words({ count: { min: 2, max: 15 } }),
       created_at: cookbook?.created_at ?? new Date(),

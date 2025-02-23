@@ -2,7 +2,7 @@ import { FC, PropsWithChildren } from "react";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Switch } from "../../shadcn";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
-import { DataTestID } from "@recipiece/constant";
+import { DataTestId } from "@recipiece/constant";
 
 export interface FormSwitchProps extends PropsWithChildren {
   readonly name: string;
@@ -24,13 +24,13 @@ export const FormSwitch: FC<FormSwitchProps> = ({ name, instructions, label, cla
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem data-testid={DataTestID.CommonForm.forContainer(dataTestId)} className={cn("flex flex-col gap-2", className)}>
-          {label && <FormLabel data-testid={DataTestID.CommonForm.forLabel(dataTestId)}>{label}</FormLabel>}
+        <FormItem data-testid={DataTestId.CommonForm.forContainer(dataTestId)} className={cn("flex flex-col gap-2", className)}>
+          {label && <FormLabel data-testid={DataTestId.CommonForm.forLabel(dataTestId)}>{label}</FormLabel>}
           <FormControl>
             <Switch data-testid={dataTestId} disabled={disabled} checked={field.value} onCheckedChange={field.onChange} />
           </FormControl>
-          <FormMessage data-testid={DataTestID.CommonForm.forMessage(dataTestId)} />
-          {instructions && <FormDescription data-testid={DataTestID.CommonForm.forInstructions(dataTestId)}>{instructions}</FormDescription>}
+          <FormMessage data-testid={DataTestId.CommonForm.forMessage(dataTestId)} />
+          {instructions && <FormDescription data-testid={DataTestId.CommonForm.forInstructions(dataTestId)}>{instructions}</FormDescription>}
         </FormItem>
       )}
     />

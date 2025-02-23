@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DataTestID } from "@recipiece/constant";
+import { DataTestId } from "@recipiece/constant";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { FC, useCallback, useEffect } from "react";
@@ -51,17 +51,16 @@ export const LoginPage: FC = () => {
           password: formData.password,
         });
         const tokenResolver = TokenManager.getInstance();
+        tokenResolver.rememberUser = formData.remember;
         tokenResolver.accessToken = response.access_token;
-        if (formData.remember) {
-          tokenResolver.refreshToken = response.refresh_token;
-        }
+        tokenResolver.refreshToken = response.refresh_token;
         navigate("/dashboard");
       } catch (error) {
         if ((error as AxiosError)?.status === 403) {
           toast({
             description: "Incorrect username or password",
             variant: "destructive",
-            dataTestId: DataTestID.LoginPage.TOAST_LOGIN_FAILED,
+            dataTestId: DataTestId.LoginPage.TOAST_LOGIN_FAILED,
           });
         }
       }
@@ -73,16 +72,16 @@ export const LoginPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput data-testid={DataTestID.LoginPage.INPUT_USERNAME} required autoCapitalize="none" name="username" type="text" label="Username or Email" />
-          <FormInput data-testid={DataTestID.LoginPage.INPUT_PASSWORD} required name="password" type="password" label="Password" />
-          <FormCheckbox data-testid={DataTestID.LoginPage.CHECKBOX_REMEMBER_ME} className="mb-1 mt-1" name="remember" label="Remember Me" />
-          <SubmitButton data-testid={DataTestID.LoginPage.BUTTON_LOGIN} type="submit">
+          <FormInput data-testid={DataTestId.LoginPage.INPUT_USERNAME} required autoCapitalize="none" name="username" type="text" label="Username or Email" />
+          <FormInput data-testid={DataTestId.LoginPage.INPUT_PASSWORD} required name="password" type="password" label="Password" />
+          <FormCheckbox data-testid={DataTestId.LoginPage.CHECKBOX_REMEMBER_ME} className="mb-1 mt-1" name="remember" label="Remember Me" />
+          <SubmitButton data-testid={DataTestId.LoginPage.BUTTON_LOGIN} type="submit">
             Login
           </SubmitButton>
-          <Button data-testid={DataTestID.LoginPage.BUTTON_REGISTER} onClick={() => navigate("/create-account")} variant="link">
+          <Button data-testid={DataTestId.LoginPage.BUTTON_REGISTER} onClick={() => navigate("/create-account")} variant="link">
             Register Now
           </Button>
-          <Button data-testid={DataTestID.LoginPage.BUTTON_FORGOT_PASSWORD} onClick={() => navigate("/forgot-password")} variant="link">
+          <Button data-testid={DataTestId.LoginPage.BUTTON_FORGOT_PASSWORD} onClick={() => navigate("/forgot-password")} variant="link">
             Forgot Password?
           </Button>
         </Stack>

@@ -1,19 +1,26 @@
-import { FC, useCallback, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useResetPasswordMutation } from "../../api";
-import { z } from "zod";
-import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../component";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DataTestId } from "@recipiece/constant";
+import { FC, useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { useResetPasswordMutation } from "../../api";
+import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../component";
 
 const ResetPasswordFormSchema = z
   .object({
     password: z.string().min(8),
     confirmPassword: z.string().min(8),
   })
-  .refine((schema) => {
-    return schema.confirmPassword === schema.password;
-  }, "Passwords must match");
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Passwords must match",
+        path: ["confirmPassword"],
+      });
+    }
+  });
 
 type ResetPasswordForm = z.infer<typeof ResetPasswordFormSchema>;
 
@@ -53,6 +60,7 @@ export const ResetPasswordPage: FC = () => {
         toast({
           title: "Password Reset",
           description: "You password was successfully reset. You may login with your new password.",
+          dataTestId: DataTestId.ResetPasswordPage.TOAST_SUCCESS,
         });
         navigate("/login");
       } catch {
@@ -60,6 +68,7 @@ export const ResetPasswordPage: FC = () => {
           title: "Error resetting password",
           description: "There was an error resetting your password. Please try again later.",
           variant: "destructive",
+          dataTestId: DataTestId.ResetPasswordPage.TOAST_FAILURE,
         });
       }
     },
@@ -70,10 +79,11 @@ export const ResetPasswordPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput type="password" name="password" label="Password" />
-          <FormInput type="password" name="confirmPassword" label="Confirm Password" />
-          <SubmitButton>Reset Password</SubmitButton>
+          <FormInput data-testid={DataTestId.ResetPasswordPage.INPUT_PASSWORD} type="password" name="password" label="Password" />
+          <FormInput data-testid={DataTestId.ResetPasswordPage.INPUT_CONFIRM_PASSWORD} type="password" name="confirmPassword" label="Confirm Password" />
+          <SubmitButton data-testid={DataTestId.ResetPasswordPage.BUTTON_RESET_PASSWORD}>Reset Password</SubmitButton>
           <Button
+            data-testid={DataTestId.ResetPasswordPage.BUTTON_LOGIN}
             variant="link"
             onClick={() => {
               navigate("/login");

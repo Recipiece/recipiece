@@ -2,7 +2,7 @@ import { FC, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, InputProps } from "../../shadcn";
-import { DataTestID } from "@recipiece/constant";
+import { DataTestId } from "@recipiece/constant";
 
 export interface FormFileProps extends InputProps {
   readonly name: string;
@@ -31,13 +31,13 @@ export const FormFile: FC<FormFileProps> = ({ isLoading, name, className, label,
       disabled={isSubmitting}
       render={() => {
         return (
-          <FormItem data-testid={DataTestID.CommonForm.forContainer(dataTestId)} className={fullClassName}>
-            {label && <FormLabel data-testid={DataTestID.CommonForm.forLabel(dataTestId)}>{label}</FormLabel>}
+          <FormItem data-testid={DataTestId.CommonForm.forContainer(dataTestId)} className={fullClassName}>
+            {label && <FormLabel data-testid={DataTestId.CommonForm.forLabel(dataTestId)}>{label}</FormLabel>}
             <FormControl>
               <Input type="file" {...restInputProps} {...fileRef} />
             </FormControl>
-            <FormMessage data-testid={DataTestID.CommonForm.forMessage(dataTestId)} />
-            {instructions && <FormDescription data-testid={DataTestID.CommonForm.forInstructions(dataTestId)}>{instructions}</FormDescription>}
+            <FormMessage data-testid={DataTestId.CommonForm.forMessage(dataTestId)} />
+            {instructions && <FormDescription data-testid={DataTestId.CommonForm.forInstructions(dataTestId)}>{instructions}</FormDescription>}
           </FormItem>
         );
       }}
