@@ -25,11 +25,11 @@ export const FormSelect: FC<FormSelectProps> = ({ children, name, label, instruc
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem data-testid={DataTestId.CommonForm.forContainer(dataTestId)}>
-          {label && <FormLabel data-testid={DataTestId.CommonForm.forLabel(dataTestId)}>{label}</FormLabel>}
+        <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)}>
+          {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
           <Select data-testid={dataTestId} onValueChange={field.onChange} defaultValue={field.value} value={field.value} required={required} disabled={disabled}>
             <FormControl>
-              <SelectTrigger data-testid={DataTestId.CommonForm.forSelectTrigger(dataTestId)}>
+              <SelectTrigger data-testid={DataTestId.Form.SELECT_TRIGGER(dataTestId)}>
                 <SelectValue placeholder={placeholder ?? ""} />
               </SelectTrigger>
             </FormControl>
@@ -39,8 +39,8 @@ export const FormSelect: FC<FormSelectProps> = ({ children, name, label, instruc
               })}
             </SelectContent>
           </Select>
-          {instructions && <FormDescription data-testid={DataTestId.CommonForm.forInstructions(dataTestId)}>{instructions}</FormDescription>}
-          <FormMessage data-testid={DataTestId.CommonForm.forMessage(dataTestId)} />
+          {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
+          <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
         </FormItem>
       )}
     />

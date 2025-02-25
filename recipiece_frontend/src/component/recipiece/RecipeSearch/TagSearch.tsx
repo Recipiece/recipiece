@@ -6,8 +6,10 @@ import { useListUserTagsQuery } from "../../../api";
 import { Badge, FormField, FormItem, FormLabel } from "../../shadcn";
 import { TypeaheadInput } from "../TypeaheadInput";
 import { RecipeSearchForm } from "./RecipeSearchFormSchema";
+import { DataTestId } from "@recipiece/constant";
 
-export const TagSearch: FC<{ readonly disabled: boolean }> = ({ disabled }) => {
+export const TagSearch: FC<{ readonly disabled: boolean; readonly dataTestId?: string }> = ({ disabled, dataTestId }) => {
+  const baseDataTestId = DataTestId.RecipeSearchBar.INPUT_TAG_SEARCH(dataTestId);
   const [filters, setFilters] = useState<ListUserTagsQuerySchema>({
     page_number: 0,
   });
@@ -81,8 +83,9 @@ export const TagSearch: FC<{ readonly disabled: boolean }> = ({ disabled }) => {
         render={({ field }) => {
           return (
             <FormItem>
-              <FormLabel>Tagged As</FormLabel>
+              <FormLabel data-testid={DataTestId.Form.LABEL(baseDataTestId)}>Tagged As</FormLabel>
               <TypeaheadInput
+                data-testid={baseDataTestId}
                 disabled={disabled}
                 placeholder="Enter a tag..."
                 onKeyDown={onKeyDown}
@@ -98,7 +101,7 @@ export const TagSearch: FC<{ readonly disabled: boolean }> = ({ disabled }) => {
       <div className="flex flex-row flex-wrap gap-2">
         {fields.map((field, index) => {
           return (
-            <Badge key={field.id} className="cursor-pointer dark:text-white" onClick={() => remove(index)}>
+            <Badge data-testid={DataTestId.RecipeSearchBar.BADGE_TAG(dataTestId)} key={field.id} className="cursor-pointer dark:text-white" onClick={() => remove(index)}>
               {field.content}
               <XIcon className="ml-2" size={12} />
             </Badge>

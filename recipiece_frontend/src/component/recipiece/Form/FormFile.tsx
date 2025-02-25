@@ -31,13 +31,13 @@ export const FormFile: FC<FormFileProps> = ({ isLoading, name, className, label,
       disabled={isSubmitting}
       render={() => {
         return (
-          <FormItem data-testid={DataTestId.CommonForm.forContainer(dataTestId)} className={fullClassName}>
-            {label && <FormLabel data-testid={DataTestId.CommonForm.forLabel(dataTestId)}>{label}</FormLabel>}
+          <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)} className={fullClassName}>
+            {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
             <FormControl>
               <Input type="file" {...restInputProps} {...fileRef} />
             </FormControl>
-            <FormMessage data-testid={DataTestId.CommonForm.forMessage(dataTestId)} />
-            {instructions && <FormDescription data-testid={DataTestId.CommonForm.forInstructions(dataTestId)}>{instructions}</FormDescription>}
+            <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
+            {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
           </FormItem>
         );
       }}

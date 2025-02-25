@@ -1,4 +1,4 @@
-import { Data } from "@recipiece/constant";
+import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
 import { IssueForgotPasswordTokenRequestSchema } from "@recipiece/types";
 import { Request } from "express";
@@ -30,7 +30,7 @@ export const issueForgotPasswordToken = async (request: Request<any, any, IssueF
   const accountToken = await tx.userValidationToken.findFirst({
     where: {
       user_id: matchingUser.id,
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     },
   });
 
@@ -41,7 +41,7 @@ export const issueForgotPasswordToken = async (request: Request<any, any, IssueF
 
     const diffMs = now.diff(tokenCreatedAt).milliseconds;
 
-    if (diffMs < Data.UserValidationTokenTypes.TOKEN_COOLDOWN_MS) {
+    if (diffMs < Constant.UserValidationTokenTypes.TOKEN_COOLDOWN_MS) {
       return [
         StatusCodes.TOO_MANY_REQUESTS,
         {
@@ -54,7 +54,7 @@ export const issueForgotPasswordToken = async (request: Request<any, any, IssueF
   const createdToken = await tx.userValidationToken.create({
     data: {
       user_id: matchingUser.id,
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     },
   });
   await sendForgotPasswordEmail(matchingUser, createdToken);

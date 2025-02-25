@@ -5,7 +5,8 @@ import { PrismaTransaction } from "@recipiece/database";
 import { ResetPasswordRequestSchema } from "@recipiece/types";
 import { ApiResponse } from "../../types";
 import { hashPassword } from "../../util/password";
-import { Data } from "@recipiece/constant";
+import { Constant } from "@recipiece/constant";
+
 
 export const resetPassword = async (request: Request<any, any, ResetPasswordRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const { password, token } = request.body;
@@ -13,7 +14,7 @@ export const resetPassword = async (request: Request<any, any, ResetPasswordRequ
   const accountToken = await tx.userValidationToken.findUnique({
     where: {
       id: token,
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     },
   });
 
@@ -29,7 +30,7 @@ export const resetPassword = async (request: Request<any, any, ResetPasswordRequ
 
   const now = DateTime.utc();
   const tokenExpiry = DateTime.fromJSDate(accountToken.created_at).plus({
-    milliseconds: Data.UserValidationTokenTypes.FORGOT_PASSWORD.duration_ms,
+    milliseconds: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.duration_ms,
   });
 
   if (now > tokenExpiry) {

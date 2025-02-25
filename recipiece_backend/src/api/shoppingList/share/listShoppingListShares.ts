@@ -1,8 +1,8 @@
+import { Constant } from "@recipiece/constant";
 import { Prisma, PrismaTransaction } from "@recipiece/database";
 import { ListShoppingListSharesQuerySchema, ListShoppingListSharesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
 
 /**
  * List shoppingLists shares that are targeting the requesting user or the requesting user has sent.
@@ -13,7 +13,7 @@ export const listShoppingListShares = async (
   tx: PrismaTransaction
 ): ApiResponse<ListShoppingListSharesResponseSchema> => {
   const { page_number, page_size, targeting_self, from_self, user_kitchen_membership_id } = request.query;
-  const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
+  const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 
   const where: Prisma.ShoppingListShareWhereInput = {};
   let userKitchenMembershipWhere = {};

@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
 import { RecipeSearch, Button, Grid, H2, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
 import { DialogContext } from "../../context";
+import { DataTestId } from "@recipiece/constant";
 
 export const DashboardPage: FC = () => {
   const { cookbookId } = useParams();
@@ -91,13 +92,13 @@ export const DashboardPage: FC = () => {
 
   return (
     <Stack>
-      {!cookbookId && <H2>Your Recipes</H2>}
+      {!cookbookId && <H2 data-testid={DataTestId.DashboardPage.HEADING_TITLE}>Your Recipes</H2>}
       {cookbookId && (
         <LoadingGroup className="h-8 w-[250px]" isLoading={isLoadingCookbook}>
           <Shelf>
-            <H2>{cookbook?.name}</H2>
+            <H2 data-testid={DataTestId.DashboardPage.HEADING_TITLE}>{cookbook?.name}</H2>
             <ShelfSpacer />
-            <Button onClick={onFindRecipe} variant="outline">
+            <Button data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_HEADER} onClick={onFindRecipe} variant="outline">
               <Plus size={20} className="mr-1" /> Add a recipe
             </Button>
           </Shelf>
@@ -105,18 +106,18 @@ export const DashboardPage: FC = () => {
       )}
       {cookbookId && (
         <LoadingGroup isLoading={isLoadingCookbook} className="h-4">
-          <p>{cookbook?.description}</p>
+          <p data-testid={DataTestId.DashboardPage.PARAGRAPH_DESCRIPTION}>{cookbook?.description}</p>
         </LoadingGroup>
       )}
-      <RecipeSearch isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)} onSubmit={onSearch} />
+      <RecipeSearch data-testid={DataTestId.DashboardPage.RECIPE_SEARCH_BAR} isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)} onSubmit={onSearch} />
       <LoadingGroup variant="spinner" isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}>
         <Stack>
           {!isLoadingRecipes && recipes.length === 0 && (
             <>
-              <NotFound message="No recipes to be had, time to get cooking!" />
+              <NotFound dataTestId={DataTestId.DashboardPage.NOT_FOUND} message="No recipes to be had, time to get cooking!" />
               {cookbookId && (
                 <div className="text-center">
-                  <Button onClick={onFindRecipe} variant="outline">
+                  <Button data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY} onClick={onFindRecipe} variant="outline">
                     <Plus size={20} className="mr-1" /> Add a recipe
                   </Button>
                 </div>
@@ -127,12 +128,12 @@ export const DashboardPage: FC = () => {
             {(recipes || []).map((recipe) => {
               return (
                 <div className="auto-rows-fr" key={recipe.id}>
-                  <RecipeCard recipe={recipe} cookbookId={cookbookId ? +cookbookId : undefined} />
+                  <RecipeCard dataTestId={`${DataTestId.DashboardPage.RECIPE_CARD}-${recipe.id}`} recipe={recipe} cookbookId={cookbookId ? +cookbookId : undefined} />
                 </div>
               );
             })}
           </Grid>
-          {recipes.length > 0 && <Pager page={filters.page_number} onPage={onPageChange} hasNextPage={!!recipeData?.has_next_page} />}
+          {recipes.length > 0 && <Pager dataTestId={DataTestId.DashboardPage.PAGER} page={filters.page_number} onPage={onPageChange} hasNextPage={!!recipeData?.has_next_page} />}
         </Stack>
       </LoadingGroup>
     </Stack>

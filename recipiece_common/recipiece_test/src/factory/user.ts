@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { prisma, PrismaTransaction, User, UserCredentials, UserKitchenMembership, UserTag, UserValidationToken } from "@recipiece/database";
 import argon2 from "argon2";
 import { emailGenerator, tagGenerator, usernameGenerator } from "../generator";
-import { Data } from "@recipiece/constant";
+import { Constant } from "@recipiece/constant";
 
 export const generateUserTag = async (tag?: Partial<Omit<UserTag, "id">>, tx?: PrismaTransaction) => {
   const userId = tag?.user_id ?? (await generateUser(undefined, tx)).id;
@@ -72,12 +72,14 @@ export const generateUser = async (user?: Partial<Omit<User, "id">>, tx?: Prisma
   });
 };
 
-export const generateUserWithPassword = async (rawPassword: string, user?: Partial<Omit<User, "id">>, tx?: PrismaTransaction): Promise<[User, UserCredentials]> => {
+export const generateUserWithPassword = async (rawPassword?: string, user?: Partial<Omit<User, "id">>, tx?: PrismaTransaction): Promise<[User, UserCredentials]> => {
+  const password = rawPassword ?? faker.internet.password({ length: 20 });
+
   const generatedUser = await generateUser(user, tx);
   const credentials = await generateUserCredentials(
     {
       user_id: generatedUser.id,
-      password_hash: await generateHashedPassword(rawPassword),
+      password_hash: await generateHashedPassword(password),
     },
     tx
   );
@@ -86,7 +88,7 @@ export const generateUserWithPassword = async (rawPassword: string, user?: Parti
 
 export const generateUserValidationToken = async (token?: Partial<Omit<UserValidationToken, "id">>, tx?: PrismaTransaction): Promise<UserValidationToken> => {
   const userId = token?.user_id ?? (await generateUser(undefined, tx)).id;
-  const purpose = token?.purpose ?? faker.helpers.arrayElement([Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose, Data.UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose]);
+  const purpose = token?.purpose ?? faker.helpers.arrayElement([Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose, Constant.UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose]);
 
   return await (tx ?? prisma).userValidationToken.create({
     data: {

@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import { cn } from "../../../util";
 import { Button, Input, InputProps, LoadingSpinner, Popover, PopoverContent, PopoverTrigger } from "../../shadcn";
+import { DataTestId } from "@recipiece/constant";
 
 export interface TypeaheadInputProps extends InputProps {
   readonly autocompleteOptions: string[];
@@ -25,6 +26,9 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, p
     setIsPopoverOpen(isFocused && (isLoading || autocompleteOptions.length > 0));
   }, [isFocused, autocompleteOptions, isLoading]);
 
+  //@ts-expect-error data-testid is not well typed
+  const dataTestId = restInputProps?.["data-testid"];
+
   return (
     <Popover open={isPopoverOpen}>
       <div>
@@ -37,6 +41,7 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, p
             setIsFocused(false);
             onBlur?.(event);
           }}
+          data-testid={dataTestId}
           {...restInputProps}
         />
         <div className="ml-4 h-0 w-0">
@@ -54,9 +59,10 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, p
             {isLoading && <LoadingSpinner />}
             {!isLoading && (
               <div className="flex flex-col gap-1">
-                {autocompleteOptions.map((item) => {
+                {autocompleteOptions.map((item, index) => {
                   return (
                     <Button
+                      data-testid={`${DataTestId.TypeaheadInput.BUTTON_POPOVER_OPTION(dataTestId)}-${index}`}
                       className="h-auto justify-start p-1"
                       variant="ghost"
                       key={item}

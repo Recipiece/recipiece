@@ -8,12 +8,12 @@
     }
   },
   "include": ["./src/**/*", "../recipiece_database/src/**/*", "../recipiece_constant/src/**/*"],
-  "references": [
-    {
-      "path": "../recipiece_database"
-    },
-    {
-      "path": "../recipiece_constant",
-    }
-  ]
+  // "references": [
+  //   {
+  //     "path": "../recipiece_database"
+  //   },
+  //   {
+  //     "path": "../recipiece_constant",
+  //   }
+  // ]
 }

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { Data, DataTestId } from "@recipiece/constant";
+import { Constant, DataTestId } from "@recipiece/constant";
 import { generateUserValidationToken, generateUserWithPassword, uuidGenerator } from "@recipiece/test";
 
 test.describe("Reset Password Page", () => {
@@ -14,7 +14,7 @@ test.describe("Reset Password Page", () => {
     const [user] = await generateUserWithPassword("password");
     const token = await generateUserValidationToken({
       user_id: user.id,
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     });
     const url = `/reset-password?token=${token.id}`;
 
@@ -40,7 +40,7 @@ test.describe("Reset Password Page", () => {
 
   test("should not accept an empty form", async ({ page }) => {
     const token = await generateUserValidationToken({
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     });
     const url = `/reset-password?token=${token.id}`;
 
@@ -60,7 +60,7 @@ test.describe("Reset Password Page", () => {
 
   test("should not accept mismatched passwords", async ({ page }) => {
     const token = await generateUserValidationToken({
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     });
     const url = `/reset-password?token=${token.id}`;
 
@@ -104,7 +104,7 @@ test.describe("Reset Password Page", () => {
 
   test("should go to login", async ({ page }) => {
     const token = await generateUserValidationToken({
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     });
     const url = `/reset-password?token=${token.id}`;
     await page.goto(url);

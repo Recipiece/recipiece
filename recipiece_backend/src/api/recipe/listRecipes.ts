@@ -1,13 +1,13 @@
+import { Constant } from "@recipiece/constant";
 import { KyselyCore, PrismaTransaction, Recipe } from "@recipiece/database";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 import { ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery, tagsSubquery } from "./util";
 
 export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipesResponseSchema> => {
   const { page_number, page_size, shared_recipes, search, cookbook_id, cookbook_attachments, ingredients, tags } = request.query;
-  const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
+  const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
   const user = request.user;
 
   const recipesCte = (db: Parameters<Parameters<typeof tx.$kysely.with>[1]>[0]) => {

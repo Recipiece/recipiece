@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { generateUserWithPassword } from "@recipiece/test";
 import { LoginPage } from "../../../recipiece_common/recipiece_constant/src/dataTestId";
-import { Data, DataTestId } from "@recipiece/constant";
+import { Constant, DataTestId } from "@recipiece/constant";
 import { prisma } from "@recipiece/database";
 
 /**
@@ -28,7 +28,7 @@ test("Forgot Password Story", async ( {page}) => {
   const createdToken = await prisma.userValidationToken.findFirst({
     where: {
       user_id: user.id,
-      purpose: Data.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     }
   });
   expect(createdToken).toBeTruthy();

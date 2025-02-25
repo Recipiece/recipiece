@@ -1,13 +1,13 @@
+import { Constant } from "@recipiece/constant";
 import { mealPlanSharesSubquery, mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
 import { ListMealPlansQuerySchema, ListMealPlansResponseSchema, MealPlanSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
 export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealPlansQuerySchema>, tx: PrismaTransaction): ApiResponse<ListMealPlansResponseSchema> => {
   const user = request.user;
   const { page_number, page_size, shared_meal_plans } = request.query;
-  const pageSize = page_size ?? DEFAULT_PAGE_SIZE;
+  const pageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 
   let query = tx.$kysely
     .selectFrom("meal_plans")

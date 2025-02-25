@@ -24,13 +24,13 @@ export const FormSwitch: FC<FormSwitchProps> = ({ name, instructions, label, cla
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem data-testid={DataTestId.CommonForm.forContainer(dataTestId)} className={cn("flex flex-col gap-2", className)}>
-          {label && <FormLabel data-testid={DataTestId.CommonForm.forLabel(dataTestId)}>{label}</FormLabel>}
+        <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)} className={cn("flex flex-col gap-2", className)}>
+          {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
           <FormControl>
             <Switch data-testid={dataTestId} disabled={disabled} checked={field.value} onCheckedChange={field.onChange} />
           </FormControl>
-          <FormMessage data-testid={DataTestId.CommonForm.forMessage(dataTestId)} />
-          {instructions && <FormDescription data-testid={DataTestId.CommonForm.forInstructions(dataTestId)}>{instructions}</FormDescription>}
+          <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
+          {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
         </FormItem>
       )}
     />

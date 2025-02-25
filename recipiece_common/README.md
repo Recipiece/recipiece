@@ -81,13 +81,6 @@ path.resolve(__dirname, "../recipiece_common/<library_name>"),
 ```
 
 to the rule in the `rules` array that is handling loading ts.
-You also need to add
-
-```typescript
-"@recipiece/<library_name>": path.resolve(__dirname, "../recipiece_common/<library_name>/src"),
-```
-
-to the `resolve.alias` block.
 
 In the `tsconfig.json`, add
 

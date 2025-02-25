@@ -6,8 +6,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build:dev": "NODE_ENV=development yarn generate && webpack",
-    "build:prod": "NODE_ENV=production yarn generate && webpack",
+    "build:dev": "NODE_ENV=development webpack",
+    "build:prod": "NODE_ENV=production webpack",
     "lint": "prettier . --write"
   },
   "devDependencies": {

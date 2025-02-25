@@ -1,5 +1,3 @@
-export const DEFAULT_PAGE_SIZE = 100;
-
 export class RecipeImportFiles {
   public static readonly MAX_SIZE = 4000000;
   public static readonly SUPPORTED_EXTENSIONS = [".paprikarecipes"];
