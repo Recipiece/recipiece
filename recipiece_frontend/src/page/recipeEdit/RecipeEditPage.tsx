@@ -12,6 +12,7 @@ import { IngredientsForm } from "./IngredientsForm";
 import { RecipeEditFormData, RecipeEditFormSchema } from "./RecipeEditFormSchema";
 import { StepsForm } from "./StepsForm";
 import { TagsForm } from "./TagsForm";
+import { DataTestId } from "@recipiece/constant";
 
 export const RecipeEditPage: FC = () => {
   const { pushDialog, popDialog } = useContext(DialogContext);
@@ -189,10 +190,19 @@ export const RecipeEditPage: FC = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Stack>
-            <FormInput name="name" label="Recipe Name" placeholder="What do you want to call this recipe?" />
-            <FormInput min={1} step={1} name="servings" type="number" label="Servings" placeholder="How many servings does this recipe make?" />
+            <FormInput data-testid={DataTestId.RecipeEditPage.INPUT_NAME} name="name" label="Recipe Name" placeholder="What do you want to call this recipe?" />
+            <FormInput
+              data-testid={DataTestId.RecipeEditPage.INPUT_SERVINGS}
+              min={1}
+              step={1}
+              name="servings"
+              type="number"
+              label="Servings"
+              placeholder="How many servings does this recipe make?"
+            />
             <TagsForm />
             <FormTextarea
+              data-testid={DataTestId.RecipeEditPage.TEXTAREA_DESCRIPTION}
               maxLength={1000}
               name="description"
               placeholder="What is this recipe all about?"
@@ -211,17 +221,24 @@ export const RecipeEditPage: FC = () => {
 
             {(isCreatingNewRecipe || !!recipe) && (
               <div className="mt-2 flex flex-row justify-end">
-                <Button disabled={form?.formState?.isSubmitting} onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
+                <Button
+                  data-testid={DataTestId.RecipeEditPage.BUTTON_CANCEL}
+                  disabled={form?.formState?.isSubmitting}
+                  onClick={() => navigate("/")}
+                  variant="secondary"
+                  type="button"
+                  className="mr-2"
+                >
                   Cancel
                 </Button>
-                <SubmitButton>Save</SubmitButton>
+                <SubmitButton data-testid={DataTestId.RecipeEditPage.BUTTON_SAVE}>Save</SubmitButton>
               </div>
             )}
           </Stack>
         </form>
       </Form>
 
-      {isRecipeGetError && <NotFound backNav="/" />}
+      {isRecipeGetError && <NotFound dataTestId={DataTestId.RecipeEditPage.NOT_FOUND} backNav="/" />}
     </div>
   );
 };

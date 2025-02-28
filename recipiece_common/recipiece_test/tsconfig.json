@@ -4,10 +4,10 @@
     "outDir": "./dist/dev",
     "paths": {
       "@recipiece/database": ["../recipiece_database/src/index.ts"],
-      "@recipiece/constant": ["../recipiece_constant/src/index.ts"],
+      "@recipiece/constant": ["../recipiece_constant/src/index.ts"]
     }
   },
-  "include": ["./src/**/*", "../recipiece_database/src/**/*", "../recipiece_constant/src/**/*"],
+  "include": ["./src/**/*", "../recipiece_database/src/**/*", "../recipiece_constant/src/**/*"]
   // "references": [
   //   {
   //     "path": "../recipiece_database"

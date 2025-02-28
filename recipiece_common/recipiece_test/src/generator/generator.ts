@@ -42,7 +42,7 @@ function* generateCookbookName(): Generator<string> {
 
 // this is a little silly but faker has it and I wanna use is this way so :shrug:
 function* generateUUID(): Generator<string> {
-  while(true) {
+  while (true) {
     yield faker.string.uuid();
   }
 }

@@ -1,4 +1,6 @@
+export * as Dialog from "./dialog";
 export * from "./form";
+export * from "./menuBar";
 export * from "./notFound";
 export * from "./pager";
 export * from "./recipeCard";

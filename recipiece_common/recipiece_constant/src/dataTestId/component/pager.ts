@@ -14,4 +14,8 @@ export class Pager {
   public static readonly BUTTON_NEXT_PAGE = (base?: string): string => {
     return `button-next-page-${base}`;
   }
+
+  public static readonly NAV_PAGER = (base?: string): string => {
+    return `nav-pager-${base}`;
+  }
 }

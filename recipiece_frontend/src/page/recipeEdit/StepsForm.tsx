@@ -5,6 +5,7 @@ import { Button, FormTextarea } from "../../component";
 import { useDrag, useDrop } from "react-dnd";
 import { cn } from "../../util";
 import mergeRefs from "merge-refs";
+import { DataTestId } from "@recipiece/constant";
 
 export interface StepsFormProps {
   readonly isLoading: boolean;
@@ -60,16 +61,22 @@ const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggabl
     <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
       <div className="flex flex-row items-center gap-2">
         {draggable && (
-          <div ref={dragRef}>
-            <Grip className="cursor-grab text-primary" />
+          <div data-testid={DataTestId.RecipeEditPage.DIV_STEP_DROP_TARGET(index)} ref={dragRef}>
+            <Grip data-testid={DataTestId.RecipeEditPage.STEP_DRAG_HANDLE(index)} className="cursor-grab text-primary" />
           </div>
         )}
         <p className="mr-auto leading-6">Step {index + 1}</p>
-        <Button variant="link" onClick={() => onRemove(index)}>
+        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_STEP(index)} variant="link" onClick={() => onRemove(index)}>
           <Minus className="text-destructive" />
         </Button>
       </div>
-      <FormTextarea readOnly={isDragging} name={`steps.${index}.content`} placeholder="What should you do?" required />
+      <FormTextarea
+        data-testid={DataTestId.RecipeEditPage.TEXTAREA_STEP_CONTENT(index)}
+        readOnly={isDragging}
+        name={`steps.${index}.content`}
+        placeholder="What should you do?"
+        required
+      />
     </div>
   );
 };
@@ -106,7 +113,7 @@ export const StepsForm: FC<StepsFormProps> = () => {
     <div>
       <div className="mb-2 flex flex-row items-center">
         <h1 className="inline text-lg">Steps</h1>
-        <Button type="button" onClick={addStep} variant="secondary" className="ml-auto">
+        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_STEP} type="button" onClick={addStep} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Step
         </Button>

@@ -7,7 +7,6 @@ import { ApiResponse } from "../../types";
 import { hashPassword } from "../../util/password";
 import { Constant } from "@recipiece/constant";
 
-
 export const resetPassword = async (request: Request<any, any, ResetPasswordRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const { password, token } = request.body;
 

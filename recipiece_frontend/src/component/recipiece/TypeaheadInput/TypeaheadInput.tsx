@@ -47,6 +47,7 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, p
         <div className="ml-4 h-0 w-0">
           <PopoverTrigger className="h-0 w-0" />
           <PopoverContent
+            data-testid={DataTestId.TypeaheadInput.POPOVER_CONTAINER(dataTestId)}
             alignOffset={-16}
             align="start"
             className={cn("p-1", popoverClassName)}

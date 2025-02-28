@@ -16,7 +16,7 @@ export const FormTextarea: FC<FormTextareaProps> = ({ name, instructions, label,
   const { isSubmitting } = form.formState;
 
   // @ts-expect-error data test id is not type on the props
-  const dataTestId = restInputProps?.["data-testid"];
+  const dataTestId = restProps?.["data-testid"];
 
   const fullClassName = useMemo(() => {
     return cn(className ?? "");

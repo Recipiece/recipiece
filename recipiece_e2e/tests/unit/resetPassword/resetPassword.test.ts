@@ -51,10 +51,10 @@ test.describe("Reset Password Page", () => {
     await page.getByTestId(DataTestId.ResetPasswordPage.BUTTON_RESET_PASSWORD).click();
     await expect(page).toHaveURL(`http://127.0.0.1:3001${url}`);
 
-    const passwordErrorMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.ResetPasswordPage.INPUT_PASSWORD));
+    const passwordErrorMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.ResetPasswordPage.INPUT_PASSWORD));
     await expect(passwordErrorMessage).toBeVisible();
 
-    const confirmErrorMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.ResetPasswordPage.INPUT_CONFIRM_PASSWORD));
+    const confirmErrorMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.ResetPasswordPage.INPUT_CONFIRM_PASSWORD));
     await expect(confirmErrorMessage).toBeVisible();
   });
 
@@ -76,7 +76,7 @@ test.describe("Reset Password Page", () => {
     await page.getByTestId(DataTestId.ResetPasswordPage.BUTTON_RESET_PASSWORD).click();
     await expect(page).toHaveURL(`http://127.0.0.1:3001${url}`);
 
-    const confirmErrorMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.ResetPasswordPage.INPUT_CONFIRM_PASSWORD));
+    const confirmErrorMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.ResetPasswordPage.INPUT_CONFIRM_PASSWORD));
     await expect(confirmErrorMessage).toBeVisible();
   });
 

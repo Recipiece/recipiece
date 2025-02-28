@@ -88,7 +88,8 @@ export const generateUserWithPassword = async (rawPassword?: string, user?: Part
 
 export const generateUserValidationToken = async (token?: Partial<Omit<UserValidationToken, "id">>, tx?: PrismaTransaction): Promise<UserValidationToken> => {
   const userId = token?.user_id ?? (await generateUser(undefined, tx)).id;
-  const purpose = token?.purpose ?? faker.helpers.arrayElement([Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose, Constant.UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose]);
+  const purpose =
+    token?.purpose ?? faker.helpers.arrayElement([Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose, Constant.UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose]);
 
   return await (tx ?? prisma).userValidationToken.create({
     data: {

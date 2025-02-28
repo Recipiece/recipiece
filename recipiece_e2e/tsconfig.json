@@ -7,5 +7,5 @@
       "@recipiece/constant": ["../recipiece_common/recipiece_constant/src"]
     }
   },
-  "references": [{ "path": "../recipiece_common/recipiece_test" }, { "path": "../recipiece_common/recipiece_database" }, { "path": "../recipiece_common/recipiece_constant" }]
+  // "references": [{ "path": "../recipiece_common/recipiece_test" }, { "path": "../recipiece_common/recipiece_database" }, { "path": "../recipiece_common/recipiece_constant" }]
 }

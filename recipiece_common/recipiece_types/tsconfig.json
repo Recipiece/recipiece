@@ -6,6 +6,6 @@
       "@recipiece/constant": ["../recipiece_constant/src"]
     }
   },
-  "include": ["./src/**/*", "../recipiece_constant/src/**/*"],
+  "include": ["./src/**/*", "../recipiece_constant/src/**/*"]
   // "references": [{ "path": "../recipiece_constant" }]
 }

@@ -90,7 +90,15 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
       <form onSubmit={form.handleSubmit(onSearchSubmit)}>
         <Collapsible open={isAdvancedSearchOpen}>
           <div className="flex flex-row items-end justify-end gap-2">
-            <FormInput data-testid={DataTestId.RecipeSearchBar.INPUT_SEARCH(dataTestId)} autoComplete="off" disabled={isLoading || isSubmitting} placeholder="Search by name..." className="flex-grow" name="search" label="Search" />
+            <FormInput
+              data-testid={DataTestId.RecipeSearchBar.INPUT_SEARCH(dataTestId)}
+              autoComplete="off"
+              disabled={isLoading || isSubmitting}
+              placeholder="Search by name..."
+              className="flex-grow"
+              name="search"
+              label="Search"
+            />
             <CollapsibleTrigger asChild>
               <Button data-testid={DataTestId.RecipeSearchBar.BUTTON_TOGGLE_ADVANCED_SEARCH(dataTestId)} variant="outline" onClick={onToggleAdvancedSearch}>
                 <ScanSearch />
@@ -100,7 +108,12 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
 
           <CollapsibleContent>
             <div className="mt-2 flex flex-col gap-2">
-              <FormCheckbox data-testid={DataTestId.RecipeSearchBar.CHECKBOX_SHARED_RECIPES(dataTestId)} disabled={isLoading || isSubmitting} name="shared_recipes" label="Include Recipes Shared to You" />
+              <FormCheckbox
+                data-testid={DataTestId.RecipeSearchBar.CHECKBOX_SHARED_RECIPES(dataTestId)}
+                disabled={isLoading || isSubmitting}
+                name="shared_recipes"
+                label="Include Recipes Shared to You"
+              />
               <IngredientSearch dataTestId={DataTestId.RecipeSearchBar.INGREDIENT_SEARCH(dataTestId)} disabled={isLoading || isSubmitting} />
               <TagSearch dataTestId={DataTestId.RecipeSearchBar.TAG_SEARCH(dataTestId)} disabled={isLoading || isSubmitting} />
             </div>

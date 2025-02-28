@@ -18,7 +18,7 @@ export const Pager: FC<PagerProps> = ({ page, onPage, hasNextPage, className, sh
   }, [page]);
 
   return (
-    <Pagination className={className || ""}>
+    <Pagination data-testid={DataTestId.Pager.NAV_PAGER(dataTestId)} className={className || ""}>
       <PaginationContent>
         {page > 0 && (
           <PaginationItem data-testid={DataTestId.Pager.BUTTON_FIRST(dataTestId)}>

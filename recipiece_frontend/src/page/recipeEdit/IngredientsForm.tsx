@@ -6,6 +6,7 @@ import { useDrag, useDrop } from "react-dnd";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button, FormField, FormInput, FormItem, TypeaheadInput } from "../../component";
 import { cn } from "../../util";
+import { DataTestId } from "@recipiece/constant";
 
 const UNIT_AUTOCOMPLETE_OPTIONS = ALL_UNITS.map((au) => {
   return au.display_name.singular;
@@ -30,6 +31,7 @@ const IngredientFormNameInput: FC<{ readonly isDragging: boolean; readonly index
 }) => {
   return (
     <FormInput
+      data-testid={DataTestId.RecipeEditPage.INPUT_INGREDIENT_NAME(index)}
       onKeyDown={(event) => {
         onKeyDown(event);
       }}
@@ -51,6 +53,7 @@ const IngredientFormAmountInput: FC<{ readonly isDragging: boolean; readonly ind
 }) => {
   return (
     <FormInput
+      data-testid={DataTestId.RecipeEditPage.INPUT_INGREDIENT_AMOUNT(index)}
       onKeyDown={(event) => {
         onKeyDown(event);
       }}
@@ -95,6 +98,7 @@ const IngredientFormUnitInput: FC<{ readonly isDragging: boolean; index: number;
         return (
           <FormItem>
             <TypeaheadInput
+              data-testid={DataTestId.RecipeEditPage.TYPEAHEAD_INPUT_INGREDIENT_UNIT(index)}
               popoverClassName="sm:max-w-[200px]"
               autocompleteOptions={currentAutocompleteItems}
               onSelectItem={onSelectItem}
@@ -154,16 +158,28 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
   return (
     // @ts-expect-error merge refs type def is funky
     <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
-      <div ref={dragRef} className="flex flex-row sm:block">
-        {draggable && <Grip className="m-0 h-full flex-shrink cursor-grab p-0 text-primary" />}
-        <Button className="m-0 ml-auto block p-0 sm:hidden" type="button" variant="link" onClick={() => onRemove(index)}>
+      <div data-testid={DataTestId.RecipeEditPage.DIV_INGREDIENT_DROP_TARGET(index)} ref={dragRef} className="flex flex-row sm:block">
+        {draggable && <Grip data-testid={DataTestId.RecipeEditPage.INGREDIENT_DRAG_HANDLE(index)} className="m-0 h-full flex-shrink cursor-grab p-0 text-primary" />}
+        <Button
+          data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_INGREDIENT(index)}
+          className="m-0 ml-auto block p-0 sm:hidden"
+          type="button"
+          variant="link"
+          onClick={() => onRemove(index)}
+        >
           <Minus className="text-destructive" />
         </Button>
       </div>
       <IngredientFormNameInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
       <IngredientFormAmountInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
       <IngredientFormUnitInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
-      <Button className="m-0 hidden p-0 sm:block" type="button" variant="link" onClick={() => onRemove(index)}>
+      <Button
+        data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_INGREDIENT(index)}
+        className="m-0 hidden p-0 sm:block"
+        type="button"
+        variant="link"
+        onClick={() => onRemove(index)}
+      >
         <Minus className="text-destructive" />
       </Button>
     </div>
@@ -214,7 +230,7 @@ export const IngredientsForm: FC<IngredientsFormProps> = () => {
     <div>
       <div className="mb-4 flex flex-row items-center">
         <h1 className="inline text-lg">Ingredients</h1>
-        <Button type="button" onClick={addIngredient} variant="secondary" className="ml-auto">
+        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_INGREDIENT} type="button" onClick={addIngredient} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Ingredient
         </Button>

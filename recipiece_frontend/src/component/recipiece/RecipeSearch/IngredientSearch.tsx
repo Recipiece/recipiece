@@ -6,7 +6,7 @@ import { FormInput } from "../Form";
 import { RecipeSearchForm } from "./RecipeSearchFormSchema";
 import { DataTestId } from "@recipiece/constant";
 
-export const IngredientSearch: FC<{ readonly disabled?: boolean, readonly dataTestId?: string }> = ({ disabled, dataTestId }) => {
+export const IngredientSearch: FC<{ readonly disabled?: boolean; readonly dataTestId?: string }> = ({ disabled, dataTestId }) => {
   const form = useFormContext<RecipeSearchForm>();
 
   const { fields, append, remove } = useFieldArray({
@@ -34,11 +34,23 @@ export const IngredientSearch: FC<{ readonly disabled?: boolean, readonly dataTe
 
   return (
     <div className="flex flex-col gap-2">
-      <FormInput data-testid={DataTestId.RecipeSearchBar.INPUT_INGREDIENT_SEARCH(dataTestId)} disabled={disabled} name="currentIngredientTerm" onKeyDown={onKeyDown} placeholder="Enter an ingredient..." label="Containing Ingredients" />
+      <FormInput
+        data-testid={DataTestId.RecipeSearchBar.INPUT_INGREDIENT_SEARCH(dataTestId)}
+        disabled={disabled}
+        name="currentIngredientTerm"
+        onKeyDown={onKeyDown}
+        placeholder="Enter an ingredient..."
+        label="Containing Ingredients"
+      />
       <div className="flex flex-row flex-wrap">
         {fields.map((field, index) => {
           return (
-            <Badge data-testid={`${DataTestId.RecipeSearchBar.BADGE_INGREDIENT(dataTestId)}-${index}`} key={field.id} className="cursor-pointer dark:text-white" onClick={() => remove(index)}>
+            <Badge
+              data-testid={`${DataTestId.RecipeSearchBar.BADGE_INGREDIENT(dataTestId)}-${index}`}
+              key={field.id}
+              className="cursor-pointer dark:text-white"
+              onClick={() => remove(index)}
+            >
               {field.name} <XIcon className="ml-2" size={12} />
             </Badge>
           );

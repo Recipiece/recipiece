@@ -36,7 +36,7 @@ test.describe("Forgot Password Page", () => {
   test("should not allow an empty form", async ({ page }) => {
     await page.getByTestId(DataTestId.ForgotPasswordPage.BUTTON_FORGOT_PASSWORD).click();
     await expect(page).toHaveURL("http://127.0.0.1:3001/forgot-password");
-    const errorMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.ForgotPasswordPage.INPUT_EMAIL));
+    const errorMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.ForgotPasswordPage.INPUT_EMAIL));
     await expect(errorMessage).toBeVisible();
   });
 

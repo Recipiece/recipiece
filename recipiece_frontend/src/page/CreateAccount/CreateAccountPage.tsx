@@ -9,7 +9,7 @@ import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../co
 
 const CreateAccountFormSchema = z
   .object({
-    email: z.string().email({message: "Enter a valid email address"}),
+    email: z.string().email({ message: "Enter a valid email address" }),
     username: z
       .string()
       .min(5, "Your username must be at least 5 characters")

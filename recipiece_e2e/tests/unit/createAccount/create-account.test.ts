@@ -73,16 +73,16 @@ test.describe("Register Page", () => {
 
     await expect(page).toHaveURL("http://127.0.0.1:3001/create-account");
 
-    const usernameFormMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.RegisterPage.INPUT_USERNAME));
+    const usernameFormMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.RegisterPage.INPUT_USERNAME));
     await expect(usernameFormMessage).toBeVisible();
 
-    const emailFormMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.RegisterPage.INPUT_EMAIL));
+    const emailFormMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.RegisterPage.INPUT_EMAIL));
     await expect(emailFormMessage).toBeVisible();
 
-    const passwordFormMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.RegisterPage.INPUT_PASSWORD));
+    const passwordFormMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.RegisterPage.INPUT_PASSWORD));
     await expect(passwordFormMessage).toBeVisible();
 
-    const confirmPasswordFormMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD));
+    const confirmPasswordFormMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD));
     await expect(confirmPasswordFormMessage).toBeVisible();
   });
 
@@ -100,7 +100,7 @@ test.describe("Register Page", () => {
 
     await expect(page).toHaveURL("http://127.0.0.1:3001/create-account");
 
-    const confirmPasswordFormMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD));
+    const confirmPasswordFormMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD));
     await expect(confirmPasswordFormMessage).toBeVisible();
   });
 
@@ -117,7 +117,7 @@ test.describe("Register Page", () => {
 
     await expect(page).toHaveURL("http://127.0.0.1:3001/create-account");
 
-    const usernameFormMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.RegisterPage.INPUT_USERNAME));
+    const usernameFormMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.RegisterPage.INPUT_USERNAME));
     await expect(usernameFormMessage).toBeVisible();
   });
 
@@ -135,7 +135,7 @@ test.describe("Register Page", () => {
 
     await expect(page).toHaveURL("http://127.0.0.1:3001/create-account");
 
-    const emailFormMessage = page.getByTestId(DataTestId.CommonForm.forMessage(DataTestId.RegisterPage.INPUT_EMAIL));
+    const emailFormMessage = page.getByTestId(DataTestId.Form.MESSAGE(DataTestId.RegisterPage.INPUT_EMAIL));
     await expect(emailFormMessage).toBeVisible();
   });
 

@@ -9,12 +9,4 @@ export class DashboardPage {
   public static readonly RECIPE_CARD = "dashboard-recipe-card";
   public static readonly PAGER = "dashboard-pager";
   public static readonly NOT_FOUND = "dashboard-not-found";
-
-  public static readonly RECIPE_CARD_TITLE = (recipeId: number): string => {
-    return `${RecipeCard.CARD_TITLE(DashboardPage.RECIPE_CARD)}-${recipeId}`;
-  }
-
-  public static readonly RECIPE_CARD_DESCRIPTION = (recipeId: number): string => {
-    return `${RecipeCard.PARAGRAPH_CARD_DESCRIPTION(DashboardPage.RECIPE_CARD)}-${recipeId}`;
-  }
 }

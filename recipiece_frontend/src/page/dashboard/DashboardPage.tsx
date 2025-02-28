@@ -109,7 +109,11 @@ export const DashboardPage: FC = () => {
           <p data-testid={DataTestId.DashboardPage.PARAGRAPH_DESCRIPTION}>{cookbook?.description}</p>
         </LoadingGroup>
       )}
-      <RecipeSearch data-testid={DataTestId.DashboardPage.RECIPE_SEARCH_BAR} isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)} onSubmit={onSearch} />
+      <RecipeSearch
+        dataTestId={DataTestId.DashboardPage.RECIPE_SEARCH_BAR}
+        isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}
+        onSubmit={onSearch}
+      />
       <LoadingGroup variant="spinner" isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}>
         <Stack>
           {!isLoadingRecipes && recipes.length === 0 && (
@@ -128,7 +132,7 @@ export const DashboardPage: FC = () => {
             {(recipes || []).map((recipe) => {
               return (
                 <div className="auto-rows-fr" key={recipe.id}>
-                  <RecipeCard dataTestId={`${DataTestId.DashboardPage.RECIPE_CARD}-${recipe.id}`} recipe={recipe} cookbookId={cookbookId ? +cookbookId : undefined} />
+                  <RecipeCard recipe={recipe} cookbookId={cookbookId ? +cookbookId : undefined} />
                 </div>
               );
             })}
