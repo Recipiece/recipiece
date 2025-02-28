@@ -1,12 +1,13 @@
+import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
-import { DEFAULT_PAGE_SIZE, ListNotificationsQuerySchema, ListNotificationsResponseSchema } from "@recipiece/types";
+import { ListNotificationsQuerySchema, ListNotificationsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const listNotifications = async (request: AuthenticatedRequest<any, ListNotificationsQuerySchema>, tx: PrismaTransaction): ApiResponse<ListNotificationsResponseSchema> => {
   const user = request.user;
   const { page_number, page_size } = request.query;
-  const pageSize = page_size ?? DEFAULT_PAGE_SIZE;
+  const pageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 
   const notifications = await tx.notification.findMany({
     where: {

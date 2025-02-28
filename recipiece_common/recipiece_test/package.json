@@ -6,13 +6,14 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build:dev": "NODE_ENV=development yarn generate && webpack",
-    "build:prod": "NODE_ENV=production yarn generate && webpack",
+    "build:dev": "NODE_ENV=development webpack",
+    "build:prod": "NODE_ENV=production webpack",
     "lint": "prettier . --write"
   },
   "devDependencies": {
     "@swc/core": "^1.10.8",
     "@swc/register": "^0.1.10",
+    "@types/argon2": "^0.15.4",
     "@types/node": "^22.10.7",
     "prettier": "^3.4.2",
     "ts-loader": "^9.5.2",
@@ -21,6 +22,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.4.0"
+    "@faker-js/faker": "^9.4.0",
+    "argon2": "^0.41.1"
   }
 }

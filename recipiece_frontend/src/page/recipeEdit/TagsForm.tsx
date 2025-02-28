@@ -5,6 +5,7 @@ import { useListUserTagsQuery } from "../../api";
 import { Badge, FormField, FormItem, FormLabel, TypeaheadInput } from "../../component";
 import { RecipeEditFormData } from "./RecipeEditFormSchema";
 import { XIcon } from "lucide-react";
+import { DataTestId } from "@recipiece/constant";
 
 export const TagsForm: FC = () => {
   const [filters, setFilters] = useState<ListUserTagsQuerySchema>({
@@ -86,6 +87,7 @@ export const TagsForm: FC = () => {
             <FormItem>
               <FormLabel>Tags</FormLabel>
               <TypeaheadInput
+                data-testid={DataTestId.RecipeEditPage.TYPEAHEAD_INPUT_TAGS}
                 popoverClassName="sm:max-w-[200px]"
                 autocompleteOptions={autocompleteOptions}
                 onSelectItem={onSelectItem}
@@ -103,7 +105,7 @@ export const TagsForm: FC = () => {
       <div className="flex flex-row flex-wrap gap-2">
         {fields.map((field, idx) => {
           return (
-            <Badge className="cursor-pointer dark:text-white" key={field.id} onClick={() => remove(idx)}>
+            <Badge data-testid={DataTestId.RecipeEditPage.BADGE_TAG(field.content)} className="cursor-pointer dark:text-white" key={field.id} onClick={() => remove(idx)}>
               {field.content} <XIcon size={12} className="ml-2" />
             </Badge>
           );

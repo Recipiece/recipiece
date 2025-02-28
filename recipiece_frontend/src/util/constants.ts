@@ -1,4 +1,5 @@
 export class StorageKeys {
+  public static readonly REMEMBER_USER = "recipiece/remember_user";
   public static readonly ACCESS_TOKEN = "recipiece/access_token";
   public static readonly REFRESH_TOKEN = "recipiece/refresh_token";
   public static readonly PUSH_NOTIFICATION_DEVICE_ID = "recipiece/push_notification_device_id";

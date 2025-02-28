@@ -1,14 +1,14 @@
+import { Constant } from "@recipiece/constant";
+import { Prisma, PrismaTransaction } from "@recipiece/database";
 import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { Prisma, PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { DEFAULT_PAGE_SIZE } from "../../util/constant";
 
 export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooksQuerySchema>, tx: PrismaTransaction): ApiResponse<ListCookbooksResponseSchema> => {
   const user = req.user;
 
   const page = req.query.page_number;
-  const pageSize = req.query.page_size || DEFAULT_PAGE_SIZE;
+  const pageSize = req.query.page_size || Constant.DEFAULT_PAGE_SIZE;
   const excludeContainingRecipeId = req.query.exclude_containing_recipe_id;
   const search = req.query.search;
 

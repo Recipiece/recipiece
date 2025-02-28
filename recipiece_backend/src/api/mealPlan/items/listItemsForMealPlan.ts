@@ -1,7 +1,8 @@
-import { DEFAULT_PAGE_SIZE, ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
+import { Constant } from "@recipiece/constant";
+import { mealPlanSharesWithMemberships, Prisma, PrismaTransaction } from "@recipiece/database";
+import { ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { mealPlanSharesWithMemberships, Prisma, PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const listItemsForMealPlan = async (
@@ -9,7 +10,7 @@ export const listItemsForMealPlan = async (
   tx: PrismaTransaction
 ): ApiResponse<ListItemsForMealPlanResponseSchema> => {
   const { start_date, end_date, page_number, page_size } = request.query;
-  const pageSize = page_size ?? DEFAULT_PAGE_SIZE;
+  const pageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
   const mealPlanId = +request.params.id;
   const user = request.user;
 

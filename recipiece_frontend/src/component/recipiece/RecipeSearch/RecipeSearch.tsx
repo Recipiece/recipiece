@@ -9,13 +9,15 @@ import { FormCheckbox, FormInput, SubmitButton } from "../Form";
 import { IngredientSearch } from "./IngredientSearch";
 import { DefaultRecipeSearchFormValues, RecipeSearchForm, RecipeSearchFormSchema } from "./RecipeSearchFormSchema";
 import { TagSearch } from "./TagSearch";
+import { DataTestId } from "@recipiece/constant";
 
 export interface RecipeSearchProps {
   readonly onSubmit: (filters: Omit<ListRecipesQuerySchema, "cookbook_id" | "cookbook_attachments" | "page_number" | "page_size">) => Promise<void>;
   readonly isLoading: boolean;
+  readonly dataTestId?: string;
 }
 
-export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading }) => {
+export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataTestId }) => {
   const location = useLocation();
 
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
@@ -88,9 +90,17 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading }) => 
       <form onSubmit={form.handleSubmit(onSearchSubmit)}>
         <Collapsible open={isAdvancedSearchOpen}>
           <div className="flex flex-row items-end justify-end gap-2">
-            <FormInput autoComplete="off" disabled={isLoading || isSubmitting} placeholder="Search by name..." className="flex-grow" name="search" label="Search" />
+            <FormInput
+              data-testid={DataTestId.RecipeSearchBar.INPUT_SEARCH(dataTestId)}
+              autoComplete="off"
+              disabled={isLoading || isSubmitting}
+              placeholder="Search by name..."
+              className="flex-grow"
+              name="search"
+              label="Search"
+            />
             <CollapsibleTrigger asChild>
-              <Button variant="outline" onClick={onToggleAdvancedSearch}>
+              <Button data-testid={DataTestId.RecipeSearchBar.BUTTON_TOGGLE_ADVANCED_SEARCH(dataTestId)} variant="outline" onClick={onToggleAdvancedSearch}>
                 <ScanSearch />
               </Button>
             </CollapsibleTrigger>
@@ -98,12 +108,17 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading }) => 
 
           <CollapsibleContent>
             <div className="mt-2 flex flex-col gap-2">
-              <FormCheckbox disabled={isLoading || isSubmitting} name="shared_recipes" label="Include Recipes Shared to You" />
-              <IngredientSearch disabled={isLoading || isSubmitting} />
-              <TagSearch disabled={isLoading || isSubmitting} />
+              <FormCheckbox
+                data-testid={DataTestId.RecipeSearchBar.CHECKBOX_SHARED_RECIPES(dataTestId)}
+                disabled={isLoading || isSubmitting}
+                name="shared_recipes"
+                label="Include Recipes Shared to You"
+              />
+              <IngredientSearch dataTestId={DataTestId.RecipeSearchBar.INGREDIENT_SEARCH(dataTestId)} disabled={isLoading || isSubmitting} />
+              <TagSearch dataTestId={DataTestId.RecipeSearchBar.TAG_SEARCH(dataTestId)} disabled={isLoading || isSubmitting} />
             </div>
             <div className="flex flex-row justify-end">
-              <SubmitButton>
+              <SubmitButton data-testid={DataTestId.RecipeSearchBar.BUTTON_ADVANCED_SEARCH(dataTestId)}>
                 <Search className="mr-2" /> Search
               </SubmitButton>
             </div>

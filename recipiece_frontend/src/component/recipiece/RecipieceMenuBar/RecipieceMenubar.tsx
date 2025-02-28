@@ -33,6 +33,7 @@ import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
 import { ShoppingListMenuItem } from "./ShoppingListMenuItem";
 import { MealPlanMenuItem } from "./MealPlanMenuItem";
+import { DataTestId } from "@recipiece/constant";
 
 export const RecipieceMenuBarContext = createContext<{
   readonly mobileMenuPortalRef: undefined | RefObject<HTMLSpanElement>;
@@ -229,53 +230,72 @@ export const RecipieceMenubar: FC = () => {
 
   return (
     <>
-      <Menubar className="h-12 rounded-none border-0 p-2 text-white sm:h-16 sm:bg-primary sm:p-4">
+      <Menubar data-testid={DataTestId.MenuBar.NAV_DESKTOP_MENU_BAR} className="h-12 rounded-none border-0 p-2 text-white sm:h-16 sm:bg-primary sm:p-4">
         <RecipieceHeader className="mr-auto w-full text-start text-primary dark:text-white sm:text-center sm:text-white md:w-auto" />
         <span className="ml-auto block sm:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="link" className="text-primary dark:text-white">
+              <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT} variant="link" className="text-primary dark:text-white">
                 <CircleUserRound />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => navigate("/kitchen")}>Kitchen</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/account")}>Account</DropdownMenuItem>
+              <DropdownMenuItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN} onClick={() => navigate("/kitchen")}>
+                Kitchen
+              </DropdownMenuItem>
+              <DropdownMenuItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_ACCOUNT} onClick={() => navigate("/account")}>
+                Account
+              </DropdownMenuItem>
               {/* <DropdownMenuItem onClick={() => navigate("/notifications")}>Notifications</DropdownMenuItem> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onLogout}>Sign Out</DropdownMenuItem>
+              <DropdownMenuItem data-testid={DataTestId.MenuBar.MENU_ITEM_SIGN_OUT} onClick={onLogout}>
+                Sign Out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </span>
         <span className="ml-auto block sm:hidden" ref={mobileMenuPortalRef} />
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_ITEM_HOME} onClick={onGoHome}>
+              Home
+            </MenubarTrigger>
           </MenubarMenu>
         </span>
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Create</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_CREATE}>Create</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={() => navigate("/recipe/edit/new?source=url")}>Recipe From URL</MenubarItem>
-              <MenubarItem onClick={() => navigate("/recipe/edit/new")}>Recipe From Scratch</MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_RECIPE_FROM_URL} onClick={() => navigate("/recipe/edit/new?source=url")}>
+                Recipe From URL
+              </MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_RECIPE_FROM_SCRATCH} onClick={() => navigate("/recipe/edit/new")}>
+                Recipe From Scratch
+              </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
         </span>
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Meal Plans</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_MEAL_PLAN}>Meal Plans</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={onStartCreateMealPlan}>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_CREATE_MEAL_PLAN} onClick={onStartCreateMealPlan}>
                 <Plus size={16} className="mr-2" />
                 New Meal Plan
               </MenubarItem>
               <LoadingGroup isLoading={isLoadingMealPlans} className="h-10 w-full">
                 {!!mealPlans?.data?.length && <Separator />}
                 {(mealPlans?.data || []).map((mealPlan) => {
-                  return <MealPlanMenuItem onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)} key={mealPlan.id} mealPlan={mealPlan} />;
+                  return (
+                    <MealPlanMenuItem
+                      data-testid={DataTestId.MenuBar.MENU_ITEM_MEAL_PLAN(mealPlan.id)}
+                      onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)}
+                      key={mealPlan.id}
+                      mealPlan={mealPlan}
+                    />
+                  );
                 })}
               </LoadingGroup>
             </MenubarContent>
@@ -284,16 +304,16 @@ export const RecipieceMenubar: FC = () => {
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Cookbooks</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_COOKBOOK}>Cookbooks</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={onStartCreateCookbook}>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_CREATE_COOKBOOK} onClick={onStartCreateCookbook}>
                 <Plus size={16} className="mr-2" /> New Cookbook
               </MenubarItem>
               <LoadingGroup isLoading={isLoadingCookbooks} className="h-10 w-full">
                 {!!cookbooks?.data?.length && <Separator />}
                 {(cookbooks?.data || []).map((cookbook) => {
                   return (
-                    <MenubarItem onClick={() => navigate(`/cookbook/${cookbook.id}`)} key={cookbook.id}>
+                    <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_COOKBOOK(cookbook.id)} onClick={() => navigate(`/cookbook/${cookbook.id}`)} key={cookbook.id}>
                       {cookbook.name}
                     </MenubarItem>
                   );
@@ -306,15 +326,22 @@ export const RecipieceMenubar: FC = () => {
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Shopping Lists</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_SHOPPING_LIST}>Shopping Lists</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={onStartCreateShoppingList}>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_CREATE_SHOPPING_LIST} onClick={onStartCreateShoppingList}>
                 <Plus size={16} className="mr-2" /> New Shopping List
               </MenubarItem>
               <LoadingGroup isLoading={isLoadingShoppingLists} className="h-10 w-full">
                 {!!shoppingLists?.data?.length && <Separator />}
                 {(shoppingLists?.data || []).map((shoppingList) => {
-                  return <ShoppingListMenuItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)} shoppingList={shoppingList} />;
+                  return (
+                    <ShoppingListMenuItem
+                      data-testid={DataTestId.MenuBar.MENU_ITEM_SHOPPING_LIST(shoppingList.id)}
+                      key={shoppingList.id}
+                      onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}
+                      shoppingList={shoppingList}
+                    />
+                  );
                 })}
                 {/* {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />} */}
               </LoadingGroup>
@@ -324,37 +351,43 @@ export const RecipieceMenubar: FC = () => {
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Account</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT}>Account</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={() => navigate("/kitchen")}>Kitchen</MenubarItem>
-              <MenubarItem onClick={() => navigate("/account")}>Settings</MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN} onClick={() => navigate("/kitchen")}>
+                Kitchen
+              </MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_ACCOUNT} onClick={() => navigate("/account")}>
+                Settings
+              </MenubarItem>
               {/* <MenubarItem onClick={() => navigate("/notifications")}>Notifications</MenubarItem> */}
               <MenubarSeparator />
-              <MenubarItem onClick={onLogout}>Sign Out</MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_SIGN_OUT} onClick={onLogout}>
+                Sign Out
+              </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
         </span>
       </Menubar>
 
-      <footer className="visible fixed bottom-0 left-0 z-50 h-16 w-full bg-primary pb-4 text-white sm:invisible">
+      <footer data-testid={DataTestId.MenuBar.FOOTER_MOBILE_MENU_BAR} className="visible fixed bottom-0 left-0 z-50 h-16 w-full bg-primary pb-4 text-white sm:invisible">
         <div className="flex h-full flex-row items-center justify-center">
-          <Button onClick={() => navigate("/")} variant="link" className="grow text-white">
+          <Button data-testid={DataTestId.MenuBar.MENU_ITEM_HOME} onClick={() => navigate("/")} variant="link" className="grow text-white">
             <Home />
           </Button>
 
-          <Button className="grow text-white" onClick={onMobileViewCookbooks}>
+          <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_COOKBOOK} className="grow text-white" onClick={onMobileViewCookbooks}>
             <Book />
           </Button>
 
-          <Button onClick={onCreatePressed} variant="link" className="grow text-white">
+          <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_CREATE} onClick={onCreatePressed} variant="link" className="grow text-white">
             <CirclePlus />
           </Button>
 
-          <Button onClick={onMobileViewShoppingLists} className="grow text-white">
+          <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_SHOPPING_LIST} onClick={onMobileViewShoppingLists} className="grow text-white">
             <ShoppingBasket />
           </Button>
 
-          <Button onClick={onMobileViewMealPlans} className="grow text-white">
+          <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_MEAL_PLAN} onClick={onMobileViewMealPlans} className="grow text-white">
             <GanttChart />
           </Button>
         </div>

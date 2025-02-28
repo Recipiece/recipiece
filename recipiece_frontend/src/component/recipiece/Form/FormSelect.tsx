@@ -1,6 +1,7 @@
 import { FC, PropsWithChildren, ReactNode } from "react";
 import { useFormContext } from "react-hook-form";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Select, SelectContent, SelectTrigger, SelectValue } from "../../shadcn";
+import { DataTestId } from "@recipiece/constant";
 
 export interface FormSelectProps extends PropsWithChildren {
   readonly name: string;
@@ -16,16 +17,19 @@ export interface FormSelectProps extends PropsWithChildren {
 export const FormSelect: FC<FormSelectProps> = ({ children, name, label, instructions, placeholder, required, disabled }) => {
   const form = useFormContext();
 
+  // @ts-expect-error data test id is not type on the props
+  const dataTestId = restInputProps?.["data-testid"];
+
   return (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem>
-          {label && <FormLabel>{label}</FormLabel>}
-          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} required={required} disabled={disabled}>
+        <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)}>
+          {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
+          <Select data-testid={dataTestId} onValueChange={field.onChange} defaultValue={field.value} value={field.value} required={required} disabled={disabled}>
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger data-testid={DataTestId.Form.SELECT_TRIGGER(dataTestId)}>
                 <SelectValue placeholder={placeholder ?? ""} />
               </SelectTrigger>
             </FormControl>
@@ -35,8 +39,8 @@ export const FormSelect: FC<FormSelectProps> = ({ children, name, label, instruc
               })}
             </SelectContent>
           </Select>
-          {instructions && <FormDescription>{instructions}</FormDescription>}
-          <FormMessage />
+          {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
+          <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
         </FormItem>
       )}
     />

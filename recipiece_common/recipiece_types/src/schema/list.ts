@@ -1,14 +1,14 @@
+import { Constant } from "@recipiece/constant";
 import { AnyObject, array, boolean, InferType, Maybe, number, object, ObjectSchema } from "yup";
-import { DEFAULT_PAGE_SIZE } from "../util";
 
 export const YListQuerySchema = object({
   page_number: number().required(),
-  page_size: number().min(1).max(DEFAULT_PAGE_SIZE).notRequired(),
+  page_size: number().min(1).max(Constant.DEFAULT_PAGE_SIZE).notRequired(),
 })
   .transform((val) => {
     return {
       ...val,
-      page_size: val.page_size ?? DEFAULT_PAGE_SIZE,
+      page_size: val.page_size ?? Constant.DEFAULT_PAGE_SIZE,
     };
   })
   .noUnknown();

@@ -1,8 +1,8 @@
+import { Constant } from "@recipiece/constant";
 import { User, prisma } from "@recipiece/database";
 import { randomUUID } from "crypto";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { UserValidationTokenTypes } from "../../../src/util/constant";
 import { verifyPassword } from "../../../src/util/password";
 
 describe("Reset Password", () => {
@@ -17,7 +17,7 @@ describe("Reset Password", () => {
     const createdToken = await prisma.userValidationToken.create({
       data: {
         user_id: user.id,
-        purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+        purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
       },
     });
 
@@ -50,7 +50,7 @@ describe("Reset Password", () => {
     const createdToken = await prisma.userValidationToken.create({
       data: {
         user_id: user.id,
-        purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+        purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
       },
     });
 
@@ -73,7 +73,7 @@ describe("Reset Password", () => {
     const createdToken = await prisma.userValidationToken.create({
       data: {
         user_id: user.id,
-        purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+        purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
       },
     });
 

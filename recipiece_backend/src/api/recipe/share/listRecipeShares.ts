@@ -1,8 +1,8 @@
-import { ListRecipeSharesQuerySchema, ListRecipeSharesResponseSchema } from "@recipiece/types";
-import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { StatusCodes } from "http-status-codes";
-import { DEFAULT_PAGE_SIZE } from "../../../util/constant";
+import { Constant } from "@recipiece/constant";
 import { Prisma, PrismaTransaction } from "@recipiece/database";
+import { ListRecipeSharesQuerySchema, ListRecipeSharesResponseSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
+import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 /**
  * List recipes shares that are targeting the requesting user or the requesting user has sent.
@@ -10,7 +10,7 @@ import { Prisma, PrismaTransaction } from "@recipiece/database";
  */
 export const listRecipeShares = async (request: AuthenticatedRequest<any, ListRecipeSharesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipeSharesResponseSchema> => {
   const { page_number, page_size, targeting_self, from_self, user_kitchen_membership_id } = request.query;
-  const actualPageSize = page_size ?? DEFAULT_PAGE_SIZE;
+  const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 
   const where: Prisma.RecipeShareWhereInput = {};
   let userKitchenMembershipWhere = {};

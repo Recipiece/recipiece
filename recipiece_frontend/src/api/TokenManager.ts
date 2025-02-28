@@ -20,6 +20,18 @@ export class TokenManager {
     return !!this.accessToken;
   }
 
+  public set rememberUser(newVal: boolean | undefined | null) {
+    if (newVal) {
+      localStorage.setItem(StorageKeys.REMEMBER_USER, "Y");
+    } else {
+      localStorage.removeItem(StorageKeys.REMEMBER_USER);
+    }
+  }
+
+  public get rememberUser(): boolean {
+    return localStorage.getItem(StorageKeys.REMEMBER_USER) === "Y";
+  }
+
   public set accessToken(newVal: string | undefined | null) {
     if (newVal) {
       sessionStorage.setItem(StorageKeys.ACCESS_TOKEN, JSON.stringify(newVal));
@@ -30,7 +42,11 @@ export class TokenManager {
 
   public set refreshToken(newVal: string | undefined | null) {
     if (newVal) {
-      localStorage.setItem(StorageKeys.REFRESH_TOKEN, JSON.stringify(newVal));
+      if (this.rememberUser) {
+        localStorage.setItem(StorageKeys.REFRESH_TOKEN, JSON.stringify(newVal));
+      } else {
+        sessionStorage.setItem(StorageKeys.REFRESH_TOKEN, JSON.stringify(newVal));
+      }
     } else {
       localStorage.removeItem(StorageKeys.REFRESH_TOKEN);
     }
@@ -45,7 +61,12 @@ export class TokenManager {
   }
 
   public get refreshToken(): string | undefined {
-    const item = localStorage.getItem(StorageKeys.REFRESH_TOKEN);
+    let item = undefined;
+    if (this.rememberUser) {
+      item = localStorage.getItem(StorageKeys.REFRESH_TOKEN);
+    } else {
+      item = sessionStorage.getItem(StorageKeys.REFRESH_TOKEN);
+    }
     if (item) {
       return JSON.parse(item);
     }

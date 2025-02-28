@@ -1,5 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { Prisma, prisma, PrismaTransaction, User, UserCredentials, UserKitchenMembership, UserTag } from "@recipiece/database";
+import { prisma, PrismaTransaction, User, UserCredentials, UserKitchenMembership, UserTag, UserValidationToken } from "@recipiece/database";
+import argon2 from "argon2";
+import { emailGenerator, tagGenerator, usernameGenerator } from "../generator";
+import { Constant } from "@recipiece/constant";
 
 export const generateUserTag = async (tag?: Partial<Omit<UserTag, "id">>, tx?: PrismaTransaction) => {
   const userId = tag?.user_id ?? (await generateUser(undefined, tx)).id;
@@ -7,7 +10,7 @@ export const generateUserTag = async (tag?: Partial<Omit<UserTag, "id">>, tx?: P
   return (tx ?? prisma).userTag.create({
     data: {
       user_id: userId,
-      content: (tag?.content ?? faker.word.words({ count: 1 })).toLowerCase().trim(),
+      content: (tag?.content ?? tagGenerator.next().value).toLowerCase().trim(),
       created_at: tag?.created_at,
     },
   });
@@ -40,16 +43,59 @@ export const generateUserCredentials = async (userCredentials?: Partial<Omit<Use
   });
 };
 
+export const generateHashedPassword = async (plainPassword: string): Promise<string | undefined> => {
+  try {
+    const hash = await argon2.hash(plainPassword, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16,
+      timeCost: 5,
+      parallelism: 1,
+    });
+    return hash;
+  } catch (err) {
+    console.error(err);
+    return undefined;
+  }
+};
+
 export const generateUser = async (user?: Partial<Omit<User, "id">>, tx?: PrismaTransaction): Promise<User> => {
   return (tx ?? prisma).user.create({
     data: {
-      username: user?.username ?? faker.internet.username(),
-      email: user?.email ?? faker.internet.email(),
+      username: user?.username ?? usernameGenerator.next().value,
+      email: user?.email ?? emailGenerator.next().value,
       created_at: user?.created_at ?? new Date(),
       validated: user?.validated ?? false,
       preferences: user?.preferences ?? {
         account_visibility: "protected",
       },
+    },
+  });
+};
+
+export const generateUserWithPassword = async (rawPassword?: string, user?: Partial<Omit<User, "id">>, tx?: PrismaTransaction): Promise<[User, UserCredentials]> => {
+  const password = rawPassword ?? faker.internet.password({ length: 20 });
+
+  const generatedUser = await generateUser(user, tx);
+  const credentials = await generateUserCredentials(
+    {
+      user_id: generatedUser.id,
+      password_hash: await generateHashedPassword(password),
+    },
+    tx
+  );
+  return [generatedUser, credentials];
+};
+
+export const generateUserValidationToken = async (token?: Partial<Omit<UserValidationToken, "id">>, tx?: PrismaTransaction): Promise<UserValidationToken> => {
+  const userId = token?.user_id ?? (await generateUser(undefined, tx)).id;
+  const purpose =
+    token?.purpose ?? faker.helpers.arrayElement([Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose, Constant.UserValidationTokenTypes.ACCOUNT_VERIFICATION.purpose]);
+
+  return await (tx ?? prisma).userValidationToken.create({
+    data: {
+      user_id: userId,
+      purpose: purpose,
+      created_at: token?.created_at,
     },
   });
 };
