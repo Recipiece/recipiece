@@ -1,90 +1,144 @@
 import { Constant } from "@recipiece/constant";
-import { KyselyCore, PrismaTransaction, Recipe } from "@recipiece/database";
+import { KyselyCore, KyselyGenerated, PrismaTransaction, Recipe } from "@recipiece/database";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery, tagsSubquery } from "./util";
+import { ingredientsSubquery, recipeSharesSubquery, stepsSubquery, tagsSubquery } from "./util";
 
 export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipesResponseSchema> => {
-  const { page_number, page_size, shared_recipes, search, cookbook_id, cookbook_attachments, ingredients, tags } = request.query;
+  const { page_number, page_size, shared_recipes, search, cookbook_id, cookbook_attachments, ingredients, tags, ingredients_filter, tags_filter } = request.query;
   const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
   const user = request.user;
 
-  const recipesCte = (db: Parameters<Parameters<typeof tx.$kysely.with>[1]>[0]) => {
-    return db
-      .selectFrom("recipes")
-      .selectAll("recipes")
-      .select((eb) => {
-        const base: any[] = [stepsSubquery(eb).as("steps"), ingredientsSubquery(eb).as("ingredients"), recipeSharesSubquery(eb, user.id).as("shares"), tagsSubquery(eb).as("tags")];
-
-        if (ingredients) {
-          base.push(
-            eb
-              .selectFrom("recipe_ingredients")
-              .select("recipe_ingredients.id")
-              .whereRef("recipe_ingredients.recipe_id", "=", "recipes.id")
-              .where(() => {
-                const joined = KyselyCore.sql.raw(ingredients.join("|"));
-                return KyselyCore.sql`lower(recipe_ingredients.name) ~* '(${joined})'`;
-              })
-              .limit(1)
-              .as("test_ingredient")
-          );
-        }
-
-        if (tags) {
-          base.push(
-            eb
-              .selectFrom("user_tags")
-              .select("user_tags.id")
-              .innerJoin("recipe_tag_attachments", "recipe_tag_attachments.user_tag_id", "user_tags.id")
-              .whereRef("recipe_tag_attachments.recipe_id", "=", "recipes.id")
-              .where(() => {
-                const joined = KyselyCore.sql.raw(tags.join("|"));
-                return KyselyCore.sql`lower(user_tags.content) ~* '(${joined})'`;
-              })
-              .limit(1)
-              .as("test_tag")
-          );
-        }
-
-        return base;
-      })
-      .where((eb) => {
-        if (shared_recipes === "include") {
-          return eb.or([eb("recipes.user_id", "=", user.id), eb.exists(recipeSharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1))]);
-        } else {
-          return eb("recipes.user_id", "=", user.id);
-        }
-      });
+  const selectableSubqueries = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">) => {
+    return [ingredientsSubquery(eb).as("ingredients"), stepsSubquery(eb).as("steps"), tagsSubquery(eb).as("tags")];
   };
 
-  let query = tx.$kysely.with("expanded_recipes", recipesCte).selectFrom("expanded_recipes").selectAll();
+  let query = tx.$kysely
+    .with("owned_recipes", (db) => {
+      return db
+        .selectFrom("recipes")
+        .selectAll("recipes")
+        .select(selectableSubqueries)
+        .select((eb) => recipeSharesSubquery(eb, user.id).as("shares"))
+        .where("recipes.user_id", "=", user.id);
+    })
+    .with("selective_grant_shared_recipes", (db) => {
+      return (
+        db
+          .selectFrom("recipe_shares")
+          .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "recipe_shares.user_kitchen_membership_id")
+          .innerJoin("recipes", "recipes.id", "recipe_shares.recipe_id")
+          .where((eb) => {
+            return eb.and([
+              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "SELECTIVE"),
+              eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
+            ]);
+          })
+          .selectAll("recipes")
+          .select(selectableSubqueries)
+          // these shares are "normal" because they are explicitly shared
+          .select((eb) => recipeSharesSubquery(eb, user.id).as("shares"))
+      );
+    })
+    .with("all_grant_shared_recipes", (db) => {
+      return (
+        db
+          .selectFrom("user_kitchen_memberships")
+          .innerJoin("users", "users.id", "user_kitchen_memberships.source_user_id")
+          .innerJoin("recipes", "recipes.user_id", "user_id")
+          .where((eb) => {
+            return eb.and([
+              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
+              eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
+            ]);
+          })
+          .whereRef("user_kitchen_memberships.source_user_id", "=", "recipes.user_id")
+          .selectAll("recipes")
+          .select(selectableSubqueries)
+          // these shares are synthetic because we don't explicitly create shares for "ALL" records
+          .select((eb) => {
+            return eb
+              .fn("jsonb_build_array", [
+                eb.fn("jsonb_build_object", [
+                  KyselyCore.sql.lit("id"),
+                  eb.lit(-1),
+                  KyselyCore.sql.lit("created_at"),
+                  eb.fn("now"),
+                  KyselyCore.sql.lit("recipe_id"),
+                  "recipes.id",
+                  KyselyCore.sql.lit("user_kitchen_membership_id"),
+                  "user_kitchen_memberships.id",
+                ]),
+              ])
+              .as("shares");
+          })
+      );
+    })
+    .with("all_recipes", (db) => {
+      if (shared_recipes === "include") {
+        return db
+          .selectFrom("owned_recipes")
+          .union((eb) => {
+            return eb.selectFrom("selective_grant_shared_recipes").selectAll();
+          })
+          .union((eb) => {
+            return eb.selectFrom("all_grant_shared_recipes").selectAll();
+          })
+          .selectAll();
+      } else {
+        return db.selectFrom("owned_recipes").selectAll();
+      }
+    })
+    .selectFrom("all_recipes")
+    .selectAll("all_recipes");
+
+  if (ingredients) {
+    if (ingredients_filter === "include") {
+      query = query.where(() => {
+        const joined = KyselyCore.sql.raw(ingredients.join("|"));
+        return KyselyCore.sql`lower(all_recipes.ingredients::text) ~* '"name": "(${joined})"'`;
+      });
+    } else {
+      query = query.where(() => {
+        const joined = KyselyCore.sql.raw(ingredients.join("|"));
+        return KyselyCore.sql`lower(all_recipes.ingredients::text) !~* '"name": "(${joined})"'`;
+      });
+    }
+  }
+
+  if (tags) {
+    if (tags_filter === "include") {
+      query = query.where(() => {
+        const joined = KyselyCore.sql.raw(tags.join("|"));
+        return KyselyCore.sql`lower(all_recipes.tags::text) ~* '"content": "(${joined})"'`;
+      });
+    } else {
+      query = query.where(() => {
+        const joined = KyselyCore.sql.raw(tags.join("|"));
+        return KyselyCore.sql`lower(all_recipes.tags::text) !~* '"content": "(${joined})"'`;
+      });
+    }
+  }
 
   if (search) {
-    query = query.where("expanded_recipes.name", "ilike", `%${search}%`);
+    query = query.where("all_recipes.name", "ilike", `%${search}%`);
   }
 
   if (cookbook_id && cookbook_attachments === "include") {
     query = query
-      .innerJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "expanded_recipes.id")
+      .innerJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "all_recipes.id")
       .where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id);
   } else if (cookbook_id && cookbook_attachments === "exclude") {
     query = query.where((eb) => {
       return eb(
-        "expanded_recipes.id",
+        "all_recipes.id",
         "not in",
         eb.selectFrom("recipe_cookbook_attachments").select("recipe_cookbook_attachments.recipe_id").where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id)
       );
     });
-  }
-
-  if (ingredients) {
-    query = query.where("expanded_recipes.test_ingredient", "is not", null);
-  }
-
-  if (tags) {
-    query = query.where("expanded_recipes.test_tag", "is not", null);
   }
 
   query = query.offset(page_number * actualPageSize).limit(actualPageSize + 1);

@@ -10,6 +10,11 @@ export const UserKitchenMembershipStatus = {
     pending: "pending"
 } as const;
 export type UserKitchenMembershipStatus = (typeof UserKitchenMembershipStatus)[keyof typeof UserKitchenMembershipStatus];
+export const UserKitchenMembershipGrantLevel = {
+    ALL: "ALL",
+    SELECTIVE: "SELECTIVE"
+} as const;
+export type UserKitchenMembershipGrantLevel = (typeof UserKitchenMembershipGrantLevel)[keyof typeof UserKitchenMembershipGrantLevel];
 export const NotificationStatus = {
     read: "read",
     unread: "unread"
@@ -156,6 +161,7 @@ export type UserCredentials = {
 export type UserKitchenMembership = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
+    grant_level: Generated<UserKitchenMembershipGrantLevel>;
     source_user_id: number;
     destination_user_id: number;
     status: UserKitchenMembershipStatus;

@@ -137,6 +137,8 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
   cookbook_id: number().notRequired(),
   cookbook_attachments: string().oneOf(["include", "exclude"]).notRequired(),
   shared_recipes: string().oneOf(["include", "exclude"]).notRequired(),
+  ingredients_filter: string().oneOf(["include", "exclude"]).notRequired(),
+  tags_filter: string().oneOf(["include", "exclude"]).notRequired(),
   ingredients: array(string()).notRequired(),
   tags: array(string()).notRequired(),
 })
@@ -146,6 +148,8 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
       ingredients: val.ingredients ? val.ingredients.split(",") : undefined,
       tags: val.tags ? val.tags.split(",") : undefined,
       shared_recipes: val.shared_recipes ?? "include",
+      ingredients_filter: val.ingredients_filter ?? "include",
+      tags_filter: val.tags_filter ?? "include",
     };
   })
   .strict()

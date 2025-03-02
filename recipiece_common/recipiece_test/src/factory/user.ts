@@ -27,6 +27,7 @@ export const generateUserKitchenMembership = async (membership?: Partial<Omit<Us
       destination_user_id: destUserId,
       status: status,
       created_at: membership?.created_at ?? new Date(),
+      grant_level: membership?.grant_level ?? "SELECTIVE",
     },
   });
 };

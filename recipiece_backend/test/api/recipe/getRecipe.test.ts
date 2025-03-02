@@ -35,13 +35,14 @@ describe("Get Recipe", () => {
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
-  it("should get a shared recipe", async () => {
+  it("should get a recipe shared with a SELECTIVE grant level", async () => {
     const otherRecipe = await generateRecipe();
 
     const membership = await generateUserKitchenMembership({
       source_user_id: otherRecipe.user_id,
       destination_user_id: user.id,
       status: "accepted",
+      grant_level: "SELECTIVE",
     });
 
     const share = await generateRecipeShare({
@@ -49,15 +50,14 @@ describe("Get Recipe", () => {
       user_kitchen_membership_id: membership.id,
     });
 
-    // make a membership and share going the other way to ensure we dont pick up stray records
+    // make a membership and share going the other way to ensure we don't pick up stray records
     const mirroredMembership = await generateUserKitchenMembership({
       destination_user_id: otherRecipe.user_id,
       source_user_id: user.id,
       status: "accepted",
+      grant_level: "SELECTIVE",
     });
-
     const usersRecipe = await generateRecipe({ user_id: user.id });
-
     const usersRecipeShare = await generateRecipeShare({
       user_kitchen_membership_id: mirroredMembership.id,
       recipe_id: usersRecipe.id,
@@ -70,6 +70,37 @@ describe("Get Recipe", () => {
 
     expect(responseData.shares?.length).toBe(1);
     expect(responseData.shares![0].id).toBe(share.id);
+    expect(responseData.shares![0].recipe_id).toBe(otherRecipe.id);
+    expect(responseData.shares![0].user_kitchen_membership_id).toBe(membership.id);
+  });
+
+  it("should get a recipe shared with an ALL grant level", async () => {
+    const otherRecipe = await generateRecipe();
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherRecipe.user_id,
+      destination_user_id: user.id,
+      status: "accepted",
+      grant_level: "ALL",
+    });
+
+    // make a membership and share going the other way to ensure we don't pick up stray records
+    await generateUserKitchenMembership({
+      destination_user_id: otherRecipe.user_id,
+      source_user_id: user.id,
+      status: "accepted",
+      grant_level: "ALL",
+    });
+    await generateRecipe({ user_id: user.id });
+
+    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: RecipeSchema = response.body;
+
+    expect(responseData.shares?.length).toBe(1);
+    expect(responseData.shares![0].id).toBe(-1);
+    expect(responseData.shares![0].recipe_id).toBe(otherRecipe.id);
+    expect(responseData.shares![0].user_kitchen_membership_id).toBe(membership.id);
   });
 
   it("should not get a shared recipe where the membership is not accepted", async () => {

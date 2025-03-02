@@ -67,19 +67,23 @@ enum UserKitchenMembershipStatus {
   pending
 }
 
+enum UserKitchenMembershipGrantLevel {
+  ALL
+  SELECTIVE
+}
+
 model UserKitchenMembership {
   @@map("user_kitchen_memberships")
   
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
+  grant_level UserKitchenMembershipGrantLevel @default(SELECTIVE)
   source_user_id Int
-  source_user User @relation(name: "source_user", fields: [source_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
   destination_user_id Int
-  destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
   status UserKitchenMembershipStatus
 
+  destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  source_user User @relation(name: "source_user", fields: [source_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipe_shares RecipeShare[]
   shopping_list_shares ShoppingListShare[]
   meal_plan_shares MealPlanShare[]

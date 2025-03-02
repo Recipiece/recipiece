@@ -25,6 +25,7 @@ export const YUserSchema = object({
 export const YUserKitchenMembershipSchema = object({
   id: number().required(),
   created_at: date().required(),
+  grant_level: string().oneOf(["ALL", "SELECTIVE"]).required(),
   destination_user: object({
     id: number().required(),
     username: string().required(),
@@ -251,3 +252,7 @@ export interface ListUserTagsQuerySchema extends InferType<typeof YListUserTagsQ
 export const YListUserTagsResponseSchema = generateYListQueryResponseSchema(YUserTagSchema);
 
 export interface ListUserTagsResponseSchema extends InferType<typeof YListUserTagsResponseSchema> {}
+
+/**
+ * Create a user household membership
+ */

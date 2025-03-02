@@ -93,7 +93,7 @@ export const stepsSubquery = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.D
       coalesce(
         jsonb_agg(recipe_steps.* order by recipe_steps."order" asc),
         '[]'
-      )  
+      )
       `.as("steps_aggregate")
     )
     .whereRef("recipe_steps.recipe_id", "=", "recipes.id");
