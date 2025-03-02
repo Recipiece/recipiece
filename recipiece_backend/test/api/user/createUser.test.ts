@@ -1,12 +1,12 @@
 import { prisma } from "@recipiece/database";
-import { generateUser } from "@recipiece/test";
+import { emailGenerator, generateUser, usernameGenerator } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
 describe("Create User", () => {
   it("should create a user, their credentials, and their access level", async () => {
-    const email = "newuser@recipiece.org";
-    const username = "testuser";
+    const email = emailGenerator.next()!.value;
+    const username = usernameGenerator.next()!.value;
     const password = "reallyCoolP@ss1234!";
 
     const response = await request(server)

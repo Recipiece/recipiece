@@ -3,7 +3,7 @@ import { KyselyCore, KyselyGenerated, PrismaTransaction, Recipe } from "@recipie
 import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { ingredientsSubquery, recipeSharesSubquery, stepsSubquery, tagsSubquery } from "./util";
+import { ingredientsSubquery, recipeSharesSubquery, stepsSubquery, tagsSubquery } from "./query";
 
 export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipesResponseSchema> => {
   const { page_number, page_size, shared_recipes, search, cookbook_id, cookbook_attachments, ingredients, tags, ingredients_filter, tags_filter } = request.query;

@@ -1,24 +1,17 @@
-import { mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { CreateMealPlanItemRequestSchema, MealPlanItemJobDataSchema, MealPlanItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanItemQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { JobType } from "../../../util/constant";
+import { getMealPlanByIdQuery } from "../query";
+import { getRecipeByIdQuery } from "../../recipe/query";
 
 export const createItemForMealPlan = async (request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanItemSchema> => {
   const user = request.user;
   const { meal_plan_id, ...restMealPlanItem } = request.body;
 
-  const mealPlan = await tx.$kysely
-    .selectFrom("meal_plans")
-    .selectAll("meal_plans")
-    .where((eb) => {
-      return eb.and([
-        eb("meal_plans.id", "=", meal_plan_id),
-        eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
-      ]);
-    })
-    .executeTakeFirst();
+  const mealPlan = await getMealPlanByIdQuery(tx, user, meal_plan_id).executeTakeFirst();
 
   if (!mealPlan) {
     return [
@@ -29,34 +22,15 @@ export const createItemForMealPlan = async (request: AuthenticatedRequest<Create
     ];
   }
 
-  // check the recipe ownership
   if (restMealPlanItem.recipe_id) {
-    const ownedRecipe = await tx.$kysely
-      .selectFrom("recipes")
-      .select("recipes.id")
-      .where("recipes.user_id", "=", user.id)
-      .where("recipes.id", "=", restMealPlanItem.recipe_id)
-      .executeTakeFirst();
-    if (!ownedRecipe) {
-      const sharedRecipe = await tx.$kysely
-        .selectFrom("recipe_shares")
-        .select("recipe_shares.recipe_id")
-        .leftJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "recipe_shares.user_kitchen_membership_id")
-        .where("user_kitchen_memberships.destination_user_id", "=", user.id)
-        .where((eb) => {
-          return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted");
-        })
-        .where("recipe_shares.recipe_id", "=", restMealPlanItem.recipe_id)
-        .executeTakeFirst();
-
-      if (!sharedRecipe) {
-        return [
-          StatusCodes.NOT_FOUND,
-          {
-            message: "User does not have access to provided recipe",
-          },
-        ];
-      }
+    const recipe = await getRecipeByIdQuery(tx, user, restMealPlanItem.recipe_id).executeTakeFirst();
+    if (!recipe) {
+      return [
+        StatusCodes.NOT_FOUND,
+        {
+          message: "User does not have access to provided recipe",
+        },
+      ];
     }
   }
 

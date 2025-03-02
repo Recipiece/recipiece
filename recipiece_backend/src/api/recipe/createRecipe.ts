@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { Prisma, PrismaTransaction, UserTag } from "@recipiece/database";
 import { CreateRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { lazyAttachTags } from "./util";
+import { lazyAttachTags } from "./query";
 import { ConflictError } from "../../util/error";
 
 export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {

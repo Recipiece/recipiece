@@ -1,9 +1,10 @@
-import { KyselyCore, mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
+import { KyselyCore, PrismaTransaction } from "@recipiece/database";
 import { MealPlanConfigurationJobDataSchema, MealPlanConfigurationSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanConfigurationQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { JobType } from "../../../util/constant";
+import { getMealPlanByIdQuery } from "../query";
 
 /**
  * Set the configuration for a meal plan.
@@ -15,17 +16,7 @@ export const setMealPlanConfiguration = async (request: AuthenticatedRequest<Mea
   const mealPlanId = +request.params.id!;
   const configuration = request.body;
 
-  const query = tx.$kysely
-    .selectFrom("meal_plans")
-    .selectAll("meal_plans")
-    .where((eb) => {
-      return eb.and([
-        eb("meal_plans.id", "=", mealPlanId),
-        eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
-      ]);
-    });
-
-  const mealPlan = await query.executeTakeFirst();
+  const mealPlan = await getMealPlanByIdQuery(tx, user, mealPlanId).executeTakeFirst();
 
   if (!mealPlan) {
     return [

@@ -1,5 +1,4 @@
 import { User } from "@recipiece/database";
-import { generateCookbook } from "@recipiece/test";
 import { CookbookSchema, CreateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";

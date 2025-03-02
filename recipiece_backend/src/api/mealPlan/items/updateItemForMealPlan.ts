@@ -1,25 +1,17 @@
-import { KyselyCore, mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
+import { KyselyCore, PrismaTransaction } from "@recipiece/database";
 import { MealPlanItemJobDataSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanItemQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { JobType } from "../../../util/constant";
 import { NotFoundError } from "../../../util/error";
+import { getMealPlanByIdQuery } from "../query";
 
 export const updateItemForMealPlan = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const user = request.user;
   const { id: mealPlanItemId, meal_plan_id, ...restMealPlanItem } = request.body;
 
-  const mealPlan = await tx.$kysely
-    .selectFrom("meal_plans")
-    .selectAll("meal_plans")
-    .where((eb) => {
-      return eb.and([
-        eb("meal_plans.id", "=", meal_plan_id),
-        eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
-      ]);
-    })
-    .executeTakeFirst();
+  const mealPlan = await getMealPlanByIdQuery(tx, user, meal_plan_id).executeTakeFirst();
 
   if (!mealPlan) {
     return [

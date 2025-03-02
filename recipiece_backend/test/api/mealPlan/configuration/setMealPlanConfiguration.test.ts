@@ -7,9 +7,9 @@ import { JobType } from "../../../../src/util/constant";
 import { mealPlanConfigurationQueue } from "../../../../src/job";
 
 describe("Set Meal Plan Configuration", () => {
+  let addToMealPlanConfigSpy;
   let user: User;
   let bearerToken: string;
-  let addToMealPlanConfigSpy;
 
   beforeEach(async () => {
     [user, bearerToken] = await fixtures.createUserAndToken();

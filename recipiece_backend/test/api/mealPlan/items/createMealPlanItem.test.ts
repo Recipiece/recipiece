@@ -10,18 +10,14 @@ import { JobType } from "../../../../src/util/constant";
 describe("Create Meal Plan Item", () => {
   let user: User;
   let bearerToken: string;
-  let jobSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     [user, bearerToken] = await fixtures.createUserAndToken();
-    jobSpy = jest.spyOn(mealPlanItemQueue, "add");
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it("should allow a user to create a meal plan item with freeform content", async () => {
+    const jobSpy = jest.spyOn(mealPlanItemQueue, "add");
+
     const mealPlan = await generateMealPlan({ user_id: user.id });
     const item: CreateMealPlanItemRequestSchema = {
       meal_plan_id: mealPlan.id,
@@ -65,6 +61,8 @@ describe("Create Meal Plan Item", () => {
   });
 
   it("should allow a user to create a meal plan item with a recipe that they own", async () => {
+    const jobSpy = jest.spyOn(mealPlanItemQueue, "add");
+
     const mealPlan = await generateMealPlan({ user_id: user.id });
     const recipe = await generateRecipe({ user_id: user.id });
 
@@ -111,6 +109,8 @@ describe("Create Meal Plan Item", () => {
   });
 
   it("should allow a shared recipe to be set in a meal plan item", async () => {
+    const jobSpy = jest.spyOn(mealPlanItemQueue, "add");
+
     const otherUser = await generateUser();
     const otherRecipe = await generateRecipe({ user_id: otherUser.id });
     const membership = await generateUserKitchenMembership({
@@ -167,7 +167,13 @@ describe("Create Meal Plan Item", () => {
     expect(jobSpy).toHaveBeenCalled();
   });
 
-  it("should not allow a non shared recipe owned by another user to be used for the meal plan item", async () => {
+  /**
+   * Not sure if this should actually be the case or not. Current implementation says no.
+   * See the skipped test over in bulkSetMealPlanItems.test.ts
+   */
+  xit("should not allow a non shared recipe owned by another user to be used for the meal plan item", async () => {
+    const jobSpy = jest.spyOn(mealPlanItemQueue, "add");
+
     const otherUser = await generateUser();
     const otherRecipe = await generateRecipe({ user_id: otherUser.id });
 

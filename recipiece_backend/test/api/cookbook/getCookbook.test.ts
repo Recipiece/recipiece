@@ -12,6 +12,7 @@ describe("Get Cookbooks", () => {
   });
 
   it("should get a cookbook", async () => {
+    // const [user, bearerToken] = await fixtures.createUserAndToken();
     const cookbook = await generateCookbook({ user_id: user.id });
 
     const response = await request(server).get(`/cookbook/${cookbook.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
@@ -21,6 +22,7 @@ describe("Get Cookbooks", () => {
   });
 
   it("should not get a cookbook that you do not own", async () => {
+    // const [user, bearerToken] = await fixtures.createUserAndToken();
     const otherCookbook = await generateCookbook();
 
     const response = await request(server).get(`/cookbook/${otherCookbook.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
@@ -29,6 +31,7 @@ describe("Get Cookbooks", () => {
   });
 
   it("should not get a cookbook that does not exist", async () => {
+    // const [user, bearerToken] = await fixtures.createUserAndToken();
     const response = await request(server).get("/cookbook/900000000").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);

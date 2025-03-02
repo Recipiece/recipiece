@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "dotenvx run -f .env.test -- jest --runInBand --forceExit",
+    "test": "dotenvx run -f .env.test -- jest --forceExit",
     "lint": "prettier . --write",
     "seed": "dotenvx run -f .env.dev -- yarn ts-node ./seed/index.ts",
     "migrate:test": "dotenvx run -f .env.test -- yarn --cwd ../recipiece_common/recipiece_database run migrate",

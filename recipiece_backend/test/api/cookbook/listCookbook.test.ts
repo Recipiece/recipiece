@@ -1,5 +1,5 @@
-import { Cookbook, User, prisma } from "@recipiece/database";
-import { generateCookbook, generateRecipe, generateRecipeCookbookAttachment } from "@recipiece/test";
+import { Cookbook, User } from "@recipiece/database";
+import { generateCookbook } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { generateCookbookWithRecipe } from "./fixtures";
@@ -53,6 +53,7 @@ describe("List Cookbooks", () => {
   });
 
   it("should page", async () => {
+    const [user, bearerToken] = await fixtures.createUserAndToken();
     for (let i = 0; i < 10; i++) {
       await generateCookbook({ user_id: user.id });
     }

@@ -85,9 +85,9 @@ globalThis.fixtures = {
 jest.mock("bullmq");
 
 // just in case there's any extra users hanging around.
-beforeAll(async () => {
-  await prisma.user.deleteMany();
-});
+// afterAll(async () => {
+//   await prisma.user.deleteMany();
+// });
 
 // enable the fetch mocks
 beforeAll(() => {

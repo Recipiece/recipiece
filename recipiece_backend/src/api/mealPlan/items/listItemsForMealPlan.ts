@@ -1,9 +1,10 @@
 import { Constant } from "@recipiece/constant";
-import { mealPlanSharesWithMemberships, Prisma, PrismaTransaction } from "@recipiece/database";
+import { Prisma, PrismaTransaction } from "@recipiece/database";
 import { ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { getMealPlanByIdQuery } from "../query";
 
 export const listItemsForMealPlan = async (
   request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>,
@@ -14,16 +15,7 @@ export const listItemsForMealPlan = async (
   const mealPlanId = +request.params.id;
   const user = request.user;
 
-  const mealPlan = await tx.$kysely
-    .selectFrom("meal_plans")
-    .selectAll("meal_plans")
-    .where((eb) => {
-      return eb.and([
-        eb("meal_plans.id", "=", mealPlanId),
-        eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
-      ]);
-    })
-    .executeTakeFirst();
+  const mealPlan = await getMealPlanByIdQuery(tx, user, mealPlanId).executeTakeFirst();
 
   if (!mealPlan) {
     return [
