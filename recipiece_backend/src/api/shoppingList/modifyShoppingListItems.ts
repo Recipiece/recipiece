@@ -1,7 +1,9 @@
-import { collapseOrders, MAX_NUM_ITEMS, prisma, ShoppingListItem } from "@recipiece/database";
+import { prisma, ShoppingListItem } from "@recipiece/database";
 import { ModifyShoppingListMessage, ModifyShoppingListResponse, ShoppingListItemSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ErrorResponse, WebsocketMethod, WebsocketRequest } from "../../types";
+import { Constant } from "@recipiece/constant";
+import { collapseOrders } from "./query";
 
 const getCurrentItems: WebsocketMethod<ModifyShoppingListMessage, ShoppingListItem[]> = async (req: WebsocketRequest<ModifyShoppingListMessage>) => {
   const shoppingListId = req.ws_token_payload.entity_id;
@@ -71,7 +73,7 @@ const markItemComplete: WebsocketMethod<ModifyShoppingListMessage, ShoppingListI
       },
       data: {
         completed: true,
-        order: MAX_NUM_ITEMS,
+        order: Constant.MAX_NUM_SHOPPING_LIST_ITEMS,
       },
     });
     return await collapseOrders(shoppingListId, tx);
@@ -93,7 +95,7 @@ const markItemIncomplete: WebsocketMethod<ModifyShoppingListMessage, ShoppingLis
       },
       data: {
         completed: false,
-        order: MAX_NUM_ITEMS,
+        order: Constant.MAX_NUM_SHOPPING_LIST_ITEMS,
       },
     });
     return await collapseOrders(shoppingListId, tx);

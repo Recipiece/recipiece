@@ -35,7 +35,7 @@ describe("Get Shopping List", () => {
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
-  it("should get a shared shopping list", async () => {
+  it("should get a shared shopping list for a SELECTIVE grant level membership", async () => {
     const othersShoppingList = await generateShoppingList();
     const membership = await generateUserKitchenMembership({
       source_user_id: othersShoppingList.user_id,
@@ -66,6 +66,38 @@ describe("Get Shopping List", () => {
 
     expect(responseData.shares?.length).toBe(1);
     expect(responseData.shares![0].id).toBe(share.id);
+  });
+
+  it("should get a shared shopping list for an ALL grant level membership", async () => {
+    const othersShoppingList = await generateShoppingList();
+    const membership = await generateUserKitchenMembership({
+      source_user_id: othersShoppingList.user_id,
+      destination_user_id: user.id,
+      status: "accepted",
+      grant_level: "ALL",
+    });
+
+    // make a membership and share going the other way to ensure we dont pick up stray records
+    const mirroredMembership = await generateUserKitchenMembership({
+      destination_user_id: othersShoppingList.user_id,
+      source_user_id: user.id,
+      status: "accepted",
+      grant_level: "SELECTIVE",
+    });
+    const usersShoppingList = await generateShoppingList({ user_id: user.id });
+    const usersShoppingListShare = await generateShoppingListShare({
+      user_kitchen_membership_id: mirroredMembership.id,
+      shopping_list_id: usersShoppingList.id,
+    });
+
+    const response = await request(server).get(`/shopping-list/${othersShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ShoppingListSchema = response.body;
+
+    expect(responseData.shares?.length).toBe(1);
+    expect(responseData.shares![0].id).toBe(-1);
+    expect(responseData.shares![0].shopping_list_id).toBe(othersShoppingList.id);
   });
 
   it("should not get a shared shopping list where the membership is not accepted", async () => {

@@ -1,1 +1,2 @@
 export const DEFAULT_PAGE_SIZE = 100;
+export const MAX_NUM_SHOPPING_LIST_ITEMS = 10000;

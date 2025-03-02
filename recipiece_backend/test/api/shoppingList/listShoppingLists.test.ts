@@ -49,13 +49,14 @@ describe("List Shopping Lists", () => {
     expect(results.length).toEqual(5);
   });
 
-  it("should list shared shopping lists", async () => {
+  it("should list shared shopping lists with a grant level of SELECTIVE", async () => {
     const otherUser = await generateUser();
     // allow otherUser to share a shopping list to user
     const membership = await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
+      grant_level: "SELECTIVE",
     });
 
     const otherShoppingList = await generateShoppingList({ user_id: otherUser.id });
@@ -64,6 +65,35 @@ describe("List Shopping Lists", () => {
       user_kitchen_membership_id: membership.id,
       shopping_list_id: otherShoppingList.id,
     });
+
+    for (let i = 0; i < 10; i++) {
+      await generateShoppingList({ user_id: user.id });
+    }
+
+    const response = await request(server)
+      .get("/shopping-list/list")
+      .query(<ListShoppingListsQuerySchema>{
+        page_number: 0,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseShoppingLists: ShoppingListSchema[] = response.body.data;
+
+    expect(responseShoppingLists.length).toBe(11);
+  });
+
+  it("should list shared shopping lists with a grant level of ALL", async () => {
+    const otherUser = await generateUser();
+    // allow otherUser to share a shopping list to user
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+      grant_level: "ALL",
+    });
+    const otherShoppingList = await generateShoppingList({ user_id: otherUser.id });
 
     for (let i = 0; i < 10; i++) {
       await generateShoppingList({ user_id: user.id });
