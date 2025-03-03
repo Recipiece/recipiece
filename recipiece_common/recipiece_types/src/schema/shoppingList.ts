@@ -56,12 +56,12 @@ export interface UpdateShoppingListRequestSchema extends InferType<typeof YUpdat
  * List shopping lists schema
  */
 export const YListShoppingListsQuerySchema = YListQuerySchema.shape({
-  shared_shopping_lists: string().oneOf(["include", "exclude"]).notRequired(),
+  shared_shopping_lists_filter: string().oneOf(["include", "exclude"]).notRequired(),
 })
   .transform((val) => {
     return {
       ...val,
-      shared_shopping_lists: val.shared_shopping_lists ?? "include",
+      shared_shopping_lists_filter: val.shared_shopping_lists_filter ?? "include",
     };
   })
   .noUnknown();

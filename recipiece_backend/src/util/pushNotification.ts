@@ -1,4 +1,4 @@
-import { MealPlan, prisma, Recipe, ShoppingList, User, UserPushNotificationSubscription } from "@recipiece/database";
+import { Cookbook, MealPlan, prisma, Recipe, ShoppingList, User, UserPushNotificationSubscription } from "@recipiece/database";
 import webpush, { PushSubscription, WebPushError } from "web-push";
 
 if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
@@ -52,6 +52,18 @@ export const sendMealPlanSharedPushNotification = async (subscription: UserPushN
     data: { ...mealPlan },
     requiresInteraction: true,
     tag: `mealPlanShare${mealPlan.id}`,
+  };
+  await sendPushNotification(subscription, message);
+};
+
+export const sendCookbookSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, cookbook: Cookbook) => {
+  const message = {
+    title: "Cookbook Shared",
+    body: `${sourceUser.username} shared their cookbook ${cookbook.name} with you`,
+    type: "cookbookShare",
+    data: { ...cookbook },
+    requiresInteraction: true,
+    tag: `cookbookShare${cookbook.id}`,
   };
   await sendPushNotification(subscription, message);
 };

@@ -9,7 +9,7 @@ export const listUserKitchenMemberships = async (
   request: AuthenticatedRequest<any, ListUserKitchenMembershipsQuerySchema>,
   tx: PrismaTransaction
 ): ApiResponse<ListUserKitchenMembershipsResponseSchema> => {
-  const { targeting_self, from_self, page_number, page_size, status = UserKitchenInvitationStatus.ALL_STATUSES, entity, entity_id, entity_type } = request.query;
+  const { targeting_self, from_self, page_number, page_size, status = UserKitchenInvitationStatus.ALL_STATUSES, entity_filter, entity_id, entity_type } = request.query;
 
   const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 
@@ -36,16 +36,16 @@ export const listUserKitchenMemberships = async (
     };
   }
 
-  if (entity && entity_id && entity_type) {
+  if (entity_filter && entity_id && entity_type) {
     switch (entity_type) {
       case "shopping_list":
-        if (entity === "include") {
+        if (entity_filter === "include") {
           where.shopping_list_shares = {
             some: {
               shopping_list_id: entity_id,
             },
           };
-        } else if (entity === "exclude") {
+        } else if (entity_filter === "exclude") {
           where.shopping_list_shares = {
             none: {
               shopping_list_id: entity_id,
@@ -54,13 +54,13 @@ export const listUserKitchenMemberships = async (
         }
         break;
       case "recipe":
-        if (entity === "include") {
+        if (entity_filter === "include") {
           where.recipe_shares = {
             some: {
               recipe_id: entity_id,
             },
           };
-        } else if (entity === "exclude") {
+        } else if (entity_filter === "exclude") {
           where.recipe_shares = {
             none: {
               recipe_id: entity_id,
@@ -69,16 +69,31 @@ export const listUserKitchenMemberships = async (
         }
         break;
       case "meal_plan":
-        if (entity === "include") {
+        if (entity_filter === "include") {
           where.meal_plan_shares = {
             some: {
               meal_plan_id: entity_id,
             },
           };
-        } else if (entity === "exclude") {
+        } else if (entity_filter === "exclude") {
           where.meal_plan_shares = {
             none: {
               meal_plan_id: entity_id,
+            },
+          };
+        }
+        break;
+      case "cookbook":
+        if (entity_filter === "include") {
+          where.cookbook_shares = {
+            some: {
+              cookbook_id: entity_id,
+            },
+          };
+        } else if (entity_filter === "exclude") {
+          where.cookbook_shares = {
+            none: {
+              cookbook_id: entity_id,
             },
           };
         }

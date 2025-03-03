@@ -89,7 +89,7 @@ export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShareSche
         queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            entity: "exclude",
+            entity_filter: "exclude",
             entity_id: data.recipe_id,
             entity_type: "recipe",
           })
@@ -170,7 +170,7 @@ export const useDeleteRecipeShareMutation = (args?: MutationArgs<unknown, Recipe
         queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            entity: "exclude",
+            entity_filter: "exclude",
             entity_id: params.recipe_id,
             entity_type: "recipe",
           })

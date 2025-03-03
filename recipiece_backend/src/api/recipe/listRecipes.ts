@@ -6,7 +6,7 @@ import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ingredientsSubquery, recipeSharesSubquery, stepsSubquery, tagsSubquery } from "./query";
 
 export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipesResponseSchema> => {
-  const { page_number, page_size, shared_recipes, search, cookbook_id, cookbook_attachments, ingredients, tags, ingredients_filter, tags_filter } = request.query;
+  const { page_number, page_size, shared_recipes_filter, search, cookbook_id, cookbook_attachments_filter, ingredients, tags, ingredients_filter, tags_filter } = request.query;
   const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
   const user = request.user;
 
@@ -78,7 +78,7 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
       );
     })
     .with("all_recipes", (db) => {
-      if (shared_recipes === "include") {
+      if (shared_recipes_filter === "include") {
         return db
           .selectFrom("owned_recipes")
           .union((eb) => {
@@ -127,11 +127,11 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
     query = query.where("all_recipes.name", "ilike", `%${search}%`);
   }
 
-  if (cookbook_id && cookbook_attachments === "include") {
+  if (cookbook_id && cookbook_attachments_filter === "include") {
     query = query
       .innerJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "all_recipes.id")
       .where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id);
-  } else if (cookbook_id && cookbook_attachments === "exclude") {
+  } else if (cookbook_id && cookbook_attachments_filter === "exclude") {
     query = query.where((eb) => {
       return eb(
         "all_recipes.id",

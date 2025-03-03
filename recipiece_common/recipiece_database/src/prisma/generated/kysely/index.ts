@@ -27,6 +27,12 @@ export type Cookbook = {
     description: string | null;
     created_at: Generated<Timestamp>;
 };
+export type CookbookShare = {
+    id: Generated<number>;
+    created_at: Generated<Timestamp>;
+    cookbook_id: number;
+    user_kitchen_membership_id: number;
+};
 export type KnownIngredient = {
     id: Generated<number>;
     created_at: Generated<Timestamp>;
@@ -197,6 +203,7 @@ export type UserValidationToken = {
     user_id: number;
 };
 export type DB = {
+    cookbook_shares: CookbookShare;
     cookbooks: Cookbook;
     known_ingredients: KnownIngredient;
     meal_plan_items: MealPlanItem;

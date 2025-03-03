@@ -34,7 +34,7 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeS
 export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponseSchema>) => {
   let filters: Partial<ListRecipesQuerySchema> = {
     cookbook_id: cookbook_id,
-    cookbook_attachments: "exclude",
+    cookbook_attachments_filter: "exclude",
     page_number: 0,
     page_size: 5,
   };

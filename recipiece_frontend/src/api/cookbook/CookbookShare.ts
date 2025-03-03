@@ -1,56 +1,56 @@
 import {
-  ListMealPlanSharesQuerySchema,
-  ListMealPlanSharesResponseSchema,
-  ListMealPlansResponseSchema,
-  MealPlanSchema,
-  MealPlanShareSchema,
-  YListMealPlanSharesResponseSchema,
-  YMealPlanShareSchema,
+  ListCookbookSharesQuerySchema,
+  ListCookbookSharesResponseSchema,
+  ListCookbooksResponseSchema,
+  CookbookSchema,
+  CookbookShareSchema,
+  YListCookbookSharesResponseSchema,
+  YCookbookShareSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request";
 import { UserQueryKeys } from "../user";
-import { MealPlanQueryKeys } from "./MealPlanQueryKeys";
+import { CookbookQueryKeys } from "./CookbookQueryKeys";
 
-export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShareSchema, { readonly meal_plan_id: number; readonly user_kitchen_membership_id: number }>) => {
+export const useCreateCookbookShareMutation = (args?: MutationArgs<CookbookShareSchema, { readonly cookbook_id: number; readonly user_kitchen_membership_id: number }>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
-  const mutation = async (data: { readonly meal_plan_id: number; readonly user_kitchen_membership_id: number }) => {
-    const response = await poster<typeof data, MealPlanShareSchema>({
-      path: "/meal-plan/share",
+  const mutation = async (data: { readonly cookbook_id: number; readonly user_kitchen_membership_id: number }) => {
+    const response = await poster<typeof data, CookbookShareSchema>({
+      path: "/cookbook/share",
       body: data,
       withAuth: "access_token",
     });
-    return YMealPlanShareSchema.cast(response.data);
+    return YCookbookShareSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data: MealPlanShareSchema, params, ctx) => {
+    onSuccess: (data: CookbookShareSchema, params, ctx) => {
       queryClient.setQueriesData(
         {
-          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          queryKey: CookbookQueryKeys.LIST_COOKBOOK_SHARES(),
           predicate: generatePartialMatchPredicate(
-            MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES({
+            CookbookQueryKeys.LIST_COOKBOOK_SHARES({
               user_kitchen_membership_id: params.user_kitchen_membership_id,
             })
           ),
         },
         oldDataCreator(data)
       );
-      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN_SHARE(data.id), data);
+      queryClient.setQueryData(CookbookQueryKeys.GET_COOKBOOK_SHARE(data.id), data);
 
       queryClient.invalidateQueries({
         queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
             entity_filter: "exclude",
-            entity_id: data.meal_plan_id,
-            entity_type: "meal_plan",
+            entity_id: data.cookbook_id,
+            entity_type: "cookbook",
           })
         ),
         refetchType: "all",
@@ -58,14 +58,14 @@ export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShare
 
       queryClient.setQueriesData(
         {
-          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
         },
-        (oldData: ListMealPlansResponseSchema | undefined) => {
+        (oldData: ListCookbooksResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
               data: (oldData.data ?? []).map((list) => {
-                if (list.id === params.meal_plan_id) {
+                if (list.id === params.cookbook_id) {
                   return {
                     ...list,
                     shares: [...(list.shares ?? []), data],
@@ -79,7 +79,7 @@ export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShare
           return undefined;
         }
       );
-      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(params.meal_plan_id), (oldData: MealPlanSchema | undefined) => {
+      queryClient.setQueryData(CookbookQueryKeys.GET_COOKBOOK(params.cookbook_id), (oldData: CookbookSchema | undefined) => {
         if (oldData) {
           return {
             ...oldData,
@@ -95,13 +95,13 @@ export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShare
   });
 };
 
-export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, MealPlanShareSchema>) => {
+export const useDeleteCookbookShareMutation = (args?: MutationArgs<unknown, CookbookShareSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (share: MealPlanShareSchema) => {
+  const mutation = async (share: CookbookShareSchema) => {
     return await deleter({
-      path: "/meal-plan/share",
+      path: "/cookbook/share",
       id: share.id,
       withAuth: "access_token",
     });
@@ -113,11 +113,11 @@ export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, Meal
     mutationFn: mutation,
     onSuccess: (data, params, ctx) => {
       queryClient.invalidateQueries({
-        queryKey: MealPlanQueryKeys.GET_MEAL_PLAN_SHARE(params.id),
+        queryKey: CookbookQueryKeys.GET_COOKBOOK_SHARE(params.id),
       });
       queryClient.setQueriesData(
         {
-          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          queryKey: CookbookQueryKeys.LIST_COOKBOOK_SHARES(),
         },
         oldDataDeleter(params)
       );
@@ -127,8 +127,8 @@ export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, Meal
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
             entity_filter: "exclude",
-            entity_id: params.meal_plan_id,
-            entity_type: "meal_plan",
+            entity_id: params.cookbook_id,
+            entity_type: "cookbook",
           })
         ),
         refetchType: "all",
@@ -136,14 +136,14 @@ export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, Meal
 
       queryClient.setQueriesData(
         {
-          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
         },
-        (oldData: ListMealPlansResponseSchema | undefined) => {
+        (oldData: ListCookbooksResponseSchema | undefined) => {
           if (oldData) {
             return {
               ...oldData,
               data: (oldData.data ?? []).map((list) => {
-                if (list.id === params.meal_plan_id) {
+                if (list.id === params.cookbook_id) {
                   return {
                     ...list,
                     shares: (list.shares ?? []).filter((share) => share.id !== params.id),
@@ -157,7 +157,7 @@ export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, Meal
           return undefined;
         }
       );
-      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(params.meal_plan_id), (oldData: MealPlanSchema | undefined) => {
+      queryClient.setQueryData(CookbookQueryKeys.GET_COOKBOOK(params.cookbook_id), (oldData: CookbookSchema | undefined) => {
         if (oldData) {
           return {
             ...oldData,
@@ -173,21 +173,21 @@ export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, Meal
   });
 };
 
-export const useListMealPlanSharesQuery = (filters: ListMealPlanSharesQuerySchema, args?: QueryArgs<ListMealPlanSharesResponseSchema>) => {
+export const useListCookbookSharesQuery = (filters: ListCookbookSharesQuerySchema, args?: QueryArgs<ListCookbookSharesResponseSchema>) => {
   const { getter } = useGet();
 
   const searchParams = filtersToSearchParams(filters);
 
   const query = async () => {
-    const mealPlanShares = await getter<never, ListMealPlanSharesResponseSchema>({
-      path: `/meal-plan/share/list?${searchParams.toString()}`,
+    const CookbookShares = await getter<never, ListCookbookSharesResponseSchema>({
+      path: `/cookbook/share/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return YListMealPlanSharesResponseSchema.cast(mealPlanShares.data);
+    return YListCookbookSharesResponseSchema.cast(CookbookShares.data);
   };
 
   return useQuery({
-    queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(filters),
+    queryKey: CookbookQueryKeys.LIST_COOKBOOK_SHARES(filters),
     queryFn: query,
     ...(args ?? {}),
   });

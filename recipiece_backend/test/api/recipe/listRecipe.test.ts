@@ -310,7 +310,7 @@ describe("List Recipes", () => {
       .query(<ListRecipesQuerySchema>{
         page_number: 0,
         cookbook_id: cookbook.id,
-        cookbook_attachments: "include",
+        cookbook_attachments_filter: "include",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -345,7 +345,7 @@ describe("List Recipes", () => {
       .query(<ListRecipesQuerySchema>{
         page_number: 0,
         cookbook_id: cookbook.id,
-        cookbook_attachments: "exclude",
+        cookbook_attachments_filter: "exclude",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);

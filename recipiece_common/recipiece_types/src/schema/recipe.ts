@@ -135,8 +135,8 @@ export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecip
 export const YListRecipesQuerySchema = YListQuerySchema.shape({
   search: string().notRequired(),
   cookbook_id: number().notRequired(),
-  cookbook_attachments: string().oneOf(["include", "exclude"]).notRequired(),
-  shared_recipes: string().oneOf(["include", "exclude"]).notRequired(),
+  cookbook_attachments_filter: string().oneOf(["include", "exclude"]).notRequired(),
+  shared_recipes_filter: string().oneOf(["include", "exclude"]).notRequired(),
   ingredients_filter: string().oneOf(["include", "exclude"]).notRequired(),
   tags_filter: string().oneOf(["include", "exclude"]).notRequired(),
   ingredients: array(string()).notRequired(),
@@ -147,7 +147,7 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
       ...val,
       ingredients: val.ingredients ? val.ingredients.split(",") : undefined,
       tags: val.tags ? val.tags.split(",") : undefined,
-      shared_recipes: val.shared_recipes ?? "include",
+      shared_recipes_filter: val.shared_recipes ?? "include",
       ingredients_filter: val.ingredients_filter ?? "include",
       tags_filter: val.tags_filter ?? "include",
     };

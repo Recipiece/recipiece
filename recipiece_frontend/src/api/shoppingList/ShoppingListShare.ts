@@ -49,7 +49,7 @@ export const useCreateShoppingListShareMutation = (
         queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            entity: "exclude",
+            entity_filter: "exclude",
             entity_id: data.shopping_list_id,
             entity_type: "shopping_list",
           })
@@ -96,7 +96,7 @@ export const useCreateShoppingListShareMutation = (
   });
 };
 
-export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, ShoppingListShareSchema>) => {
+export const useDeleteShoppingListShareMutation = (args?: MutationArgs<unknown, ShoppingListShareSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -127,7 +127,7 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
         queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            entity: "exclude",
+            entity_filter: "exclude",
             entity_id: params.shopping_list_id,
             entity_type: "shopping_list",
           })

@@ -1,8 +1,9 @@
 import { Cookbook, User } from "@recipiece/database";
-import { generateCookbook } from "@recipiece/test";
+import { generateCookbook, generateCookbookShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { generateCookbookWithRecipe } from "./fixtures";
+import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "@recipiece/types";
 
 describe("List Cookbooks", () => {
   let user: User;
@@ -78,9 +79,10 @@ describe("List Cookbooks", () => {
 
     const response = await request(server)
       .get("/cookbook/list")
-      .query({
+      .query(<ListCookbooksQuerySchema>{
         page_number: 0,
-        exclude_containing_recipe_id: recipe.id,
+        recipe_id: recipe.id,
+        recipe_id_filter: "exclude",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -90,5 +92,159 @@ describe("List Cookbooks", () => {
 
     expect(data.length).toBe(1);
     expect(data[0].id).toBe(notContainingCookbook.id);
+  });
+
+  it("should include cookbooks containing a certain recipe", async () => {
+    await generateCookbook({ user_id: user.id });
+    const [containingCookbook, recipe] = await generateCookbookWithRecipe(user.id);
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        recipe_id: recipe.id,
+        recipe_id_filter: "include",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.status).toBe(StatusCodes.OK);
+    const data: Cookbook[] = response.body.data;
+
+    expect(data.length).toBe(1);
+    expect(data[0].id).toBe(containingCookbook.id);
+  });
+
+  it("should include shared cookbooks", async () => {
+    // create a SELECTIVE membership
+    const otherUserSelective = await generateUser();
+    const selectiveMembership = await generateUserKitchenMembership({
+      source_user_id: otherUserSelective.id,
+      destination_user_id: user.id,
+      status: "accepted",
+      grant_level: "SELECTIVE",
+    });
+    const selectiveSharedCookbook = await generateCookbook({ user_id: otherUserSelective.id });
+    await generateCookbookShare({
+      user_kitchen_membership_id: selectiveMembership.id,
+      cookbook_id: selectiveSharedCookbook.id,
+    });
+
+    // create an ALL membership
+    const otherUserAll = await generateUser();
+    const allMembership = await generateUserKitchenMembership({
+      source_user_id: otherUserAll.id,
+      destination_user_id: user.id,
+      status: "accepted",
+      grant_level: "ALL",
+    });
+    const allCookbook = await generateCookbook({ user_id: otherUserAll.id });
+
+    // create a cookbook for the user
+    const userCookbook = await generateCookbook({ user_id: user.id });
+
+    // make some noise
+    await generateCookbook();
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        shared_cookbooks_filter: "include",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
+
+    expect(responseData.data.length).toBe(3);
+    expect(responseData.data.find((c) => c.id === selectiveSharedCookbook.id)).toBeTruthy();
+    expect(responseData.data.find((c) => c.id === allCookbook.id)).toBeTruthy();
+    expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
+  });
+
+  it("should exclude shared cookbooks", async () => {
+    const otherUserSelective = await generateUser();
+    const selectiveMembership = await generateUserKitchenMembership({
+      source_user_id: otherUserSelective.id,
+      destination_user_id: user.id,
+      status: "accepted",
+      grant_level: "SELECTIVE",
+    });
+    const selectiveSharedCookbook = await generateCookbook({ user_id: otherUserSelective.id });
+    await generateCookbookShare({
+      user_kitchen_membership_id: selectiveMembership.id,
+      cookbook_id: selectiveSharedCookbook.id,
+    });
+
+    const otherUserAll = await generateUser();
+    await generateUserKitchenMembership({
+      source_user_id: otherUserAll.id,
+      destination_user_id: user.id,
+      status: "accepted",
+      grant_level: "ALL",
+    });
+    await generateCookbook({ user_id: otherUserAll.id });
+
+    const userCookbook = await generateCookbook({ user_id: user.id });
+
+    await generateCookbook();
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        shared_cookbooks_filter: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
+
+    expect(responseData.data.length).toBe(1);
+    expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
+  });
+
+  it("should not list cookbooks belonging to a non-accepted membership", async () => {
+    const otherUserSelective = await generateUser();
+    const selectiveMembership = await generateUserKitchenMembership({
+      source_user_id: otherUserSelective.id,
+      destination_user_id: user.id,
+      status: "denied",
+      grant_level: "SELECTIVE",
+    });
+    const selectiveSharedCookbook = await generateCookbook({ user_id: otherUserSelective.id });
+    await generateCookbookShare({
+      user_kitchen_membership_id: selectiveMembership.id,
+      cookbook_id: selectiveSharedCookbook.id,
+    });
+
+    const otherUserAll = await generateUser();
+    await generateUserKitchenMembership({
+      source_user_id: otherUserAll.id,
+      destination_user_id: user.id,
+      status: "denied",
+      grant_level: "ALL",
+    });
+    await generateCookbook({ user_id: otherUserAll.id });
+
+    const userCookbook = await generateCookbook({ user_id: user.id });
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        shared_cookbooks_filter: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
+
+    expect(responseData.data.length).toBe(1);
+    expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
   });
 });

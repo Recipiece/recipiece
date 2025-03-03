@@ -22,8 +22,8 @@ export const deleteItemForMealPlan = async (request: AuthenticatedRequest, tx: P
     where: {
       id: mealPlanItemId,
       meal_plan_id: mealPlan.id,
-    }
-  })
+    },
+  });
 
   if (!mealPlanItem) {
     return [

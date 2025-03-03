@@ -199,7 +199,7 @@ describe("List User Kitchen Memberships", () => {
     const response = await request(server)
       .get("/user/kitchen/membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
-        entity: "exclude",
+        entity_filter: "exclude",
         entity_id: recipe.id,
         entity_type: "recipe",
         page_number: 0,
@@ -235,7 +235,7 @@ describe("List User Kitchen Memberships", () => {
     const response = await request(server)
       .get("/user/kitchen/membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
-        entity: "include",
+        entity_filter: "include",
         entity_id: recipe.id,
         entity_type: "recipe",
         from_self: true,

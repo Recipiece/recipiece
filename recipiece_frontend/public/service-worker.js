@@ -53,6 +53,8 @@ self.addEventListener("notificationclick", (event) => {
     destinationUrl = `/meal-plan/view/${data.id}`;
   } else if (tag.startsWith("thawMeatTimer")) {
     destinationUrl = `/recipe/view/${data.id}`;
+  } else if (tag.startsWith("cookbookShare")) {
+    destinationUrl = `/cookbook/${data.id}`;
   }
 
   if (destinationUrl.length > 0) {

@@ -7,7 +7,7 @@ import { mealPlanSharesSubquery } from "./query";
 
 export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealPlansQuerySchema>, tx: PrismaTransaction): ApiResponse<ListMealPlansResponseSchema> => {
   const user = request.user;
-  const { page_number, page_size, shared_meal_plans } = request.query;
+  const { page_number, page_size, shared_meal_plans_filter } = request.query;
   const pageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 
   let query = tx.$kysely
@@ -68,7 +68,7 @@ export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealP
       );
     })
     .with("all_meal_plans", (db) => {
-      if (shared_meal_plans === "include") {
+      if (shared_meal_plans_filter === "include") {
         return db
           .selectFrom("owned_meal_plans")
           .union((eb) => {
@@ -86,6 +86,7 @@ export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealP
     .selectAll("all_meal_plans");
 
   query = query.offset(page_number * pageSize).limit(pageSize + 1);
+  query = query.orderBy("all_meal_plans.name asc");
   const mealPlans = await query.execute();
 
   const hasNextPage = mealPlans.length > pageSize;

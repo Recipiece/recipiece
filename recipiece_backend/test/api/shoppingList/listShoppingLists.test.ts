@@ -136,7 +136,7 @@ describe("List Shopping Lists", () => {
       .get("/shopping-list/list")
       .query(<ListShoppingListsQuerySchema>{
         page_number: 0,
-        shared_shopping_lists: "exclude",
+        shared_shopping_lists_filter: "exclude",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -170,7 +170,7 @@ describe("List Shopping Lists", () => {
       .get("/shopping-list/list")
       .query(<ListShoppingListsQuerySchema>{
         page_number: 0,
-        shared_shopping_lists: "exclude",
+        shared_shopping_lists_filter: "exclude",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);

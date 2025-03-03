@@ -3,16 +3,13 @@ import { AddRecipeToCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ConflictError } from "../../util/error";
+import { getCookbookByIdQuery } from "./query";
 
 export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const attachBody = req.body;
   const user = req.user;
 
-  const cookbook = await tx.cookbook.findFirst({
-    where: {
-      id: attachBody.cookbook_id,
-    },
-  });
+  const cookbook = await getCookbookByIdQuery(tx, user, attachBody.cookbook_id).executeTakeFirst();
 
   if (!cookbook) {
     return [
@@ -30,32 +27,6 @@ export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToC
   });
 
   if (!recipe) {
-    return [
-      StatusCodes.NOT_FOUND,
-      {
-        message: "Recipe does not exist",
-      },
-    ];
-  }
-
-  /**
-   * You cannot attach recipes to cookbooks you do not own.
-   */
-  if (cookbook.user_id !== user.id) {
-    console.warn(`User ${user.id} attempted to attach recipe ${recipe.id} to ${cookbook.id}. They do not own the cookbook.`);
-    return [
-      StatusCodes.NOT_FOUND,
-      {
-        message: "Cookbook does not exist",
-      },
-    ];
-  }
-
-  /**
-   * You cannot attach recipes you do not own to a cookbook
-   */
-  if (recipe.user_id !== user.id) {
-    console.warn(`User ${user.id} attempted to attach recipe ${recipe.id} to ${cookbook.id}. They do not own the recipe.`);
     return [
       StatusCodes.NOT_FOUND,
       {

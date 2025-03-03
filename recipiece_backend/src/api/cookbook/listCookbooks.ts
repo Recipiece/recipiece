@@ -1,56 +1,143 @@
 import { Constant } from "@recipiece/constant";
-import { Prisma, PrismaTransaction } from "@recipiece/database";
-import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "@recipiece/types";
+import { KyselyCore, PrismaTransaction } from "@recipiece/database";
+import { ListCookbooksQuerySchema, ListCookbooksResponseSchema, YListCookbooksResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { cookbookSharesSubquery } from "./query";
 
 export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooksQuerySchema>, tx: PrismaTransaction): ApiResponse<ListCookbooksResponseSchema> => {
   const user = req.user;
+  const { page_number, page_size = Constant.DEFAULT_PAGE_SIZE, recipe_id, recipe_id_filter, search, shared_cookbooks_filter } = req.query;
 
-  const page = req.query.page_number;
-  const pageSize = req.query.page_size || Constant.DEFAULT_PAGE_SIZE;
-  const excludeContainingRecipeId = req.query.exclude_containing_recipe_id;
-  const search = req.query.search;
+  // const page = req.query.page_number;
+  // const pageSize = req.query.page_size ?? Constant.DEFAULT_PAGE_SIZE;
+  // const excludeContainingRecipeId = req.query.exclude_containing_recipe_id;
+  // const search = req.query.search;
+  // const shared_cookbooks = req.query.shared_cookbooks ?? "include";
 
-  let where: Prisma.CookbookWhereInput = {
-    user_id: user.id,
-  };
-
-  if (excludeContainingRecipeId) {
-    where.recipe_cookbook_attachments = {
-      none: {
-        recipe_id: excludeContainingRecipeId,
-      },
-    };
-  }
+  let query = tx.$kysely
+    .with("owned_cookbooks", (db) => {
+      return db
+        .selectFrom("cookbooks")
+        .selectAll("cookbooks")
+        .select((eb) => cookbookSharesSubquery(eb, user.id).as("shares"))
+        .where("cookbooks.user_id", "=", user.id);
+    })
+    .with("selective_grant_shared_cookbooks", (db) => {
+      return db
+        .selectFrom("cookbook_shares")
+        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "cookbook_shares.user_kitchen_membership_id")
+        .innerJoin("cookbooks", "cookbooks.id", "cookbook_shares.cookbook_id")
+        .where((eb) => {
+          return eb.and([
+            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+            eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "SELECTIVE"),
+            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
+          ]);
+        })
+        .selectAll("cookbooks")
+        .select((eb) => cookbookSharesSubquery(eb, user.id).as("shares"));
+    })
+    .with("all_grant_shared_cookbooks", (db) => {
+      return (
+        db
+          .selectFrom("user_kitchen_memberships")
+          .innerJoin("users", "users.id", "user_kitchen_memberships.source_user_id")
+          .innerJoin("cookbooks", "cookbooks.user_id", "user_id")
+          .where((eb) => {
+            return eb.and([
+              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
+              eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
+            ]);
+          })
+          .whereRef("user_kitchen_memberships.source_user_id", "=", "cookbooks.user_id")
+          .selectAll("cookbooks")
+          // these shares are synthetic because we don't explicitly create shares for "ALL" records
+          .select((eb) => {
+            return eb
+              .fn("jsonb_build_array", [
+                eb.fn("jsonb_build_object", [
+                  KyselyCore.sql.lit("id"),
+                  eb.lit(-1),
+                  KyselyCore.sql.lit("created_at"),
+                  eb.fn("now"),
+                  KyselyCore.sql.lit("cookbook_id"),
+                  "cookbooks.id",
+                  KyselyCore.sql.lit("user_kitchen_membership_id"),
+                  "user_kitchen_memberships.id",
+                ]),
+              ])
+              .as("shares");
+          })
+      );
+    })
+    .with("all_cookbooks", (db) => {
+      if (shared_cookbooks_filter === "include") {
+        return db
+          .selectFrom("owned_cookbooks")
+          .union((eb) => {
+            return eb.selectFrom("selective_grant_shared_cookbooks").selectAll();
+          })
+          .union((eb) => {
+            return eb.selectFrom("all_grant_shared_cookbooks").selectAll();
+          })
+          .selectAll();
+      } else {
+        return db.selectFrom("owned_cookbooks").selectAll();
+      }
+    })
+    .selectFrom("all_cookbooks")
+    .selectAll("all_cookbooks");
 
   if (search) {
-    where.name = {
-      contains: search,
-      mode: "insensitive",
-    };
+    query = query.where((eb) => {
+      return eb(eb.fn("lower", ["all_cookbooks.name"]), "~*", search);
+    });
   }
 
-  const offset = page * pageSize;
+  if (recipe_id) {
+    if (recipe_id_filter === "include") {
+      query = query.where((eb) => {
+        return eb(
+          eb
+            .selectFrom("recipe_cookbook_attachments")
+            .select("recipe_cookbook_attachments.recipe_id")
+            .where("recipe_cookbook_attachments.recipe_id", "=", recipe_id)
+            .whereRef("recipe_cookbook_attachments.cookbook_id", "=", "all_cookbooks.id"),
+          "is not",
+          null
+        );
+      });
+    } else if (recipe_id_filter === "exclude") {
+      query = query.where((eb) => {
+        return eb(
+          eb
+            .selectFrom("recipe_cookbook_attachments")
+            .select("recipe_cookbook_attachments.recipe_id")
+            .where("recipe_cookbook_attachments.recipe_id", "=", recipe_id)
+            .whereRef("recipe_cookbook_attachments.cookbook_id", "=", "all_cookbooks.id"),
+          "is",
+          null
+        );
+      });
+    }
+  }
 
-  const cookbooks = await tx.cookbook.findMany({
-    where: where,
-    skip: offset,
-    take: pageSize + 1,
-    orderBy: {
-      created_at: "desc",
-    },
-  });
+  query = query.offset(page_number * page_size!).limit(page_size! + 1);
+  query = query.orderBy("all_cookbooks.name asc");
 
-  const hasNextPage = cookbooks.length > pageSize;
-  const resultsData = cookbooks.splice(0, pageSize);
+  const cookbooks = await query.execute();
+
+  const hasNextPage = cookbooks.length > page_size!;
+  const resultsData = cookbooks.splice(0, page_size!);
 
   return [
     StatusCodes.OK,
-    {
+    YListCookbooksResponseSchema.cast({
       data: resultsData,
       has_next_page: hasNextPage,
-      page: page,
-    },
+      page: page_number,
+    }),
   ];
 };
