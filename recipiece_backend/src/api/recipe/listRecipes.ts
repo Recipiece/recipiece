@@ -79,6 +79,7 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
     })
     .with("all_recipes", (db) => {
       if (shared_recipes_filter === "include") {
+        console.debug("including shared recipes")
         return db
           .selectFrom("owned_recipes")
           .union((eb) => {
@@ -89,6 +90,7 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
           })
           .selectAll();
       } else {
+        console.debug("excluding shared recipes")
         return db.selectFrom("owned_recipes").selectAll();
       }
     })
@@ -128,9 +130,13 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
   }
 
   if (cookbook_id && cookbook_attachments_filter === "include") {
-    query = query
-      .innerJoin("recipe_cookbook_attachments", "recipe_cookbook_attachments.recipe_id", "all_recipes.id")
-      .where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id);
+    query = query.where((eb) => {
+      return eb(
+        "all_recipes.id",
+        "in",
+        eb.selectFrom("recipe_cookbook_attachments").select("recipe_cookbook_attachments.recipe_id").where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id)
+      );
+    });
   } else if (cookbook_id && cookbook_attachments_filter === "exclude") {
     query = query.where((eb) => {
       return eb(

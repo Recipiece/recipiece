@@ -17,14 +17,14 @@ export const DashboardPage: FC = () => {
         page_number: 0,
         cookbook_id: +cookbookId,
         search: "",
-        shared_recipes: "include",
-        cookbook_attachments: "include",
+        shared_recipes_filter: "include",
+        cookbook_attachments_filter: "include",
       };
     } else {
       return {
         page_number: 0,
         search: "",
-        shared_recipes: "include",
+        shared_recipes_filter: "include",
       };
     }
   }, [cookbookId]);

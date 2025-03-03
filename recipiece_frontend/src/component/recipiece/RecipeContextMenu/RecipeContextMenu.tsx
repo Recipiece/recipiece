@@ -83,7 +83,8 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const { data: cookbooks, isLoading: isLoadingCookbook } = useListCookbooksQuery(
     {
       page_number: 0,
-      exclude_containing_recipe_id: recipe.id,
+      recipe_id: recipe.id,
+      recipe_id_filter: "exclude",
     },
     {
       enabled: canAddToCookbook && isCookbookListContextMenuOpen,

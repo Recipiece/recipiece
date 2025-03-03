@@ -10,6 +10,7 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipS
   const navigate = useNavigate();
   const { toast } = useToast();
   const [mealPlanSharesPage, setRecipeSharesPage] = useState(0);
+  const isShareAll = membership?.grant_level === "ALL";
 
   const { mutateAsync: deleteRecipeShare, isPending: isDeletingRecipeShare } = useDeleteRecipeShareMutation();
 
@@ -20,9 +21,11 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipS
       page_number: mealPlanSharesPage,
     },
     {
-      enabled: !!membership,
+      enabled: !!membership && !isShareAll,
     }
   );
+
+  const hasNoShares = membership?.grant_level === "SELECTIVE" && (mealPlanShares?.data?.length ?? 0) === 0;
 
   const onUnshareRecipe = useCallback(
     async (share: RecipeShareSchema) => {
@@ -44,32 +47,35 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipS
   );
 
   return (
-    <LoadingGroup isLoading={isLoadingRecipeShares} variant="spinner" className="h-10 w-10">
-      {(mealPlanShares?.data?.length ?? 0) > 0 && (
-        <>
-          <div className="mb-2 mt-2 flex flex-col">
-            {mealPlanShares!.data.map((share) => {
-              return (
-                <div className="flex flex-row gap-2 border-b-[1px] border-b-primary pb-2" key={share.id}>
-                  <div className="flex flex-col">
-                    <span>{share.recipe.name}</span>
-                    <span className="text-xs">{DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+    <>
+      {isShareAll && <p className="text-center text-sm">You&apos;re sharing everything with this user.</p>}
+      <LoadingGroup isLoading={!isShareAll && isLoadingRecipeShares} variant="spinner" className="h-10 w-10">
+        {(mealPlanShares?.data?.length ?? 0) > 0 && (
+          <>
+            <div className="mb-2 mt-2 flex flex-col">
+              {mealPlanShares!.data.map((share) => {
+                return (
+                  <div className="flex flex-row gap-2 border-b-[1px] border-b-primary pb-2" key={share.id}>
+                    <div className="flex flex-col">
+                      <span>{share.recipe.name}</span>
+                      <span className="text-xs">{DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                    </div>
+                    <Button size="sm" variant="link" onClick={() => navigate(`/recipe/view/${share.recipe_id}`, {})}>
+                      <ExternalLink />
+                    </Button>
+                    <span className="ml-auto" />
+                    <Button variant="ghost" onClick={() => onUnshareRecipe(share)} disabled={isDeletingRecipeShare}>
+                      <Ban className="text-destructive" />
+                    </Button>
                   </div>
-                  <Button size="sm" variant="link" onClick={() => navigate(`/recipe/view/${share.recipe_id}`, {})}>
-                    <ExternalLink />
-                  </Button>
-                  <span className="ml-auto" />
-                  <Button variant="ghost" onClick={() => onUnshareRecipe(share)} disabled={isDeletingRecipeShare}>
-                    <Ban className="text-destructive" />
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
-          <Pager page={mealPlanSharesPage} onPage={setRecipeSharesPage} hasNextPage={!!mealPlanShares?.has_next_page} />
-        </>
-      )}
-      {(mealPlanShares?.data?.length ?? 0) === 0 && <p className="text-center text-sm">You haven&apos;t shared any recipes with this user.</p>}
-    </LoadingGroup>
+                );
+              })}
+            </div>
+            <Pager page={mealPlanSharesPage} onPage={setRecipeSharesPage} hasNextPage={!!mealPlanShares?.has_next_page} />
+          </>
+        )}
+        {hasNoShares && <p className="text-center text-sm">You haven&apos;t shared any recipes with this user.</p>}
+      </LoadingGroup>
+    </>
   );
 };

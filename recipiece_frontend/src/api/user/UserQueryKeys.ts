@@ -6,10 +6,10 @@ export class UserQueryKeys {
 
   public static LIST_USER_KITCHEN_MEMBERSHIPS = (filters?: Partial<ListUserKitchenMembershipsQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listKitchenMemberships"];
-    const { from_self, targeting_self, page_number, status, entity, entity_id, entity_type } = filters ?? {};
+    const { from_self, targeting_self, page_number, status, entity_filter, entity_id, entity_type } = filters ?? {};
 
-    if (entity) {
-      base.push({ entity });
+    if (entity_filter) {
+      base.push({ entity_filter });
     }
     if (entity_id) {
       base.push({ entity_id });

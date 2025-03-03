@@ -6,7 +6,7 @@ export const RecipeSearchFormSchema = z.object({
   currentTagTerm: z.string(),
   tags: z.array(z.object({ content: z.string() })),
   search: z.string(),
-  shared_recipes: z.boolean(),
+  shared_recipes_filter: z.boolean(),
 });
 
 export type RecipeSearchForm = z.infer<typeof RecipeSearchFormSchema>;
@@ -17,5 +17,5 @@ export const DefaultRecipeSearchFormValues: RecipeSearchForm = {
   currentTagTerm: "",
   tags: [],
   search: "",
-  shared_recipes: true,
+  shared_recipes_filter: true,
 };

@@ -147,7 +147,7 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
       ...val,
       ingredients: val.ingredients ? val.ingredients.split(",") : undefined,
       tags: val.tags ? val.tags.split(",") : undefined,
-      shared_recipes_filter: val.shared_recipes ?? "include",
+      shared_recipes_filter: val.shared_recipes_filter ?? "include",
       ingredients_filter: val.ingredients_filter ?? "include",
       tags_filter: val.tags_filter ?? "include",
     };

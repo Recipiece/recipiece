@@ -7,3 +7,4 @@ export * from "./recipeCard";
 export * from "./recipeContextMenu";
 export * from "./recipeSearchBar";
 export * from "./typeaheadInput";
+export * from "./sharedAvatar";

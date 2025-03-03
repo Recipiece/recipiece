@@ -34,6 +34,7 @@ import { RecipieceHeader } from "../Typography";
 import { ShoppingListMenuItem } from "./ShoppingListMenuItem";
 import { MealPlanMenuItem } from "./MealPlanMenuItem";
 import { DataTestId } from "@recipiece/constant";
+import { CookbookMenuItem } from "./CookbookMenuItem";
 
 export const RecipieceMenuBarContext = createContext<{
   readonly mobileMenuPortalRef: undefined | RefObject<HTMLSpanElement>;
@@ -313,9 +314,12 @@ export const RecipieceMenubar: FC = () => {
                 {!!cookbooks?.data?.length && <Separator />}
                 {(cookbooks?.data || []).map((cookbook) => {
                   return (
-                    <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_COOKBOOK(cookbook.id)} onClick={() => navigate(`/cookbook/${cookbook.id}`)} key={cookbook.id}>
-                      {cookbook.name}
-                    </MenubarItem>
+                    <CookbookMenuItem
+                      cookbook={cookbook}
+                      data-testid={DataTestId.MenuBar.MENU_ITEM_COOKBOOK(cookbook.id)}
+                      onClick={() => navigate(`/cookbook/${cookbook.id}`)}
+                      key={cookbook.id}
+                    />
                   );
                 })}
                 {/* {cookbooks?.data && <Pager shortForm={true} page={cookbooksPage} onPage={setCookbooksPage} hasNextPage={cookbooks?.hasNextPage} />} */}

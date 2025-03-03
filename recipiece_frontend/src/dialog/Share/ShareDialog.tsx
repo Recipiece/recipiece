@@ -27,7 +27,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
         ...base,
         entity_id,
         entity_type,
-        entity: "exclude",
+        entity_filter: "exclude",
       };
     }
 

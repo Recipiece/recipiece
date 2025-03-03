@@ -37,7 +37,7 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
         search: formData.search,
         ingredients: (formData.ingredients ?? []).map((i) => i.name),
         tags: (formData?.tags ?? []).map((t) => t.content),
-        shared_recipes: formData.shared_recipes ? "include" : "exclude",
+        shared_recipes_filter: formData.shared_recipes_filter ? "include" : "exclude",
       });
       setIsSubmitting(false);
     },
@@ -57,7 +57,7 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
         search: search,
         ingredients: [],
         tags: [],
-        shared_recipes: "include",
+        shared_recipes_filter: "include",
       });
     }
     setIsAdvancedSearchOpen((prev) => !prev);
@@ -111,7 +111,7 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
               <FormCheckbox
                 data-testid={DataTestId.RecipeSearchBar.CHECKBOX_SHARED_RECIPES(dataTestId)}
                 disabled={isLoading || isSubmitting}
-                name="shared_recipes"
+                name="shared_recipes_filter"
                 label="Include Recipes Shared to You"
               />
               <IngredientSearch dataTestId={DataTestId.RecipeSearchBar.INGREDIENT_SEARCH(dataTestId)} disabled={isLoading || isSubmitting} />

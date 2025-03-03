@@ -5,10 +5,12 @@ import { H2, LoadingGroup, NotFound, Stack, Tabs, TabsContent, TabsList, TabsTri
 import { MealPlanSharesTable } from "./MealPlanSharesTable";
 import { RecipeSharesTable } from "./RecipeSharesTable";
 import { ShoppingListSharesTable } from "./ShoppingListSharesTable";
+import { CookbookSharesTable } from "./CookbookSharesTable";
 
 const TAB_RECIPES = "recipes";
 const TAB_MEAL_PLANS = "meal_plans";
 const TAB_SHOPPING_LISTS = "shopping_lists";
+const TAB_COOKBOOKS = "cookbooks";
 
 export const KitchenMembershipPage: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,12 +49,16 @@ export const KitchenMembershipPage: FC = () => {
           <Tabs defaultValue={searchParams.get("tab") ?? TAB_RECIPES} onValueChange={onTabChange}>
             <TabsList className="items-left w-full justify-start">
               <TabsTrigger value={TAB_RECIPES}>Recipes</TabsTrigger>
+              <TabsTrigger value={TAB_COOKBOOKS}>Cookbooks</TabsTrigger>
               <TabsTrigger value={TAB_MEAL_PLANS}>Meal Plans</TabsTrigger>
               <TabsTrigger value={TAB_SHOPPING_LISTS}>Shopping Lists</TabsTrigger>
             </TabsList>
 
             <TabsContent value={TAB_RECIPES} className="pl-4 pr-4">
               <RecipeSharesTable membership={membership} />
+            </TabsContent>
+            <TabsContent value={TAB_COOKBOOKS} className="pl-4 pr-4">
+              <CookbookSharesTable membership={membership} />
             </TabsContent>
             <TabsContent value={TAB_MEAL_PLANS} className="pl-4 pr-4">
               <MealPlanSharesTable membership={membership} />
