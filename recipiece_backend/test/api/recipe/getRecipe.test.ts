@@ -1,4 +1,4 @@
-import { User, prisma } from "@recipiece/database";
+import { prisma, User } from "@recipiece/database";
 import { generateRecipe, generateRecipeShare, generateUserKitchenMembership } from "@recipiece/test";
 import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
@@ -15,7 +15,9 @@ describe("Get Recipe", () => {
   it("should allow a user to get a recipe", async () => {
     const existingRecipe = await generateRecipe({ user_id: user.id });
 
-    const response = await request(server).get(`/recipe/${existingRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/recipe/${existingRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const recipeBody = response.body as RecipeSchema;
@@ -25,7 +27,9 @@ describe("Get Recipe", () => {
   it("should not retrieve a recipe that is not shared and does not belong to the requesting user", async () => {
     const otherRecipe = await generateRecipe();
 
-    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/recipe/${otherRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
@@ -63,7 +67,9 @@ describe("Get Recipe", () => {
       recipe_id: usersRecipe.id,
     });
 
-    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/recipe/${otherRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: RecipeSchema = response.body;
@@ -92,7 +98,9 @@ describe("Get Recipe", () => {
     });
     await generateRecipe({ user_id: user.id });
 
-    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/recipe/${otherRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: RecipeSchema = response.body;
@@ -121,7 +129,9 @@ describe("Get Recipe", () => {
       },
     });
 
-    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/recipe/${otherRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

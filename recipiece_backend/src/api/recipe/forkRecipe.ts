@@ -1,10 +1,13 @@
+import { PrismaTransaction } from "@recipiece/database";
 import { ForkRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
+export const forkRecipe = async (
+  request: AuthenticatedRequest<ForkRecipeRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<RecipeSchema> => {
   const { original_recipe_id } = request.body;
   const user = request.user;
   const originalRecipe = await tx.recipe.findFirst({

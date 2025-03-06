@@ -1,5 +1,5 @@
-import { StatusCodes } from "http-status-codes";
 import { PrismaTransaction } from "@recipiece/database";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
 export const deleteRecipeShare = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {

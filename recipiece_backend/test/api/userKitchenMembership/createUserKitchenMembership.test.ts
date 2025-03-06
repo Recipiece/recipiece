@@ -1,9 +1,9 @@
-import { User, prisma } from "@recipiece/database";
-import { StatusCodes } from "http-status-codes";
-import request from "supertest";
-import { UserKitchenInvitationStatus } from "../../../../src/util/constant";
+import { prisma, User } from "@recipiece/database";
 import { generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { StatusCodes } from "http-status-codes";
 import "jest-expect-message";
+import request from "supertest";
+import { UserKitchenInvitationStatus } from "../../../src/util/constant";
 
 describe("Create User Kitchen Memberships", () => {
   let user: User;
@@ -16,16 +16,24 @@ describe("Create User Kitchen Memberships", () => {
   });
 
   it("should not allow a user to create a membership for themselves", async () => {
-    const response = await request(server).post("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
-      username: user.username,
-    });
+    const response = await request(server)
+      .post("/user-kitchen-membership")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({
+        username: user.username,
+      });
     expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 
   it("should allow a user to create a membership targeting another user", async () => {
-    const response = await request(server).post("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
-      username: otherUser.username,
-    });
+    const response = await request(server)
+      .post("/user-kitchen-membership")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({
+        username: otherUser.username,
+      });
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const invitation = await prisma.userKitchenMembership.findFirst({
@@ -46,9 +54,13 @@ describe("Create User Kitchen Memberships", () => {
       status: UserKitchenInvitationStatus.DENIED,
     });
 
-    const response = await request(server).post("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
-      username: otherUser.username,
-    });
+    const response = await request(server)
+      .post("/user-kitchen-membership")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({
+        username: otherUser.username,
+      });
     expect(response.statusCode).toBe(StatusCodes.TOO_MANY_REQUESTS);
 
     const allInvitations = await prisma.userKitchenMembership.findMany({
@@ -63,7 +75,7 @@ describe("Create User Kitchen Memberships", () => {
 
   it("should not allow a user to create a membership for a user that does not exist", async () => {
     const response = await request(server)
-      .post("/user/kitchen/membership")
+      .post("/user-kitchen-membership")
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`)
       .send({
@@ -79,9 +91,13 @@ describe("Create User Kitchen Memberships", () => {
         account_visibility: "private",
       },
     });
-    const response = await request(server).post("/user/kitchen/membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
-      username: privateUser.username,
-    });
+    const response = await request(server)
+      .post("/user-kitchen-membership")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({
+        username: privateUser.username,
+      });
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

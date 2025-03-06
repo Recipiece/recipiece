@@ -1,8 +1,8 @@
 import { FC, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { H2, Stack, Tabs, TabsContent, TabsList, TabsTrigger } from "../../component";
 import { FromUserTable } from "./FromUserTable";
 import { TargetingUserTable } from "./TargetingUserTable";
-import { useSearchParams } from "react-router-dom";
 
 const TAB_TARGETING = "targeting";
 const TAB_FROM = "from";

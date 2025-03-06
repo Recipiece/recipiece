@@ -72,16 +72,42 @@ export const LoginPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput data-testid={DataTestId.LoginPage.INPUT_USERNAME} required autoCapitalize="none" name="username" type="text" label="Username or Email" />
-          <FormInput data-testid={DataTestId.LoginPage.INPUT_PASSWORD} required name="password" type="password" label="Password" />
-          <FormCheckbox data-testid={DataTestId.LoginPage.CHECKBOX_REMEMBER_ME} className="mb-1 mt-1" name="remember" label="Remember Me" />
+          <FormInput
+            data-testid={DataTestId.LoginPage.INPUT_USERNAME}
+            required
+            autoCapitalize="none"
+            name="username"
+            type="text"
+            label="Username or Email"
+          />
+          <FormInput
+            data-testid={DataTestId.LoginPage.INPUT_PASSWORD}
+            required
+            name="password"
+            type="password"
+            label="Password"
+          />
+          <FormCheckbox
+            data-testid={DataTestId.LoginPage.CHECKBOX_REMEMBER_ME}
+            className="mb-1 mt-1"
+            name="remember"
+            label="Remember Me"
+          />
           <SubmitButton data-testid={DataTestId.LoginPage.BUTTON_LOGIN} type="submit">
             Login
           </SubmitButton>
-          <Button data-testid={DataTestId.LoginPage.BUTTON_REGISTER} onClick={() => navigate("/create-account")} variant="link">
+          <Button
+            data-testid={DataTestId.LoginPage.BUTTON_REGISTER}
+            onClick={() => navigate("/create-account")}
+            variant="link"
+          >
             Register Now
           </Button>
-          <Button data-testid={DataTestId.LoginPage.BUTTON_FORGOT_PASSWORD} onClick={() => navigate("/forgot-password")} variant="link">
+          <Button
+            data-testid={DataTestId.LoginPage.BUTTON_FORGOT_PASSWORD}
+            onClick={() => navigate("/forgot-password")}
+            variant="link"
+          >
             Forgot Password?
           </Button>
         </Stack>

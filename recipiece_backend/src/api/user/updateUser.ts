@@ -1,10 +1,13 @@
-import { StatusCodes } from "http-status-codes";
-import { UpdateUserRequestSchema, UserPreferencesSchema, UserSchema } from "@recipiece/types";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { Prisma, PrismaTransaction } from "@recipiece/database";
+import { UpdateUserRequestSchema, UserPreferencesSchema, UserSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { BadRequestError } from "../../util/error";
 
-export const updateUser = async (request: AuthenticatedRequest<UpdateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<UserSchema> => {
+export const updateUser = async (
+  request: AuthenticatedRequest<UpdateUserRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<UserSchema> => {
   const requestUser = request.user;
   const { id: updateId, ...restBody } = request.body;
 

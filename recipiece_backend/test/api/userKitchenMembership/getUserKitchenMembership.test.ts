@@ -1,4 +1,4 @@
-import { User, prisma } from "@recipiece/database";
+import { User } from "@recipiece/database";
 import { generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
@@ -22,7 +22,9 @@ describe("Get User Kitchen Membership", () => {
       status: "pending",
     });
 
-    const response = await request(server).get(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/user-kitchen-membership/${membership.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: UserKitchenMembershipSchema = response.body;
@@ -38,7 +40,9 @@ describe("Get User Kitchen Membership", () => {
       status: "pending",
     });
 
-    const response = await request(server).get(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`);
+    const response = await request(server)
+      .get(`/user-kitchen-membership/${membership.id}`)
+      .set("Authorization", `Bearer ${otherBearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: UserKitchenMembershipSchema = response.body;
@@ -55,12 +59,16 @@ describe("Get User Kitchen Membership", () => {
       status: "pending",
     });
 
-    const response = await request(server).get(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`);
+    const response = await request(server)
+      .get(`/user-kitchen-membership/${membership.id}`)
+      .set("Authorization", `Bearer ${otherBearerToken}`);
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 
   it("should not get a membership that does not exist", async () => {
-    const response = await request(server).get(`/user/kitchen/membership/100000000`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/user-kitchen-membership/100000000`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

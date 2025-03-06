@@ -1,14 +1,17 @@
-import { StatusCodes } from "http-status-codes";
 import { PrismaTransaction } from "@recipiece/database";
 import { CreateRecipeShareRequestSchema, RecipeShareSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { sendRecipeSharedPushNotification } from "../../../util/pushNotification";
 import { ConflictError } from "../../../util/error";
+import { sendRecipeSharedPushNotification } from "../../../util/pushNotification";
 
 /**
  * Allow a user to share a recipe they own with another user.
  */
-export const createRecipeShare = async (request: AuthenticatedRequest<CreateRecipeShareRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeShareSchema> => {
+export const createRecipeShare = async (
+  request: AuthenticatedRequest<CreateRecipeShareRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<RecipeShareSchema> => {
   const { recipe_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 
@@ -70,6 +73,8 @@ export const createRecipeShare = async (request: AuthenticatedRequest<CreateReci
         await sendRecipeSharedPushNotification(sub, membership.source_user, recipe);
       });
     }
+
+    console.log("SHARAE", share);
 
     return [StatusCodes.OK, share];
   } catch (err) {

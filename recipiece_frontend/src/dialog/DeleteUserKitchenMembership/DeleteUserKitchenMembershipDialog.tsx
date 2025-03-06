@@ -9,8 +9,13 @@ export interface DeleteUserKitchenMembershipDialogProps extends BaseDialogProps<
   readonly userKitchenMembership: UserKitchenMembershipSchema;
 }
 
-export const DeleteUserKitchenMembershipDialog: FC<DeleteUserKitchenMembershipDialogProps> = ({ onClose, onSubmit, userKitchenMembership }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
+export const DeleteUserKitchenMembershipDialog: FC<DeleteUserKitchenMembershipDialogProps> = ({
+  onClose,
+  onSubmit,
+  userKitchenMembership,
+}) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
+    useResponsiveDialogComponents();
   const { data: user } = useGetSelfQuery();
 
   const [isDisabled, setIsDisabled] = useState(false);
@@ -30,9 +35,11 @@ export const DeleteUserKitchenMembershipDialog: FC<DeleteUserKitchenMembershipDi
           {!isTargetedUser && `Remove ${userKitchenMembership.destination_user.username} From Your Kitchen?`}
         </ResponsiveTitle>
         <ResponsiveDescription>
-          {isTargetedUser && `You can leave ${userKitchenMembership.source_user.username}'s kitchen by selecting the Leave Kitchen button below.`}
-          {!isTargetedUser && `You can remove ${userKitchenMembership.destination_user.username} from your kitchen by selecting the Remove From Kitchen button below.`} This will
-          remove all shared items permanently, and cannot be undone.
+          {isTargetedUser &&
+            `You can leave ${userKitchenMembership.source_user.username}'s kitchen by selecting the Leave Kitchen button below.`}
+          {!isTargetedUser &&
+            `You can remove ${userKitchenMembership.destination_user.username} from your kitchen by selecting the Remove From Kitchen button below.`}{" "}
+          This will remove all shared items permanently, and cannot be undone.
         </ResponsiveDescription>
       </ResponsiveHeader>
       <ResponsiveFooter className="flex-col-reverse">

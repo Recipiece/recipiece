@@ -22,7 +22,13 @@ import { setMealPlanConfiguration } from "./configuration/setMealPlanConfigurati
 import { createMealPlan } from "./createMealPlan";
 import { deleteMealPlan } from "./deleteMealPlan";
 import { getMealPlan } from "./getMealPlan";
-import { bulkSetMealPlanItems, createItemForMealPlan, deleteItemForMealPlan, listItemsForMealPlan, updateItemForMealPlan } from "./items";
+import {
+  bulkSetMealPlanItems,
+  createItemForMealPlan,
+  deleteItemForMealPlan,
+  listItemsForMealPlan,
+  updateItemForMealPlan,
+} from "./items";
 import { listMealPlans } from "./listMealPlans";
 import { createMealPlanShare, deleteMealPlanShare, listMealPlanShares } from "./share";
 import { updateMealPlan } from "./updateMealPlan";

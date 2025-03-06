@@ -23,6 +23,10 @@ export class RecipeSearchBar {
     return `input-tag-search-${base}`;
   }
 
+  public static readonly INPUT_USER_KITCHEN_MEMBERSHIP_SEARCH = (base?: any): string => {
+    return `input-user-kitchen-membership-search-${base}`;
+  }
+
   public static readonly BADGE_INGREDIENT = (base?: any): string => {
     return `badge-ingredient-${base}`;
   };
@@ -31,11 +35,19 @@ export class RecipeSearchBar {
     return `badge-tag-${base}`;
   }
 
+  public static readonly BADGE_USER_KITCHEN_MEMBERSHIP_SEARCH = (base?: any): string => {
+    return `badge-user-kitchen-membership-${base}`;
+  }
+
   public static readonly INGREDIENT_SEARCH = (base?: any): string => {
     return `ingredient-search-${base}`;
   }
 
   public static readonly TAG_SEARCH = (base?: any): string => {
     return `tag-search-${base}`;
+  }
+
+  public static readonly USER_KITCHEN_MEMBERSHIP_SEARCH = (base?: any): string => {
+    return `user-kitchen-membership-search-${base}`;
   }
 }

@@ -13,7 +13,12 @@ import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, useP
 import { UserQueryKeys } from "../user";
 import { MealPlanQueryKeys } from "./MealPlanQueryKeys";
 
-export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShareSchema, { readonly meal_plan_id: number; readonly user_kitchen_membership_id: number }>) => {
+export const useCreateMealPlanShareMutation = (
+  args?: MutationArgs<
+    MealPlanShareSchema,
+    { readonly meal_plan_id: number; readonly user_kitchen_membership_id: number }
+  >
+) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
@@ -79,15 +84,18 @@ export const useCreateMealPlanShareMutation = (args?: MutationArgs<MealPlanShare
           return undefined;
         }
       );
-      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(params.meal_plan_id), (oldData: MealPlanSchema | undefined) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            shares: [...(oldData.shares ?? []), data],
-          };
+      queryClient.setQueryData(
+        MealPlanQueryKeys.GET_MEAL_PLAN(params.meal_plan_id),
+        (oldData: MealPlanSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              shares: [...(oldData.shares ?? []), data],
+            };
+          }
+          return undefined;
         }
-        return undefined;
-      });
+      );
 
       onSuccess?.(data, params, ctx);
     },
@@ -157,15 +165,18 @@ export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, Meal
           return undefined;
         }
       );
-      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(params.meal_plan_id), (oldData: MealPlanSchema | undefined) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
-          };
+      queryClient.setQueryData(
+        MealPlanQueryKeys.GET_MEAL_PLAN(params.meal_plan_id),
+        (oldData: MealPlanSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
+            };
+          }
+          return undefined;
         }
-        return undefined;
-      });
+      );
 
       onSuccess?.(data, params, ctx);
     },
@@ -173,7 +184,10 @@ export const useDeleteMealPlanShareMutation = (args?: MutationArgs<unknown, Meal
   });
 };
 
-export const useListMealPlanSharesQuery = (filters: ListMealPlanSharesQuerySchema, args?: QueryArgs<ListMealPlanSharesResponseSchema>) => {
+export const useListMealPlanSharesQuery = (
+  filters: ListMealPlanSharesQuerySchema,
+  args?: QueryArgs<ListMealPlanSharesResponseSchema>
+) => {
   const { getter } = useGet();
 
   const searchParams = filtersToSearchParams(filters);

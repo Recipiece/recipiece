@@ -4,15 +4,16 @@
  */
 
 import { execSync } from "child_process";
+import { prisma } from "@recipiece/database";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.test" });
 
-import { prisma } from "@recipiece/database";
-
 export default async () => {
   try {
-    execSync("dotenvx run -f .env.test -- yarn  --cwd ../recipiece_common/recipiece_database run prisma migrate deploy");
+    execSync(
+      "dotenvx run -f .env.test -- yarn  --cwd ../recipiece_common/recipiece_database run prisma migrate deploy"
+    );
     await prisma.user.deleteMany();
   } catch (err) {
     console.error(err);

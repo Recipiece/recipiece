@@ -14,7 +14,10 @@ describe("Delete User Tag", () => {
   it("should delete a tag belonging to the user", async () => {
     const tag = await generateUserTag({ user_id: user.id });
 
-    const response = await request(server).delete(`/user/tag/${tag.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
+    const response = await request(server)
+      .delete(`/user-tag/${tag.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -29,7 +32,10 @@ describe("Delete User Tag", () => {
   it("should not delete another users tag", async () => {
     const tag = await generateUserTag();
 
-    const response = await request(server).delete(`/user/tag/${tag.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
+    const response = await request(server)
+      .delete(`/user-tag/${tag.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 

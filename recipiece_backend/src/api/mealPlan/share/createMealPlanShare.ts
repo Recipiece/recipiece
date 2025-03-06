@@ -2,13 +2,16 @@ import { PrismaTransaction } from "@recipiece/database";
 import { CreateMealPlanShareRequestSchema, MealPlanShareSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { sendMealPlanSharedPushNotification } from "../../../util/pushNotification";
 import { ConflictError } from "../../../util/error";
+import { sendMealPlanSharedPushNotification } from "../../../util/pushNotification";
 
 /**
  * Allow a user to share a meal plan they own with another user.
  */
-export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMealPlanShareRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanShareSchema> => {
+export const createMealPlanShare = async (
+  request: AuthenticatedRequest<CreateMealPlanShareRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<MealPlanShareSchema> => {
   const { meal_plan_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 

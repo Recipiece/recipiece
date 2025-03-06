@@ -5,7 +5,10 @@ import { StatusCodes } from "http-status-codes";
 import { AuthenticatedRequest } from "../../types";
 import { shoppingListSharesSubquery } from "./query";
 
-export const listShoppingLists = async (request: AuthenticatedRequest<any, ListShoppingListsQuerySchema>, tx: PrismaTransaction) => {
+export const listShoppingLists = async (
+  request: AuthenticatedRequest<any, ListShoppingListsQuerySchema>,
+  tx: PrismaTransaction
+) => {
   const { shared_shopping_lists_filter, page_number, page_size } = request.query;
   const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
   const user = request.user;
@@ -21,7 +24,11 @@ export const listShoppingLists = async (request: AuthenticatedRequest<any, ListS
     .with("selective_grant_shared_shopping_lists", (db) => {
       return db
         .selectFrom("shopping_list_shares")
-        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "shopping_list_shares.user_kitchen_membership_id")
+        .innerJoin(
+          "user_kitchen_memberships",
+          "user_kitchen_memberships.id",
+          "shopping_list_shares.user_kitchen_membership_id"
+        )
         .innerJoin("shopping_lists", "shopping_lists.id", "shopping_list_shares.shopping_list_id")
         .where((eb) => {
           return eb.and([

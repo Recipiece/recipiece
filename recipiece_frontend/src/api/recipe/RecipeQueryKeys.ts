@@ -15,7 +15,15 @@ export class RecipeQueryKeys {
   public static readonly LIST_RECIPES = (filters?: Partial<ListRecipesQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listRecipes"];
     if (filters) {
-      const { page_number, cookbook_id, search, cookbook_attachments_filter, shared_recipes_filter, ingredients, tags } = filters;
+      const {
+        page_number,
+        cookbook_id,
+        search,
+        cookbook_attachments_filter,
+        user_kitchen_membership_ids,
+        ingredients,
+        tags,
+      } = filters;
       if (page_number) {
         base.push({ page_number });
       }
@@ -28,8 +36,8 @@ export class RecipeQueryKeys {
         base.push({ cookbook_attachments_filter });
       }
 
-      if (shared_recipes_filter) {
-        base.push({ shared_recipes_filter });
+      if (user_kitchen_membership_ids) {
+        base.push({ user_kitchen_membership_ids });
       }
 
       if (search) {
@@ -68,7 +76,9 @@ export class RecipeQueryKeys {
     return base;
   };
 
-  public static readonly LIST_RECIPES_AVAILABLE_TO_COOKBOOK = (filters?: Partial<{ readonly search: string; readonly cookbook_id: number }>): RcpQueryKey => {
+  public static readonly LIST_RECIPES_AVAILABLE_TO_COOKBOOK = (
+    filters?: Partial<{ readonly search: string; readonly cookbook_id: number }>
+  ): RcpQueryKey => {
     const base: RcpQueryKey = ["recipeCookbookSearch"];
     if (filters) {
       const { search, cookbook_id } = filters;

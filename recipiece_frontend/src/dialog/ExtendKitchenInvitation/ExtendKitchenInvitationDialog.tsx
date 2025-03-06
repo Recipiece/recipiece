@@ -13,9 +13,13 @@ export const ExtendKitchenInvitationFormSchema = z.object({
 
 export type ExtendKitchenInvitationForm = z.infer<typeof ExtendKitchenInvitationFormSchema>;
 
-export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvitationForm>> = ({ onClose, onSubmit }) => {
+export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvitationForm>> = ({
+  onClose,
+  onSubmit,
+}) => {
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
+    useResponsiveDialogComponents();
 
   const form = useForm<ExtendKitchenInvitationForm>({
     resolver: zodResolver(ExtendKitchenInvitationFormSchema),
@@ -44,7 +48,9 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
         <form onSubmit={form.handleSubmit(onInviteUser)}>
           <ResponsiveHeader>
             <ResponsiveTitle>Invite a User</ResponsiveTitle>
-            <ResponsiveDescription>Invite a user to your kitchen by entering their username below.</ResponsiveDescription>
+            <ResponsiveDescription>
+              Invite a user to your kitchen by entering their username below.
+            </ResponsiveDescription>
           </ResponsiveHeader>
 
           <div className="mb-2">
@@ -52,7 +58,11 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
           </div>
 
           <ResponsiveFooter className="flex-col-reverse">
-            <Button variant="outline" disabled={form.formState.isSubmitting || isLoadingUser} onClick={() => onClose?.()}>
+            <Button
+              variant="outline"
+              disabled={form.formState.isSubmitting || isLoadingUser}
+              onClick={() => onClose?.()}
+            >
               Cancel
             </Button>
             <SubmitButton disabled={isLoadingUser}>Send Invitation</SubmitButton>

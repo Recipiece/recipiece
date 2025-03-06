@@ -1,8 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
-import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
-import { RecipeQueryKeys } from "../recipe";
-import { CookbookQueryKeys } from "./CookbookQueryKeys";
 import {
   CookbookSchema,
   ListCookbooksQuerySchema,
@@ -13,6 +8,11 @@ import {
   YCookbookSchema,
   YListCookbooksResponseSchema,
 } from "@recipiece/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { RecipeQueryKeys } from "../recipe";
+import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { CookbookQueryKeys } from "./CookbookQueryKeys";
 
 export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<CookbookSchema>) => {
   const { getter } = useGet();
@@ -32,7 +32,10 @@ export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<Coo
   });
 };
 
-export const useListCookbooksQuery = (filters: ListCookbooksQuerySchema, args?: QueryArgs<ListCookbooksResponseSchema>) => {
+export const useListCookbooksQuery = (
+  filters: ListCookbooksQuerySchema,
+  args?: QueryArgs<ListCookbooksResponseSchema>
+) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
   const searchParams = filtersToSearchParams(filters);
@@ -143,7 +146,9 @@ export const useDeleteCookbookMutation = (args?: MutationArgs<unknown, CookbookS
   });
 };
 
-export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
+export const useAttachRecipeToCookbookMutation = (
+  args?: MutationArgs<void, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>
+) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
@@ -169,7 +174,12 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { re
         refetchType: "all",
       });
       queryClient.setQueriesData(
-        { queryKey: RecipeQueryKeys.LIST_RECIPES({ cookbook_id: params.cookbook.id, cookbook_attachments_filter: "include" }) },
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES({
+            cookbook_id: params.cookbook.id,
+            cookbook_attachments_filter: "include",
+          }),
+        },
         (oldData: ListRecipesResponseSchema | undefined) => {
           if (oldData) {
             return {
@@ -209,7 +219,9 @@ export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { re
   });
 };
 
-export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<unknown, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
+export const useRemoveRecipeFromCookbookMutation = (
+  args?: MutationArgs<unknown, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>
+) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
@@ -235,7 +247,10 @@ export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<unknown,
       });
       queryClient.setQueriesData(
         {
-          queryKey: RecipeQueryKeys.LIST_RECIPES({ cookbook_id: params.cookbook.id, cookbook_attachments_filter: "include" }),
+          queryKey: RecipeQueryKeys.LIST_RECIPES({
+            cookbook_id: params.cookbook.id,
+            cookbook_attachments_filter: "include",
+          }),
         },
         (oldData: ListRecipeSharesResponseSchema | undefined) => {
           if (oldData) {

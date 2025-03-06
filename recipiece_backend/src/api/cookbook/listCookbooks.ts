@@ -5,9 +5,19 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { cookbookSharesSubquery } from "./query";
 
-export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooksQuerySchema>, tx: PrismaTransaction): ApiResponse<ListCookbooksResponseSchema> => {
+export const listCookbooks = async (
+  req: AuthenticatedRequest<any, ListCookbooksQuerySchema>,
+  tx: PrismaTransaction
+): ApiResponse<ListCookbooksResponseSchema> => {
   const user = req.user;
-  const { page_number, page_size = Constant.DEFAULT_PAGE_SIZE, recipe_id, recipe_id_filter, search, shared_cookbooks_filter } = req.query;
+  const {
+    page_number,
+    page_size = Constant.DEFAULT_PAGE_SIZE,
+    recipe_id,
+    recipe_id_filter,
+    search,
+    shared_cookbooks_filter,
+  } = req.query;
 
   // const page = req.query.page_number;
   // const pageSize = req.query.page_size ?? Constant.DEFAULT_PAGE_SIZE;
@@ -26,7 +36,11 @@ export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooks
     .with("selective_grant_shared_cookbooks", (db) => {
       return db
         .selectFrom("cookbook_shares")
-        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "cookbook_shares.user_kitchen_membership_id")
+        .innerJoin(
+          "user_kitchen_memberships",
+          "user_kitchen_memberships.id",
+          "cookbook_shares.user_kitchen_membership_id"
+        )
         .innerJoin("cookbooks", "cookbooks.id", "cookbook_shares.cookbook_id")
         .where((eb) => {
           return eb.and([

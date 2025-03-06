@@ -58,7 +58,9 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipS
                   <div className="flex flex-row gap-2 border-b-[1px] border-b-primary pb-2" key={share.id}>
                     <div className="flex flex-col">
                       <span>{share.recipe.name}</span>
-                      <span className="text-xs">{DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                      <span className="text-xs">
+                        {DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}
+                      </span>
                     </div>
                     <Button size="sm" variant="link" onClick={() => navigate(`/recipe/view/${share.recipe_id}`, {})}>
                       <ExternalLink />
@@ -71,7 +73,11 @@ export const RecipeSharesTable: FC<{ readonly membership: UserKitchenMembershipS
                 );
               })}
             </div>
-            <Pager page={mealPlanSharesPage} onPage={setRecipeSharesPage} hasNextPage={!!mealPlanShares?.has_next_page} />
+            <Pager
+              page={mealPlanSharesPage}
+              onPage={setRecipeSharesPage}
+              hasNextPage={!!mealPlanShares?.has_next_page}
+            />
           </>
         )}
         {hasNoShares && <p className="text-center text-sm">You haven&apos;t shared any recipes with this user.</p>}

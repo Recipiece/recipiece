@@ -1,9 +1,13 @@
 import { User } from "@recipiece/database";
 import { generateRecipe, generateRecipeShare, generateUserKitchenMembership } from "@recipiece/test";
-import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema, UserKitchenMembershipSchema } from "@recipiece/types";
+import {
+  ListUserKitchenMembershipsQuerySchema,
+  ListUserKitchenMembershipsResponseSchema,
+  UserKitchenMembershipSchema,
+} from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { UserKitchenInvitationStatus } from "../../../../src/util/constant";
+import { UserKitchenInvitationStatus } from "../../../src/util/constant";
 
 describe("List User Kitchen Memberships", () => {
   let user: User;
@@ -31,7 +35,7 @@ describe("List User Kitchen Memberships", () => {
     }
 
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         from_self: true,
         targeting_self: true,
@@ -61,7 +65,7 @@ describe("List User Kitchen Memberships", () => {
     }
 
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         targeting_self: true,
         page_number: 0,
@@ -94,7 +98,7 @@ describe("List User Kitchen Memberships", () => {
     }
 
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         from_self: true,
         page_number: 0,
@@ -129,7 +133,7 @@ describe("List User Kitchen Memberships", () => {
     const totalNumMemberships = UserKitchenInvitationStatus.ALL_STATUSES.length * 4 * 2;
 
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query({
         from_self: true,
         targeting_self: true,
@@ -146,7 +150,7 @@ describe("List User Kitchen Memberships", () => {
 
   it("should not allow you to not specify one of from_self or targeting_self", async () => {
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         page_number: 0,
       })
@@ -165,7 +169,7 @@ describe("List User Kitchen Memberships", () => {
     }
 
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         from_self: true,
         targeting_self: true,
@@ -197,7 +201,7 @@ describe("List User Kitchen Memberships", () => {
     });
 
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         entity_filter: "exclude",
         entity_id: recipe.id,
@@ -233,7 +237,7 @@ describe("List User Kitchen Memberships", () => {
     });
 
     const response = await request(server)
-      .get("/user/kitchen/membership/list")
+      .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         entity_filter: "include",
         entity_id: recipe.id,

@@ -79,8 +79,18 @@ export const ResetPasswordPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput data-testid={DataTestId.ResetPasswordPage.INPUT_PASSWORD} type="password" name="password" label="Password" />
-          <FormInput data-testid={DataTestId.ResetPasswordPage.INPUT_CONFIRM_PASSWORD} type="password" name="confirmPassword" label="Confirm Password" />
+          <FormInput
+            data-testid={DataTestId.ResetPasswordPage.INPUT_PASSWORD}
+            type="password"
+            name="password"
+            label="Password"
+          />
+          <FormInput
+            data-testid={DataTestId.ResetPasswordPage.INPUT_CONFIRM_PASSWORD}
+            type="password"
+            name="confirmPassword"
+            label="Confirm Password"
+          />
           <SubmitButton data-testid={DataTestId.ResetPasswordPage.BUTTON_RESET_PASSWORD}>Reset Password</SubmitButton>
           <Button
             data-testid={DataTestId.ResetPasswordPage.BUTTON_LOGIN}

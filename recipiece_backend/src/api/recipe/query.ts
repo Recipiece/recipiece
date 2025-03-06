@@ -1,4 +1,12 @@
-import { KyselyCore, KyselyGenerated, PrismaTransaction, Recipe, RecipeIngredient, User, UserTag } from "@recipiece/database";
+import {
+  KyselyCore,
+  KyselyGenerated,
+  PrismaTransaction,
+  Recipe,
+  RecipeIngredient,
+  User,
+  UserTag,
+} from "@recipiece/database";
 
 export const getRecipeByIdQuery = (tx: PrismaTransaction, user: User, recipeId: number) => {
   const selectiveShareCheck = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">) => {
@@ -6,7 +14,11 @@ export const getRecipeByIdQuery = (tx: PrismaTransaction, user: User, recipeId: 
       eb
         .selectFrom("recipe_shares")
         .select("recipe_shares.id")
-        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "recipe_shares.user_kitchen_membership_id")
+        .innerJoin(
+          "user_kitchen_memberships",
+          "user_kitchen_memberships.id",
+          "recipe_shares.user_kitchen_membership_id"
+        )
         .where((_eb) => {
           return _eb.and([
             _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
@@ -158,7 +170,10 @@ export const ingredientsSubquery = (eb: KyselyCore.ExpressionBuilder<KyselyGener
     );
 };
 
-export const recipeSharesWithMemberships = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">, userId: number) => {
+export const recipeSharesWithMemberships = (
+  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">,
+  userId: number
+) => {
   return eb
     .selectFrom("recipe_shares")
     .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "recipe_shares.user_kitchen_membership_id")
@@ -166,12 +181,18 @@ export const recipeSharesWithMemberships = (eb: KyselyCore.ExpressionBuilder<Kys
     .where((eb) => {
       return eb.and([
         eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-        eb.or([eb("user_kitchen_memberships.destination_user_id", "=", userId), eb("user_kitchen_memberships.source_user_id", "=", userId)]),
+        eb.or([
+          eb("user_kitchen_memberships.destination_user_id", "=", userId),
+          eb("user_kitchen_memberships.source_user_id", "=", userId),
+        ]),
       ]);
     });
 };
 
-export const recipeSharesSubquery = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">, userId: number) => {
+export const recipeSharesSubquery = (
+  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">,
+  userId: number
+) => {
   return recipeSharesWithMemberships(eb, userId).select(
     KyselyCore.sql<KyselyGenerated.RecipeShare[]>`
       coalesce(

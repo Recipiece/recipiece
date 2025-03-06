@@ -1,6 +1,6 @@
+import { PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { PrismaTransaction } from "@recipiece/database";
 
 export const deleteShoppingList = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const listId = +request.params.id;

@@ -1,7 +1,7 @@
-import { User, prisma } from "@recipiece/database";
-import request from "supertest";
-import { StatusCodes } from "http-status-codes";
+import { prisma, User } from "@recipiece/database";
 import { generateShoppingList, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
+import { StatusCodes } from "http-status-codes";
+import request from "supertest";
 
 describe("Delete Shopping List Share", () => {
   let user: User;
@@ -25,7 +25,10 @@ describe("Delete Shopping List Share", () => {
       user_kitchen_membership_id: membership.id,
     });
 
-    const response = await request(server).delete(`/shopping-list/share/${share.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
+    const response = await request(server)
+      .delete(`/shopping-list/share/${share.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -52,7 +55,10 @@ describe("Delete Shopping List Share", () => {
       user_kitchen_membership_id: membership.id,
     });
 
-    const response = await request(server).delete(`/shopping-list/share/${share.id}`).set("Authorization", `Bearer ${thirdUserToken}`).send();
+    const response = await request(server)
+      .delete(`/shopping-list/share/${share.id}`)
+      .set("Authorization", `Bearer ${thirdUserToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 
@@ -65,7 +71,10 @@ describe("Delete Shopping List Share", () => {
   });
 
   it("should not allow a user to delete a share that doesn't exist", async () => {
-    const response = await request(server).delete(`/shopping-list/share/1000000`).set("Authorization", `Bearer ${bearerToken}`).send();
+    const response = await request(server)
+      .delete(`/shopping-list/share/1000000`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

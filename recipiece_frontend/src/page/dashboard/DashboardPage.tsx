@@ -1,11 +1,24 @@
+import { DataTestId } from "@recipiece/constant";
 import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { Plus } from "lucide-react";
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
-import { RecipeSearch, Button, Grid, H2, LoadingGroup, NotFound, Pager, RecipeCard, Shelf, ShelfSpacer, Stack, useToast } from "../../component";
+import {
+  Button,
+  Grid,
+  H2,
+  LoadingGroup,
+  NotFound,
+  Pager,
+  RecipeCard,
+  RecipeSearch,
+  Shelf,
+  ShelfSpacer,
+  Stack,
+  useToast,
+} from "../../component";
 import { DialogContext } from "../../context";
-import { DataTestId } from "@recipiece/constant";
 
 export const DashboardPage: FC = () => {
   const { cookbookId } = useParams();
@@ -59,7 +72,9 @@ export const DashboardPage: FC = () => {
   }, []);
 
   const { data: recipeData, isLoading: isLoadingRecipes, isFetching: isFetchingRecipes } = useListRecipesQuery(filters);
-  const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, { enabled: !!cookbookId });
+  const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, {
+    enabled: !!cookbookId,
+  });
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
 
   const recipes = useMemo(() => {
@@ -98,7 +113,11 @@ export const DashboardPage: FC = () => {
           <Shelf>
             <H2 data-testid={DataTestId.DashboardPage.HEADING_TITLE}>{cookbook?.name}</H2>
             <ShelfSpacer />
-            <Button data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_HEADER} onClick={onFindRecipe} variant="outline">
+            <Button
+              data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_HEADER}
+              onClick={onFindRecipe}
+              variant="outline"
+            >
               <Plus size={20} className="mr-1" /> Add a recipe
             </Button>
           </Shelf>
@@ -114,14 +133,24 @@ export const DashboardPage: FC = () => {
         isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}
         onSubmit={onSearch}
       />
-      <LoadingGroup variant="spinner" isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}>
+      <LoadingGroup
+        variant="spinner"
+        isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}
+      >
         <Stack>
           {!isLoadingRecipes && recipes.length === 0 && (
             <>
-              <NotFound dataTestId={DataTestId.DashboardPage.NOT_FOUND} message="No recipes to be had, time to get cooking!" />
+              <NotFound
+                dataTestId={DataTestId.DashboardPage.NOT_FOUND}
+                message="No recipes to be had, time to get cooking!"
+              />
               {cookbookId && (
                 <div className="text-center">
-                  <Button data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY} onClick={onFindRecipe} variant="outline">
+                  <Button
+                    data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
+                    onClick={onFindRecipe}
+                    variant="outline"
+                  >
                     <Plus size={20} className="mr-1" /> Add a recipe
                   </Button>
                 </div>
@@ -137,7 +166,14 @@ export const DashboardPage: FC = () => {
               );
             })}
           </Grid>
-          {recipes.length > 0 && <Pager dataTestId={DataTestId.DashboardPage.PAGER} page={filters.page_number} onPage={onPageChange} hasNextPage={!!recipeData?.has_next_page} />}
+          {recipes.length > 0 && (
+            <Pager
+              dataTestId={DataTestId.DashboardPage.PAGER}
+              page={filters.page_number}
+              onPage={onPageChange}
+              hasNextPage={!!recipeData?.has_next_page}
+            />
+          )}
         </Stack>
       </LoadingGroup>
     </Stack>

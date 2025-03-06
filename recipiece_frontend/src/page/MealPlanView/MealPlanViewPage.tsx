@@ -293,7 +293,10 @@ export const MealPlanViewPage: FC = () => {
     const itemsToUpdate = flatFormData.filter((item) => {
       const matchingDataArrayItem = flatDataArrayData.find((val) => !!val.id && val.id === item.id);
       if (matchingDataArrayItem) {
-        return matchingDataArrayItem["notes"] !== item["notes"] || matchingDataArrayItem["freeform_content"] !== item["freeform_content"];
+        return (
+          matchingDataArrayItem["notes"] !== item["notes"] ||
+          matchingDataArrayItem["freeform_content"] !== item["freeform_content"]
+        );
       }
       return false;
     });
@@ -329,7 +332,10 @@ export const MealPlanViewPage: FC = () => {
                 {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
               </div>
 
-              {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(<MealPlanContextMenu mealPlan={mealPlan} />, mobileMenuPortalRef.current)}
+              {isMobile &&
+                mobileMenuPortalRef &&
+                mobileMenuPortalRef.current &&
+                createPortal(<MealPlanContextMenu mealPlan={mealPlan} />, mobileMenuPortalRef.current)}
               {!isMobile && <>{<MealPlanContextMenu mealPlan={mealPlan} />}</>}
             </div>
 
@@ -386,7 +392,13 @@ export const MealPlanViewPage: FC = () => {
                   >
                     {/* Do this so that we don't flash the far left end of the view window. It's jank but like... */}
                     {daysSpan > 3 && (
-                      <MealPlanItemCard dayId={dist} isEditing={isEditing} isLoading={matchingDataArrayItem === undefined} mealPlan={mealPlan!} date={displayDate} />
+                      <MealPlanItemCard
+                        dayId={dist}
+                        isEditing={isEditing}
+                        isLoading={matchingDataArrayItem === undefined}
+                        mealPlan={mealPlan!}
+                        date={displayDate}
+                      />
                     )}
                   </div>
                 );

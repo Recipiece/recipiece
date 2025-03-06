@@ -1,6 +1,9 @@
 import { KyselyCore, KyselyGenerated, PrismaTransaction, User } from "@recipiece/database";
 
-export const cookbookSharesWithMemberships = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "cookbooks">, userId: number) => {
+export const cookbookSharesWithMemberships = (
+  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "cookbooks">,
+  userId: number
+) => {
   return eb
     .selectFrom("cookbook_shares")
     .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "cookbook_shares.user_kitchen_membership_id")
@@ -8,12 +11,18 @@ export const cookbookSharesWithMemberships = (eb: KyselyCore.ExpressionBuilder<K
     .where((eb) => {
       return eb.and([
         eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-        eb.or([eb("user_kitchen_memberships.destination_user_id", "=", userId), eb("user_kitchen_memberships.source_user_id", "=", userId)]),
+        eb.or([
+          eb("user_kitchen_memberships.destination_user_id", "=", userId),
+          eb("user_kitchen_memberships.source_user_id", "=", userId),
+        ]),
       ]);
     });
 };
 
-export const cookbookSharesSubquery = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "cookbooks">, userId: number) => {
+export const cookbookSharesSubquery = (
+  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "cookbooks">,
+  userId: number
+) => {
   return cookbookSharesWithMemberships(eb, userId).select(
     KyselyCore.sql<KyselyGenerated.CookbookShare[]>`
       coalesce(
@@ -30,7 +39,11 @@ export const getCookbookByIdQuery = (tx: PrismaTransaction, user: User, cookbook
       eb
         .selectFrom("cookbook_shares")
         .select("cookbook_shares.id")
-        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "cookbook_shares.user_kitchen_membership_id")
+        .innerJoin(
+          "user_kitchen_memberships",
+          "user_kitchen_memberships.id",
+          "cookbook_shares.user_kitchen_membership_id"
+        )
         .where((_eb) => {
           return _eb.and([
             _eb("user_kitchen_memberships.destination_user_id", "=", user.id),

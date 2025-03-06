@@ -9,8 +9,13 @@ export interface SearchRecipesForCookbookDialogProps extends BaseDialogProps<Rec
   readonly cookbookId: number;
 }
 
-export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogProps> = ({ onClose, onSubmit, cookbookId }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogProps> = ({
+  onClose,
+  onSubmit,
+  cookbookId,
+}) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -72,7 +77,9 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
               </Button>
             );
           })}
-          {!!recipeData && recipeData.data.length === 0 && <p className="text-sm">No recipes found, try searching for something else.</p>}
+          {!!recipeData && recipeData.data.length === 0 && (
+            <p className="text-sm">No recipes found, try searching for something else.</p>
+          )}
         </LoadingGroup>
       </Stack>
       <ResponsiveFooter>

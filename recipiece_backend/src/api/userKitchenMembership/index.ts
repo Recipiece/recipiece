@@ -2,20 +2,19 @@ import {
   YCreateUserKitchenMembershipRequestSchema,
   YListUserKitchenMembershipsQuerySchema,
   YListUserKitchenMembershipsResponseSchema,
-  YSetUserKitchenMembershipStatusRequestSchema,
-  YSetUserKitchenMembershipStatusResponseSchema,
+  YUpdateUserKitchenMembershipRequestSchema,
   YUserKitchenMembershipSchema,
 } from "@recipiece/types";
-import { Route } from "../../../types";
+import { Route } from "../../types";
 import { createUserKitchenMembership } from "./createUserKitchenMembership";
 import { deleteUserKitchenMembership } from "./deleteUserKitchenMembership";
 import { getUserKitchenMembership } from "./getUserKitchenMembership";
 import { listUserKitchenMemberships } from "./listUserKitchenMemberships";
-import { setUserKitchenMembershipStatus } from "./setUserKitchenMembershipStatus";
+import { updateUserKitchenMembership } from "./updateUserKitchenMembership";
 
 export const USER_KITCHEN_MEMBERSHIP_ROUTES: Route[] = [
   {
-    path: "/user/kitchen/membership",
+    path: "/user-kitchen-membership",
     method: "POST",
     function: createUserKitchenMembership,
     requestSchema: YCreateUserKitchenMembershipRequestSchema,
@@ -23,21 +22,21 @@ export const USER_KITCHEN_MEMBERSHIP_ROUTES: Route[] = [
     authentication: "access_token",
   },
   {
-    path: "/user/kitchen/membership",
+    path: "/user-kitchen-membership",
     method: "PUT",
-    function: setUserKitchenMembershipStatus,
+    function: updateUserKitchenMembership,
     authentication: "access_token",
-    requestSchema: YSetUserKitchenMembershipStatusRequestSchema,
-    responseSchema: YSetUserKitchenMembershipStatusResponseSchema,
+    requestSchema: YUpdateUserKitchenMembershipRequestSchema,
+    responseSchema: YUserKitchenMembershipSchema,
   },
   {
-    path: "/user/kitchen/membership/:id(\\d+)",
+    path: "/user-kitchen-membership/:id(\\d+)",
     method: "DELETE",
     function: deleteUserKitchenMembership,
     authentication: "access_token",
   },
   {
-    path: "/user/kitchen/membership/list",
+    path: "/user-kitchen-membership/list",
     method: "GET",
     function: listUserKitchenMemberships,
     authentication: "access_token",
@@ -45,7 +44,7 @@ export const USER_KITCHEN_MEMBERSHIP_ROUTES: Route[] = [
     responseSchema: YListUserKitchenMembershipsResponseSchema,
   },
   {
-    path: "/user/kitchen/membership/:id(\\d+)",
+    path: "/user-kitchen-membership/:id(\\d+)",
     method: "GET",
     function: getUserKitchenMembership,
     authentication: "access_token",

@@ -12,7 +12,8 @@ export interface ShareDialogProps extends BaseDialogProps<UserKitchenMembershipS
 }
 
 export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, entity_type, onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const [isDisabled, setIsDisabled] = useState(false);
 
   const filters: ListUserKitchenMembershipsQuerySchema = useMemo(() => {
@@ -34,7 +35,8 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
     return base;
   }, [entity_id, entity_type]);
 
-  const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } = useListUserKitchenMembershipsQuery({ ...filters });
+  const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } =
+    useListUserKitchenMembershipsQuery({ ...filters });
 
   const onSelectUser = useCallback(
     async (membership: UserKitchenMembershipSchema) => {
@@ -57,10 +59,18 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
               <div className="flex flex-row gap-2">
                 {userKitchenMemberships!.data.map((membership) => {
                   return (
-                    <Button disabled={isDisabled} onClick={() => onSelectUser(membership)} key={membership.id} variant="ghost" className="h-fit w-fit">
+                    <Button
+                      disabled={isDisabled}
+                      onClick={() => onSelectUser(membership)}
+                      key={membership.id}
+                      variant="ghost"
+                      className="h-fit w-fit"
+                    >
                       <div className="flex flex-col items-center justify-center gap-1">
                         <Avatar>
-                          <AvatarFallback className="bg-primary text-white">{membership.destination_user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                          <AvatarFallback className="bg-primary text-white">
+                            {membership.destination_user.username.charAt(0).toUpperCase()}
+                          </AvatarFallback>
                         </Avatar>
                         <p className="text-sm">{membership.destination_user.username}</p>
                       </div>

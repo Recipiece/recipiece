@@ -1,4 +1,4 @@
-import { User, prisma } from "@recipiece/database";
+import { prisma, User } from "@recipiece/database";
 import { generateCookbook, generateUserKitchenMembership } from "@recipiece/test";
 import { CookbookShareSchema, CreateCookbookShareRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";

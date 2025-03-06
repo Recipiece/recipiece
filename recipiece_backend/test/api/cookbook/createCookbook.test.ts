@@ -17,7 +17,11 @@ describe("Create Cookbooks", () => {
       description: "The best recipes ever",
     };
 
-    const response = await request(server).post("/cookbook").send(expectedBody).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .post("/cookbook")
+      .send(expectedBody)
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const responseBody = response.body as CookbookSchema;

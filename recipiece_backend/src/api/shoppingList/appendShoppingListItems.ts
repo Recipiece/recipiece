@@ -1,10 +1,10 @@
+import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
 import { AppendShoppingListItemsRequestSchema, AppendShoppingListItemsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { broadcastMessageViaEntityId } from "../../middleware";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { collapseOrders, getShoppingListByIdQuery } from "./query";
-import { Constant } from "@recipiece/constant";
 
 export const appendShoppingListItems = async (
   request: AuthenticatedRequest<AppendShoppingListItemsRequestSchema>,

@@ -10,14 +10,16 @@ export const TargetingUserTable: FC = () => {
   const { toast } = useToast();
   const [kitchenMembershipsPage, setKitchenMembershipsPage] = useState(0);
 
-  const { data: kitchenMembershipsTargetingUser, isLoading: isLoadingKitchenMembershipsTargetingUser } = useListUserKitchenMembershipsQuery({
-    targeting_self: true,
-    page_number: kitchenMembershipsPage,
-    page_size: 10,
-    status: ["pending"],
-  });
+  const { data: kitchenMembershipsTargetingUser, isLoading: isLoadingKitchenMembershipsTargetingUser } =
+    useListUserKitchenMembershipsQuery({
+      targeting_self: true,
+      page_number: kitchenMembershipsPage,
+      page_size: 10,
+      status: ["pending"],
+    });
 
-  const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } = useUpdatePendingUserKitchenMembershipMutation();
+  const { mutateAsync: updateKitchenMembership, isPending: isUpdatingKitchenMembership } =
+    useUpdatePendingUserKitchenMembershipMutation();
 
   const isLoadingTargetingUser = isLoadingKitchenMembershipsTargetingUser;
   const hasAnyTargetingRequests = !!kitchenMembershipsTargetingUser?.data?.length;
@@ -75,13 +77,20 @@ export const TargetingUserTable: FC = () => {
           <div className="mb-2 mt-2 flex flex-col gap-2">
             {kitchenMembershipsTargetingUser.data.map((membership) => {
               return (
-                <div key={membership.id} className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2">
+                <div
+                  key={membership.id}
+                  className="flex flex-row items-center gap-2 border-b-[1px] border-b-primary pb-2"
+                >
                   <Avatar className="h-12 w-12">
-                    <AvatarFallback className="bg-primary text-lg text-white">{membership.source_user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback className="bg-primary text-lg text-white">
+                      {membership.source_user.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
                     <span>{membership.source_user.username}</span>
-                    <span className="text-xs">{DateTime.fromJSDate(membership.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                    <span className="text-xs">
+                      {DateTime.fromJSDate(membership.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}
+                    </span>
                   </div>
                   <span className="ml-auto" />
                   <Button disabled={isUpdatingKitchenMembership} variant="ghost" onClick={() => onDeny(membership)}>
@@ -96,7 +105,13 @@ export const TargetingUserTable: FC = () => {
           </div>
         )}
         {!hasAnyTargetingRequests && <p className="pb-4 pt-4 text-center text-sm">You have no pending requests.</p>}
-        {hasAnyTargetingRequests && <Pager page={kitchenMembershipsPage} onPage={setKitchenMembershipsPage} hasNextPage={!!kitchenMembershipsTargetingUser?.has_next_page} />}
+        {hasAnyTargetingRequests && (
+          <Pager
+            page={kitchenMembershipsPage}
+            onPage={setKitchenMembershipsPage}
+            hasNextPage={!!kitchenMembershipsTargetingUser?.has_next_page}
+          />
+        )}
         <PastTargetingMembershipsTable />
       </LoadingGroup>
     </div>

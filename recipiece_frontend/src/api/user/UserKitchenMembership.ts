@@ -9,12 +9,18 @@ import {
   YUserKitchenMembershipSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater, RcpQueryKey } from "../QueryKeys";
+import { MealPlanQueryKeys } from "../mealPlan";
+import {
+  generatePartialMatchPredicate,
+  oldDataCreator,
+  oldDataDeleter,
+  oldDataUpdater,
+  RcpQueryKey,
+} from "../QueryKeys";
 import { RecipeQueryKeys } from "../recipe";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { ShoppingListQueryKeys } from "../shoppingList";
 import { UserQueryKeys } from "./UserQueryKeys";
-import { MealPlanQueryKeys } from "../mealPlan";
 
 interface ShareableEntityData {
   readonly user_id: number;
@@ -80,7 +86,10 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShareEntitiesList = <OldDataType extends ShareEntityListData>(membership: UserKitchenMembershipSchema, queryKey: RcpQueryKey) => {
+  const purgeShareEntitiesList = <OldDataType extends ShareEntityListData>(
+    membership: UserKitchenMembershipSchema,
+    queryKey: RcpQueryKey
+  ) => {
     queryClient.setQueriesData(
       {
         queryKey: queryKey,
@@ -124,7 +133,10 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShareEntity = <OldDataType extends ShareEntityData>(membership: UserKitchenMembershipSchema, queryKey: RcpQueryKey) => {
+  const purgeShareEntity = <OldDataType extends ShareEntityData>(
+    membership: UserKitchenMembershipSchema,
+    queryKey: RcpQueryKey
+  ) => {
     queryClient.setQueriesData(
       {
         queryKey: queryKey,
@@ -140,21 +152,30 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShoppingLists = (membership: UserKitchenMembershipSchema, enforceMembershipUser?: "source_user" | "destination_user") => {
+  const purgeShoppingLists = (
+    membership: UserKitchenMembershipSchema,
+    enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
     purgeParentEntityList(membership, ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), enforceMembershipUser);
     purgeParentEntity(membership, ShoppingListQueryKeys.GET_SHOPPING_LIST(), enforceMembershipUser);
     purgeShareEntitiesList(membership, ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES());
     purgeShareEntity(membership, ShoppingListQueryKeys.GET_SHOPPING_LIST_SHARE());
   };
 
-  const purgeRecipes = (membership: UserKitchenMembershipSchema, enforceMembershipUser?: "source_user" | "destination_user") => {
+  const purgeRecipes = (
+    membership: UserKitchenMembershipSchema,
+    enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
     purgeParentEntityList(membership, RecipeQueryKeys.LIST_RECIPES(), enforceMembershipUser);
     purgeParentEntity(membership, RecipeQueryKeys.GET_RECIPE(), enforceMembershipUser);
     purgeShareEntitiesList(membership, RecipeQueryKeys.LIST_RECIPE_SHARES());
     purgeShareEntity(membership, RecipeQueryKeys.GET_RECIPE_SHARE());
   };
 
-  const purgeMealPlans = (membership: UserKitchenMembershipSchema, enforceMembershipUser?: "source_user" | "destination_user") => {
+  const purgeMealPlans = (
+    membership: UserKitchenMembershipSchema,
+    enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
     purgeParentEntityList(membership, MealPlanQueryKeys.LIST_MEAL_PLANS(), enforceMembershipUser);
     purgeParentEntity(membership, MealPlanQueryKeys.GET_MEAL_PLAN(), enforceMembershipUser);
     purgeShareEntitiesList(membership, MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES());
@@ -164,13 +185,16 @@ const usePurgeSharedQueries = () => {
   return { purgeRecipes, purgeShoppingLists, purgeMealPlans };
 };
 
-export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipsQuerySchema, args?: QueryArgs<ListUserKitchenMembershipsResponseSchema>) => {
+export const useListUserKitchenMembershipsQuery = (
+  filters?: ListUserKitchenMembershipsQuerySchema,
+  args?: QueryArgs<ListUserKitchenMembershipsResponseSchema>
+) => {
   const { getter } = useGet();
   const queryClient = useQueryClient();
 
   const query = async () => {
     const data = await getter<ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema>({
-      path: "/user/kitchen/membership/list",
+      path: "/user-kitchen-membership/list",
       withAuth: "access_token",
       query: {
         ...(filters ?? { page_number: 0, page_size: 100 }),
@@ -192,14 +216,16 @@ export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMemb
   });
 };
 
-export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, { readonly username: string }>) => {
+export const useCreateKitchenMembershipMutation = (
+  args?: MutationArgs<UserKitchenMembershipSchema, { readonly username: string }>
+) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
   const mutation = async (body: { readonly username: string }) => {
     const response = await poster<typeof body, UserKitchenMembershipSchema>({
       withAuth: "access_token",
-      path: "/user/kitchen/membership",
+      path: "/user-kitchen-membership",
       body: { ...body },
     });
     return YUserKitchenMembershipSchema.cast(response.data);
@@ -229,7 +255,10 @@ export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitch
 };
 
 export const useUpdatePendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembershipSchema, { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }>
+  args?: MutationArgs<
+    UserKitchenMembershipSchema,
+    { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }
+  >
 ) => {
   const queryClient = useQueryClient();
   const { onSuccess, ...restArgs } = args ?? {};
@@ -300,7 +329,10 @@ export const useUpdatePendingUserKitchenMembershipMutation = (
 };
 
 export const useUpdatedNonPendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembershipSchema, { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }>
+  args?: MutationArgs<
+    UserKitchenMembershipSchema,
+    { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -427,14 +459,19 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
   return mutation;
 };
 
-const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }>) => {
+const useUpdateKitchenMembershipMutation = (
+  args?: MutationArgs<
+    UserKitchenMembershipSchema,
+    { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }
+  >
+) => {
   const { putter } = usePut();
 
   const queryClient = useQueryClient();
 
   const mutation = async (body: { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }) => {
     const response = await putter<typeof body, UserKitchenMembershipSchema>({
-      path: "/user/kitchen/membership",
+      path: "/user-kitchen-membership",
       body: {
         ...body,
       },
@@ -460,7 +497,7 @@ export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<Us
 
   const query = async () => {
     const response = await getter<never, UserKitchenMembershipSchema>({
-      path: `/user/kitchen/membership/${id}`,
+      path: `/user-kitchen-membership/${id}`,
       withAuth: "access_token",
     });
     return YUserKitchenMembershipSchema.cast(response.data);
@@ -473,14 +510,17 @@ export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<Us
   });
 };
 
-export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_user" | "destination_user", args?: MutationArgs<unknown, UserKitchenMembershipSchema>) => {
+export const useDeleteUserKitchenMembershipMutation = (
+  deletionContext: "source_user" | "destination_user",
+  args?: MutationArgs<unknown, UserKitchenMembershipSchema>
+) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
   const { purgeRecipes, purgeShoppingLists, purgeMealPlans } = usePurgeSharedQueries();
 
   const mutation = async (membership: UserKitchenMembershipSchema) => {
     return await deleter({
-      path: "/user/kitchen/membership",
+      path: "/user-kitchen-membership",
       id: membership.id,
       withAuth: "access_token",
     });

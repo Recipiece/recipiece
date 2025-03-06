@@ -1,4 +1,5 @@
 import { MealPlanConfigurationSchema } from "@recipiece/types";
+import { ArrowLeft } from "lucide-react";
 import { FC, useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,7 +8,6 @@ import { Button, Form, H2, LoadingGroup, SubmitButton, useToast } from "../../co
 import { GeneralConfigCard } from "./GeneralConfigCard";
 import { MeatConfigCard } from "./MeatConfigCard";
 import { NotificationConfigCard } from "./NotificationConfigCard";
-import { ArrowLeft } from "lucide-react";
 
 export const MealPlanConfigurationPage: FC = () => {
   const navigate = useNavigate();

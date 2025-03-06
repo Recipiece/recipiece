@@ -18,7 +18,8 @@ const ModifyMealPlanFormSchema = z.object({
 export type ModifyMealPlanForm = z.infer<typeof ModifyMealPlanFormSchema>;
 
 export const ModifyMealPlanDialog: FC<ModifyMealPlanDialogProps> = ({ onSubmit, onClose, mealPlan }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
 
   const isEditing = !!mealPlan;
 
@@ -54,11 +55,19 @@ export const ModifyMealPlanDialog: FC<ModifyMealPlanDialogProps> = ({ onSubmit, 
         <form onSubmit={form.handleSubmit(onModifyMealPlan)}>
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>{isEditing ? "Edit" : "Create"} Meal Plan</ResponsiveTitle>
-            <ResponsiveDescription>{isEditing ? "Edit your meal plan" : "Create a new meal plan"}</ResponsiveDescription>
+            <ResponsiveDescription>
+              {isEditing ? "Edit your meal plan" : "Create a new meal plan"}
+            </ResponsiveDescription>
           </ResponsiveHeader>
 
           <Stack>
-            <FormInput required placeholder="What do you want to call your meal plan?" name="name" type="text" label="Name" />
+            <FormInput
+              required
+              placeholder="What do you want to call your meal plan?"
+              name="name"
+              type="text"
+              label="Name"
+            />
           </Stack>
 
           <ResponsiveFooter className="mt-4 flex-col-reverse">

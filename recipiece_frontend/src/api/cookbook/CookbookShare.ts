@@ -1,11 +1,11 @@
 import {
+  CookbookSchema,
+  CookbookShareSchema,
   ListCookbookSharesQuerySchema,
   ListCookbookSharesResponseSchema,
   ListCookbooksResponseSchema,
-  CookbookSchema,
-  CookbookShareSchema,
-  YListCookbookSharesResponseSchema,
   YCookbookShareSchema,
+  YListCookbookSharesResponseSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter } from "../QueryKeys";
@@ -13,7 +13,12 @@ import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, useP
 import { UserQueryKeys } from "../user";
 import { CookbookQueryKeys } from "./CookbookQueryKeys";
 
-export const useCreateCookbookShareMutation = (args?: MutationArgs<CookbookShareSchema, { readonly cookbook_id: number; readonly user_kitchen_membership_id: number }>) => {
+export const useCreateCookbookShareMutation = (
+  args?: MutationArgs<
+    CookbookShareSchema,
+    { readonly cookbook_id: number; readonly user_kitchen_membership_id: number }
+  >
+) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
@@ -79,15 +84,18 @@ export const useCreateCookbookShareMutation = (args?: MutationArgs<CookbookShare
           return undefined;
         }
       );
-      queryClient.setQueryData(CookbookQueryKeys.GET_COOKBOOK(params.cookbook_id), (oldData: CookbookSchema | undefined) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            shares: [...(oldData.shares ?? []), data],
-          };
+      queryClient.setQueryData(
+        CookbookQueryKeys.GET_COOKBOOK(params.cookbook_id),
+        (oldData: CookbookSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              shares: [...(oldData.shares ?? []), data],
+            };
+          }
+          return undefined;
         }
-        return undefined;
-      });
+      );
 
       onSuccess?.(data, params, ctx);
     },
@@ -157,15 +165,18 @@ export const useDeleteCookbookShareMutation = (args?: MutationArgs<unknown, Cook
           return undefined;
         }
       );
-      queryClient.setQueryData(CookbookQueryKeys.GET_COOKBOOK(params.cookbook_id), (oldData: CookbookSchema | undefined) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
-          };
+      queryClient.setQueryData(
+        CookbookQueryKeys.GET_COOKBOOK(params.cookbook_id),
+        (oldData: CookbookSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
+            };
+          }
+          return undefined;
         }
-        return undefined;
-      });
+      );
 
       onSuccess?.(data, params, ctx);
     },
@@ -173,7 +184,10 @@ export const useDeleteCookbookShareMutation = (args?: MutationArgs<unknown, Cook
   });
 };
 
-export const useListCookbookSharesQuery = (filters: ListCookbookSharesQuerySchema, args?: QueryArgs<ListCookbookSharesResponseSchema>) => {
+export const useListCookbookSharesQuery = (
+  filters: ListCookbookSharesQuerySchema,
+  args?: QueryArgs<ListCookbookSharesResponseSchema>
+) => {
   const { getter } = useGet();
 
   const searchParams = filtersToSearchParams(filters);

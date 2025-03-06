@@ -36,7 +36,10 @@ export const SharedAvatar: FC<SharedAvatarProps> = ({ userKitchenMembershipId, d
     <Tooltip data-testid={DataTestId.SharedAvatar.TOOLTIP_CONTAINER(dataTestId)}>
       {isMembershipTargetingSource && (
         <TooltipTrigger asChild>
-          <div data-testid={DataTestId.SharedAvatar.TOOLTIP_TRIGGER} className={cn(W_H_SIZES[size], "flex items-center justify-center rounded-full bg-primary text-white")}>
+          <div
+            data-testid={DataTestId.SharedAvatar.TOOLTIP_TRIGGER}
+            className={cn(W_H_SIZES[size], "flex items-center justify-center rounded-full bg-primary text-white")}
+          >
             <Waypoints size={ICON_SIZES[size]} />
           </div>
         </TooltipTrigger>
@@ -45,7 +48,9 @@ export const SharedAvatar: FC<SharedAvatarProps> = ({ userKitchenMembershipId, d
         <TooltipTrigger asChild>
           <div data-testid={DataTestId.SharedAvatar.TOOLTIP_TRIGGER} className={W_H_SIZES[size]}>
             <Avatar className={W_H_SIZES[size]}>
-              <AvatarFallback className={cn(W_H_SIZES[size], "cursor-pointer bg-primary text-white")}>{membership.source_user.username.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className={cn(W_H_SIZES[size], "cursor-pointer bg-primary text-white")}>
+                {membership.source_user.username.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
           </div>
         </TooltipTrigger>

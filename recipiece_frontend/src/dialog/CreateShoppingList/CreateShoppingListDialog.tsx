@@ -14,7 +14,8 @@ const CreateShoppingListFormSchema = z.object({
 export type CreateShoppingListForm = z.infer<typeof CreateShoppingListFormSchema>;
 
 export const CreateShoppingListDialog: FC<BaseDialogProps<CreateShoppingListForm>> = ({ onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const { popDialog } = useContext(DialogContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,11 +47,22 @@ export const CreateShoppingListDialog: FC<BaseDialogProps<CreateShoppingListForm
           </ResponsiveHeader>
 
           <Stack>
-            <FormInput disabled={isSubmitting} placeholder="What do you want to call your shopping list?" name="name" type="text" label="Name" />
+            <FormInput
+              disabled={isSubmitting}
+              placeholder="What do you want to call your shopping list?"
+              name="name"
+              type="text"
+              label="Name"
+            />
           </Stack>
 
           <ResponsiveFooter className="mt-4 flex-col-reverse">
-            <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => popDialog("createShoppingList")}>
+            <Button
+              disabled={isSubmitting}
+              type="button"
+              variant="outline"
+              onClick={() => popDialog("createShoppingList")}
+            >
               Cancel
             </Button>
             <SubmitButton disabled={isSubmitting}>Create Shopping List</SubmitButton>

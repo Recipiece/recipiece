@@ -1,6 +1,6 @@
 import { PrismaTransaction } from "@recipiece/database";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { StatusCodes } from "http-status-codes";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 export const deleteNotification = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const user = request.user;

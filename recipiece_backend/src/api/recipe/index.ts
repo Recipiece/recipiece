@@ -1,8 +1,8 @@
 import {
   YCreateRecipeRequestSchema,
   YForkRecipeRequestSchema,
-  YListCookbooksResponseSchema,
   YListRecipesQuerySchema,
+  YListRecipesResponseSchema,
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
   YUpdateRecipeRequestSchema,
@@ -48,7 +48,7 @@ export const RECIPE_ROUTES: Route[] = [
     method: "GET",
     function: listRecipes,
     requestSchema: YListRecipesQuerySchema,
-    responseSchema: YListCookbooksResponseSchema,
+    responseSchema: YListRecipesResponseSchema,
   },
   {
     path: "/recipe/:id(\\d+)",

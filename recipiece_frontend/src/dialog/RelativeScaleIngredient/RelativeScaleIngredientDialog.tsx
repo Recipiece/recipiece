@@ -38,8 +38,13 @@ const RelativeScaleIngredientFormSchema = z.object({
 
 export type RelativeScaleIngredientForm = z.infer<typeof RelativeScaleIngredientFormSchema>;
 
-export const RelativeScaleIngredientDialog: FC<RelativeScaleIngredientDialogProps> = ({ onClose, onSubmit, ingredient }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+export const RelativeScaleIngredientDialog: FC<RelativeScaleIngredientDialogProps> = ({
+  onClose,
+  onSubmit,
+  ingredient,
+}) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
 
   const form = useForm<RelativeScaleIngredientForm>({
     resolver: zodResolver(RelativeScaleIngredientFormSchema),
@@ -69,8 +74,9 @@ export const RelativeScaleIngredientDialog: FC<RelativeScaleIngredientDialogProp
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>Scale Recipe Relative to Ingredient</ResponsiveTitle>
             <ResponsiveDescription>
-              This recipe calls for {formatIngredientAmount(ingredient.amount)} {ingredient.unit ?? ""} of {ingredient.name}. If you only have a certain amount of {ingredient.name}{" "}
-              on hand, you can scale the rest of the recipe relative to that amount.
+              This recipe calls for {formatIngredientAmount(ingredient.amount)} {ingredient.unit ?? ""} of{" "}
+              {ingredient.name}. If you only have a certain amount of {ingredient.name} on hand, you can scale the rest
+              of the recipe relative to that amount.
               <br />
               <br />
               This may affect cooking/baking time and serving sizes!
@@ -78,7 +84,13 @@ export const RelativeScaleIngredientDialog: FC<RelativeScaleIngredientDialogProp
           </ResponsiveHeader>
 
           <div className="flex flex-row items-end gap-2">
-            <FormInput placeholder="How much do you currently have?" name="amount" label="New Amount" required className="flex-grow" />
+            <FormInput
+              placeholder="How much do you currently have?"
+              name="amount"
+              label="New Amount"
+              required
+              className="flex-grow"
+            />
             <span>{ingredient.unit ?? ""}</span>
           </div>
 

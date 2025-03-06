@@ -5,7 +5,10 @@ import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ConflictError } from "../../util/error";
 import { getCookbookByIdQuery } from "./query";
 
-export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
+export const addRecipeToCookbook = async (
+  req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<{}> => {
   const attachBody = req.body;
   const user = req.user;
 

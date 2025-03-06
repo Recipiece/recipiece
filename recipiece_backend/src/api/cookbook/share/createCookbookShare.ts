@@ -1,11 +1,14 @@
 import { PrismaTransaction } from "@recipiece/database";
-import { CreateCookbookShareRequestSchema, CookbookShareSchema } from "@recipiece/types";
+import { CookbookShareSchema, CreateCookbookShareRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { sendCookbookSharedPushNotification } from "../../../util/pushNotification";
 import { ConflictError } from "../../../util/error";
+import { sendCookbookSharedPushNotification } from "../../../util/pushNotification";
 
-export const createCookbookShare = async (request: AuthenticatedRequest<CreateCookbookShareRequestSchema>, tx: PrismaTransaction): ApiResponse<CookbookShareSchema> => {
+export const createCookbookShare = async (
+  request: AuthenticatedRequest<CreateCookbookShareRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<CookbookShareSchema> => {
   const { cookbook_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 

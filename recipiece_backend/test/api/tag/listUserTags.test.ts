@@ -25,7 +25,7 @@ describe("List User Tags", () => {
     }
 
     const response = await request(server)
-      .get("/user/tag/list")
+      .get("/user-tag/list")
       .set("Authorization", `Bearer ${bearerToken}`)
       .query(<ListUserTagsQuerySchema>{
         page_number: 0,
@@ -51,7 +51,7 @@ describe("List User Tags", () => {
     }
 
     const response = await request(server)
-      .get("/user/tag/list")
+      .get("/user-tag/list")
       .set("Authorization", `Bearer ${bearerToken}`)
       .query(<ListUserTagsQuerySchema>{
         page_number: 0,
@@ -69,7 +69,7 @@ describe("List User Tags", () => {
     }
 
     const response = await request(server)
-      .get("/user/tag/list")
+      .get("/user-tag/list")
       .set("Authorization", `Bearer ${bearerToken}`)
       .query(<ListUserTagsQuerySchema>{
         page_number: 0,

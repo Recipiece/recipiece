@@ -4,7 +4,10 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { getMealPlanByIdQuery } from "./query";
 
-export const getMealPlan = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<MealPlanSchema> => {
+export const getMealPlan = async (
+  request: AuthenticatedRequest,
+  tx: PrismaTransaction
+): ApiResponse<MealPlanSchema> => {
   const user = request.user;
   const mealPlanId = +request.params.id;
 

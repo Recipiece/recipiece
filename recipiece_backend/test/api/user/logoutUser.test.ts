@@ -1,4 +1,4 @@
-import { User, prisma } from "@recipiece/database";
+import { prisma, User } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { TokenPayload } from "../../../src/types";
@@ -14,7 +14,10 @@ describe("Logout User", () => {
   });
 
   it("should remove the user session", async () => {
-    const response = await request(server).post(`/user/logout`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .post(`/user/logout`)
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 

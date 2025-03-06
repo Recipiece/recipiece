@@ -6,7 +6,11 @@ export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlan
       eb
         .selectFrom("meal_plan_shares")
         .select("meal_plan_shares.id")
-        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "meal_plan_shares.user_kitchen_membership_id")
+        .innerJoin(
+          "user_kitchen_memberships",
+          "user_kitchen_memberships.id",
+          "meal_plan_shares.user_kitchen_membership_id"
+        )
         .where((_eb) => {
           return _eb.and([
             _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
@@ -94,7 +98,10 @@ export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlan
   return query;
 };
 
-export const mealPlanSharesWithMemberships = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "meal_plans">, userId: number) => {
+export const mealPlanSharesWithMemberships = (
+  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "meal_plans">,
+  userId: number
+) => {
   return eb
     .selectFrom("meal_plan_shares")
     .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "meal_plan_shares.user_kitchen_membership_id")
@@ -102,12 +109,18 @@ export const mealPlanSharesWithMemberships = (eb: KyselyCore.ExpressionBuilder<K
     .where((eb) => {
       return eb.and([
         eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-        eb.or([eb("user_kitchen_memberships.destination_user_id", "=", userId), eb("user_kitchen_memberships.source_user_id", "=", userId)]),
+        eb.or([
+          eb("user_kitchen_memberships.destination_user_id", "=", userId),
+          eb("user_kitchen_memberships.source_user_id", "=", userId),
+        ]),
       ]);
     });
 };
 
-export const mealPlanSharesSubquery = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "meal_plans">, userId: number) => {
+export const mealPlanSharesSubquery = (
+  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "meal_plans">,
+  userId: number
+) => {
   return mealPlanSharesWithMemberships(eb, userId).select(
     KyselyCore.sql<KyselyGenerated.MealPlanShare[]>`
       coalesce(

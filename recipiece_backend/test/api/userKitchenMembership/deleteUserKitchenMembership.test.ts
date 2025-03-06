@@ -1,8 +1,8 @@
-import { User, prisma } from "@recipiece/database";
+import { prisma, User } from "@recipiece/database";
 import { generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { UserKitchenInvitationStatus } from "../../../../src/util/constant";
+import { UserKitchenInvitationStatus } from "../../../src/util/constant";
 
 describe("Delete User Kitchen Membership", () => {
   let user: User;
@@ -22,7 +22,10 @@ describe("Delete User Kitchen Membership", () => {
       status: UserKitchenInvitationStatus.PENDING,
     });
 
-    const response = await request(server).delete(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
+    const response = await request(server)
+      .delete(`/user-kitchen-membership/${membership.id}`)
+      .set("Authorization", `Bearer ${otherBearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -42,7 +45,10 @@ describe("Delete User Kitchen Membership", () => {
       status: UserKitchenInvitationStatus.PENDING,
     });
 
-    const response = await request(server).delete(`/user/kitchen/membership/${membership.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
+    const response = await request(server)
+      .delete(`/user-kitchen-membership/${membership.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 

@@ -75,9 +75,24 @@ export const CreateAccountPage: FC = () => {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Stack>
             <FormInput data-testid={DataTestId.RegisterPage.INPUT_EMAIL} type="text" name="email" label="Email" />
-            <FormInput data-testid={DataTestId.RegisterPage.INPUT_USERNAME} type="text" name="username" label="Username" />
-            <FormInput data-testid={DataTestId.RegisterPage.INPUT_PASSWORD} type="password" name="password" label="Password" />
-            <FormInput data-testid={DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD} type="password" name="confirmPassword" label="Confirm Password" />
+            <FormInput
+              data-testid={DataTestId.RegisterPage.INPUT_USERNAME}
+              type="text"
+              name="username"
+              label="Username"
+            />
+            <FormInput
+              data-testid={DataTestId.RegisterPage.INPUT_PASSWORD}
+              type="password"
+              name="password"
+              label="Password"
+            />
+            <FormInput
+              data-testid={DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD}
+              type="password"
+              name="confirmPassword"
+              label="Confirm Password"
+            />
             <SubmitButton data-testid={DataTestId.RegisterPage.BUTTON_CREATE_ACCOUNT}>Create Account</SubmitButton>
             <Button
               data-testid={DataTestId.RegisterPage.BUTTON_LOGIN}

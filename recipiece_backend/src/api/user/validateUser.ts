@@ -1,11 +1,14 @@
-import { StatusCodes } from "http-status-codes";
-import { DateTime } from "luxon";
+import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
 import { ValidateUserRequestSchema, ValidateUserResponseSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
+import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { Constant } from "@recipiece/constant";
 
-export const validateUser = async (request: AuthenticatedRequest<ValidateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<ValidateUserResponseSchema> => {
+export const validateUser = async (
+  request: AuthenticatedRequest<ValidateUserRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<ValidateUserResponseSchema> => {
   const { token } = request.body;
 
   const accountToken = await tx.userValidationToken.findUnique({

@@ -31,7 +31,11 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeS
   });
 };
 
-export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponseSchema>) => {
+export const useListRecipesToAddToCookbook = (
+  search: string,
+  cookbook_id: number,
+  args?: QueryArgs<ListRecipesResponseSchema>
+) => {
   let filters: Partial<ListRecipesQuerySchema> = {
     cookbook_id: cookbook_id,
     cookbook_attachments_filter: "exclude",
@@ -61,7 +65,10 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   });
 };
 
-export const useListRecipesForMealPlanQuery = (filters: ListRecipesQuerySchema, args?: QueryArgs<ListRecipesResponseSchema>) => {
+export const useListRecipesForMealPlanQuery = (
+  filters: ListRecipesQuerySchema,
+  args?: QueryArgs<ListRecipesResponseSchema>
+) => {
   const { getter } = useGet();
 
   const searchParams = new URLSearchParams();

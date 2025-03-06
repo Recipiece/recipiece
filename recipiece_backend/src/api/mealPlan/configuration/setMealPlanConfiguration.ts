@@ -1,5 +1,9 @@
 import { KyselyCore, PrismaTransaction } from "@recipiece/database";
-import { MealPlanConfigurationJobDataSchema, MealPlanConfigurationSchema, YMealPlanConfigurationSchema } from "@recipiece/types";
+import {
+  MealPlanConfigurationJobDataSchema,
+  MealPlanConfigurationSchema,
+  YMealPlanConfigurationSchema,
+} from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanConfigurationQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
@@ -11,7 +15,10 @@ import { getMealPlanByIdQuery } from "../query";
  * This will also set a task in the meal plan configurations queue that will scan any and all future meal plan
  * items in the meal plan and take the appropriate actions based on the configuration.
  */
-export const setMealPlanConfiguration = async (request: AuthenticatedRequest<MealPlanConfigurationSchema>, tx: PrismaTransaction): ApiResponse<MealPlanConfigurationSchema> => {
+export const setMealPlanConfiguration = async (
+  request: AuthenticatedRequest<MealPlanConfigurationSchema>,
+  tx: PrismaTransaction
+): ApiResponse<MealPlanConfigurationSchema> => {
   const user = request.user;
   const mealPlanId = +request.params.id!;
   const configuration = request.body;

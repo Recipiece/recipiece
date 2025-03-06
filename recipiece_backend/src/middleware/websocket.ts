@@ -1,6 +1,6 @@
+import { Redis } from "@recipiece/database";
 import { ExtendedWebSocket } from "websocket-express";
 import { WebsocketTokenPayload } from "../types";
-import { Redis } from "@recipiece/database";
 
 const OPEN_CONNECTIONS_MAP = new Map<string, ExtendedWebSocket>();
 

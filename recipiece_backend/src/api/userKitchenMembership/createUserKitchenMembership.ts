@@ -1,8 +1,11 @@
-import { StatusCodes } from "http-status-codes";
 import { PrismaTransaction } from "@recipiece/database";
-import { CreateUserKitchenMembershipRequestSchema, UserKitchenMembershipSchema } from "@recipiece/types";
-import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { UserKitchenInvitationStatus } from "../../../util/constant";
+import {
+  CreateUserKitchenMembershipRequestSchema,
+  UserKitchenInvitationStatus,
+  UserKitchenMembershipSchema,
+} from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
 /**
  * Allows a user to invite another user to their kitchen, which opens up the gates for
@@ -77,7 +80,10 @@ export const createUserKitchenMembership = async (
     StatusCodes.OK,
     {
       ...membership,
-      status: membership.status as typeof UserKitchenInvitationStatus.PENDING | typeof UserKitchenInvitationStatus.ACCEPTED | typeof UserKitchenInvitationStatus.DENIED,
+      status: membership.status as
+        | typeof UserKitchenInvitationStatus.PENDING
+        | typeof UserKitchenInvitationStatus.ACCEPTED
+        | typeof UserKitchenInvitationStatus.DENIED,
     },
   ];
 };

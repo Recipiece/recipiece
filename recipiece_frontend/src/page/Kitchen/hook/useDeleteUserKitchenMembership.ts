@@ -1,15 +1,16 @@
+import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { useCallback, useContext } from "react";
 import { useDeleteUserKitchenMembershipMutation, useGetSelfQuery } from "../../../api";
-import { DialogContext } from "../../../context";
 import { useToast } from "../../../component";
-import { UserKitchenMembershipSchema } from "@recipiece/types";
+import { DialogContext } from "../../../context";
 
 export const useDeleteUserKitchenMembershipDialog = (deletionContext: "source_user" | "destination_user") => {
   const { toast } = useToast();
   const { pushDialog, popDialog } = useContext(DialogContext);
 
   const { data: user } = useGetSelfQuery();
-  const { mutateAsync: deleteMembershipMutation, isPending: isDeletingUserKitchenMembership } = useDeleteUserKitchenMembershipMutation(deletionContext);
+  const { mutateAsync: deleteMembershipMutation, isPending: isDeletingUserKitchenMembership } =
+    useDeleteUserKitchenMembershipMutation(deletionContext);
 
   const deleteUserKitchenMembership = useCallback(
     async (userKitchenMembership: UserKitchenMembershipSchema) => {

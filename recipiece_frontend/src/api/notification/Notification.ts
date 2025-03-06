@@ -7,9 +7,9 @@ import {
   YNotificationSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { generatePartialMatchPredicate, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePut } from "../Request";
 import { NotificationQueryKeys } from "./NotificationQueryKeys";
-import { generatePartialMatchPredicate, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 
 export const useGetNotificationQuery = (notificationId: number, args?: QueryArgs<NotificationSchema>) => {
   const { getter } = useGet();
@@ -29,7 +29,10 @@ export const useGetNotificationQuery = (notificationId: number, args?: QueryArgs
   });
 };
 
-export const useListNotificationsQuery = (filters?: Partial<ListNotificationsQuerySchema>, args?: QueryArgs<ListNotificationsResponseSchema>) => {
+export const useListNotificationsQuery = (
+  filters?: Partial<ListNotificationsQuerySchema>,
+  args?: QueryArgs<ListNotificationsResponseSchema>
+) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -56,7 +59,9 @@ export const useListNotificationsQuery = (filters?: Partial<ListNotificationsQue
   });
 };
 
-export const useSetNotificationStatusMutation = (args?: MutationArgs<NotificationSchema, SetNotificationStatusRequestSchema>) => {
+export const useSetNotificationStatusMutation = (
+  args?: MutationArgs<NotificationSchema, SetNotificationStatusRequestSchema>
+) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 

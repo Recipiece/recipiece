@@ -1,7 +1,7 @@
 import { createContext, FC, PropsWithChildren, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { authenticatedPaths, unauthenticatedPaths } from "../routes";
 import { TokenManager } from "../api";
+import { authenticatedPaths, unauthenticatedPaths } from "../routes";
 
 export const AuthContext = createContext<{}>({});
 

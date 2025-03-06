@@ -58,9 +58,15 @@ export const MealPlanSharesTable: FC<{ readonly membership: UserKitchenMembershi
                   <div className="flex flex-row gap-2 border-b-[1px] border-b-primary pb-2" key={share.id}>
                     <div className="flex flex-col">
                       <span>{share.meal_plan.name}</span>
-                      <span className="text-xs">{DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                      <span className="text-xs">
+                        {DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}
+                      </span>
                     </div>
-                    <Button size="sm" variant="link" onClick={() => navigate(`/meal-plan/view/${share.meal_plan_id}`, {})}>
+                    <Button
+                      size="sm"
+                      variant="link"
+                      onClick={() => navigate(`/meal-plan/view/${share.meal_plan_id}`, {})}
+                    >
                       <ExternalLink />
                     </Button>
                     <span className="ml-auto" />
@@ -71,7 +77,11 @@ export const MealPlanSharesTable: FC<{ readonly membership: UserKitchenMembershi
                 );
               })}
             </div>
-            <Pager page={mealPlanSharesPage} onPage={setMealPlanSharesPage} hasNextPage={!!mealPlanShares?.has_next_page} />
+            <Pager
+              page={mealPlanSharesPage}
+              onPage={setMealPlanSharesPage}
+              hasNextPage={!!mealPlanShares?.has_next_page}
+            />
           </>
         )}
         {hasNoShares && <p className="text-center text-sm">You haven&apos;t shared any meal plans with this user.</p>}

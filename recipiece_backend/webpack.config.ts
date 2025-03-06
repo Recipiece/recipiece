@@ -1,8 +1,8 @@
 import path from "path";
-import nodeExternals from "webpack-node-externals";
-import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import { Configuration } from "webpack";
+import nodeExternals from "webpack-node-externals";
 
 const isProduction = process.env.NODE_ENV === "production";
 const arch = process.env.TARGET_ARCH ?? "osx";

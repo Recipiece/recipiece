@@ -13,7 +13,10 @@ import { MutationArgs, QueryArgs, useDelete, useGet, usePost } from "../Request"
 import { UserQueryKeys } from "../user";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
 
-export const useListRecipeSharesQuery = (filters: ListRecipeSharesQuerySchema, args?: QueryArgs<ListRecipeSharesResponseSchema>) => {
+export const useListRecipeSharesQuery = (
+  filters: ListRecipeSharesQuerySchema,
+  args?: QueryArgs<ListRecipeSharesResponseSchema>
+) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -51,7 +54,9 @@ export const useListRecipeSharesQuery = (filters: ListRecipeSharesQuerySchema, a
   });
 };
 
-export const useCreateRecipeShareMutation = (args?: MutationArgs<RecipeShareSchema, { readonly user_kitchen_membership_id: number; readonly recipe_id: number }>) => {
+export const useCreateRecipeShareMutation = (
+  args?: MutationArgs<RecipeShareSchema, { readonly user_kitchen_membership_id: number; readonly recipe_id: number }>
+) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 

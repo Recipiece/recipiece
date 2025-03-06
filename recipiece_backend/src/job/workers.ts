@@ -1,6 +1,11 @@
-import { Job, Worker } from "bullmq";
-import { importRecipes, processMealPlanConfigurationUpdate, processMealPlanItem, processMealPlanNotification } from "./processors";
 import { prisma } from "@recipiece/database";
+import { Job, Worker } from "bullmq";
+import {
+  importRecipes,
+  processMealPlanConfigurationUpdate,
+  processMealPlanItem,
+  processMealPlanNotification,
+} from "./processors";
 
 const attachLogging = (worker: Worker) => {
   worker.on("failed", (job?: Job, err?: Error) => {
@@ -72,6 +77,8 @@ const mealPlanItemsWorker = new Worker("MealPlanItems", jobWrapper(processMealPl
 attachLogging(mealPlanItemsWorker);
 
 export const closeWorkers = async () => {
-  const closePromises = [configsWorker, mealPlanItemsWorker, mealPlanNotificationsWorker, recipeImportWorker].map((worker) => worker.close());
+  const closePromises = [configsWorker, mealPlanItemsWorker, mealPlanNotificationsWorker, recipeImportWorker].map(
+    (worker) => worker.close()
+  );
   return Promise.all(closePromises);
 };

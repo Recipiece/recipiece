@@ -3,7 +3,10 @@ import { ComponentProps, FC } from "react";
 import { MenubarItem } from "../../shadcn";
 import { SharedAvatar } from "../SharedAvatar";
 
-export const CookbookMenuItem: FC<{ readonly cookbook: CookbookSchema } & ComponentProps<typeof MenubarItem>> = ({ cookbook, ...restProps }) => {
+export const CookbookMenuItem: FC<{ readonly cookbook: CookbookSchema } & ComponentProps<typeof MenubarItem>> = ({
+  cookbook,
+  ...restProps
+}) => {
   const membershipId = cookbook.shares?.[0]?.user_kitchen_membership_id;
 
   return (

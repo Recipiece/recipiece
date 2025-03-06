@@ -1,6 +1,6 @@
-import { Constant } from "@recipiece/constant";
-import { User, prisma } from "@recipiece/database";
 import { randomUUID } from "crypto";
+import { Constant } from "@recipiece/constant";
+import { prisma, User } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { verifyPassword } from "../../../src/util/password";

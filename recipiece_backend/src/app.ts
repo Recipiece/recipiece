@@ -1,4 +1,5 @@
-import { YEmptySchema } from "@recipiece/types";
+import { prisma } from "@recipiece/database";
+import { YEmptySchema, YErrorSchema } from "@recipiece/types";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
@@ -16,13 +17,11 @@ import {
   storeWebsocket,
   validateRequestBodySchema,
   validateRequestQuerySchema,
-  validateResponseSchema,
   wsTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
-import { Logger } from "./util/logger";
-import { prisma } from "@recipiece/database";
 import { ApiError } from "./util/error";
+import { Logger } from "./util/logger";
 
 const app = new WebSocketExpress();
 const logger = Logger.getLogger({
@@ -94,7 +93,16 @@ ROUTES.forEach((route) => {
         // @ts-expect-error AuthenticatedRequest is hard to type match against
         return await route.function(req, tx);
       });
-      res.status(statusCode).send(responseBody);
+      let sanitizedBody;
+
+      if (statusCode <= 299) {
+        const responseSchema = route.responseSchema ?? YEmptySchema;
+        sanitizedBody = responseSchema.cast(responseBody, { stripUnknown: true });
+      } else {
+        sanitizedBody = YErrorSchema.cast(responseBody, { stripUnknown: true });
+      }
+
+      res.status(statusCode).send(sanitizedBody);
     } catch (err) {
       console.error(err);
       if (err instanceof ApiError) {
@@ -113,12 +121,6 @@ ROUTES.forEach((route) => {
     logger.log(`  installing extra post-middleware for ${route.path}`);
     routeHandlers.push(...route.postMiddleware);
   }
-
-  /**
-   * setup the response schema validation.
-   */
-  const responseSchema = route.responseSchema ?? YEmptySchema;
-  routeHandlers.push(validateResponseSchema(responseSchema));
 
   switch (route.method) {
     case "POST":

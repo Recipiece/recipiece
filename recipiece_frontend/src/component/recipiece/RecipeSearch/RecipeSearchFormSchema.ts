@@ -1,3 +1,4 @@
+import { Constant } from "@recipiece/constant";
 import { z } from "zod";
 
 export const RecipeSearchFormSchema = z.object({
@@ -6,7 +7,9 @@ export const RecipeSearchFormSchema = z.object({
   currentTagTerm: z.string(),
   tags: z.array(z.object({ content: z.string() })),
   search: z.string(),
-  shared_recipes_filter: z.boolean(),
+  currentMembershipTerm: z.string(),
+  userKitchenMembershipIds: z.array(z.string()),
+  showAllRecipes: z.boolean(),
 });
 
 export type RecipeSearchForm = z.infer<typeof RecipeSearchFormSchema>;
@@ -15,7 +18,9 @@ export const DefaultRecipeSearchFormValues: RecipeSearchForm = {
   currentIngredientTerm: "",
   ingredients: [],
   currentTagTerm: "",
+  currentMembershipTerm: "",
   tags: [],
   search: "",
-  shared_recipes_filter: true,
+  userKitchenMembershipIds: [Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL],
+  showAllRecipes: true,
 };

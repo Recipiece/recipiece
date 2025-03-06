@@ -2,14 +2,23 @@ import { Constant } from "@recipiece/constant";
 import { Prisma, PrismaTransaction, UserKitchenMembershipStatus } from "@recipiece/database";
 import { ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { ApiResponse, AuthenticatedRequest } from "../../../types";
-import { UserKitchenInvitationStatus } from "../../../util/constant";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { UserKitchenInvitationStatus } from "../../util/constant";
 
 export const listUserKitchenMemberships = async (
   request: AuthenticatedRequest<any, ListUserKitchenMembershipsQuerySchema>,
   tx: PrismaTransaction
 ): ApiResponse<ListUserKitchenMembershipsResponseSchema> => {
-  const { targeting_self, from_self, page_number, page_size, status = UserKitchenInvitationStatus.ALL_STATUSES, entity_filter, entity_id, entity_type } = request.query;
+  const {
+    targeting_self,
+    from_self,
+    page_number,
+    page_size,
+    status = UserKitchenInvitationStatus.ALL_STATUSES,
+    entity_filter,
+    entity_id,
+    entity_type,
+  } = request.query;
 
   const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 

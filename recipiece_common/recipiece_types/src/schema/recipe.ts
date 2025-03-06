@@ -1,6 +1,7 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YUserKitchenMembershipSchema, YUserTagSchema } from "./user";
+import { Constant } from "@recipiece/constant";
 
 export const YRecipeIngredientSchema = object({
   id: number().required(),
@@ -136,7 +137,7 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
   search: string().notRequired(),
   cookbook_id: number().notRequired(),
   cookbook_attachments_filter: string().oneOf(["include", "exclude"]).notRequired(),
-  shared_recipes_filter: string().oneOf(["include", "exclude"]).notRequired(),
+  user_kitchen_membership_ids: array(string()).notRequired(),
   ingredients_filter: string().oneOf(["include", "exclude"]).notRequired(),
   tags_filter: string().oneOf(["include", "exclude"]).notRequired(),
   ingredients: array(string()).notRequired(),
@@ -147,7 +148,7 @@ export const YListRecipesQuerySchema = YListQuerySchema.shape({
       ...val,
       ingredients: val.ingredients ? val.ingredients.split(",") : undefined,
       tags: val.tags ? val.tags.split(",") : undefined,
-      shared_recipes_filter: val.shared_recipes_filter ?? "include",
+      user_kitchen_membership_ids: val.user_kitchen_membership_ids ? val.user_kitchen_membership_ids.split(",") : [Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL],
       ingredients_filter: val.ingredients_filter ?? "include",
       tags_filter: val.tags_filter ?? "include",
     };

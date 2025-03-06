@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import {
   CreatePushNotificationRequestSchema,
   CreateUserRequestSchema,
@@ -11,7 +12,6 @@ import {
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Buffer } from "buffer";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { TokenManager } from "../TokenManager";
 import { UserQueryKeys } from "./UserQueryKeys";
@@ -37,7 +37,9 @@ export const useGetSelfQuery = (args?: QueryArgs<UserSchema>) => {
   });
 };
 
-export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }, unknown>) => {
+export const useLoginUserMutation = (
+  args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }, unknown>
+) => {
   const { poster } = usePost();
 
   const mutation = async (data: { readonly username: string; readonly password: string }) => {
@@ -63,7 +65,11 @@ export const useChangePasswordMutation = (args?: MutationArgs<void, unknown>) =>
     autoLogoutOnCodes: [],
   });
 
-  const mutation = async (data: { readonly username: string; readonly password: string; readonly new_password: string }) => {
+  const mutation = async (data: {
+    readonly username: string;
+    readonly password: string;
+    readonly new_password: string;
+  }) => {
     const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
     const response = await poster<unknown, never>({
       path: "/user/change-password",
@@ -241,7 +247,9 @@ export const useResetPasswordMutation = (args?: MutationArgs<void, unknown>) => 
   });
 };
 
-export const useRequestRecipeImportMutation = (args?: MutationArgs<unknown, { readonly file: File; readonly source: string }>) => {
+export const useRequestRecipeImportMutation = (
+  args?: MutationArgs<unknown, { readonly file: File; readonly source: string }>
+) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly file: File; readonly source: string }) => {
@@ -270,7 +278,9 @@ export const useRequestRecipeImportMutation = (args?: MutationArgs<unknown, { re
   });
 };
 
-export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<unknown, CreatePushNotificationRequestSchema>) => {
+export const useOptIntoPushNotificationsMutation = (
+  args?: MutationArgs<unknown, CreatePushNotificationRequestSchema>
+) => {
   const { poster } = usePost();
 
   const mutation = async (body: CreatePushNotificationRequestSchema) => {

@@ -1,7 +1,7 @@
+import { DataTestId } from "@recipiece/constant";
 import { FC, useCallback, useEffect, useState } from "react";
 import { cn } from "../../../util";
 import { Button, Input, InputProps, LoadingSpinner, Popover, PopoverContent, PopoverTrigger } from "../../shadcn";
-import { DataTestId } from "@recipiece/constant";
 
 export interface TypeaheadInputProps extends InputProps {
   readonly autocompleteOptions: string[];
@@ -10,7 +10,15 @@ export interface TypeaheadInputProps extends InputProps {
   readonly popoverClassName?: string;
 }
 
-export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, popoverClassName, onSelectItem, onFocus, onBlur, isLoading, ...restInputProps }) => {
+export const TypeaheadInput: FC<TypeaheadInputProps> = ({
+  autocompleteOptions,
+  popoverClassName,
+  onSelectItem,
+  onFocus,
+  onBlur,
+  isLoading,
+  ...restInputProps
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 

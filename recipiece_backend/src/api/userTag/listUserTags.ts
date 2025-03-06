@@ -2,9 +2,12 @@ import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
 import { ListUserTagsQuerySchema, ListUserTagsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listUserTags = async (request: AuthenticatedRequest<any, ListUserTagsQuerySchema>, tx: PrismaTransaction): ApiResponse<ListUserTagsResponseSchema> => {
+export const listUserTags = async (
+  request: AuthenticatedRequest<any, ListUserTagsQuerySchema>,
+  tx: PrismaTransaction
+): ApiResponse<ListUserTagsResponseSchema> => {
   const user = request.user;
   const { page_number, search } = request.query;
   const pageSize = request.query.page_size ?? Constant.DEFAULT_PAGE_SIZE;

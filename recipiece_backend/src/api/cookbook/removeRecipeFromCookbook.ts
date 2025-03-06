@@ -4,7 +4,10 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { getCookbookByIdQuery } from "./query";
 
-export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
+export const removeRecipeFromCookbook = async (
+  req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<{}> => {
   const removeBody = req.body;
   const user = req.user;
 

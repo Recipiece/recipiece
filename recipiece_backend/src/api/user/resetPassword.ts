@@ -1,13 +1,16 @@
+import { Constant } from "@recipiece/constant";
+import { PrismaTransaction } from "@recipiece/database";
+import { ResetPasswordRequestSchema } from "@recipiece/types";
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { PrismaTransaction } from "@recipiece/database";
-import { ResetPasswordRequestSchema } from "@recipiece/types";
 import { ApiResponse } from "../../types";
 import { hashPassword } from "../../util/password";
-import { Constant } from "@recipiece/constant";
 
-export const resetPassword = async (request: Request<any, any, ResetPasswordRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
+export const resetPassword = async (
+  request: Request<any, any, ResetPasswordRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<{}> => {
   const { password, token } = request.body;
 
   const accountToken = await tx.userValidationToken.findUnique({

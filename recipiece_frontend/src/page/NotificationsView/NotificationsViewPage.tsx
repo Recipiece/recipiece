@@ -1,6 +1,6 @@
+import { ListNotificationsQuerySchema } from "@recipiece/types";
 import { FC, useCallback, useState } from "react";
 import { useListNotificationsQuery, useSetNotificationStatusMutation } from "../../api";
-import { ListNotificationsQuerySchema } from "@recipiece/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, H2, LoadingGroup, Stack } from "../../component";
 
 export const NotificationsViewPage: FC = () => {

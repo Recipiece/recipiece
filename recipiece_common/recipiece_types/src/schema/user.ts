@@ -35,7 +35,7 @@ export const YUserKitchenMembershipSchema = object({
     username: string().required(),
   }),
   status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED, UserKitchenInvitationStatus.PENDING]).required(),
-}).noUnknown();
+});
 
 export interface UserSchema extends InferType<typeof YUserSchema> {}
 
@@ -194,18 +194,13 @@ export interface CreateUserKitchenMembershipRequestSchema extends InferType<type
 /**
  * Set kitchen membership status
  */
-export const YSetUserKitchenMembershipStatusRequestSchema = object({
+export const YUpdateUserKitchenMembershipRequestSchema = object({
   id: number().required(),
-  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).required(),
+  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).notRequired(),
+  grant_level: string().oneOf(["ALL", "SELECTIVE"]).notRequired(),
 }).noUnknown();
 
-export interface SetUserKitchenMembershipStatusRequestSchema extends InferType<typeof YSetUserKitchenMembershipStatusRequestSchema> {}
-
-export const YSetUserKitchenMembershipStatusResponseSchema = YUserKitchenMembershipSchema.shape({
-  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).required(),
-});
-
-export interface SetUserKitchenMembershipStatusResponseSchema extends InferType<typeof YSetUserKitchenMembershipStatusResponseSchema> {}
+export interface UpdateUserKitchenMembershipRequestSchema extends InferType<typeof YUpdateUserKitchenMembershipRequestSchema> {}
 
 /**
  * List kitchen memberships

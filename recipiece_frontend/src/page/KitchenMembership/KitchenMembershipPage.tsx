@@ -2,10 +2,10 @@ import { FC, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useGetUserKitchenMembershipQuery } from "../../api";
 import { H2, LoadingGroup, NotFound, Stack, Tabs, TabsContent, TabsList, TabsTrigger } from "../../component";
+import { CookbookSharesTable } from "./CookbookSharesTable";
 import { MealPlanSharesTable } from "./MealPlanSharesTable";
 import { RecipeSharesTable } from "./RecipeSharesTable";
 import { ShoppingListSharesTable } from "./ShoppingListSharesTable";
-import { CookbookSharesTable } from "./CookbookSharesTable";
 
 const TAB_RECIPES = "recipes";
 const TAB_MEAL_PLANS = "meal_plans";
@@ -17,7 +17,11 @@ export const KitchenMembershipPage: FC = () => {
   const { kitchenMembershipId } = useParams();
   const entityId = +kitchenMembershipId!;
 
-  const { data: membership, isLoading: isLoadingMembership, isError: isMembershipError } = useGetUserKitchenMembershipQuery(entityId);
+  const {
+    data: membership,
+    isLoading: isLoadingMembership,
+    isError: isMembershipError,
+  } = useGetUserKitchenMembershipQuery(entityId);
 
   useEffect(() => {
     if (!searchParams.get("tab")) {
@@ -45,7 +49,9 @@ export const KitchenMembershipPage: FC = () => {
       {membership && (
         <Stack>
           <H2>Shared with {membership.destination_user.username}</H2>
-          <p className="text-sm">Below are all of the things you&apos;ve shared with {membership.destination_user.username}.</p>
+          <p className="text-sm">
+            Below are all of the things you&apos;ve shared with {membership.destination_user.username}.
+          </p>
           <Tabs defaultValue={searchParams.get("tab") ?? TAB_RECIPES} onValueChange={onTabChange}>
             <TabsList className="items-left w-full justify-start">
               <TabsTrigger value={TAB_RECIPES}>Recipes</TabsTrigger>

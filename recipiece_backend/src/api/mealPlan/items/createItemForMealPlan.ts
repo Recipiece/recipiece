@@ -4,10 +4,13 @@ import { StatusCodes } from "http-status-codes";
 import { mealPlanItemQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { JobType } from "../../../util/constant";
-import { getMealPlanByIdQuery } from "../query";
 import { getRecipeByIdQuery } from "../../recipe/query";
+import { getMealPlanByIdQuery } from "../query";
 
-export const createItemForMealPlan = async (request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanItemSchema> => {
+export const createItemForMealPlan = async (
+  request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<MealPlanItemSchema> => {
   const user = request.user;
   const { meal_plan_id, ...restMealPlanItem } = request.body;
 

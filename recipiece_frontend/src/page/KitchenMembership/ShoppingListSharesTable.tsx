@@ -12,7 +12,8 @@ export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembe
   const [shoppingListSharesPage, setShoppingListSharesPage] = useState(0);
   const isShareAll = membership?.grant_level === "ALL";
 
-  const { mutateAsync: deleteShoppingListShare, isPending: isDeletingShoppingListShare } = useDeleteShoppingListShareMutation();
+  const { mutateAsync: deleteShoppingListShare, isPending: isDeletingShoppingListShare } =
+    useDeleteShoppingListShareMutation();
 
   const { data: shoppingListShares, isLoading: isLoadingShoppingListShares } = useListShoppingListSharesQuery(
     {
@@ -58,23 +59,39 @@ export const ShoppingListSharesTable: FC<{ readonly membership: UserKitchenMembe
                   <div className="flex flex-row gap-2 border-b-[1px] border-b-primary pb-2" key={share.id}>
                     <div className="flex flex-col">
                       <span>{share.shopping_list.name}</span>
-                      <span className="text-xs">{DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}</span>
+                      <span className="text-xs">
+                        {DateTime.fromJSDate(share.created_at).toLocal().toLocaleString(DateTime.DATE_SHORT)}
+                      </span>
                     </div>
-                    <Button size="sm" variant="link" onClick={() => navigate(`/shopping-list/${share.shopping_list_id}`, {})}>
+                    <Button
+                      size="sm"
+                      variant="link"
+                      onClick={() => navigate(`/shopping-list/${share.shopping_list_id}`, {})}
+                    >
                       <ExternalLink />
                     </Button>
                     <span className="ml-auto" />
-                    <Button variant="ghost" onClick={() => onUnshareShoppingList(share)} disabled={isDeletingShoppingListShare}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => onUnshareShoppingList(share)}
+                      disabled={isDeletingShoppingListShare}
+                    >
                       <Ban className="text-destructive" />
                     </Button>
                   </div>
                 );
               })}
             </div>
-            <Pager page={shoppingListSharesPage} onPage={setShoppingListSharesPage} hasNextPage={!!shoppingListShares?.has_next_page} />
+            <Pager
+              page={shoppingListSharesPage}
+              onPage={setShoppingListSharesPage}
+              hasNextPage={!!shoppingListShares?.has_next_page}
+            />
           </>
         )}
-        {hasNoShares && <p className="text-center text-sm">You haven&apos;t shared any shopping lists with this user.</p>}
+        {hasNoShares && (
+          <p className="text-center text-sm">You haven&apos;t shared any shopping lists with this user.</p>
+        )}
       </LoadingGroup>
     </>
   );
