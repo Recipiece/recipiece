@@ -13,12 +13,12 @@ const CreateAccountFormSchema = z
     username: z
       .string()
       .min(5, "Your username must be at least 5 characters")
-      .max(40, "Your username must be less than 40 characters")
+      .max(32, "Your username must be less than 32 characters")
       .refine((val) => {
         return val.match(/[a-zA-Z_0-9-]+/);
       }, "Only letters, numbers, _, and - are allowed"),
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
+    password: z.string().min(8).max(128),
+    confirmPassword: z.string().min(8).max(128),
   })
   .superRefine(({ password, confirmPassword }, ctx) => {
     if (password !== confirmPassword) {

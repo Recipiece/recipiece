@@ -1,14 +1,17 @@
 import {
+  ListCookbooksResponseSchema,
+  ListMealPlansResponseSchema,
   ListRecipesResponseSchema,
   ListShoppingListsResponseSchema,
   ListUserKitchenMembershipsQuerySchema,
   ListUserKitchenMembershipsResponseSchema,
+  UpdateUserKitchenMembershipRequestSchema,
   UserKitchenMembershipSchema,
-  UserKitchenMembershipSchemaStatus,
   YListUserKitchenMembershipsResponseSchema,
-  YUserKitchenMembershipSchema,
+  YUserKitchenMembershipSchema
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CookbookQueryKeys } from "../cookbook";
 import { MealPlanQueryKeys } from "../mealPlan";
 import {
   generatePartialMatchPredicate,
@@ -182,7 +185,17 @@ const usePurgeSharedQueries = () => {
     purgeShareEntity(membership, MealPlanQueryKeys.GET_MEAL_PLAN_SHARE());
   };
 
-  return { purgeRecipes, purgeShoppingLists, purgeMealPlans };
+  const purgeCookbooks = (
+    membership: UserKitchenMembershipSchema,
+    enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
+    purgeParentEntityList(membership, CookbookQueryKeys.LIST_COOKBOOKS(), enforceMembershipUser);
+    purgeParentEntity(membership, CookbookQueryKeys.GET_COOKBOOK(), enforceMembershipUser);
+    purgeShareEntitiesList(membership, CookbookQueryKeys.LIST_COOKBOOK_SHARES());
+    purgeShareEntity(membership, CookbookQueryKeys.GET_COOKBOOK_SHARE());
+  };
+
+  return { purgeRecipes, purgeShoppingLists, purgeMealPlans, purgeCookbooks };
 };
 
 export const useListUserKitchenMembershipsQuery = (
@@ -255,10 +268,7 @@ export const useCreateKitchenMembershipMutation = (
 };
 
 export const useUpdatePendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<
-    UserKitchenMembershipSchema,
-    { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }
-  >
+  args?: MutationArgs<UserKitchenMembershipSchema, Omit<UpdateUserKitchenMembershipRequestSchema, "grant_level">>
 ) => {
   const queryClient = useQueryClient();
   const { onSuccess, ...restArgs } = args ?? {};
@@ -318,6 +328,16 @@ export const useUpdatePendingUserKitchenMembershipMutation = (
           queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
           refetchType: "inactive",
         });
+
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
+          predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOKS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOK_SHARES(),
+          refetchType: "inactive",
+        });
       }
 
       onSuccess?.(data, vars, ctx);
@@ -329,10 +349,7 @@ export const useUpdatePendingUserKitchenMembershipMutation = (
 };
 
 export const useUpdatedNonPendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<
-    UserKitchenMembershipSchema,
-    { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }
-  >
+  args?: MutationArgs<UserKitchenMembershipSchema, Omit<UpdateUserKitchenMembershipRequestSchema, "grant_level">>
 ) => {
   const queryClient = useQueryClient();
 
@@ -401,7 +418,7 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
             queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
             predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
           },
-          (oldData: ListShoppingListsResponseSchema | undefined) => {
+          (oldData: ListMealPlansResponseSchema | undefined) => {
             if (oldData) {
               return {
                 ...oldData,
@@ -414,6 +431,27 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
         queryClient.invalidateQueries({
           queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
           predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
+          refetchType: "inactive",
+        });
+
+        queryClient.setQueriesData(
+          {
+            queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
+            predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOKS()),
+          },
+          (oldData: ListCookbooksResponseSchema | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: (oldData.data ?? []).filter((r) => r.user_id === data.destination_user.id),
+              };
+            }
+            return undefined;
+          }
+        );
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOK_SHARES(),
+          predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOK_SHARES()),
           refetchType: "inactive",
         });
       } else {
@@ -449,6 +487,16 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
           predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
           refetchType: "inactive",
         });
+
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
+          predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOKS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOK_SHARES(),
+          refetchType: "inactive",
+        });
       }
 
       onSuccess?.(data, vars, ctx);
@@ -459,17 +507,14 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
   return mutation;
 };
 
-const useUpdateKitchenMembershipMutation = (
-  args?: MutationArgs<
-    UserKitchenMembershipSchema,
-    { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }
-  >
+export const useUpdateKitchenMembershipMutation = (
+  args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>
 ) => {
   const { putter } = usePut();
 
   const queryClient = useQueryClient();
 
-  const mutation = async (body: { readonly id: number; readonly status: UserKitchenMembershipSchemaStatus }) => {
+  const mutation = async (body: UpdateUserKitchenMembershipRequestSchema) => {
     const response = await putter<typeof body, UserKitchenMembershipSchema>({
       path: "/user-kitchen-membership",
       body: {
@@ -490,6 +535,66 @@ const useUpdateKitchenMembershipMutation = (
     },
     ...restArgs,
   });
+};
+
+export const useUpdateGrantLevelMutation = (
+  args?: MutationArgs<UserKitchenMembershipSchema, Omit<UpdateUserKitchenMembershipRequestSchema, "status">>
+) => {
+  const queryClient = useQueryClient();
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  const mutation = useUpdateKitchenMembershipMutation({
+    onSuccess: (data, vars, ctx) => {
+      if (data.grant_level === "SELECTIVE") {
+        queryClient.invalidateQueries({
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LISTS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
+          predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOKS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOK_SHARES(),
+          refetchType: "inactive",
+        });
+      } else {
+        
+      }
+
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+
+  return mutation;
 };
 
 export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<UserKitchenMembershipSchema>) => {
@@ -516,7 +621,7 @@ export const useDeleteUserKitchenMembershipMutation = (
 ) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
-  const { purgeRecipes, purgeShoppingLists, purgeMealPlans } = usePurgeSharedQueries();
+  const { purgeRecipes, purgeShoppingLists, purgeMealPlans, purgeCookbooks } = usePurgeSharedQueries();
 
   const mutation = async (membership: UserKitchenMembershipSchema) => {
     return await deleter({
@@ -544,6 +649,7 @@ export const useDeleteUserKitchenMembershipMutation = (
       purgeRecipes(params, deletionContext);
       purgeShoppingLists(params, deletionContext);
       purgeMealPlans(params, deletionContext);
+      purgeCookbooks(params, deletionContext);
       onSuccess?.(data, params, ctx);
     },
     ...restArgs,

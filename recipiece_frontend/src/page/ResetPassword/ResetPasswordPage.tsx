@@ -9,8 +9,8 @@ import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../co
 
 const ResetPasswordFormSchema = z
   .object({
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
+    password: z.string().min(8).max(128),
+    confirmPassword: z.string().min(8).max(128),
   })
   .superRefine(({ password, confirmPassword }, ctx) => {
     if (password !== confirmPassword) {

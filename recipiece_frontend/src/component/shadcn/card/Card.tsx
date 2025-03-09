@@ -15,9 +15,9 @@ CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    // @ts-expect-error data-testid not typed property
-    // eslint-disable-next-line react/prop-types
     <h3
+      // @ts-expect-error data-testid not typed property
+      // eslint-disable-next-line react/prop-types
       data-testid={props?.["data-testid"]}
       ref={ref}
       className={cn("text-2xl font-semibold leading-none tracking-tight", className)}
@@ -29,9 +29,9 @@ CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    // @ts-expect-error data-testid not typed property
-    // eslint-disable-next-line react/prop-types
     <p
+      // @ts-expect-error data-testid not typed property
+      // eslint-disable-next-line react/prop-types
       data-testid={props?.["data-testid"]}
       ref={ref}
       className={cn("text-sm text-muted-foreground", className)}
@@ -51,4 +51,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 );
 CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle };

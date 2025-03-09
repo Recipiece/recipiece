@@ -198,6 +198,7 @@ export const listRecipes = async (
     });
   }
 
+  query = query.orderBy("all_recipes.name asc");
   query = query.offset(page_number * actualPageSize).limit(actualPageSize + 1);
 
   const recipes = await query.execute();

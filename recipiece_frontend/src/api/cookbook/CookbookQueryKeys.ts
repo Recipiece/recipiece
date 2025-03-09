@@ -2,8 +2,14 @@ import { ListCookbookSharesQuerySchema, ListCookbooksQuerySchema } from "@recipi
 import { RcpQueryKey } from "../QueryKeys";
 
 export class CookbookQueryKeys {
-  public static readonly GET_COOKBOOK = (cookbookId: number): RcpQueryKey => {
-    return ["cookbook", { id: cookbookId }];
+  public static readonly GET_COOKBOOK = (id?: number): RcpQueryKey => {
+    const base: RcpQueryKey = ["cookbook"];
+
+    if (id) {
+      base.push({ id });
+    }
+
+    return base;
   };
 
   public static readonly LIST_COOKBOOKS = (filters?: Partial<ListCookbooksQuerySchema>): RcpQueryKey => {

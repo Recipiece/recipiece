@@ -52,8 +52,8 @@ export type UserKitchenMembershipSchemaStatus = UserKitchenMembershipSchema["sta
  */
 export const YCreateUserRequestSchema = object({
   email: string().required(),
-  username: string().required().min(5),
-  password: string().required().min(8),
+  username: string().required().min(5).max(32),
+  password: string().required().min(8).max(128),
 }).noUnknown();
 
 export interface CreateUserRequestSchema extends InferType<typeof YCreateUserRequestSchema> {}
@@ -73,7 +73,7 @@ export interface CreateUserResponseSchema extends InferType<typeof YCreateUserRe
  */
 export const YUpdateUserRequestSchema = object({
   id: number().required(),
-  username: string().optional(),
+  username: string().optional().min(5).max(32),
   email: string().optional(),
   preferences: YUserPreferencesSchema.optional(),
 }).noUnknown();
@@ -118,7 +118,7 @@ export interface IssueForgotPasswordTokenRequestSchema extends InferType<typeof 
  * Reset password
  */
 export const YResetPasswordRequestSchema = object({
-  password: string().required(),
+  password: string().required().min(8).max(128),
   token: string().required(),
 }).noUnknown();
 
@@ -177,7 +177,7 @@ export interface CreatePushNotificationRequestSchema extends InferType<typeof YC
  * Change password
  */
 export const YChangePasswordRequestSchema = object({
-  new_password: string().required(),
+  new_password: string().required().min(8).max(128),
 }).noUnknown();
 
 export interface ChangePasswordRequestSchema extends InferType<typeof YChangePasswordRequestSchema> {}
@@ -186,7 +186,7 @@ export interface ChangePasswordRequestSchema extends InferType<typeof YChangePas
  * Invite user to kitchen
  */
 export const YCreateUserKitchenMembershipRequestSchema = object({
-  username: string().required().min(5),
+  username: string().required().min(5).max(32),
 }).noUnknown();
 
 export interface CreateUserKitchenMembershipRequestSchema extends InferType<typeof YCreateUserKitchenMembershipRequestSchema> {}
@@ -247,7 +247,3 @@ export interface ListUserTagsQuerySchema extends InferType<typeof YListUserTagsQ
 export const YListUserTagsResponseSchema = generateYListQueryResponseSchema(YUserTagSchema);
 
 export interface ListUserTagsResponseSchema extends InferType<typeof YListUserTagsResponseSchema> {}
-
-/**
- * Create a user household membership
- */
