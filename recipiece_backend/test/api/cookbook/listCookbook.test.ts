@@ -116,27 +116,12 @@ describe("List Cookbooks", () => {
   });
 
   it("should include shared cookbooks", async () => {
-    // create a SELECTIVE membership
-    const otherUserSelective = await generateUser();
-    const selectiveMembership = await generateUserKitchenMembership({
-      source_user_id: otherUserSelective.id,
-      destination_user_id: user.id,
-      status: "accepted",
-      grant_level: "SELECTIVE",
-    });
-    const selectiveSharedCookbook = await generateCookbook({ user_id: otherUserSelective.id });
-    await generateCookbookShare({
-      user_kitchen_membership_id: selectiveMembership.id,
-      cookbook_id: selectiveSharedCookbook.id,
-    });
-
     // create an ALL membership
     const otherUserAll = await generateUser();
-    const allMembership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: otherUserAll.id,
       destination_user_id: user.id,
       status: "accepted",
-      grant_level: "ALL",
     });
     const allCookbook = await generateCookbook({ user_id: otherUserAll.id });
 
@@ -158,32 +143,17 @@ describe("List Cookbooks", () => {
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: ListCookbooksResponseSchema = response.body;
 
-    expect(responseData.data.length).toBe(3);
-    expect(responseData.data.find((c) => c.id === selectiveSharedCookbook.id)).toBeTruthy();
+    expect(responseData.data.length).toBe(2);
     expect(responseData.data.find((c) => c.id === allCookbook.id)).toBeTruthy();
     expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
   });
 
   it("should exclude shared cookbooks", async () => {
-    const otherUserSelective = await generateUser();
-    const selectiveMembership = await generateUserKitchenMembership({
-      source_user_id: otherUserSelective.id,
-      destination_user_id: user.id,
-      status: "accepted",
-      grant_level: "SELECTIVE",
-    });
-    const selectiveSharedCookbook = await generateCookbook({ user_id: otherUserSelective.id });
-    await generateCookbookShare({
-      user_kitchen_membership_id: selectiveMembership.id,
-      cookbook_id: selectiveSharedCookbook.id,
-    });
-
     const otherUserAll = await generateUser();
     await generateUserKitchenMembership({
       source_user_id: otherUserAll.id,
       destination_user_id: user.id,
       status: "accepted",
-      grant_level: "ALL",
     });
     await generateCookbook({ user_id: otherUserAll.id });
 
@@ -208,25 +178,11 @@ describe("List Cookbooks", () => {
   });
 
   it("should not list cookbooks belonging to a non-accepted membership", async () => {
-    const otherUserSelective = await generateUser();
-    const selectiveMembership = await generateUserKitchenMembership({
-      source_user_id: otherUserSelective.id,
-      destination_user_id: user.id,
-      status: "denied",
-      grant_level: "SELECTIVE",
-    });
-    const selectiveSharedCookbook = await generateCookbook({ user_id: otherUserSelective.id });
-    await generateCookbookShare({
-      user_kitchen_membership_id: selectiveMembership.id,
-      cookbook_id: selectiveSharedCookbook.id,
-    });
-
     const otherUserAll = await generateUser();
     await generateUserKitchenMembership({
       source_user_id: otherUserAll.id,
       destination_user_id: user.id,
       status: "denied",
-      grant_level: "ALL",
     });
     await generateCookbook({ user_id: otherUserAll.id });
 

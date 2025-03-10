@@ -25,7 +25,6 @@ export const YUserSchema = object({
 export const YUserKitchenMembershipSchema = object({
   id: number().required(),
   created_at: date().required(),
-  grant_level: string().oneOf(["ALL", "SELECTIVE"]).required(),
   destination_user: object({
     id: number().required(),
     username: string().required(),
@@ -197,7 +196,6 @@ export interface CreateUserKitchenMembershipRequestSchema extends InferType<type
 export const YUpdateUserKitchenMembershipRequestSchema = object({
   id: number().required(),
   status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).notRequired(),
-  grant_level: string().oneOf(["ALL", "SELECTIVE"]).notRequired(),
 }).noUnknown();
 
 export interface UpdateUserKitchenMembershipRequestSchema extends InferType<typeof YUpdateUserKitchenMembershipRequestSchema> {}

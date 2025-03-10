@@ -42,9 +42,7 @@ describe("Get Cookbooks", () => {
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
-  it("should get a shared cookbook with an ALL grant level", async () => {});
-
-  it("should get a shared cookbook with a SELECTIVE grant level", async () => {});
+  it("should get a shared cookbook", async () => {});
 
   it("should not get a cookbook in a membership that is not accepted", async () => {});
 });

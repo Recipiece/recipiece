@@ -1,5 +1,5 @@
 import { Constant } from "@recipiece/constant";
-import { Prisma, Recipe, User, UserKitchenMembershipGrantLevel } from "@recipiece/database";
+import { Recipe, User } from "@recipiece/database";
 import {
   generateCookbook,
   generateRecipe,
@@ -153,49 +153,13 @@ describe("List Recipes", () => {
     expect(results.length).toEqual(5);
   });
 
-  it("should list shared recipes belonging to a SELECTIVE grant type membership", async () => {
+  it("should list shared recipes", async () => {
     const otherUser = await generateUser();
     // allow otherUser to share a recipe to user
     const membership = await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
-      grant_level: "SELECTIVE",
-    });
-
-    const otherRecipe = await generateRecipe({ user_id: otherUser.id });
-
-    await generateRecipeShare({
-      user_kitchen_membership_id: membership.id,
-      recipe_id: otherRecipe.id,
-    });
-
-    for (let i = 0; i < 10; i++) {
-      await generateRecipe({ user_id: user.id });
-    }
-
-    const response = await request(server)
-      .get("/recipe/list")
-      .query(<ListRecipesQuerySchema>{
-        page_number: 0,
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseRecipes: RecipeSchema[] = response.body.data;
-
-    expect(responseRecipes.length).toBe(11);
-  });
-
-  it("should list shared recipes belonging to an ALL grant type membership", async () => {
-    const otherUser = await generateUser();
-    // allow otherUser to share a recipe to user
-    const membership = await generateUserKitchenMembership({
-      source_user_id: otherUser.id,
-      destination_user_id: user.id,
-      status: "accepted",
-      grant_level: "ALL",
     });
 
     // generate some recipes for the other user
@@ -347,22 +311,8 @@ describe("List Recipes", () => {
         source_user_id: allGrantUser.id,
         destination_user_id: user.id,
         status: "accepted",
-        grant_level: "ALL",
       });
       await generateRecipe({ user_id: allGrantUser.id });
-
-      const selectiveGrantUser = await generateUser();
-      const selectiveMembership = await generateUserKitchenMembership({
-        source_user_id: selectiveGrantUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-        grant_level: "SELECTIVE",
-      });
-      const selectiveRecipe = await generateRecipe({ user_id: selectiveGrantUser.id });
-      await generateRecipeShare({
-        recipe_id: selectiveRecipe.id,
-        user_kitchen_membership_id: selectiveMembership.id,
-      });
 
       const response = await request(server)
         .get("/recipe/list")
@@ -394,22 +344,8 @@ describe("List Recipes", () => {
         source_user_id: allGrantUser.id,
         destination_user_id: user.id,
         status: "accepted",
-        grant_level: "ALL",
       });
       const allRecipe = await generateRecipe({ user_id: allGrantUser.id });
-
-      const selectiveGrantUser = await generateUser();
-      const selectiveMembership = await generateUserKitchenMembership({
-        source_user_id: selectiveGrantUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-        grant_level: "SELECTIVE",
-      });
-      const selectiveRecipe = await generateRecipe({ user_id: selectiveGrantUser.id });
-      await generateRecipeShare({
-        recipe_id: selectiveRecipe.id,
-        user_kitchen_membership_id: selectiveMembership.id,
-      });
 
       const response = await request(server)
         .get("/recipe/list")
@@ -423,103 +359,80 @@ describe("List Recipes", () => {
       expect(response.statusCode).toBe(StatusCodes.OK);
       const responseData: ListRecipesResponseSchema = response.body;
 
-      expect(responseData.data.length).toBe(12);
-      const expectedRecipeIds = [...recipes.map((r) => r.id), selectiveRecipe.id, allRecipe.id];
+      expect(responseData.data.length).toBe(11);
+      const expectedRecipeIds = [...recipes.map((r) => r.id), allRecipe.id];
       responseData.data.forEach((datum) => {
         expect(expectedRecipeIds.includes(datum.id)).toBeTruthy();
       });
     });
 
-    it.each(<UserKitchenMembershipGrantLevel[]>["SELECTIVE", "ALL"])(
-      "should list only recipes belonging to a particular membership",
-      async (grantLevel) => {
-        const recipes = [];
-        for (let i = 0; i < 10; i++) {
-          recipes.push(await generateRecipe({ user_id: user.id }));
-        }
-
-        const otherUser = await generateUser();
-        const membership = await generateUserKitchenMembership({
-          source_user_id: otherUser.id,
-          destination_user_id: user.id,
-          status: "accepted",
-          grant_level: grantLevel,
-        });
-        const otherRecipe = await generateRecipe({ user_id: otherUser.id });
-        if (grantLevel === "SELECTIVE") {
-          await generateRecipeShare({
-            recipe_id: otherRecipe.id,
-            user_kitchen_membership_id: membership.id,
-          });
-        }
-
-        const response = await request(server)
-          .get("/recipe/list")
-          .query({
-            page_number: 0,
-            user_kitchen_membership_ids: [membership.id.toString()].join(","),
-          })
-          .set("Content-Type", "application/json")
-          .set("Authorization", `Bearer ${bearerToken}`);
-
-        expect(response.statusCode).toBe(StatusCodes.OK);
-        const responseData: ListRecipesResponseSchema = response.body;
-
-        expect(responseData.data.length).toBe(1);
-        expect(responseData.data[0].id).toBe(otherRecipe.id);
+    it("should list only recipes belonging to a particular membership", async () => {
+      const recipes = [];
+      for (let i = 0; i < 10; i++) {
+        recipes.push(await generateRecipe({ user_id: user.id }));
       }
-    );
 
-    it.each(<UserKitchenMembershipGrantLevel[]>["SELECTIVE", "ALL"])(
-      "should list recipes belonging to the user and to selected memberships",
-      async (grantLevel) => {
-        const recipes = [];
-        for (let i = 0; i < 10; i++) {
-          recipes.push(await generateRecipe({ user_id: user.id }));
-        }
+      const otherUser = await generateUser();
+      const membership = await generateUserKitchenMembership({
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: "accepted",
+      });
+      const otherRecipe = await generateRecipe({ user_id: otherUser.id });
 
-        const otherUser = await generateUser();
-        const membership = await generateUserKitchenMembership({
-          source_user_id: otherUser.id,
-          destination_user_id: user.id,
-          status: "accepted",
-          grant_level: grantLevel,
-        });
-        const otherRecipe = await generateRecipe({ user_id: otherUser.id });
-        if (grantLevel === "SELECTIVE") {
-          await generateRecipeShare({
-            recipe_id: otherRecipe.id,
-            user_kitchen_membership_id: membership.id,
-          });
-        }
+      const response = await request(server)
+        .get("/recipe/list")
+        .query({
+          page_number: 0,
+          user_kitchen_membership_ids: [membership.id.toString()].join(","),
+        })
+        .set("Content-Type", "application/json")
+        .set("Authorization", `Bearer ${bearerToken}`);
 
-        const thirdMembership = await generateUserKitchenMembership({
-          destination_user_id: user.id,
-          status: "accepted",
-          grant_level: "ALL",
-        });
-        await generateRecipe({ user_id: thirdMembership.source_user_id });
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseData: ListRecipesResponseSchema = response.body;
 
-        const response = await request(server)
-          .get("/recipe/list")
-          .query({
-            page_number: 0,
-            user_kitchen_membership_ids: [membership.id.toString(), Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER].join(
-              ","
-            ),
-          })
-          .set("Content-Type", "application/json")
-          .set("Authorization", `Bearer ${bearerToken}`);
+      expect(responseData.data.length).toBe(1);
+      expect(responseData.data[0].id).toBe(otherRecipe.id);
+    });
 
-        expect(response.statusCode).toBe(StatusCodes.OK);
-        const responseData: ListRecipesResponseSchema = response.body;
-
-        expect(responseData.data.length).toBe(11);
-        const expectedIds = [...recipes.map((r) => r.id), otherRecipe.id];
-        responseData.data.forEach((datum) => {
-          expect(expectedIds.includes(datum.id)).toBeTruthy();
-        });
+    it("should list recipes belonging to the user and to selected memberships", async () => {
+      const recipes = [];
+      for (let i = 0; i < 10; i++) {
+        recipes.push(await generateRecipe({ user_id: user.id }));
       }
-    );
+
+      const otherUser = await generateUser();
+      const membership = await generateUserKitchenMembership({
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: "accepted",
+      });
+      const otherRecipe = await generateRecipe({ user_id: otherUser.id });
+
+      const thirdMembership = await generateUserKitchenMembership({
+        destination_user_id: user.id,
+        status: "accepted",
+      });
+      await generateRecipe({ user_id: thirdMembership.source_user_id });
+
+      const response = await request(server)
+        .get("/recipe/list")
+        .query({
+          page_number: 0,
+          user_kitchen_membership_ids: [membership.id.toString(), Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER].join(","),
+        })
+        .set("Content-Type", "application/json")
+        .set("Authorization", `Bearer ${bearerToken}`);
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseData: ListRecipesResponseSchema = response.body;
+
+      expect(responseData.data.length).toBe(11);
+      const expectedIds = [...recipes.map((r) => r.id), otherRecipe.id];
+      responseData.data.forEach((datum) => {
+        expect(expectedIds.includes(datum.id)).toBeTruthy();
+      });
+    });
   });
 });

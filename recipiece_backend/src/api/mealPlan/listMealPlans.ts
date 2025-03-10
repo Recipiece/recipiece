@@ -21,25 +21,6 @@ export const listMealPlans = async (
         .select((eb) => mealPlanSharesSubquery(eb, user.id).as("shares"))
         .where("meal_plans.user_id", "=", user.id);
     })
-    .with("selective_grant_shared_meal_plans", (db) => {
-      return db
-        .selectFrom("meal_plan_shares")
-        .innerJoin(
-          "user_kitchen_memberships",
-          "user_kitchen_memberships.id",
-          "meal_plan_shares.user_kitchen_membership_id"
-        )
-        .innerJoin("meal_plans", "meal_plans.id", "meal_plan_shares.meal_plan_id")
-        .where((eb) => {
-          return eb.and([
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-            eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "SELECTIVE"),
-            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-          ]);
-        })
-        .selectAll("meal_plans")
-        .select((eb) => mealPlanSharesSubquery(eb, user.id).as("shares"));
-    })
     .with("all_grant_shared_meal_plans", (db) => {
       return (
         db
@@ -49,7 +30,6 @@ export const listMealPlans = async (
           .where((eb) => {
             return eb.and([
               eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
               eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
             ]);
           })
@@ -78,9 +58,6 @@ export const listMealPlans = async (
       if (shared_meal_plans_filter === "include") {
         return db
           .selectFrom("owned_meal_plans")
-          .union((eb) => {
-            return eb.selectFrom("selective_grant_shared_meal_plans").selectAll();
-          })
           .union((eb) => {
             return eb.selectFrom("all_grant_shared_meal_plans").selectAll();
           })

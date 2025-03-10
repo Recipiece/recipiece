@@ -19,12 +19,6 @@ export const listCookbooks = async (
     shared_cookbooks_filter,
   } = req.query;
 
-  // const page = req.query.page_number;
-  // const pageSize = req.query.page_size ?? Constant.DEFAULT_PAGE_SIZE;
-  // const excludeContainingRecipeId = req.query.exclude_containing_recipe_id;
-  // const search = req.query.search;
-  // const shared_cookbooks = req.query.shared_cookbooks ?? "include";
-
   let query = tx.$kysely
     .with("owned_cookbooks", (db) => {
       return db
@@ -32,25 +26,6 @@ export const listCookbooks = async (
         .selectAll("cookbooks")
         .select((eb) => cookbookSharesSubquery(eb, user.id).as("shares"))
         .where("cookbooks.user_id", "=", user.id);
-    })
-    .with("selective_grant_shared_cookbooks", (db) => {
-      return db
-        .selectFrom("cookbook_shares")
-        .innerJoin(
-          "user_kitchen_memberships",
-          "user_kitchen_memberships.id",
-          "cookbook_shares.user_kitchen_membership_id"
-        )
-        .innerJoin("cookbooks", "cookbooks.id", "cookbook_shares.cookbook_id")
-        .where((eb) => {
-          return eb.and([
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-            eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "SELECTIVE"),
-            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-          ]);
-        })
-        .selectAll("cookbooks")
-        .select((eb) => cookbookSharesSubquery(eb, user.id).as("shares"));
     })
     .with("all_grant_shared_cookbooks", (db) => {
       return (
@@ -61,7 +36,6 @@ export const listCookbooks = async (
           .where((eb) => {
             return eb.and([
               eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
               eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
             ]);
           })
@@ -90,9 +64,6 @@ export const listCookbooks = async (
       if (shared_cookbooks_filter === "include") {
         return db
           .selectFrom("owned_cookbooks")
-          .union((eb) => {
-            return eb.selectFrom("selective_grant_shared_cookbooks").selectAll();
-          })
           .union((eb) => {
             return eb.selectFrom("all_grant_shared_cookbooks").selectAll();
           })

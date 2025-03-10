@@ -39,16 +39,12 @@ describe("Get Shopping List", () => {
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
-  it("should get a shared shopping list for a SELECTIVE grant level membership", async () => {
+  it("should get a shared shopping list", async () => {
     const othersShoppingList = await generateShoppingList();
     const membership = await generateUserKitchenMembership({
       source_user_id: othersShoppingList.user_id,
       destination_user_id: user.id,
       status: "accepted",
-    });
-    const share = await generateShoppingListShare({
-      shopping_list_id: othersShoppingList.id,
-      user_kitchen_membership_id: membership.id,
     });
 
     // make a membership and share going the other way to ensure we dont pick up stray records
@@ -56,39 +52,6 @@ describe("Get Shopping List", () => {
       destination_user_id: othersShoppingList.user_id,
       source_user_id: user.id,
       status: "accepted",
-    });
-    const usersShoppingList = await generateShoppingList({ user_id: user.id });
-    const usersShoppingListShare = await generateShoppingListShare({
-      user_kitchen_membership_id: mirroredMembership.id,
-      shopping_list_id: usersShoppingList.id,
-    });
-
-    const response = await request(server)
-      .get(`/shopping-list/${othersShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: ShoppingListSchema = response.body;
-
-    expect(responseData.shares?.length).toBe(1);
-    expect(responseData.shares![0].id).toBe(share.id);
-  });
-
-  it("should get a shared shopping list for an ALL grant level membership", async () => {
-    const othersShoppingList = await generateShoppingList();
-    const membership = await generateUserKitchenMembership({
-      source_user_id: othersShoppingList.user_id,
-      destination_user_id: user.id,
-      status: "accepted",
-      grant_level: "ALL",
-    });
-
-    // make a membership and share going the other way to ensure we dont pick up stray records
-    const mirroredMembership = await generateUserKitchenMembership({
-      destination_user_id: othersShoppingList.user_id,
-      source_user_id: user.id,
-      status: "accepted",
-      grant_level: "SELECTIVE",
     });
     const usersShoppingList = await generateShoppingList({ user_id: user.id });
     const usersShoppingListShare = await generateShoppingListShare({

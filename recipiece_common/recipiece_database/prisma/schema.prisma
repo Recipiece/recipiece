@@ -67,17 +67,11 @@ enum UserKitchenMembershipStatus {
   pending
 }
 
-enum UserKitchenMembershipGrantLevel {
-  ALL
-  SELECTIVE
-}
-
 model UserKitchenMembership {
   @@map("user_kitchen_memberships")
   
   id Int @id @default(autoincrement())
   created_at DateTime @default(now())
-  grant_level UserKitchenMembershipGrantLevel @default(SELECTIVE)
   source_user_id Int
   destination_user_id Int
   status UserKitchenMembershipStatus

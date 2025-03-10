@@ -174,7 +174,7 @@ describe("Bulk Set Meal Plan Items", () => {
     expect(dbItem).toBeTruthy();
   });
 
-  it("should allow a shared user to bulk set items for a SELECTIVE grant level", async () => {
+  it("should allow a shared user to bulk set items for a shared meal plan", async () => {
     const otherUser = await generateUser();
     const mealPlan = await generateMealPlan({
       user_id: otherUser.id,
@@ -196,77 +196,6 @@ describe("Bulk Set Meal Plan Items", () => {
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
-      grant_level: "SELECTIVE",
-    });
-    const share = await generateMealPlanShare({
-      user_kitchen_membership_id: membership.id,
-      meal_plan_id: mealPlan.id,
-    });
-
-    const recipeToAdd = await generateRecipe({
-      user_id: user.id,
-    });
-
-    const response = await request(server)
-      .post(`/meal-plan/${mealPlan.id}/item/bulk-set`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<BulkSetMealPlanItemsRequestSchema>{
-        create: [
-          {
-            recipe_id: recipeToAdd.id,
-            meal_plan_id: mealPlan.id,
-            start_date: DateTime.utc().toJSDate(),
-          },
-        ],
-        update: [
-          {
-            ...itemToUpdate,
-            freeform_content: "new",
-          },
-        ],
-        delete: [itemToDelete],
-      });
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const mealPlanItems = await prisma.mealPlanItem.findMany({
-      where: {
-        meal_plan_id: mealPlan.id,
-      },
-    });
-    expect(mealPlanItems.length).toBe(2);
-
-    const recipeBasedItem = mealPlanItems.find((item) => !!item.recipe_id);
-    expect(recipeBasedItem).toBeTruthy();
-    expect(recipeBasedItem?.recipe_id).toBe(recipeToAdd.id);
-
-    const nonRecipeItem = mealPlanItems.find((item) => !item.recipe_id);
-    expect(nonRecipeItem).toBeTruthy();
-    expect(nonRecipeItem?.freeform_content).toBe("new");
-  });
-
-  it("should allow a shared user to bulk set items for an ALL grant level", async () => {
-    const otherUser = await generateUser();
-    const mealPlan = await generateMealPlan({
-      user_id: otherUser.id,
-    });
-    const otherUsersRecipe = await generateRecipe({
-      user_id: otherUser.id,
-    });
-    const itemToDelete = await generateMealPlanItem({
-      recipe_id: otherUsersRecipe.id,
-      meal_plan_id: mealPlan.id,
-    });
-
-    const itemToUpdate = await generateMealPlanItem({
-      freeform_content: "asdfqwer",
-      meal_plan_id: mealPlan.id,
-    });
-
-    const membership = await generateUserKitchenMembership({
-      source_user_id: otherUser.id,
-      destination_user_id: user.id,
-      status: "accepted",
-      grant_level: "ALL",
     });
 
     const recipeToAdd = await generateRecipe({

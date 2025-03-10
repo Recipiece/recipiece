@@ -40,11 +40,10 @@ describe("Add Recipe to Cookbook", () => {
   it("should allow a shared user to attach a recipe", async () => {
     const otherUser = await generateUser();
     const otherCookbook = await generateCookbook({ user_id: otherUser.id });
-    const membership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
-      grant_level: "ALL",
     });
 
     const userRecipe = await generateRecipe({ user_id: user.id });
@@ -98,11 +97,10 @@ describe("Add Recipe to Cookbook", () => {
   it("should not allow a denied membership to attach a recipe", async () => {
     const otherUser = await generateUser();
     const otherCookbook = await generateCookbook({ user_id: otherUser.id });
-    const membership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "denied",
-      grant_level: "ALL",
     });
 
     const userRecipe = await generateRecipe({ user_id: user.id });

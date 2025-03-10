@@ -90,71 +90,12 @@ describe("Update User Kitchen Membership", () => {
     expect(updatedRecord!.status).toBe(membership.status);
   });
 
-  it("should allow you to modify the grant level of a membership that you created", async () => {
-    const membership = await generateUserKitchenMembership({
-      source_user_id: user.id,
-      status: "accepted",
-      grant_level: "SELECTIVE",
-    });
-
-    const response = await request(server)
-      .put("/user-kitchen-membership")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<UpdateUserKitchenMembershipRequestSchema>{
-        id: membership.id,
-        grant_level: "ALL",
-      });
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const updatedBody: UserKitchenMembershipSchema = response.body;
-
-    expect(updatedBody.grant_level).toBe("ALL");
-
-    const updatedRecord = await prisma.userKitchenMembership.findFirst({
-      where: {
-        id: membership.id,
-      },
-    });
-    expect(updatedRecord).toBeTruthy();
-    expect(updatedRecord!.grant_level).toBe("ALL");
-  });
-
-  it("should allow you to modify the grant level of a membership that is targeting you", async () => {
-    const membership = await generateUserKitchenMembership({
-      destination_user_id: user.id,
-      status: "accepted",
-      grant_level: "SELECTIVE",
-    });
-
-    const response = await request(server)
-      .put("/user-kitchen-membership")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send(<UpdateUserKitchenMembershipRequestSchema>{
-        id: membership.id,
-        grant_level: "ALL",
-      });
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const updatedBody: UserKitchenMembershipSchema = response.body;
-
-    expect(updatedBody.grant_level).toBe("ALL");
-
-    const updatedRecord = await prisma.userKitchenMembership.findFirst({
-      where: {
-        id: membership.id,
-      },
-    });
-    expect(updatedRecord).toBeTruthy();
-    expect(updatedRecord!.grant_level).toBe("ALL");
-  });
-
   it("should not allow you to modify a membership that does not exist", async () => {
     const response = await request(server)
       .put(`/user-kitchen-membership`)
       .set("Authorization", `Bearer ${bearerToken}`)
       .send(<UpdateUserKitchenMembershipRequestSchema>{
         id: 10000000,
-        grant_level: "ALL",
         status: "accepted",
       });
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);

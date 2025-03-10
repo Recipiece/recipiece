@@ -1,8 +1,7 @@
 import { PrismaTransaction } from "@recipiece/database";
 import {
   UpdateUserKitchenMembershipRequestSchema,
-  UserKitchenInvitationStatus,
-  UserKitchenMembershipSchema,
+  UserKitchenMembershipSchema
 } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
@@ -15,7 +14,7 @@ export const updateUserKitchenMembership = async (
   request: AuthenticatedRequest<UpdateUserKitchenMembershipRequestSchema>,
   tx: PrismaTransaction
 ): ApiResponse<UserKitchenMembershipSchema> => {
-  const { id, status, grant_level } = request.body;
+  const { id, status } = request.body;
 
   const membership = await tx.userKitchenMembership.findFirst({
     where: {
@@ -55,7 +54,6 @@ export const updateUserKitchenMembership = async (
     },
     data: {
       status: status ?? membership.status,
-      grant_level: grant_level ?? membership.grant_level,
     },
     include: {
       destination_user: true,
@@ -63,13 +61,5 @@ export const updateUserKitchenMembership = async (
     },
   });
 
-  return [
-    StatusCodes.OK,
-    {
-      ...updatedRecord,
-      status: updatedRecord.status as
-        | typeof UserKitchenInvitationStatus.ACCEPTED
-        | typeof UserKitchenInvitationStatus.DENIED,
-    },
-  ];
+  return [StatusCodes.OK, updatedRecord];
 };

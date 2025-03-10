@@ -1,9 +1,8 @@
-import { prisma, User, UserKitchenMembershipGrantLevel } from "@recipiece/database";
+import { prisma, User } from "@recipiece/database";
 import {
   generateShoppingList,
-  generateShoppingListShare,
   generateUser,
-  generateUserKitchenMembership,
+  generateUserKitchenMembership
 } from "@recipiece/test";
 import { ShoppingListSchema, UpdateShoppingListRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
@@ -57,46 +56,35 @@ describe("Update Shopping List", () => {
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 
-  it.each(<UserKitchenMembershipGrantLevel[]>["ALL", "SELECTIVE"])(
-    "should not allow a shared user to update a shopping list",
-    async (grantLevel) => {
-      const otherUser = await generateUser();
-      const membership = await generateUserKitchenMembership({
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-        grant_level: grantLevel,
-      });
-      const shoppingList = await generateShoppingList({ user_id: otherUser.id });
+  it("should not allow a shared user to update a shopping list", async () => {
+    const otherUser = await generateUser();
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+    const shoppingList = await generateShoppingList({ user_id: otherUser.id });
 
-      if (grantLevel === "SELECTIVE") {
-        await generateShoppingListShare({
-          user_kitchen_membership_id: membership.id,
-          shopping_list_id: shoppingList.id,
-        });
-      }
+    const updateBody: UpdateShoppingListRequestSchema = {
+      name: "new name",
+      id: shoppingList.id,
+    };
 
-      const updateBody: UpdateShoppingListRequestSchema = {
-        name: "new name",
+    const response = await request(server)
+      .put("/shopping-list")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({ ...updateBody });
+
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+
+    const updatedRecord = await prisma.shoppingList.findFirst({
+      where: {
         id: shoppingList.id,
-      };
-
-      const response = await request(server)
-        .put("/shopping-list")
-        .set("Authorization", `Bearer ${bearerToken}`)
-        .send({ ...updateBody });
-
-      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-
-      const updatedRecord = await prisma.shoppingList.findFirst({
-        where: {
-          id: shoppingList.id,
-        },
-      });
-      expect(updatedRecord).toBeTruthy();
-      expect(updatedRecord!.name).toBe(shoppingList.name);
-    }
-  );
+      },
+    });
+    expect(updatedRecord).toBeTruthy();
+    expect(updatedRecord!.name).toBe(shoppingList.name);
+  });
 
   it("should not allow another user to update your shopping list", async () => {
     const otherUser = await generateUser();

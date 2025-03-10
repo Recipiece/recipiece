@@ -7,7 +7,7 @@ ALTER TABLE "user_kitchen_memberships" ADD COLUMN     "grant_level" "UserKitchen
 update 
     user_kitchen_memberships
 set 
-    grant_level = 'SELECTIVE' 
+    grant_level = 'ALL' 
 where 
     true
 ;

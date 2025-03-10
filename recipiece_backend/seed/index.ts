@@ -153,7 +153,6 @@ const seedOtherUser = async () => {
     source_user_id: devUser.id,
     destination_user_id: otherUser.id,
     status: "accepted",
-    grant_level: "ALL",
   });
 
   await generateUserKitchenMembership({

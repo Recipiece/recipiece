@@ -3,7 +3,6 @@ import {
   CreateAccountPage,
   DashboardPage,
   ForgotPasswordPage,
-  KitchenMembershipPage,
   KitchenPage,
   LoginPage,
   MealPlanConfigurationPage,
@@ -74,10 +73,6 @@ export const authenticatedRoutes = [
   {
     path: "/kitchen",
     element: KitchenPage,
-  },
-  {
-    path: "/kitchen/:kitchenMembershipId",
-    element: KitchenMembershipPage,
   },
   // {
   //   path: "/notifications",

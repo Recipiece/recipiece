@@ -24,4 +24,3 @@ export * from "./SearchRecipes";
 export * from "./SearchRecipesForCookbook";
 export * from "./SearchRecipesForMealPlan";
 export * from "./Share";
-export * from "./EditMembership";

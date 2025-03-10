@@ -1,5 +1,5 @@
-import { prisma, User, UserKitchenMembershipGrantLevel } from "@recipiece/database";
-import { generateMealPlan, generateMealPlanShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { prisma, User } from "@recipiece/database";
+import { generateMealPlan, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { MealPlanSchema, UpdateMealPlanRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -78,46 +78,34 @@ describe("Update Meal Plan", () => {
     expect(updatedMealPlanRecord!.name).toBe(otherMealPlan.name);
   });
 
-  it.each(<UserKitchenMembershipGrantLevel[]>["ALL", "SELECTIVE"])(
-    "should not allow a shared user to update a meal plan",
-    async (grantLevel) => {
-      const otherUser = await generateUser();
-      const membership = await generateUserKitchenMembership({
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-        grant_level: grantLevel,
+  it("should not allow a shared user to update a meal plan", async () => {
+    const otherUser = await generateUser();
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+    const otherMealPlan = await generateMealPlan({ user_id: otherUser.id });
+
+    const newName = "new name";
+
+    const response = await request(server)
+      .put("/meal-plan")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send(<UpdateMealPlanRequestSchema>{
+        id: otherMealPlan.id,
+        name: newName,
       });
 
-      const otherMealPlan = await generateMealPlan({ user_id: otherUser.id });
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 
-      if (grantLevel === "SELECTIVE") {
-        await generateMealPlanShare({
-          meal_plan_id: otherMealPlan.id,
-          user_kitchen_membership_id: membership.id,
-        });
-      }
+    const updatedMealPlanRecord = await prisma.mealPlan.findFirst({
+      where: {
+        id: otherMealPlan.id,
+      },
+    });
 
-      const newName = "new name";
-
-      const response = await request(server)
-        .put("/meal-plan")
-        .set("Authorization", `Bearer ${bearerToken}`)
-        .send(<UpdateMealPlanRequestSchema>{
-          id: otherMealPlan.id,
-          name: newName,
-        });
-
-      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-
-      const updatedMealPlanRecord = await prisma.mealPlan.findFirst({
-        where: {
-          id: otherMealPlan.id,
-        },
-      });
-
-      expect(updatedMealPlanRecord).toBeTruthy();
-      expect(updatedMealPlanRecord!.name).toBe(otherMealPlan.name);
-    }
-  );
+    expect(updatedMealPlanRecord).toBeTruthy();
+    expect(updatedMealPlanRecord!.name).toBe(otherMealPlan.name);
+  });
 });

@@ -49,33 +49,6 @@ export const listRecipes = async (
         .select((eb) => recipeSharesSubquery(eb, user.id).as("shares"))
         .where("recipes.user_id", "=", user.id);
     })
-    .with("selective_grant_shared_recipes", (db) => {
-      let base = db
-        .selectFrom("recipe_shares")
-        .innerJoin(
-          "user_kitchen_memberships",
-          "user_kitchen_memberships.id",
-          "recipe_shares.user_kitchen_membership_id"
-        )
-        .innerJoin("recipes", "recipes.id", "recipe_shares.recipe_id")
-        .where((eb) => {
-          return eb.and([
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-            eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "SELECTIVE"),
-            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-          ]);
-        })
-        .selectAll("recipes")
-        .select(selectableSubqueries)
-        // these shares are "normal" because they are explicitly shared
-        .select((eb) => recipeSharesSubquery(eb, user.id).as("shares"));
-
-      if (membershipIds.length > 0) {
-        base = base.where("user_kitchen_memberships.id", "in", membershipIds);
-      }
-
-      return base;
-    })
     .with("all_grant_shared_recipes", (db) => {
       let base = db
         .selectFrom("user_kitchen_memberships")
@@ -84,7 +57,6 @@ export const listRecipes = async (
         .where((eb) => {
           return eb.and([
             eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-            eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
             eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
           ]);
         })
@@ -120,19 +92,11 @@ export const listRecipes = async (
         return db
           .selectFrom("owned_recipes")
           .union((eb) => {
-            return eb.selectFrom("selective_grant_shared_recipes").selectAll();
-          })
-          .union((eb) => {
             return eb.selectFrom("all_grant_shared_recipes").selectAll();
           })
           .selectAll();
       } else if (!showUserRecipes && membershipIds.length > 0) {
-        return db
-          .selectFrom("selective_grant_shared_recipes")
-          .union((eb) => {
-            return eb.selectFrom("all_grant_shared_recipes").selectAll();
-          })
-          .selectAll();
+        return db.selectFrom("all_grant_shared_recipes").selectAll();
       } else if (showUserRecipes && membershipIds.length === 0) {
         return db.selectFrom("owned_recipes").selectAll();
       } else {

@@ -42,50 +42,13 @@ describe("Append Shopping List Items", () => {
     expect(listItems.length).toBe(0);
   });
 
-  it("should allow a shared user to append items when the grant level is SELECTIVE", async () => {
+  it("should allow a shared user to append items to a shared meal plan", async () => {
     const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
     const shoppingList = await generateShoppingList({ user_id: user.id });
-    const membership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: user.id,
       destination_user_id: otherUser.id,
       status: "accepted",
-    });
-    const share = await generateShoppingListShare({
-      shopping_list_id: shoppingList.id,
-      user_kitchen_membership_id: membership.id,
-    });
-
-    const appendedItem: Partial<ShoppingListItem> = {
-      content: "appended",
-    };
-    const response = await request(server)
-      .post("/shopping-list/append-items")
-      .send({
-        shopping_list_id: shoppingList.id,
-        items: [{ ...appendedItem }],
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${otherBearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-
-    const listItems = await prisma.shoppingListItem.findMany({
-      where: {
-        shopping_list_id: shoppingList.id,
-      },
-    });
-    expect(listItems.length).toBe(1);
-    expect(listItems[0].content).toBe(appendedItem.content);
-  });
-
-  it("should allow a shared user to append items when the grant level is ALL", async () => {
-    const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
-    const shoppingList = await generateShoppingList({ user_id: user.id });
-    const membership = await generateUserKitchenMembership({
-      source_user_id: user.id,
-      destination_user_id: otherUser.id,
-      status: "accepted",
-      grant_level: "ALL",
     });
 
     const appendedItem: Partial<ShoppingListItem> = {

@@ -49,7 +49,6 @@ describe("Remove Recipe from Cookbook", () => {
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
-      grant_level: "ALL",
     });
 
     const userRecipe = await generateRecipe({ user_id: user.id });
@@ -115,7 +114,6 @@ describe("Remove Recipe from Cookbook", () => {
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "denied",
-      grant_level: "ALL",
     });
 
     const response = await request(server)

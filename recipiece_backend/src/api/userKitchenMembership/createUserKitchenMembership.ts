@@ -76,14 +76,5 @@ export const createUserKitchenMembership = async (
       destination_user: true,
     },
   });
-  return [
-    StatusCodes.OK,
-    {
-      ...membership,
-      status: membership.status as
-        | typeof UserKitchenInvitationStatus.PENDING
-        | typeof UserKitchenInvitationStatus.ACCEPTED
-        | typeof UserKitchenInvitationStatus.DENIED,
-    },
-  ];
+  return [StatusCodes.OK, membership];
 };

@@ -64,25 +64,11 @@ describe("List Meal Plan", () => {
 
   describe("Shared Meal Plan", () => {
     it("should list meal plans shared to you", async () => {
-      const otherUserSelective = await generateUser();
-      const selectiveMembership = await generateUserKitchenMembership({
-        source_user_id: otherUserSelective.id,
-        destination_user_id: user.id,
-        status: "accepted",
-        grant_level: "SELECTIVE",
-      });
-      const otherMealPlanSelective = await generateMealPlan({ user_id: otherUserSelective.id });
-      await generateMealPlanShare({
-        meal_plan_id: otherMealPlanSelective.id,
-        user_kitchen_membership_id: selectiveMembership.id,
-      });
-
       const otherUserAll = await generateUser();
       const allMembership = await generateUserKitchenMembership({
         source_user_id: otherUserAll.id,
         destination_user_id: user.id,
         status: "accepted",
-        grant_level: "ALL",
       });
       const otherMealPlanAll = await generateMealPlan({ user_id: otherUserAll.id });
 
@@ -103,35 +89,21 @@ describe("List Meal Plan", () => {
       expect(response.statusCode).toBe(StatusCodes.OK);
       const responseData: ListMealPlansResponseSchema = response.body;
 
-      expect(responseData.data.length).toBe(12);
-      const expectedIds = [...userMealPlans, otherMealPlanAll, otherMealPlanSelective].map((mp) => mp.id);
+      expect(responseData.data.length).toBe(11);
+      const expectedIds = [...userMealPlans, otherMealPlanAll].map((mp) => mp.id);
       responseData.data.forEach((mp) => {
         expect(expectedIds.includes(mp.id)).toBeTruthy();
       });
     });
 
     it("should not list meal plans shared to you", async () => {
-      const otherUserSelective = await generateUser();
-      const selectiveMembership = await generateUserKitchenMembership({
-        source_user_id: otherUserSelective.id,
-        destination_user_id: user.id,
-        status: "accepted",
-        grant_level: "SELECTIVE",
-      });
-      const otherMealPlanSelective = await generateMealPlan({ user_id: otherUserSelective.id });
-      await generateMealPlanShare({
-        meal_plan_id: otherMealPlanSelective.id,
-        user_kitchen_membership_id: selectiveMembership.id,
-      });
-
       const otherUserAll = await generateUser();
-      const allMembership = await generateUserKitchenMembership({
+      await generateUserKitchenMembership({
         source_user_id: otherUserAll.id,
         destination_user_id: user.id,
         status: "accepted",
-        grant_level: "ALL",
       });
-      const otherMealPlanAll = await generateMealPlan({ user_id: otherUserAll.id });
+      await generateMealPlan({ user_id: otherUserAll.id });
 
       const userMealPlans = [];
       for (let i = 0; i < 10; i++) {
@@ -162,17 +134,12 @@ describe("List Meal Plan", () => {
       "should not list meal plans shared to a non-accepted membership",
       async (membershipStatus) => {
         const otherUserSelective = await generateUser();
-        const selectiveMembership = await generateUserKitchenMembership({
+        await generateUserKitchenMembership({
           source_user_id: otherUserSelective.id,
           destination_user_id: user.id,
           status: membershipStatus,
-          grant_level: "SELECTIVE",
         });
-        const otherMealPlanSelective = await generateMealPlan({ user_id: otherUserSelective.id });
-        await generateMealPlanShare({
-          meal_plan_id: otherMealPlanSelective.id,
-          user_kitchen_membership_id: selectiveMembership.id,
-        });
+        await generateMealPlan({ user_id: otherUserSelective.id });
 
         const userMealPlans = [];
         for (let i = 0; i < 10; i++) {

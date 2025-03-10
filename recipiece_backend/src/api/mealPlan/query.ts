@@ -1,29 +1,6 @@
 import { KyselyCore, KyselyGenerated, PrismaTransaction, User } from "@recipiece/database";
 
 export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlanId: number) => {
-  const selectiveShareCheck = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "meal_plans">) => {
-    return eb.exists(
-      eb
-        .selectFrom("meal_plan_shares")
-        .select("meal_plan_shares.id")
-        .innerJoin(
-          "user_kitchen_memberships",
-          "user_kitchen_memberships.id",
-          "meal_plan_shares.user_kitchen_membership_id"
-        )
-        .where((_eb) => {
-          return _eb.and([
-            _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-            _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-            _eb(_eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "SELECTIVE"),
-          ]);
-        })
-        .whereRef("meal_plan_shares.meal_plan_id", "=", "meal_plans.id")
-        .whereRef("user_kitchen_memberships.source_user_id", "=", "meal_plans.user_id")
-        .limit(1)
-    );
-  };
-
   const allShareCheck = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "meal_plans">) => {
     return eb.exists(
       eb
@@ -32,7 +9,6 @@ export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlan
           return _eb.and([
             _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
             _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-            _eb(_eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
           ]);
         })
         .whereRef("user_kitchen_memberships.source_user_id", "=", "meal_plans.user_id")
@@ -48,8 +24,6 @@ export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlan
       return eb
         .case()
         .when("meal_plans.user_id", "=", user.id)
-        .then(mealPlanSharesSubquery(eb, user.id))
-        .when(selectiveShareCheck(eb))
         .then(mealPlanSharesSubquery(eb, user.id))
         .when(allShareCheck(eb))
         .then(
@@ -70,7 +44,6 @@ export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlan
                   return _eb.and([
                     _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
                     _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-                    _eb(_eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
                   ]);
                 })
                 .limit(1),
@@ -87,8 +60,6 @@ export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlan
         eb.or([
           // it's your meal_plan
           eb("meal_plans.user_id", "=", user.id),
-          // it's been explicitly shared through a SELECTIVE grant type
-          selectiveShareCheck(eb),
           // it's implicitly shared through an ALL grant type
           allShareCheck(eb),
         ]),

@@ -21,25 +21,6 @@ export const listShoppingLists = async (
         .select((eb) => shoppingListSharesSubquery(eb, user.id).as("shares"))
         .where("shopping_lists.user_id", "=", user.id);
     })
-    .with("selective_grant_shared_shopping_lists", (db) => {
-      return db
-        .selectFrom("shopping_list_shares")
-        .innerJoin(
-          "user_kitchen_memberships",
-          "user_kitchen_memberships.id",
-          "shopping_list_shares.user_kitchen_membership_id"
-        )
-        .innerJoin("shopping_lists", "shopping_lists.id", "shopping_list_shares.shopping_list_id")
-        .where((eb) => {
-          return eb.and([
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-            eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "SELECTIVE"),
-            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-          ]);
-        })
-        .selectAll("shopping_lists")
-        .select((eb) => shoppingListSharesSubquery(eb, user.id).as("shares"));
-    })
     .with("all_grant_shared_shopping_lists", (db) => {
       return (
         db
@@ -49,7 +30,6 @@ export const listShoppingLists = async (
           .where((eb) => {
             return eb.and([
               eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              eb(eb.cast("user_kitchen_memberships.grant_level", "text"), "=", "ALL"),
               eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
             ]);
           })
@@ -78,9 +58,6 @@ export const listShoppingLists = async (
       if (shared_shopping_lists_filter === "include") {
         return db
           .selectFrom("owned_shopping_lists")
-          .union((eb) => {
-            return eb.selectFrom("selective_grant_shared_shopping_lists").selectAll();
-          })
           .union((eb) => {
             return eb.selectFrom("all_grant_shared_shopping_lists").selectAll();
           })
