@@ -1,5 +1,5 @@
 import { Cookbook, User } from "@recipiece/database";
-import { generateCookbook, generateCookbookShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { generateCookbook, generateRecipe, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -202,5 +202,30 @@ describe("List Cookbooks", () => {
 
     expect(responseData.data.length).toBe(1);
     expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
+  });
+
+  it("should not list cookbooks for a recipe where the owner does not have access to the recipe", async () => {
+    const membership = await generateUserKitchenMembership({
+      destination_user_id: user.id,
+    });
+    const recipe = await generateRecipe({user_id: user.id});
+    const userCookbook = await generateCookbook({ user_id: user.id });
+    const sharedCookbook = await generateCookbook({ user_id: membership.source_user_id });
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        recipe_id: recipe.id,
+        recipe_id_filter: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
+
+    expect(responseData.data.length).toBe(1);
+    expect(responseData.data[0].id).toBe(userCookbook.id);
   });
 });

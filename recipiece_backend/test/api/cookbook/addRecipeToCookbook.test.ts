@@ -3,6 +3,7 @@ import { generateCookbook, generateRecipe, generateUser, generateUserKitchenMemb
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { generateCookbookWithRecipe } from "./fixtures";
+import { access } from "fs";
 
 describe("Add Recipe to Cookbook", () => {
   let user: User;
@@ -43,6 +44,11 @@ describe("Add Recipe to Cookbook", () => {
     await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
+      status: "accepted",
+    });
+    await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
       status: "accepted",
     });
 
@@ -139,4 +145,39 @@ describe("Add Recipe to Cookbook", () => {
 
     expect(response.statusCode).toEqual(StatusCodes.CONFLICT);
   });
+
+  it("should not allow a shared user to attach a recipe that the source user cannot access", async () => {
+    const bToUserMembership = await generateUserKitchenMembership({
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+    const cToUserMembership = await generateUserKitchenMembership({
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+
+    const bRecipe = await generateRecipe({user_id: bToUserMembership.source_user_id});
+    const cRecipe = await generateRecipe({user_id: cToUserMembership.source_user_id});
+
+    const cCookbook = await generateCookbook({user_id: cToUserMembership.source_user_id});
+
+    const response = await request(server)
+      .post("/cookbook/recipe/add")
+      .send({
+        recipe_id: bRecipe.id,
+        cookbook_id: cCookbook.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toEqual(StatusCodes.PRECONDITION_FAILED);
+
+    const attachment = await prisma.recipeCookbookAttachment.findFirst({
+      where: {
+        recipe_id: bRecipe.id,
+        cookbook_id: cCookbook.id,
+      }
+    });
+    expect(attachment).toBeFalsy();
+  })
 });

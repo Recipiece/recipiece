@@ -96,15 +96,29 @@ export const listCookbooks = async (
       });
     } else if (recipe_id_filter === "exclude") {
       query = query.where((eb) => {
-        return eb(
-          eb
-            .selectFrom("recipe_cookbook_attachments")
-            .select("recipe_cookbook_attachments.recipe_id")
-            .where("recipe_cookbook_attachments.recipe_id", "=", recipe_id)
-            .whereRef("recipe_cookbook_attachments.cookbook_id", "=", "all_cookbooks.id"),
-          "is",
-          null
-        );
+        return eb.and([
+          eb(
+            eb
+              .selectFrom("recipe_cookbook_attachments")
+              .select("recipe_cookbook_attachments.recipe_id")
+              .where("recipe_cookbook_attachments.recipe_id", "=", recipe_id)
+              .whereRef("recipe_cookbook_attachments.cookbook_id", "=", "all_cookbooks.id"),
+            "is",
+            null
+          ),
+          eb.or([
+            eb("all_cookbooks.user_id", "=", user.id),
+            eb(
+              eb
+                .selectFrom("user_kitchen_memberships")
+                .select("user_kitchen_memberships.id")
+                .where((_eb) => _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"))
+                .where("user_kitchen_memberships.destination_user_id", "=", user.id),
+              "is not",
+              null
+            ),
+          ]),
+        ]);
       });
     }
   }
