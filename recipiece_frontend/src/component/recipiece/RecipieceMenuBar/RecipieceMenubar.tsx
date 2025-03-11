@@ -1,13 +1,12 @@
 import { DataTestId } from "@recipiece/constant";
 import { CookbookSchema, ShoppingListSchema } from "@recipiece/types";
-import { Book, CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
+import { CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
 import { createContext, createRef, FC, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateCookbookMutation,
   useCreateMealPlanMutation,
   useCreateShoppingListMutation,
-  useListCookbooksQuery,
   useListMealPlansQuery,
   useListShoppingListsQuery,
   useLogoutUserMutation,
@@ -37,7 +36,6 @@ import {
 } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
-import { CookbookMenuItem } from "./CookbookMenuItem";
 import { MealPlanMenuItem } from "./MealPlanMenuItem";
 import { ShoppingListMenuItem } from "./ShoppingListMenuItem";
 
@@ -51,9 +49,7 @@ export const RecipieceMenuBarContextProvider: FC<PropsWithChildren> = ({ childre
   const mobileMenuPortalRef = createRef<HTMLSpanElement>();
 
   return (
-    <RecipieceMenuBarContext.Provider value={{ mobileMenuPortalRef: mobileMenuPortalRef }}>
-      {children}
-    </RecipieceMenuBarContext.Provider>
+    <RecipieceMenuBarContext.Provider value={{ mobileMenuPortalRef }}>{children}</RecipieceMenuBarContext.Provider>
   );
 };
 
@@ -71,7 +67,6 @@ export const RecipieceMenubar: FC = () => {
   const { toast } = useToast();
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
-  const [cookbooksPage, setCookbooksPage] = useState(0);
   const [shoppingListsPage, setShoppingListsPage] = useState(0);
   const [mealPlansPage, setMealPlansPage] = useState(0);
 
@@ -81,10 +76,6 @@ export const RecipieceMenubar: FC = () => {
 
   const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery({
     page_number: shoppingListsPage,
-  });
-
-  const { data: cookbooks, isLoading: isLoadingCookbooks } = useListCookbooksQuery({
-    page_number: cookbooksPage,
   });
 
   const { data: mealPlans, isLoading: isLoadingMealPlans } = useListMealPlansQuery({
@@ -218,16 +209,6 @@ export const RecipieceMenubar: FC = () => {
     });
   }, [navigate, popDialog, pushDialog]);
 
-  const onMobileViewCookbooks = useCallback(() => {
-    pushDialog("mobileCookbooks", {
-      onClose: () => popDialog("mobileCookbooks"),
-      onSubmit: (cookbook: CookbookSchema) => {
-        popDialog("mobileCookbooks");
-        navigate(`/cookbook/${cookbook.id}`);
-      },
-    });
-  }, [navigate, popDialog, pushDialog]);
-
   const onMobileViewMealPlans = useCallback(() => {
     pushDialog("mobileMealPlans", {
       onClose: () => popDialog("mobileMealPlans"),
@@ -242,7 +223,7 @@ export const RecipieceMenubar: FC = () => {
     <>
       <Menubar
         data-testid={DataTestId.MenuBar.NAV_DESKTOP_MENU_BAR}
-        className="h-12 rounded-none border-0 p-2 text-white sm:h-16 sm:bg-primary sm:p-4"
+        className="h-12 rounded-none border-0 p-2 text-white sm:h-16 sm:bg-primary sm:p-4 sm:fixed w-full z-50"
       >
         <RecipieceHeader className="mr-auto w-full text-start text-primary dark:text-white sm:text-center sm:text-white md:w-auto" />
         <span className="ml-auto block sm:hidden">
@@ -333,31 +314,6 @@ export const RecipieceMenubar: FC = () => {
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_COOKBOOK}>Cookbooks</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_CREATE_COOKBOOK} onClick={onStartCreateCookbook}>
-                <Plus size={16} className="mr-2" /> New Cookbook
-              </MenubarItem>
-              <LoadingGroup isLoading={isLoadingCookbooks} className="h-10 w-full">
-                {!!cookbooks?.data?.length && <Separator />}
-                {(cookbooks?.data || []).map((cookbook) => {
-                  return (
-                    <CookbookMenuItem
-                      cookbook={cookbook}
-                      data-testid={DataTestId.MenuBar.MENU_ITEM_COOKBOOK(cookbook.id)}
-                      onClick={() => navigate(`/cookbook/${cookbook.id}`)}
-                      key={cookbook.id}
-                    />
-                  );
-                })}
-                {/* {cookbooks?.data && <Pager shortForm={true} page={cookbooksPage} onPage={setCookbooksPage} hasNextPage={cookbooks?.hasNextPage} />} */}
-              </LoadingGroup>
-            </MenubarContent>
-          </MenubarMenu>
-        </span>
-
-        <span className="hidden w-0 sm:block sm:w-auto">
-          <MenubarMenu>
             <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_SHOPPING_LIST}>Shopping Lists</MenubarTrigger>
             <MenubarContent>
               <MenubarItem
@@ -418,13 +374,13 @@ export const RecipieceMenubar: FC = () => {
             <Home />
           </Button>
 
-          <Button
+          {/* <Button
             data-testid={DataTestId.MenuBar.MENU_TRIGGER_COOKBOOK}
             className="grow text-white"
             onClick={onMobileViewCookbooks}
           >
             <Book />
-          </Button>
+          </Button> */}
 
           <Button
             data-testid={DataTestId.MenuBar.MENU_TRIGGER_CREATE}

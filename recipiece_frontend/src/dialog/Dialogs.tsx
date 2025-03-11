@@ -95,5 +95,5 @@ export const Dialogs = {
   },
   deleteUserKitchenMembership: {
     component: DeleteUserKitchenMembershipDialog,
-  }
+  },
 };

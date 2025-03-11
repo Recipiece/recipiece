@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Constant, DataTestId } from "@recipiece/constant";
+import { DataTestId } from "@recipiece/constant";
 import { ListRecipesQuerySchema } from "@recipiece/types";
 import { ScanSearch } from "lucide-react";
 import { FC, useCallback, useEffect, useState } from "react";
@@ -10,7 +10,6 @@ import { FormInput } from "../Form";
 import { IngredientSearch } from "./IngredientSearch";
 import { DefaultRecipeSearchFormValues, RecipeSearchForm, RecipeSearchFormSchema } from "./RecipeSearchFormSchema";
 import { TagSearch } from "./TagSearch";
-import { UserKitchenMembershipSearch } from "./UserKitchenMembershipSearch";
 
 export interface RecipeSearchProps {
   readonly onSubmit: (
@@ -32,7 +31,6 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
   });
 
   const search = form.watch("search");
-  const userKitchenMembershipIds = form.watch("userKitchenMembershipIds");
   const tags = form.watch("tags");
   const ingredients = form.watch("ingredients");
 
@@ -43,7 +41,6 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
         search: formData.search,
         ingredients: (formData.ingredients ?? []).map((i) => i.name),
         tags: (formData?.tags ?? []).map((t) => t.content),
-        user_kitchen_membership_ids: formData.userKitchenMembershipIds,
       });
       setIsSubmitting(false);
     },
@@ -66,7 +63,6 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
         search: search,
         ingredients: [],
         tags: [],
-        user_kitchen_membership_ids: [Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL],
       });
     }
     setIsAdvancedSearchOpen((prev) => !prev);
@@ -95,7 +91,7 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
       form.handleSubmit(onSearchSubmit)();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userKitchenMembershipIds, tags, ingredients]);
+  }, [tags, ingredients]);
 
   /**
    * When the user changes pages, reset the form
@@ -132,10 +128,6 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
 
           <CollapsibleContent>
             <div className="mt-2 flex flex-col gap-2">
-              <UserKitchenMembershipSearch
-                dataTestId={DataTestId.RecipeSearchBar.USER_KITCHEN_MEMBERSHIP_SEARCH(dataTestId)}
-                disabled={isLoading || isSubmitting}
-              />
               <IngredientSearch
                 dataTestId={DataTestId.RecipeSearchBar.INGREDIENT_SEARCH(dataTestId)}
                 disabled={isLoading || isSubmitting}

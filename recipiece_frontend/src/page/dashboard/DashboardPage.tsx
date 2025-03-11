@@ -1,9 +1,14 @@
-import { DataTestId } from "@recipiece/constant";
+import { Constant, DataTestId } from "@recipiece/constant";
 import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { Plus } from "lucide-react";
-import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useListRecipesQuery } from "../../api";
+import { FC, Fragment, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import {
+  useAttachRecipeToCookbookMutation,
+  useGetCookbookByIdQuery,
+  useGetUserKitchenMembershipQuery,
+  useListRecipesQuery,
+} from "../../api";
 import {
   Button,
   Grid,
@@ -13,15 +18,17 @@ import {
   Pager,
   RecipeCard,
   RecipeSearch,
-  Shelf,
-  ShelfSpacer,
+  SidebarProvider,
+  SidebarTrigger,
   Stack,
   useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
+import { DashboardSidebar } from "./DashboardSidebar";
 
 export const DashboardPage: FC = () => {
-  const { cookbookId } = useParams();
+  const { cookbookId, membershipId } = useParams();
+  const location = useLocation();
   const { pushDialog, popDialog } = useContext(DialogContext);
 
   const defaultFilters: ListRecipesQuerySchema = useMemo(() => {
@@ -33,14 +40,29 @@ export const DashboardPage: FC = () => {
         shared_recipes_filter: "include",
         cookbook_attachments_filter: "include",
       };
+    } else if (membershipId) {
+      return {
+        page_number: 0,
+        search: "",
+        user_kitchen_membership_ids: [membershipId],
+        shared_recipes_filter: "include",
+      };
+    } else if (location.pathname.endsWith("/all")) {
+      return {
+        page_number: 0,
+        search: "",
+        user_kitchen_membership_ids: [Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL],
+        shared_recipes_filter: "include",
+      };
     } else {
       return {
         page_number: 0,
         search: "",
-        shared_recipes_filter: "include",
+        user_kitchen_membership_ids: [Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER],
+        shared_recipes_filter: "exclude",
       };
     }
-  }, [cookbookId]);
+  }, [cookbookId, location.pathname, membershipId]);
 
   const [filters, setFilters] = useState<ListRecipesQuerySchema>({ ...defaultFilters });
 
@@ -75,6 +97,12 @@ export const DashboardPage: FC = () => {
   const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, {
     enabled: !!cookbookId,
   });
+  const { data: membership, isLoading: isLoadingMembership } = useGetUserKitchenMembershipQuery(
+    membershipId ? +membershipId : -1,
+    {
+      enabled: !!membershipId,
+    }
+  );
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
 
   const recipes = useMemo(() => {
@@ -105,77 +133,112 @@ export const DashboardPage: FC = () => {
     });
   }, [addRecipeToCookbook, cookbook, cookbookId, popDialog, pushDialog, toast]);
 
+  const title = useMemo(() => {
+    if (cookbookId && cookbook) {
+      return cookbook?.name;
+    } else if (membershipId && membership) {
+      return `${membership.source_user.username}'s Kitchen`;
+    } else if (location.pathname.endsWith("/dashboard/all")) {
+      return "All Recipes";
+    } else if (location.pathname.endsWith("/dashboard")) {
+      return "Your Recipes";
+    } else {
+      return undefined;
+    }
+  }, [cookbook, cookbookId, location.pathname, membership, membershipId]);
+
+  const isLoading =
+    isLoadingRecipes ||
+    isFetchingRecipes ||
+    (!!cookbookId && isLoadingCookbook) ||
+    (!!membershipId && isLoadingMembership);
+
+  const isLoadingTitle = (!!cookbookId && isLoadingCookbook) || (!!membershipId && isLoadingMembership);
+
   return (
-    <Stack>
-      {!cookbookId && <H2 data-testid={DataTestId.DashboardPage.HEADING_TITLE}>Your Recipes</H2>}
-      {cookbookId && (
-        <LoadingGroup className="h-8 w-[250px]" isLoading={isLoadingCookbook}>
-          <Shelf>
-            <H2 data-testid={DataTestId.DashboardPage.HEADING_TITLE}>{cookbook?.name}</H2>
-            <ShelfSpacer />
+    <SidebarProvider className="h-[calc(100%-64px)] min-h-[calc(100%-64px)]">
+      <DashboardSidebar />
+      <div className="flex flex-col gap-2 w-full h-full">
+        <LoadingGroup variant="skeleton" isLoading={isLoadingTitle} className="h-[49px] w-full">
+          {title && (
+            <H2 className="flex-grow basis-full">
+              <div className="inline sm:flex sm:flex-row">
+                <SidebarTrigger className="sm:hidden mr-2" />
+                {title}
+                {cookbookId && (
+                  <div className="hidden sm:inline-block ml-auto">
+                    <Button
+                      data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
+                      onClick={onFindRecipe}
+                      variant="outline"
+                    >
+                      <Plus size={20} /> <span className="ml-1">Add a recipe</span>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </H2>
+          )}
+        </LoadingGroup>
+        {cookbookId && (
+          <LoadingGroup isLoading={isLoadingTitle} className="h-[24px]">
+            <p data-testid={DataTestId.DashboardPage.PARAGRAPH_DESCRIPTION}>{cookbook?.description}</p>
             <Button
-              data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_HEADER}
+              data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
               onClick={onFindRecipe}
               variant="outline"
+              className="sm:hidden"
             >
-              <Plus size={20} className="mr-1" /> Add a recipe
+              <Plus size={20} /> <span className="ml-1">Add a recipe</span>
             </Button>
-          </Shelf>
-        </LoadingGroup>
-      )}
-      {cookbookId && (
-        <LoadingGroup isLoading={isLoadingCookbook} className="h-4">
-          <p data-testid={DataTestId.DashboardPage.PARAGRAPH_DESCRIPTION}>{cookbook?.description}</p>
-        </LoadingGroup>
-      )}
-      <RecipeSearch
-        dataTestId={DataTestId.DashboardPage.RECIPE_SEARCH_BAR}
-        isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}
-        onSubmit={onSearch}
-      />
-      <LoadingGroup
-        variant="spinner"
-        isLoading={isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook)}
-      >
-        <Stack>
-          {!isLoadingRecipes && recipes.length === 0 && (
-            <>
-              <NotFound
-                dataTestId={DataTestId.DashboardPage.NOT_FOUND}
-                message="No recipes to be had, time to get cooking!"
+          </LoadingGroup>
+        )}
+        <RecipeSearch
+          dataTestId={DataTestId.DashboardPage.RECIPE_SEARCH_BAR}
+          isLoading={isLoading}
+          onSubmit={onSearch}
+        />
+        <LoadingGroup variant="spinner" isLoading={isLoading}>
+          <Stack>
+            {!isLoadingRecipes && recipes.length === 0 && (
+              <>
+                <NotFound
+                  dataTestId={DataTestId.DashboardPage.NOT_FOUND}
+                  message="No recipes to be had, time to get cooking!"
+                />
+                {cookbookId && (
+                  <div className="text-center">
+                    <Button
+                      data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
+                      onClick={onFindRecipe}
+                      variant="outline"
+                    >
+                      <Plus size={20} /> <span className="ml-1 hidden sm:inline-block">Add a recipe</span>
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+            <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+              {(recipes || []).map((recipe) => {
+                return (
+                  <Fragment key={recipe.id}>
+                    <RecipeCard recipe={recipe} cookbookId={cookbookId ? +cookbookId : undefined} />
+                  </Fragment>
+                );
+              })}
+            </Grid>
+            {recipes.length > 0 && (
+              <Pager
+                dataTestId={DataTestId.DashboardPage.PAGER}
+                page={filters.page_number}
+                onPage={onPageChange}
+                hasNextPage={!!recipeData?.has_next_page}
               />
-              {cookbookId && (
-                <div className="text-center">
-                  <Button
-                    data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
-                    onClick={onFindRecipe}
-                    variant="outline"
-                  >
-                    <Plus size={20} className="mr-1" /> Add a recipe
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-          <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {(recipes || []).map((recipe) => {
-              return (
-                <div className="auto-rows-fr" key={recipe.id}>
-                  <RecipeCard recipe={recipe} cookbookId={cookbookId ? +cookbookId : undefined} />
-                </div>
-              );
-            })}
-          </Grid>
-          {recipes.length > 0 && (
-            <Pager
-              dataTestId={DataTestId.DashboardPage.PAGER}
-              page={filters.page_number}
-              onPage={onPageChange}
-              hasNextPage={!!recipeData?.has_next_page}
-            />
-          )}
-        </Stack>
-      </LoadingGroup>
-    </Stack>
+            )}
+          </Stack>
+        </LoadingGroup>
+      </div>
+    </SidebarProvider>
   );
 };

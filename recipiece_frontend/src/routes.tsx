@@ -39,11 +39,19 @@ export const unauthenticatedRoutes = [
 
 export const authenticatedRoutes = [
   {
+    path: "/dashboard/all",
+    element: DashboardPage,
+  },
+  {
     path: "/dashboard",
     element: DashboardPage,
   },
   {
     path: "/cookbook/:cookbookId",
+    element: DashboardPage,
+  },
+  {
+    path: "/kitchen/:membershipId",
     element: DashboardPage,
   },
   {
