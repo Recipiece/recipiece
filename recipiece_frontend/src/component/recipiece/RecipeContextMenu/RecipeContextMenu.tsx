@@ -504,7 +504,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   }, [addToOptions, editOptions, removeItems, resetOptions, scalingOptions]);
 
   return (
-    <DropdownMenuContent>
+    <DropdownMenuContent data-testid={DataTestId.RecipeContextMenu.DROPDOWN_MENU(dataTestId)}>
       {allItems.map((opt, idx) => {
         return <Fragment key={idx}>{opt}</Fragment>;
       })}

@@ -1,3 +1,4 @@
+import { DataTestId } from "@recipiece/constant";
 import { CookbookSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { FC, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -51,18 +52,19 @@ export const DashboardSidebar: FC = () => {
 
   return (
     <Sidebar className="mt-16 h-[calc(100%-64px)]" collapsible="icon">
-      <SidebarContent className="pt-16 md:pt-8 lg:pt-0">
+      <SidebarContent data-testid={DataTestId.DashboardSidebar.SIDEBAR_CONTENT} className="pt-16 md:pt-8 lg:pt-0">
         <SidebarGroup className="hidden sm:block">
-          <SidebarTrigger />
+          <SidebarTrigger data-testid={DataTestId.DashboardSidebar.SIDEBAR_TRIGGER_DESKTOP} />
         </SidebarGroup>
         {open && (
-          <SidebarGroup>
+          <SidebarGroup data-testid={DataTestId.DashboardSidebar.SIDEBAR_GROUP_KITCHENS}>
             <SidebarGroupLabel>Kitchens</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <LoadingGroup isLoading={isLoadingMemberships} variant="spinner" className="w-6 h-6">
                   <SidebarMenuItem>
                     <SidebarMenuButton
+                      data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_YOUR_RECIPES}
                       className="h-auto cursor-pointer"
                       isActive={location.pathname.endsWith("/dashboard")}
                       onClick={() => onNavigate("/dashboard")}
@@ -72,6 +74,7 @@ export const DashboardSidebar: FC = () => {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton
+                      data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_ALL_RECIPES}
                       className="h-auto cursor-pointer"
                       isActive={location.pathname.endsWith("/dashboard/all")}
                       onClick={() => onNavigate("/dashboard/all")}
@@ -83,6 +86,7 @@ export const DashboardSidebar: FC = () => {
                     return (
                       <SidebarMenuItem key={membership.id}>
                         <SidebarMenuButton
+                          data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_MEMBERSHIP(membership.id)}
                           className="h-auto cursor-pointer"
                           isActive={location.pathname.endsWith(`/kitchen/${membership.id}`)}
                           onClick={() => onNavigate(`/kitchen/${membership.id}`)}
@@ -98,7 +102,7 @@ export const DashboardSidebar: FC = () => {
           </SidebarGroup>
         )}
         {open && (
-          <SidebarGroup>
+          <SidebarGroup data-testid={DataTestId.DashboardSidebar.SIDEBAR_GROUP_COOKBOOKS}>
             <SidebarGroupLabel>Cookbooks</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -107,6 +111,7 @@ export const DashboardSidebar: FC = () => {
                     return (
                       <SidebarMenuItem key={cookbook.id}>
                         <SidebarMenuButton
+                          data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_COOKBOOK(cookbook.id)}
                           className="h-auto cursor-pointer"
                           isActive={location.pathname.endsWith(`/cookbook/${cookbook.id}`)}
                           asChild

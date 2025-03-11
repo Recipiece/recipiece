@@ -163,8 +163,11 @@ export const DashboardPage: FC = () => {
           {title && (
             <H2 className="flex-grow basis-full">
               <div className="inline sm:flex sm:flex-row">
-                <SidebarTrigger className="sm:hidden mr-2" />
-                {title}
+                <SidebarTrigger
+                  data-testid={DataTestId.DashboardSidebar.SIDEBAR_TRIGGER_MOBILE}
+                  className="sm:hidden mr-2"
+                />
+                <span data-testid={DataTestId.DashboardPage.HEADING_TITLE}>{title}</span>
                 {cookbookId && (
                   <div className="hidden sm:inline-block ml-auto">
                     <Button

@@ -1,4 +1,8 @@
 export class RecipeContextMenu {
+  public static readonly DROPDOWN_MENU = (base?: string): string => {
+    return `recipe-context-menu-${base}`;
+  }
+
   public static readonly BUTTON_HALF_RECIPE = (base?: string): string => {
     return `button-half-recipe-${base}`;
   }
