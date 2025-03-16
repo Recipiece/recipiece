@@ -344,7 +344,10 @@ export const RecipieceMenubar: FC = () => {
           <MenubarMenu>
             <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT}>Account</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN} onClick={() => navigate("/memberships")}>
+              <MenubarItem
+                data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN}
+                onClick={() => navigate("/memberships")}
+              >
                 Kitchens
               </MenubarItem>
               <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_ACCOUNT} onClick={() => navigate("/account")}>

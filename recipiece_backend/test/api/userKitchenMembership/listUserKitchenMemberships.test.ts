@@ -1,5 +1,5 @@
 import { User } from "@recipiece/database";
-import { generateRecipe, generateRecipeShare, generateUserKitchenMembership } from "@recipiece/test";
+import { generateRecipe, generateUserKitchenMembership } from "@recipiece/test";
 import {
   ListUserKitchenMembershipsQuerySchema,
   ListUserKitchenMembershipsResponseSchema,
@@ -191,10 +191,6 @@ describe("List User Kitchen Memberships", () => {
       status: "accepted",
     });
     const recipe = await generateRecipe({ user_id: user.id });
-    const recipeShare = await generateRecipeShare({
-      user_kitchen_membership_id: membership.id,
-      recipe_id: recipe.id,
-    });
     const thirdMembership = await generateUserKitchenMembership({
       source_user_id: user.id,
       status: "accepted",
@@ -226,10 +222,6 @@ describe("List User Kitchen Memberships", () => {
     });
     const recipe = await generateRecipe({
       user_id: user.id,
-    });
-    const recipeShare = await generateRecipeShare({
-      user_kitchen_membership_id: membership.id,
-      recipe_id: recipe.id,
     });
     const thirdMembership = await generateUserKitchenMembership({
       source_user_id: user.id,

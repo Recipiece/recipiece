@@ -4,7 +4,7 @@ import { NotFound } from "../../component";
 export const NotFoundPage: FC = () => {
   return (
     <div>
-      <NotFound backNav="/dashboard" message="This pantry is looking pretty empty."/>
+      <NotFound backNav="/dashboard" message="This pantry is looking pretty empty." />
     </div>
-  )
-}
+  );
+};

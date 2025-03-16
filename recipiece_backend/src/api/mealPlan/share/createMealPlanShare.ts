@@ -18,10 +18,7 @@ export const createMealPlanShare = async (
   const membership = await tx.userKitchenMembership.findUnique({
     where: {
       id: user_kitchen_membership_id,
-      OR: [
-        {source_user_id: user.id},
-        {destination_user_id: user.id},
-      ],
+      OR: [{ source_user_id: user.id }, { destination_user_id: user.id }],
       status: "accepted",
     },
     include: {
@@ -76,7 +73,7 @@ export const createMealPlanShare = async (
         await sendMealPlanSharedPushNotification(
           sub,
           membership.source_user_id === user.id ? membership.destination_user : membership.source_user,
-          mealPlan,
+          mealPlan
         );
       });
     }

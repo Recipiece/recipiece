@@ -36,15 +36,18 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
      * only the recipes that are in the scope of memberships pertaining
      * to us and the user.
      */
-    if(cookbook.user_id !== user?.id && cookbook.user_kitchen_membership_id) {
+    if (cookbook.user_id !== user?.id && cookbook.user_kitchen_membership_id) {
       return {
         ...base,
-        user_kitchen_membership_ids: [Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER, cookbook.user_kitchen_membership_id.toString()],
-      }
+        user_kitchen_membership_ids: [
+          Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER,
+          cookbook.user_kitchen_membership_id.toString(),
+        ],
+      };
     } else {
       return {
         ...base,
-      }
+      };
     }
   }, [user, cookbook]);
 
@@ -52,12 +55,15 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesQuery({
-    ...defaultFilters,
-    search: search,
-  }, {
-    enabled: !!user && search.trim().length > 0,
-  })
+  } = useListRecipesQuery(
+    {
+      ...defaultFilters,
+      search: search,
+    },
+    {
+      enabled: !!user && search.trim().length > 0,
+    }
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -88,14 +94,18 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
         <ResponsiveDescription>Search for a recipe to add to your cookbook.</ResponsiveDescription>
       </ResponsiveHeader>
       <Stack>
-        <Input type="text" value={debouncedSearchTerm} onChange={(event) => setDebouncedSearchTerm(event.target.value)} />
+        <Input
+          type="text"
+          value={debouncedSearchTerm}
+          onChange={(event) => setDebouncedSearchTerm(event.target.value)}
+        />
         <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="h-6 w-6">
           {(recipeData?.data || []).map((recipe) => {
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>
                 <div className="flex flex-row gap-2 items-center">
-                <MembershipAvatar membershipId={recipe.user_kitchen_membership_id} size="small" />
-                {recipe.name}
+                  <MembershipAvatar membershipId={recipe.user_kitchen_membership_id} size="small" />
+                  {recipe.name}
                 </div>
               </Button>
             );

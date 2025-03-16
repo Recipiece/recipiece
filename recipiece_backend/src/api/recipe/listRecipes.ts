@@ -73,7 +73,7 @@ export const listRecipes = async (
         })
         .selectAll("recipes")
         .select(selectableSubqueries)
-        .select("user_kitchen_memberships.id as user_kitchen_membership_id")
+        .select("user_kitchen_memberships.id as user_kitchen_membership_id");
       if (membershipIds.length > 0) {
         base = base.where("user_kitchen_memberships.id", "in", membershipIds);
       }

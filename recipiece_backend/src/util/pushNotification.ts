@@ -76,35 +76,3 @@ export const sendMealPlanSharedPushNotification = async (
   };
   await sendPushNotification(subscription, message);
 };
-
-export const sendCookbookSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  cookbook: Cookbook
-) => {
-  const message = {
-    title: "Cookbook Shared",
-    body: `${sourceUser.username} shared their cookbook ${cookbook.name} with you`,
-    type: "cookbookShare",
-    data: { ...cookbook },
-    requiresInteraction: true,
-    tag: `cookbookShare${cookbook.id}`,
-  };
-  await sendPushNotification(subscription, message);
-};
-
-export const sendRecipeSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  recipe: Recipe
-) => {
-  const message = {
-    title: "Recipe Shared",
-    body: `${sourceUser.username} shared their recipe ${recipe.name} with you`,
-    type: "recipeShare",
-    data: { ...recipe },
-    requiresInteraction: true,
-    tag: `recipeShare${recipe.id}`,
-  };
-  await sendPushNotification(subscription, message);
-};

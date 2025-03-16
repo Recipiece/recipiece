@@ -16,7 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-  useSidebar
+  useSidebar,
 } from "../../component";
 import { useLayout } from "../../hooks";
 
@@ -43,7 +43,7 @@ export const DashboardSidebar: FC = () => {
     page_number: 0,
   });
 
-  const { data: user, isLoading: isLoadingUser} = useGetSelfQuery();
+  const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
 
   const onNavigate = useCallback(
     (dest: string) => {

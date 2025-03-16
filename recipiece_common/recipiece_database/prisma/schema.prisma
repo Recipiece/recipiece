@@ -78,10 +78,8 @@ model UserKitchenMembership {
 
   destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   source_user User @relation(name: "source_user", fields: [source_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  recipe_shares RecipeShare[]
   shopping_list_shares ShoppingListShare[]
   meal_plan_shares MealPlanShare[]
-  cookbook_shares CookbookShare[]
   user_kitchen_membership_notification_attachments UserKitchenMembershipNotificationAttachment[]
 
   @@index([status, destination_user_id])
@@ -187,21 +185,6 @@ model UserKitchenMembershipNotificationAttachment {
   notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model RecipeShare {
-  @@map("recipe_shares")
-
-  id Int @id @default(autoincrement())
-  created_at DateTime @default(now())
-
-  recipe_id Int
-  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  user_kitchen_membership_id Int
-  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([recipe_id, user_kitchen_membership_id])
-}
-
 model Recipe {
   @@map("recipes")
 
@@ -220,7 +203,6 @@ model Recipe {
   steps RecipeStep[]
   recipe_cookbook_attachments RecipeCookbookAttachment[]
   meal_plan_items MealPlanItem[]
-  recipe_shares RecipeShare[]
   recipe_tag_attachments RecipeTagAttachment[]
 
   @@index([user_id, name])
@@ -275,24 +257,8 @@ model Cookbook {
   created_at DateTime @default(now())
 
   recipe_cookbook_attachments RecipeCookbookAttachment[]
-  cookbook_shares CookbookShare[]
 
   @@index([user_id, name])
-}
-
-model CookbookShare {
-  @@map("cookbook_shares")
-
-  id Int @id @default(autoincrement())
-  created_at DateTime @default(now())
-
-  cookbook_id Int
-  cookbook Cookbook @relation(fields: [cookbook_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  user_kitchen_membership_id Int
-  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([cookbook_id, user_kitchen_membership_id])
 }
 
 model RecipeCookbookAttachment {

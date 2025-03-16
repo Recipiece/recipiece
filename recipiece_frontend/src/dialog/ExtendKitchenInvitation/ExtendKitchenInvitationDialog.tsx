@@ -61,11 +61,7 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
           </div>
 
           <ResponsiveFooter className="flex-col-reverse">
-            <Button
-              variant="outline"
-              disabled={isSubmitting || isLoadingUser}
-              onClick={() => onClose?.()}
-            >
+            <Button variant="outline" disabled={isSubmitting || isLoadingUser} onClick={() => onClose?.()}>
               Cancel
             </Button>
             <SubmitButton disabled={isSubmitting || isLoadingUser}>Send Invitation</SubmitButton>

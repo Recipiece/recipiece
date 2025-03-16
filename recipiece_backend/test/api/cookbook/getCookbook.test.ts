@@ -62,19 +62,22 @@ describe("Get Cookbooks", () => {
     expect(responseBody.id).toBe(cookbook.id);
   });
 
-  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])("should not get a cookbook when the associated membership has status %o", async (membershipStatus) => {
-    const otherUser = await generateUser();
-    const membership = await generateUserKitchenMembership({
-      source_user_id: user.id,
-      destination_user_id: otherUser.id,
-      status: membershipStatus,
-    });
-    const cookbook = await generateCookbook({ user_id: otherUser.id });
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
+    "should not get a cookbook when the associated membership has status %o",
+    async (membershipStatus) => {
+      const otherUser = await generateUser();
+      const membership = await generateUserKitchenMembership({
+        source_user_id: user.id,
+        destination_user_id: otherUser.id,
+        status: membershipStatus,
+      });
+      const cookbook = await generateCookbook({ user_id: otherUser.id });
 
-    const response = await request(server)
-      .get(`/cookbook/${cookbook.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-    expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
-  });
+      const response = await request(server)
+        .get(`/cookbook/${cookbook.id}`)
+        .set("Content-Type", "application/json")
+        .set("Authorization", `Bearer ${bearerToken}`);
+      expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
+    }
+  );
 });

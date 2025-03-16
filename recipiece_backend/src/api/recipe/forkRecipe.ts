@@ -31,7 +31,8 @@ export const forkRecipe = async (
     ];
   }
 
-  const { id, user_id, created_at, ingredients, metadata, steps, tags, user_kitchen_membership_id, ...restRecipe } = originalRecipe;
+  const { id, user_id, created_at, ingredients, metadata, steps, tags, user_kitchen_membership_id, ...restRecipe } =
+    originalRecipe;
   const metadataCast = metadata as any;
   const idLessIngredients = (ingredients ?? []).map((ing) => {
     const { id, recipe_id, ...restIng } = ing;

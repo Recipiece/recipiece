@@ -39,7 +39,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
   const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } =
     useListUserKitchenMembershipsQuery({ ...filters });
 
-  const {data: user, isLoading: isLoadingUser} = useGetSelfQuery();
+  const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
 
   const onSelectUser = useCallback(
     async (membership: UserKitchenMembershipSchema) => {
@@ -49,13 +49,16 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
     [onSubmit]
   );
 
-  const displayUser = useCallback((membership: UserKitchenMembershipSchema) => {
-    if(membership.destination_user.id === user!.id) {
-      return membership.source_user;
-    } else {
-      return membership.destination_user;
-    }
-  }, [user]);
+  const displayUser = useCallback(
+    (membership: UserKitchenMembershipSchema) => {
+      if (membership.destination_user.id === user!.id) {
+        return membership.source_user;
+      } else {
+        return membership.destination_user;
+      }
+    },
+    [user]
+  );
 
   return (
     <ResponsiveContent className="p-6">

@@ -15,37 +15,40 @@ describe("Create Meal Plan Share", () => {
     [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
   });
 
-  it.each([true, false])("should allow a user to share a meal plan when source user is user is %o", async (isUserSourceUser) => {
-    const mealPlan = await generateMealPlan({
-      user_id: user.id,
-    });
-    const membership = await generateUserKitchenMembership({
-      source_user_id: isUserSourceUser ? user.id : otherUser.id,
-      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
-      status: "accepted",
-    });
-
-    const response = await request(server)
-      .post("/meal-plan/share")
-      .set("Authorization", bearerToken)
-      .send(<CreateMealPlanShareRequestSchema>{
-        meal_plan_id: mealPlan.id,
-        user_kitchen_membership_id: membership.id,
+  it.each([true, false])(
+    "should allow a user to share a meal plan when source user is user is %o",
+    async (isUserSourceUser) => {
+      const mealPlan = await generateMealPlan({
+        user_id: user.id,
+      });
+      const membership = await generateUserKitchenMembership({
+        source_user_id: isUserSourceUser ? user.id : otherUser.id,
+        destination_user_id: isUserSourceUser ? otherUser.id : user.id,
+        status: "accepted",
       });
 
-    expect(response.statusCode).toBe(StatusCodes.CREATED);
-    const responseBody: MealPlanShareSchema = response.body;
+      const response = await request(server)
+        .post("/meal-plan/share")
+        .set("Authorization", bearerToken)
+        .send(<CreateMealPlanShareRequestSchema>{
+          meal_plan_id: mealPlan.id,
+          user_kitchen_membership_id: membership.id,
+        });
 
-    expect(responseBody.meal_plan_id).toBe(mealPlan.id);
-    expect(responseBody.user_kitchen_membership_id).toBe(membership.id);
+      expect(response.statusCode).toBe(StatusCodes.CREATED);
+      const responseBody: MealPlanShareSchema = response.body;
 
-    const record = await prisma.mealPlanShare.findFirst({
-      where: {
-        id: responseBody.id,
-      },
-    });
-    expect(record).toBeTruthy();
-  });
+      expect(responseBody.meal_plan_id).toBe(mealPlan.id);
+      expect(responseBody.user_kitchen_membership_id).toBe(membership.id);
+
+      const record = await prisma.mealPlanShare.findFirst({
+        where: {
+          id: responseBody.id,
+        },
+      });
+      expect(record).toBeTruthy();
+    }
+  );
 
   it("should not allow a user to share a meal plan they do not own", async () => {
     const mealPlan = await generateMealPlan({

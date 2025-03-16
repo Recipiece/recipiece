@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { Cookbook, CookbookShare, prisma, PrismaTransaction, RecipeCookbookAttachment, UserKitchenMembership } from "@recipiece/database";
-import { generateRecipe } from "./recipe";
-import { generateUser, generateUserKitchenMembership } from "./user";
+import { Cookbook, prisma, PrismaTransaction, RecipeCookbookAttachment } from "@recipiece/database";
 import { cookbookNameGenerator } from "../generator";
+import { generateRecipe } from "./recipe";
+import { generateUser } from "./user";
 
 export const generateRecipeCookbookAttachment = async (attachment?: Partial<RecipeCookbookAttachment>, tx?: PrismaTransaction) => {
   const recipeId = attachment?.recipe_id ?? (await generateRecipe(undefined, tx)).id;
@@ -25,40 +25,6 @@ export const generateCookbook = async (cookbook?: Partial<Omit<Cookbook, "id">>,
       user_id: userId,
       description: cookbook?.description ?? faker.word.words({ count: { min: 2, max: 15 } }),
       created_at: cookbook?.created_at ?? new Date(),
-    },
-  });
-};
-
-export const generateCookbookShare = async (share?: Partial<Omit<CookbookShare, "id">>, tx?: PrismaTransaction): Promise<CookbookShare> => {
-  let userKitchenMembership: UserKitchenMembership | undefined = undefined;
-  if (share?.user_kitchen_membership_id) {
-    userKitchenMembership =
-      (await (tx ?? prisma).userKitchenMembership.findFirst({
-        where: {
-          id: share.user_kitchen_membership_id,
-        },
-      })) ?? undefined;
-  }
-
-  if (!userKitchenMembership) {
-    userKitchenMembership = await generateUserKitchenMembership(undefined, tx);
-  }
-
-  const cookbookId =
-    share?.cookbook_id ??
-    (
-      await generateCookbook(
-        {
-          user_id: userKitchenMembership.source_user_id,
-        },
-        tx
-      )
-    ).id;
-
-  return (tx ?? prisma).cookbookShare.create({
-    data: {
-      user_kitchen_membership_id: userKitchenMembership.id,
-      cookbook_id: cookbookId,
     },
   });
 };

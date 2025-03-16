@@ -152,78 +152,84 @@ describe("List Recipes", () => {
     expect(results.length).toEqual(5);
   });
 
-  it.each([true, false])("should list shared recipes when membership source user is user is %o", async (isUserSourceUser) => {
-    const otherUser = await generateUser();
-    // allow otherUser to share a recipe to user
-    const membership = await generateUserKitchenMembership({
-      source_user_id: isUserSourceUser ? user.id : otherUser.id,
-      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
-      status: "accepted",
-    });
+  it.each([true, false])(
+    "should list shared recipes when membership source user is user is %o",
+    async (isUserSourceUser) => {
+      const otherUser = await generateUser();
+      // allow otherUser to share a recipe to user
+      const membership = await generateUserKitchenMembership({
+        source_user_id: isUserSourceUser ? user.id : otherUser.id,
+        destination_user_id: isUserSourceUser ? otherUser.id : user.id,
+        status: "accepted",
+      });
 
-    // generate some recipes for the other user
-    for (let i = 0; i < 10; i++) {
-      await generateRecipe({ user_id: otherUser.id });
+      // generate some recipes for the other user
+      for (let i = 0; i < 10; i++) {
+        await generateRecipe({ user_id: otherUser.id });
+      }
+
+      // generate some recipes for the destination user user
+      for (let i = 0; i < 10; i++) {
+        await generateRecipe({ user_id: user.id });
+      }
+
+      const response = await request(server)
+        .get("/recipe/list")
+        .query(<ListRecipesQuerySchema>{
+          page_number: 0,
+        })
+        .set("Content-Type", "application/json")
+        .set("Authorization", `Bearer ${bearerToken}`);
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseRecipes: RecipeSchema[] = response.body.data;
+
+      expect(responseRecipes.length).toBe(20);
+
+      const belongingToUser = responseRecipes.filter((recipe) => recipe.user_id === user.id);
+      expect(belongingToUser.length).toBe(10);
+
+      const belongingToOther = responseRecipes.filter((recipe) => recipe.user_id === otherUser.id);
+      expect(belongingToOther.length).toBe(10);
     }
+  );
 
-    // generate some recipes for the destination user user
-    for (let i = 0; i < 10; i++) {
-      await generateRecipe({ user_id: user.id });
-    }
+  it.each(<UserKitchenMembershipStatus[]>["denied", "pending"])(
+    "should not list shared recipes belonging to a membership with status %o",
+    async (membershipStatus) => {
+      const otherUser = await generateUser();
+      // allow otherUser to share a recipe to user
+      await generateUserKitchenMembership({
+        source_user_id: otherUser.id,
+        destination_user_id: user.id,
+        status: membershipStatus,
+      });
+      const otherRecipe = await generateRecipe({ user_id: otherUser.id });
 
-    const response = await request(server)
-      .get("/recipe/list")
-      .query(<ListRecipesQuerySchema>{
-        page_number: 0,
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+      for (let i = 0; i < 10; i++) {
+        await generateRecipe({
+          user_id: user.id,
+        });
+      }
 
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseRecipes: RecipeSchema[] = response.body.data;
+      const response = await request(server)
+        .get("/recipe/list")
+        .query(<ListRecipesQuerySchema>{
+          page_number: 0,
+          shared_recipes: "exclude",
+        })
+        .set("Content-Type", "application/json")
+        .set("Authorization", `Bearer ${bearerToken}`);
 
-    expect(responseRecipes.length).toBe(20);
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseRecipes: RecipeSchema[] = response.body.data;
 
-    const belongingToUser = responseRecipes.filter((recipe) => recipe.user_id === user.id);
-    expect(belongingToUser.length).toBe(10);
-
-    const belongingToOther = responseRecipes.filter((recipe) => recipe.user_id === otherUser.id);
-    expect(belongingToOther.length).toBe(10);
-  });
-
-  it.each(<UserKitchenMembershipStatus[]>["denied", "pending"])("should not list shared recipes belonging to a membership with status %o", async (membershipStatus) => {
-    const otherUser = await generateUser();
-    // allow otherUser to share a recipe to user
-    await generateUserKitchenMembership({
-      source_user_id: otherUser.id,
-      destination_user_id: user.id,
-      status: membershipStatus,
-    });
-    const otherRecipe = await generateRecipe({ user_id: otherUser.id });
-
-    for (let i = 0; i < 10; i++) {
-      await generateRecipe({
-        user_id: user.id,
+      expect(responseRecipes.length).toBe(10);
+      responseRecipes.forEach((rcp) => {
+        expect(rcp.id).not.toBe(otherRecipe.id);
       });
     }
-
-    const response = await request(server)
-      .get("/recipe/list")
-      .query(<ListRecipesQuerySchema>{
-        page_number: 0,
-        shared_recipes: "exclude",
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseRecipes: RecipeSchema[] = response.body.data;
-
-    expect(responseRecipes.length).toBe(10);
-    responseRecipes.forEach((rcp) => {
-      expect(rcp.id).not.toBe(otherRecipe.id);
-    });
-  });
+  );
 
   it("should list recipes in a cookbook", async () => {
     for (let i = 0; i < 10; i++) {

@@ -1,9 +1,9 @@
+import { access } from "fs";
 import { prisma, User } from "@recipiece/database";
 import { generateCookbook, generateRecipe, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { generateCookbookWithRecipe } from "./fixtures";
-import { access } from "fs";
 
 describe("Add Recipe to Cookbook", () => {
   let user: User;
@@ -156,10 +156,10 @@ describe("Add Recipe to Cookbook", () => {
       status: "accepted",
     });
 
-    const bRecipe = await generateRecipe({user_id: bToUserMembership.source_user_id});
-    const cRecipe = await generateRecipe({user_id: cToUserMembership.source_user_id});
+    const bRecipe = await generateRecipe({ user_id: bToUserMembership.source_user_id });
+    const cRecipe = await generateRecipe({ user_id: cToUserMembership.source_user_id });
 
-    const cCookbook = await generateCookbook({user_id: cToUserMembership.source_user_id});
+    const cCookbook = await generateCookbook({ user_id: cToUserMembership.source_user_id });
 
     const response = await request(server)
       .post("/cookbook/recipe/add")
@@ -176,8 +176,8 @@ describe("Add Recipe to Cookbook", () => {
       where: {
         recipe_id: bRecipe.id,
         cookbook_id: cCookbook.id,
-      }
+      },
     });
     expect(attachment).toBeFalsy();
-  })
+  });
 });

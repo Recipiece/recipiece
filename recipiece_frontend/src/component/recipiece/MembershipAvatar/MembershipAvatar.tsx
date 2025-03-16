@@ -16,7 +16,7 @@ const SIZE_CLASSNAME_MAP = {
 };
 
 export const MembershipAvatar: FC<MembershipAvatarProps> = ({ membershipId, size = "medium" }) => {
-  const isValidMembershipId = !!membershipId && membershipId !== -1
+  const isValidMembershipId = !!membershipId && membershipId !== -1;
   const { data: membership, isLoading: isLoadingMembership } = useGetUserKitchenMembershipQuery(membershipId ?? -1, {
     enabled: isValidMembershipId,
   });

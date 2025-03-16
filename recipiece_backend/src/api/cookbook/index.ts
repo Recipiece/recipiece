@@ -5,7 +5,7 @@ import {
   YListCookbooksQuerySchema,
   YListCookbooksResponseSchema,
   YRemoveRecipeFromCookbookRequestSchema,
-  YUpdateCookbookRequestSchema
+  YUpdateCookbookRequestSchema,
 } from "@recipiece/types";
 import { Route } from "../../types";
 import { addRecipeToCookbook } from "./addRecipeToCookbook";

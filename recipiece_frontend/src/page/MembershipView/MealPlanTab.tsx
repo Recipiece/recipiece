@@ -19,11 +19,7 @@ export const MealPlanTab: FC<TabProps> = ({ userKitchenMembershipId }) => {
     <LoadingGroup variant="spinner" className="text-center w-4 h-4" isLoading={isLoadingShares}>
       <div className="flex flex-col gap-2">
         {(shares?.data ?? []).map((share) => {
-          return (
-            <div key={share.id}>
-              
-            </div>
-          )
+          return <div key={share.id}></div>;
         })}
         {shares && <Pager page={pageNumber} onPage={setPageNumber} hasNextPage={shares.has_next_page} />}
       </div>

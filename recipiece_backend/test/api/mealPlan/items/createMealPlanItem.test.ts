@@ -3,7 +3,6 @@ import {
   generateMealPlan,
   generateMealPlanShare,
   generateRecipe,
-  generateRecipeShare,
   generateUser,
   generateUserKitchenMembership,
 } from "@recipiece/test";
@@ -124,10 +123,6 @@ describe("Create Meal Plan Item", () => {
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
-    });
-    const share = await generateRecipeShare({
-      user_kitchen_membership_id: membership.id,
-      recipe_id: otherRecipe.id,
     });
 
     const mealPlan = await generateMealPlan({ user_id: user.id });

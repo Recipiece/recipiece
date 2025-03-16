@@ -4,7 +4,6 @@ import { ListMealPlanSharesQuerySchema, ListMealPlanSharesResponseSchema } from 
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-
 export const listMealPlanShares = async (
   request: AuthenticatedRequest<any, ListMealPlanSharesQuerySchema>,
   tx: PrismaTransaction
@@ -26,7 +25,7 @@ export const listMealPlanShares = async (
     .selectFrom("meal_plan_shares")
     .selectAll("meal_plan_shares")
     .select(() => {
-      return KyselyCore.sql<MealPlan>`to_json(meal_plans.*)`.as("meal_plan")
+      return KyselyCore.sql<MealPlan>`to_json(meal_plans.*)`.as("meal_plan");
     })
     .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "meal_plan_shares.user_kitchen_membership_id")
     .innerJoin("meal_plans", "meal_plan_shares.meal_plan_id", "meal_plans.id")
@@ -34,23 +33,23 @@ export const listMealPlanShares = async (
       return eb.or([
         eb("user_kitchen_memberships.destination_user_id", "=", user.id),
         eb("user_kitchen_memberships.source_user_id", "=", user.id),
-      ])
+      ]);
     })
     .where((eb) => {
-      return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted")
-    })
-    
-  if(targeting_self) {
+      return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted");
+    });
+
+  if (targeting_self) {
     sharesQuery = sharesQuery.where("meal_plans.user_id", "!=", user.id);
   }
-  if(from_self) {
+  if (from_self) {
     sharesQuery = sharesQuery.where("meal_plans.user_id", "=", user.id);
   }
-  if(user_kitchen_membership_id) {
+  if (user_kitchen_membership_id) {
     sharesQuery = sharesQuery.where("user_kitchen_memberships.id", "=", user_kitchen_membership_id);
   }
 
-  sharesQuery = sharesQuery.offset(page_number * actualPageSize)
+  sharesQuery = sharesQuery.offset(page_number * actualPageSize);
   sharesQuery = sharesQuery.limit(actualPageSize + 1);
 
   const mealPlanShares = await sharesQuery.execute();

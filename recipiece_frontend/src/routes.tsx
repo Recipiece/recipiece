@@ -3,11 +3,11 @@ import {
   CreateAccountPage,
   DashboardPage,
   ForgotPasswordPage,
-  MembershipViewPage,
-  MembershipsPage,
   LoginPage,
   MealPlanConfigurationPage,
   MealPlanViewPage,
+  MembershipsPage,
+  MembershipViewPage,
   NotFoundPage,
   RecipeEditPage,
   RecipeViewPage,
@@ -102,6 +102,6 @@ export const allRoutes = [
   ...authenticatedRoutes,
   {
     path: "*",
-    element: NotFoundPage, 
-  }
+    element: NotFoundPage,
+  },
 ];
