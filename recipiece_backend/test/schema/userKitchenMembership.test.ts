@@ -1,5 +1,5 @@
 import { User, UserKitchenMembership } from "@recipiece/database";
-import { generateUserKitchenMembership } from "@recipiece/test";
+import { generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import {
   CreateUserKitchenMembershipRequestSchema,
   ListUserKitchenMembershipsQuerySchema,
@@ -70,12 +70,13 @@ describe("User Kitchen Membership Schemas", () => {
 
   it("should not display the emails when creating memberships", async () => {
     // a membership already exist from source -> dest, create one going the other way
+    const thirdUser = await generateUser();
     const body: CreateUserKitchenMembershipRequestSchema = {
-      username: sourceUser.username,
+      username: thirdUser.username,
     };
     const response = await request(server)
       .post("/user-kitchen-membership")
-      .set("Authorization", `Bearer ${destBearerToken}`)
+      .set("Authorization", `Bearer ${sourceBearerToken}`)
       .send({ ...body });
 
     expect(response.statusCode).toBe(StatusCodes.OK);
@@ -87,8 +88,8 @@ describe("User Kitchen Membership Schemas", () => {
     expect(sourceUserKeys).not.toContain("email");
     expect(destUserKeys).not.toContain("email");
 
-    expect(responseBody.source_user.username).toBe(destUser.username);
-    expect(responseBody.destination_user.username).toBe(sourceUser.username);
+    expect(responseBody.source_user.username).toBe(sourceUser.username);
+    expect(responseBody.destination_user.username).toBe(thirdUser.username);
   });
 
   it("should not display the emails when setting membership status", async () => {

@@ -1,7 +1,7 @@
 import { ShoppingListSchema } from "@recipiece/types";
 import { ComponentProps, FC } from "react";
 import { MenubarItem } from "../../shadcn";
-import { SharedAvatar } from "../SharedAvatar";
+import { MembershipAvatar } from "../MembershipAvatar";
 
 export const ShoppingListMenuItem: FC<
   { readonly shoppingList: ShoppingListSchema } & ComponentProps<typeof MenubarItem>
@@ -11,7 +11,7 @@ export const ShoppingListMenuItem: FC<
   return (
     <MenubarItem {...restProps}>
       <div className="flex flex-row items-center gap-2">
-        {membershipId && <SharedAvatar size="small" userKitchenMembershipId={membershipId}></SharedAvatar>}
+        {membershipId && <MembershipAvatar size="small" membershipId={membershipId} />}
         {shoppingList.name}
       </div>
     </MenubarItem>

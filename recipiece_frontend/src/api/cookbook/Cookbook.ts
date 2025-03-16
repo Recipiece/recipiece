@@ -2,7 +2,6 @@ import {
   CookbookSchema,
   ListCookbooksQuerySchema,
   ListCookbooksResponseSchema,
-  ListRecipeSharesResponseSchema,
   ListRecipesResponseSchema,
   RecipeSchema,
   YCookbookSchema,
@@ -252,7 +251,7 @@ export const useRemoveRecipeFromCookbookMutation = (
             cookbook_attachments_filter: "include",
           }),
         },
-        (oldData: ListRecipeSharesResponseSchema | undefined) => {
+        (oldData: ListRecipesResponseSchema | undefined) => {
           if (oldData) {
             const newVal = {
               ...oldData,

@@ -1,6 +1,6 @@
 import { ListUserKitchenMembershipsQuerySchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { FC, useCallback, useMemo, useState } from "react";
-import { useListUserKitchenMembershipsQuery } from "../../api";
+import { useGetSelfQuery, useListUserKitchenMembershipsQuery } from "../../api";
 import { Avatar, AvatarFallback, Button, LoadingGroup, ScrollArea, ScrollBar } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
@@ -19,6 +19,7 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
   const filters: ListUserKitchenMembershipsQuerySchema = useMemo(() => {
     let base: ListUserKitchenMembershipsQuerySchema = {
       from_self: true,
+      targeting_self: true,
       page_number: 0,
       status: ["accepted"],
     };
@@ -38,6 +39,8 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
   const { data: userKitchenMemberships, isLoading: isLoadingUserKitchenMemberships } =
     useListUserKitchenMembershipsQuery({ ...filters });
 
+  const {data: user, isLoading: isLoadingUser} = useGetSelfQuery();
+
   const onSelectUser = useCallback(
     async (membership: UserKitchenMembershipSchema) => {
       setIsDisabled(true);
@@ -46,13 +49,21 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
     [onSubmit]
   );
 
+  const displayUser = useCallback((membership: UserKitchenMembershipSchema) => {
+    if(membership.destination_user.id === user!.id) {
+      return membership.source_user;
+    } else {
+      return membership.destination_user;
+    }
+  }, [user]);
+
   return (
     <ResponsiveContent className="p-6">
       <ResponsiveHeader>
         <ResponsiveTitle>Share {displayName}</ResponsiveTitle>
         <ResponsiveDescription>Share your {displayName} with another user.</ResponsiveDescription>
       </ResponsiveHeader>
-      <LoadingGroup isLoading={isLoadingUserKitchenMemberships} className="h-9 w-full">
+      <LoadingGroup isLoading={isLoadingUser || isLoadingUserKitchenMemberships} className="h-9 w-full">
         {userKitchenMemberships && (
           <ScrollArea className="w-full">
             {userKitchenMemberships!.data.length > 0 && (
@@ -69,10 +80,10 @@ export const ShareDialog: FC<ShareDialogProps> = ({ displayName, entity_id, enti
                       <div className="flex flex-col items-center justify-center gap-1">
                         <Avatar>
                           <AvatarFallback className="bg-primary text-white">
-                            {membership.destination_user.username.charAt(0).toUpperCase()}
+                            {displayUser(membership).username.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <p className="text-sm">{membership.destination_user.username}</p>
+                        <p className="text-sm">{displayUser(membership).username}</p>
                       </div>
                     </Button>
                   );

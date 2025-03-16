@@ -1,7 +1,7 @@
-import { array, boolean, date, InferType, number, object, string } from "yup";
-import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
-import { YUserKitchenMembershipSchema, YUserTagSchema } from "./user";
 import { Constant } from "@recipiece/constant";
+import { array, date, InferType, number, object, string } from "yup";
+import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
+import { YUserTagSchema } from "./user";
 
 export const YRecipeIngredientSchema = object({
   id: number().required(),
@@ -19,13 +19,6 @@ export const YRecipeStepSchema = object({
   content: string().required(),
 }).noUnknown();
 
-export const YRecipeShareSchema = object({
-  id: number().required(),
-  created_at: date().required(),
-  recipe_id: number().required(),
-  user_kitchen_membership_id: number().required(),
-}).noUnknown();
-
 export const YRecipeSchema = object({
   id: number().required(),
   user_id: number().required(),
@@ -36,8 +29,8 @@ export const YRecipeSchema = object({
   servings: number().notRequired(),
   ingredients: array().of(YRecipeIngredientSchema).notRequired(),
   steps: array().of(YRecipeStepSchema).notRequired(),
-  shares: array().of(YRecipeShareSchema).notRequired(),
   tags: array().of(YUserTagSchema).notRequired(),
+  user_kitchen_membership_id: number().notRequired(),
 }).noUnknown();
 
 export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
@@ -45,8 +38,6 @@ export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
 export interface RecipeIngredientSchema extends InferType<typeof YRecipeIngredientSchema> {}
 
 export interface RecipeStepSchema extends InferType<typeof YRecipeStepSchema> {}
-
-export interface RecipeShareSchema extends InferType<typeof YRecipeShareSchema> {}
 
 /**
  * Create recipe schema
@@ -170,40 +161,3 @@ export const YForkRecipeRequestSchema = object({
 }).noUnknown();
 
 export interface ForkRecipeRequestSchema extends InferType<typeof YForkRecipeRequestSchema> {}
-
-/**
- * Create Recipe Share
- */
-export const YCreateRecipeShareRequestSchema = object({
-  user_kitchen_membership_id: number().required(),
-  recipe_id: number().required(),
-}).noUnknown();
-
-export interface CreateRecipeShareRequestSchema extends InferType<typeof YCreateRecipeShareRequestSchema> {}
-
-/**
- * List Recipe Shares
- */
-export const YListRecipeSharesQuerySchema = YListQuerySchema.shape({
-  targeting_self: boolean().notRequired(),
-  from_self: boolean().notRequired(),
-  user_kitchen_membership_id: number().notRequired(),
-})
-  .test("onlyOneOfTargetingSelfOrFromSelf", "Must specify only one of targeting_self or from_self", (ctx) => {
-    return !ctx.from_self || !ctx.targeting_self;
-  })
-  .noUnknown();
-
-export interface ListRecipeSharesQuerySchema extends InferType<typeof YListRecipeSharesQuerySchema> {}
-
-export const YListRecipeSharesResponseSchema = generateYListQueryResponseSchema(
-  YRecipeShareSchema.shape({
-    recipe: object({
-      id: number().required(),
-      name: string().required(),
-    }).required(),
-    user_kitchen_membership: YUserKitchenMembershipSchema.required(),
-  })
-).noUnknown();
-
-export interface ListRecipeSharesResponseSchema extends InferType<typeof YListRecipeSharesResponseSchema> {}

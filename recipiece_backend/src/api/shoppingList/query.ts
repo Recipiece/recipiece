@@ -1,12 +1,4 @@
-import {
-  KyselyCore,
-  KyselyGenerated,
-  prisma,
-  PrismaTransaction,
-  ShoppingListItem,
-  ShoppingListShare,
-  User,
-} from "@recipiece/database";
+import { KyselyCore, KyselyGenerated, prisma, PrismaTransaction, ShoppingListItem, ShoppingListShare, User } from "@recipiece/database";
 
 /**
  * Takes all the items in the provided shopping list and aligns their order so that there's no out-of-order entities
@@ -49,18 +41,20 @@ export const collapseOrders = async (shoppingListId: number, tx?: any): Promise<
 };
 
 export const getShoppingListByIdQuery = (tx: PrismaTransaction, user: User, shoppingListId: number) => {
-  const allShareCheck = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "shopping_lists">) => {
+  const selectiveShareCheck = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "shopping_lists">) => {
     return eb.exists(
       eb
-        .selectFrom("user_kitchen_memberships")
+        .selectFrom("shopping_list_shares")
+        .select("shopping_list_shares.id")
+        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "shopping_list_shares.user_kitchen_membership_id")
         .where((_eb) => {
           return _eb.and([
             _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
             _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
           ]);
         })
+        .whereRef("shopping_list_shares.shopping_list_id", "=", "shopping_lists.id")
         .whereRef("user_kitchen_memberships.source_user_id", "=", "shopping_lists.user_id")
-        .where("shopping_lists.id", "=", shoppingListId)
         .limit(1)
     );
   };
@@ -73,31 +67,8 @@ export const getShoppingListByIdQuery = (tx: PrismaTransaction, user: User, shop
         .case()
         .when("shopping_lists.user_id", "=", user.id)
         .then(shoppingListSharesSubquery(eb, user.id))
-        .when(allShareCheck(eb))
-        .then(
-          eb.fn("jsonb_build_array", [
-            eb.fn("jsonb_build_object", [
-              KyselyCore.sql.lit("id"),
-              eb.lit(-1),
-              KyselyCore.sql.lit("created_at"),
-              eb.fn("now"),
-              KyselyCore.sql.lit("shopping_list_id"),
-              "shopping_lists.id",
-              KyselyCore.sql.lit("user_kitchen_membership_id"),
-              eb
-                .selectFrom("user_kitchen_memberships")
-                .select("user_kitchen_memberships.id")
-                .whereRef("user_kitchen_memberships.source_user_id", "=", "shopping_lists.user_id")
-                .where((_eb) => {
-                  return _eb.and([
-                    _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-                    _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-                  ]);
-                })
-                .limit(1),
-            ]),
-          ])
-        )
+        .when(selectiveShareCheck(eb))
+        .then(shoppingListSharesSubquery(eb, user.id))
         .else(KyselyCore.sql`'[]'::jsonb`)
         .end()
         .as("shares");
@@ -108,8 +79,8 @@ export const getShoppingListByIdQuery = (tx: PrismaTransaction, user: User, shop
         eb.or([
           // it's your meal_plan
           eb("shopping_lists.user_id", "=", user.id),
-          // it's implicitly shared through an ALL grant type
-          allShareCheck(eb),
+          // it's been explicitly shared through a SELECTIVE grant type
+          selectiveShareCheck(eb),
         ]),
       ]);
     });
@@ -117,33 +88,20 @@ export const getShoppingListByIdQuery = (tx: PrismaTransaction, user: User, shop
   return query;
 };
 
-export const shoppingListSharesWithMemberships = (
-  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "shopping_lists">,
-  userId: number
-) => {
+export const shoppingListSharesWithMemberships = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "shopping_lists">, userId: number) => {
   return eb
     .selectFrom("shopping_list_shares")
-    .innerJoin(
-      "user_kitchen_memberships",
-      "user_kitchen_memberships.id",
-      "shopping_list_shares.user_kitchen_membership_id"
-    )
+    .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "shopping_list_shares.user_kitchen_membership_id")
     .whereRef("shopping_list_shares.shopping_list_id", "=", "shopping_lists.id")
     .where((eb) => {
       return eb.and([
         eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-        eb.or([
-          eb("user_kitchen_memberships.destination_user_id", "=", userId),
-          eb("user_kitchen_memberships.source_user_id", "=", userId),
-        ]),
+        eb.or([eb("user_kitchen_memberships.destination_user_id", "=", userId), eb("user_kitchen_memberships.source_user_id", "=", userId)]),
       ]);
     });
 };
 
-export const shoppingListSharesSubquery = (
-  eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "shopping_lists">,
-  userId: number
-) => {
+export const shoppingListSharesSubquery = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "shopping_lists">, userId: number) => {
   return shoppingListSharesWithMemberships(eb, userId).select(
     KyselyCore.sql<ShoppingListShare[]>`
       coalesce(

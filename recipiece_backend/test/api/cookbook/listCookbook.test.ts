@@ -1,4 +1,4 @@
-import { Cookbook, User } from "@recipiece/database";
+import { Cookbook, User, UserKitchenMembershipStatus } from "@recipiece/database";
 import { generateCookbook, generateRecipe, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
@@ -115,20 +115,17 @@ describe("List Cookbooks", () => {
     expect(data[0].id).toBe(containingCookbook.id);
   });
 
-  it("should include shared cookbooks", async () => {
-    // create an ALL membership
-    const otherUserAll = await generateUser();
+  it.each([true, false])("should include shared cookbooks when user is source user is %o", async (isUserSourceUser) => {
+    const otherUser = await generateUser();
     await generateUserKitchenMembership({
-      source_user_id: otherUserAll.id,
-      destination_user_id: user.id,
+      source_user_id: isUserSourceUser ? user.id : otherUser.id,
+      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
       status: "accepted",
     });
-    const allCookbook = await generateCookbook({ user_id: otherUserAll.id });
-
-    // create a cookbook for the user
+    const otherUserCookbook = await generateCookbook({ user_id: otherUser.id });
     const userCookbook = await generateCookbook({ user_id: user.id });
 
-    // make some noise
+    // make some noise!
     await generateCookbook();
 
     const response = await request(server)
@@ -144,7 +141,7 @@ describe("List Cookbooks", () => {
     const responseData: ListCookbooksResponseSchema = response.body;
 
     expect(responseData.data.length).toBe(2);
-    expect(responseData.data.find((c) => c.id === allCookbook.id)).toBeTruthy();
+    expect(responseData.data.find((c) => c.id === otherUserCookbook.id)).toBeTruthy();
     expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
   });
 
@@ -177,12 +174,12 @@ describe("List Cookbooks", () => {
     expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
   });
 
-  it("should not list cookbooks belonging to a non-accepted membership", async () => {
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])("should not list cookbooks belonging membership with status %o", async (membershipStatus) => {
     const otherUserAll = await generateUser();
     await generateUserKitchenMembership({
       source_user_id: otherUserAll.id,
       destination_user_id: user.id,
-      status: "denied",
+      status: membershipStatus,
     });
     await generateCookbook({ user_id: otherUserAll.id });
 
@@ -204,9 +201,10 @@ describe("List Cookbooks", () => {
     expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
   });
 
-  it("should not list cookbooks for a recipe where the owner does not have access to the recipe", async () => {
+  it("should not list cookbooks for a recipe where the cookbook owner does not have access to the recipe", async () => {
     const membership = await generateUserKitchenMembership({
       destination_user_id: user.id,
+      status: "accepted",
     });
     const recipe = await generateRecipe({user_id: user.id});
     const userCookbook = await generateCookbook({ user_id: user.id });

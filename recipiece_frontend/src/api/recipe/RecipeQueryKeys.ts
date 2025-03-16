@@ -1,4 +1,4 @@
-import { ListRecipeSharesQuerySchema, ListRecipesQuerySchema } from "@recipiece/types";
+import { ListRecipesQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class RecipeQueryKeys {
@@ -88,34 +88,6 @@ export class RecipeQueryKeys {
       if (cookbook_id) {
         base.push({ cookbook_id });
       }
-    }
-    return base;
-  };
-
-  public static readonly LIST_RECIPE_SHARES = (filters?: Partial<ListRecipeSharesQuerySchema>): RcpQueryKey => {
-    const base: RcpQueryKey = ["listRecipeShares"];
-    const { page_number, user_kitchen_membership_id, from_self, targeting_self } = filters ?? {};
-
-    if (page_number) {
-      base.push({ page_number });
-    }
-    if (user_kitchen_membership_id) {
-      base.push({ user_kitchen_membership_id });
-    }
-    if (from_self) {
-      base.push({ from_self });
-    }
-    if (targeting_self) {
-      base.push({ targeting_self });
-    }
-
-    return base;
-  };
-
-  public static readonly GET_RECIPE_SHARE = (id?: number): RcpQueryKey => {
-    const base: RcpQueryKey = ["recipeShare"];
-    if (id) {
-      base.push({ id });
     }
     return base;
   };

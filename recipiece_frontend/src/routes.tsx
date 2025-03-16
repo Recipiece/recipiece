@@ -3,10 +3,12 @@ import {
   CreateAccountPage,
   DashboardPage,
   ForgotPasswordPage,
-  KitchenPage,
+  MembershipViewPage,
+  MembershipsPage,
   LoginPage,
   MealPlanConfigurationPage,
   MealPlanViewPage,
+  NotFoundPage,
   RecipeEditPage,
   RecipeViewPage,
   RegisterPage,
@@ -79,8 +81,12 @@ export const authenticatedRoutes = [
     element: MealPlanConfigurationPage,
   },
   {
-    path: "/kitchen",
-    element: KitchenPage,
+    path: "/memberships/:membershipId",
+    element: MembershipViewPage,
+  },
+  {
+    path: "/memberships",
+    element: MembershipsPage,
   },
   // {
   //   path: "/notifications",
@@ -91,4 +97,11 @@ export const authenticatedRoutes = [
 export const unauthenticatedPaths = unauthenticatedRoutes.map((r) => r.path);
 export const authenticatedPaths = authenticatedRoutes.map((r) => r.path);
 
-export const allRoutes = [...unauthenticatedRoutes, ...authenticatedRoutes];
+export const allRoutes = [
+  ...unauthenticatedRoutes,
+  ...authenticatedRoutes,
+  {
+    path: "*",
+    element: NotFoundPage, 
+  }
+];

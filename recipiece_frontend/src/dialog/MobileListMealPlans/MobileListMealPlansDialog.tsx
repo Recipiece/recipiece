@@ -1,7 +1,7 @@
 import { ListMealPlansQuerySchema, MealPlanSchema } from "@recipiece/types";
 import { FC, useMemo } from "react";
 import { useListMealPlansQuery } from "../../api";
-import { Button, LoadingGroup, SharedAvatar } from "../../component";
+import { Button, LoadingGroup, MembershipAvatar } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
@@ -10,7 +10,7 @@ const MealPlanDisplay: FC<{ readonly mealPlan: MealPlanSchema }> = ({ mealPlan }
 
   return (
     <div className="flex flex-row items-center gap-2">
-      {membershipId && <SharedAvatar size="small" userKitchenMembershipId={membershipId}></SharedAvatar>}
+      <MembershipAvatar size="small" membershipId={membershipId}/>
       {mealPlan.name}
     </div>
   );

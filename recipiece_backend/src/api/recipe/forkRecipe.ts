@@ -3,6 +3,7 @@ import { ForkRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { getRecipeByIdQuery } from "./query";
 
 export const forkRecipe = async (
   request: AuthenticatedRequest<ForkRecipeRequestSchema>,
@@ -10,24 +11,7 @@ export const forkRecipe = async (
 ): ApiResponse<RecipeSchema> => {
   const { original_recipe_id } = request.body;
   const user = request.user;
-  const originalRecipe = await tx.recipe.findFirst({
-    where: {
-      id: original_recipe_id,
-      recipe_shares: {
-        some: {
-          recipe_id: original_recipe_id,
-          user_kitchen_membership: {
-            destination_user_id: user.id,
-            status: "accepted",
-          },
-        },
-      },
-    },
-    include: {
-      ingredients: true,
-      steps: true,
-    },
-  });
+  const originalRecipe = await getRecipeByIdQuery(tx, user, original_recipe_id).executeTakeFirst();
 
   if (!originalRecipe) {
     return [
@@ -47,13 +31,13 @@ export const forkRecipe = async (
     ];
   }
 
-  const { id, user_id, created_at, ingredients, metadata, steps, ...restRecipe } = originalRecipe;
+  const { id, user_id, created_at, ingredients, metadata, steps, tags, user_kitchen_membership_id, ...restRecipe } = originalRecipe;
   const metadataCast = metadata as any;
-  const idLessIngredients = ingredients.map((ing) => {
+  const idLessIngredients = (ingredients ?? []).map((ing) => {
     const { id, recipe_id, ...restIng } = ing;
     return restIng;
   });
-  const idLessSteps = steps.map((step) => {
+  const idLessSteps = (steps ?? []).map((step) => {
     const { id, recipe_id, ...restStep } = step;
     return restStep;
   });

@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { useBulkSetMealPlanItemsMutation, useGetMealPlanByIdQuery, useListMealPlanItemsQuery } from "../../api";
-import { Button, Form, H2, LoadingGroup, RecipieceMenuBarContext, SharedAvatar, SubmitButton } from "../../component";
+import { Button, Form, H2, LoadingGroup, MembershipAvatar, RecipieceMenuBarContext, SubmitButton } from "../../component";
 import { useLayout } from "../../hooks";
 import { ceilDateToDay, floorDateToDay } from "../../util";
 import { MealPlanContextMenu } from "./MealPlanContextMenu";
@@ -329,7 +329,7 @@ export const MealPlanViewPage: FC = () => {
             <div className="flex flex-row items-center">
               <div className="flex flex-row items-center gap-2">
                 <H2>{mealPlan?.name}</H2>
-                {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
+                <MembershipAvatar membershipId={sharedMembershipId} />
               </div>
 
               {isMobile &&

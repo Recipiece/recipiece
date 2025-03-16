@@ -22,15 +22,15 @@ import {
   Input,
   LoadingGroup,
   LoadingSpinner,
+  MembershipAvatar,
   Popover,
   PopoverContent,
   PopoverTrigger,
   RecipieceMenuBarContext,
-  SharedAvatar,
   Shelf,
   ShelfSpacer,
   Stack,
-  useToast,
+  useToast
 } from "../../component";
 import { DialogContext } from "../../context";
 import { useLayout } from "../../hooks";
@@ -314,7 +314,7 @@ export const ShoppingListViewPage: FC = () => {
           <Shelf>
             <div className="flex flex-row items-center gap-2">
               <H2>{shoppingList?.name}</H2>
-              {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
+              <MembershipAvatar membershipId={sharedMembershipId} />
             </div>
             <ShelfSpacer />
             {shoppingList && (

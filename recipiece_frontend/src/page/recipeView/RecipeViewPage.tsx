@@ -16,10 +16,10 @@ import {
   DropdownMenuTrigger,
   H2,
   LoadingGroup,
+  MembershipAvatar,
   NotFound,
   RecipeContextMenu,
-  RecipieceMenuBarContext,
-  SharedAvatar,
+  RecipieceMenuBarContext
 } from "../../component";
 import { useLayout } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
@@ -35,7 +35,7 @@ export const RecipeViewPage: FC = () => {
     enabled: !!id,
   });
 
-  const userKitchenMembershipId = (originalRecipe?.shares ?? [])[0]?.user_kitchen_membership_id;
+  const userKitchenMembershipId = originalRecipe?.user_kitchen_membership_id;
 
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { isMobile } = useLayout();
@@ -153,7 +153,6 @@ export const RecipeViewPage: FC = () => {
               canFork={recipe!.user_id !== currentUser?.id}
               canDelete={recipe!.user_id === currentUser?.id}
               canEdit={recipe!.user_id === currentUser?.id}
-              canShare={recipe!.user_id === currentUser?.id}
               canAddToShoppingList
               canAddToCookbook={recipe!.user_id === currentUser?.id}
               canScale
@@ -174,7 +173,7 @@ export const RecipeViewPage: FC = () => {
           <LoadingGroup isLoading={isLoading} className="h-[40px] w-full">
             <div className="flex flex-row items-center gap-2">
               <H2 className="text-4xl font-medium">{recipe?.name}</H2>
-              <SharedAvatar userKitchenMembershipId={userKitchenMembershipId} />
+              <MembershipAvatar membershipId={userKitchenMembershipId!} />
               {recipe && (
                 <>
                   {isMobile &&

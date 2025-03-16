@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useGetSelfQuery } from "../../api";
@@ -17,6 +17,7 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
   onClose,
   onSubmit,
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
     useResponsiveDialogComponents();
@@ -36,7 +37,9 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
           message: "You cannot invite yourself",
         });
       } else {
-        onSubmit?.(formData);
+        setIsSubmitting(true);
+        await onSubmit?.(formData);
+        setIsSubmitting(false);
       }
     },
     [form, onSubmit, user]
@@ -60,12 +63,12 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
           <ResponsiveFooter className="flex-col-reverse">
             <Button
               variant="outline"
-              disabled={form.formState.isSubmitting || isLoadingUser}
+              disabled={isSubmitting || isLoadingUser}
               onClick={() => onClose?.()}
             >
               Cancel
             </Button>
-            <SubmitButton disabled={isLoadingUser}>Send Invitation</SubmitButton>
+            <SubmitButton disabled={isSubmitting || isLoadingUser}>Send Invitation</SubmitButton>
           </ResponsiveFooter>
         </form>
       </Form>

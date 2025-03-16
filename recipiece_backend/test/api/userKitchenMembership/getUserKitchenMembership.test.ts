@@ -15,34 +15,16 @@ describe("Get User Kitchen Membership", () => {
     [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
   });
 
-  it("should get a membership where the source user is the requesting user", async () => {
+  it.each([true, false])("should get a membership where the source user is the requesting user", async (isUserSourceUser) => {
     const membership = await generateUserKitchenMembership({
-      source_user_id: user.id,
-      destination_user_id: otherUser.id,
+      source_user_id: isUserSourceUser ? user.id : otherUser.id,
+      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
       status: "pending",
     });
 
     const response = await request(server)
       .get(`/user-kitchen-membership/${membership.id}`)
       .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: UserKitchenMembershipSchema = response.body;
-
-    expect(responseData.id).toBe(membership.id);
-    expect(responseData.status).toBe(membership.status);
-  });
-
-  it("should get a membership where the destination user is the requesting user", async () => {
-    const membership = await generateUserKitchenMembership({
-      source_user_id: user.id,
-      destination_user_id: otherUser.id,
-      status: "pending",
-    });
-
-    const response = await request(server)
-      .get(`/user-kitchen-membership/${membership.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: UserKitchenMembershipSchema = response.body;

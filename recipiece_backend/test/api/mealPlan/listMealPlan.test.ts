@@ -71,6 +71,10 @@ describe("List Meal Plan", () => {
         status: "accepted",
       });
       const otherMealPlanAll = await generateMealPlan({ user_id: otherUserAll.id });
+      await generateMealPlanShare({
+        user_kitchen_membership_id: allMembership.id,
+        meal_plan_id: otherMealPlanAll.id,
+      });
 
       const userMealPlans = [];
       for (let i = 0; i < 10; i++) {
@@ -131,7 +135,7 @@ describe("List Meal Plan", () => {
     });
 
     it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
-      "should not list meal plans shared to a non-accepted membership",
+      "should not list meal plans belonging to a membership with status %o",
       async (membershipStatus) => {
         const otherUserSelective = await generateUser();
         await generateUserKitchenMembership({

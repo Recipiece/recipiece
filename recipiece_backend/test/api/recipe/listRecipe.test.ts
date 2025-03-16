@@ -1,10 +1,9 @@
 import { Constant } from "@recipiece/constant";
-import { Recipe, User } from "@recipiece/database";
+import { Recipe, User, UserKitchenMembershipStatus } from "@recipiece/database";
 import {
   generateCookbook,
   generateRecipe,
   generateRecipeCookbookAttachment,
-  generateRecipeShare,
   generateRecipeTagAttachment,
   generateRecipeWithIngredientsAndSteps,
   generateUser,
@@ -153,12 +152,12 @@ describe("List Recipes", () => {
     expect(results.length).toEqual(5);
   });
 
-  it("should list shared recipes", async () => {
+  it.each([true, false])("should list shared recipes when membership source user is user is %o", async (isUserSourceUser) => {
     const otherUser = await generateUser();
     // allow otherUser to share a recipe to user
     const membership = await generateUserKitchenMembership({
-      source_user_id: otherUser.id,
-      destination_user_id: user.id,
+      source_user_id: isUserSourceUser ? user.id : otherUser.id,
+      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
       status: "accepted",
     });
 
@@ -192,21 +191,15 @@ describe("List Recipes", () => {
     expect(belongingToOther.length).toBe(10);
   });
 
-  it("should not list shared recipes belonging to a non-accepted membership", async () => {
+  it.each(<UserKitchenMembershipStatus[]>["denied", "pending"])("should not list shared recipes belonging to a membership with status %o", async (membershipStatus) => {
     const otherUser = await generateUser();
     // allow otherUser to share a recipe to user
-    const membership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
-      status: "denied",
+      status: membershipStatus,
     });
-
     const otherRecipe = await generateRecipe({ user_id: otherUser.id });
-
-    await generateRecipeShare({
-      user_kitchen_membership_id: membership.id,
-      recipe_id: otherRecipe.id,
-    });
 
     for (let i = 0; i < 10; i++) {
       await generateRecipe({

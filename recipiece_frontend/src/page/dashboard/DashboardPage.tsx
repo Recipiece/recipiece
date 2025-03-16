@@ -6,6 +6,7 @@ import { useLocation, useParams } from "react-router-dom";
 import {
   useAttachRecipeToCookbookMutation,
   useGetCookbookByIdQuery,
+  useGetSelfQuery,
   useGetUserKitchenMembershipQuery,
   useListRecipesQuery,
 } from "../../api";
@@ -93,6 +94,7 @@ export const DashboardPage: FC = () => {
     });
   }, []);
 
+  const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
   const { data: recipeData, isLoading: isLoadingRecipes, isFetching: isFetchingRecipes } = useListRecipesQuery(filters);
   const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, {
     enabled: !!cookbookId,
@@ -111,7 +113,7 @@ export const DashboardPage: FC = () => {
 
   const onFindRecipe = useCallback(() => {
     pushDialog("searchRecipesForCookbook", {
-      cookbookId: +cookbookId!,
+      cookbook: cookbook!,
       onSubmit: async (recipe: RecipeSchema) => {
         try {
           await addRecipeToCookbook({ recipe: recipe, cookbook: cookbook! });
@@ -131,13 +133,17 @@ export const DashboardPage: FC = () => {
       },
       onClose: () => popDialog("searchRecipesForCookbook"),
     });
-  }, [addRecipeToCookbook, cookbook, cookbookId, popDialog, pushDialog, toast]);
+  }, [addRecipeToCookbook, cookbook, popDialog, pushDialog, toast]);
 
   const title = useMemo(() => {
     if (cookbookId && cookbook) {
       return cookbook?.name;
-    } else if (membershipId && membership) {
-      return `${membership.source_user.username}'s Kitchen`;
+    } else if (user && membershipId && membership) {
+      if (user.id === membership.source_user.id) {
+        return `${membership.destination_user.username}'s Kitchen`;
+      } else {
+        return `${membership.source_user.username}'s Kitchen`;
+      }
     } else if (location.pathname.endsWith("/dashboard/all")) {
       return "All Recipes";
     } else if (location.pathname.endsWith("/dashboard")) {
@@ -145,15 +151,17 @@ export const DashboardPage: FC = () => {
     } else {
       return undefined;
     }
-  }, [cookbook, cookbookId, location.pathname, membership, membershipId]);
+  }, [cookbook, cookbookId, location.pathname, membership, membershipId, user]);
 
   const isLoading =
+    isLoadingUser ||
     isLoadingRecipes ||
     isFetchingRecipes ||
     (!!cookbookId && isLoadingCookbook) ||
     (!!membershipId && isLoadingMembership);
 
-  const isLoadingTitle = (!!cookbookId && isLoadingCookbook) || (!!membershipId && isLoadingMembership);
+  const isLoadingTitle =
+    isLoadingUser || (!!cookbookId && isLoadingCookbook) || (!!membershipId && isLoadingMembership);
 
   return (
     <SidebarProvider className="h-[calc(100%-64px)] min-h-[calc(100%-64px)]">

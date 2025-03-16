@@ -242,13 +242,13 @@ export const RecipieceMenubar: FC = () => {
                 data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN}
                 onClick={() => navigate("/kitchen")}
               >
-                Kitchen
+                Kitchens
               </DropdownMenuItem>
               <DropdownMenuItem
                 data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_ACCOUNT}
                 onClick={() => navigate("/account")}
               >
-                Account
+                Settings
               </DropdownMenuItem>
               {/* <DropdownMenuItem onClick={() => navigate("/notifications")}>Notifications</DropdownMenuItem> */}
               <DropdownMenuSeparator />
@@ -344,8 +344,8 @@ export const RecipieceMenubar: FC = () => {
           <MenubarMenu>
             <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT}>Account</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN} onClick={() => navigate("/kitchen")}>
-                Kitchen
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN} onClick={() => navigate("/memberships")}>
+                Kitchens
               </MenubarItem>
               <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_ACCOUNT} onClick={() => navigate("/account")}>
                 Settings

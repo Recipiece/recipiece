@@ -63,6 +63,10 @@ describe("List Shopping Lists", () => {
       status: "accepted",
     });
     const otherShoppingList = await generateShoppingList({ user_id: otherUser.id });
+    await generateShoppingListShare({
+      shopping_list_id: otherShoppingList.id,
+      user_kitchen_membership_id: membership.id,
+    });
 
     for (let i = 0; i < 10; i++) {
       await generateShoppingList({ user_id: user.id });

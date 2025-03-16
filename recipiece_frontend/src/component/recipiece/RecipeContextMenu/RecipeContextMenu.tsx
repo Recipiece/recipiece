@@ -17,7 +17,6 @@ import { FC, Fragment, useCallback, useContext, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import {
   useAttachRecipeToCookbookMutation,
-  useCreateRecipeShareMutation,
   useForkRecipeMutation,
   useGetCookbookByIdQuery,
   useListCookbooksQuery,
@@ -43,7 +42,6 @@ export interface RecipeContextMenuProps {
   readonly canAddToCookbook?: boolean;
   readonly canAddToShoppingList?: boolean;
   readonly canFork?: boolean;
-  readonly canShare?: boolean;
   readonly canEdit?: boolean;
   readonly canDelete?: boolean;
   readonly canRemoveFromCookbook?: boolean;
@@ -60,7 +58,6 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   canAddToCookbook,
   canAddToShoppingList,
   canFork,
-  canShare,
   canDelete,
   canEdit,
   canRemoveFromCookbook,
@@ -107,7 +104,6 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     enabled: !!cookbookId,
   });
 
-  const { mutateAsync: shareRecipe } = useCreateRecipeShareMutation();
   const { mutateAsync: forkRecipe } = useForkRecipeMutation();
   const { mutateAsync: removeRecipeFromCookbook } = useRemoveRecipeFromCookbookMutation();
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
@@ -192,35 +188,6 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
       });
     }
   }, [removeRecipeFromCookbook, recipe, cookbook, toast]);
-
-  const onShareRecipe = useCallback(async () => {
-    pushDialog("share", {
-      displayName: recipe.name,
-      entity_id: recipe.id,
-      entity_type: "recipe",
-      onClose: () => popDialog("share"),
-      onSubmit: async (membership: UserKitchenMembershipSchema) => {
-        try {
-          await shareRecipe({
-            user_kitchen_membership_id: membership.id,
-            recipe_id: recipe.id,
-          });
-          toast({
-            title: "Recipe Shared",
-            description: `Your recipe has been sent to ${membership.destination_user.username}`,
-          });
-        } catch {
-          toast({
-            title: "Unable to Share Recipe",
-            description: `Your recipe could not be shared with ${membership.destination_user.username}. Try again later.`,
-            variant: "destructive",
-          });
-        } finally {
-          popDialog("share");
-        }
-      },
-    });
-  }, [popDialog, pushDialog, recipe, shareRecipe, toast]);
 
   const onForkRecipe = useCallback(async () => {
     try {
@@ -423,19 +390,8 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
       );
     }
 
-    if (canShare) {
-      items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_SHARE_RECIPE(dataTestId)}
-          onClick={onShareRecipe}
-        >
-          <Share /> Share Recipe
-        </DropdownMenuItem>
-      );
-    }
-
     return items;
-  }, [dataTestId, canEdit, canFork, canShare, navigate, onForkRecipe, onShareRecipe, recipe]);
+  }, [dataTestId, canEdit, canFork, navigate, onForkRecipe, recipe]);
 
   const removeItems = useMemo(() => {
     const items = [];

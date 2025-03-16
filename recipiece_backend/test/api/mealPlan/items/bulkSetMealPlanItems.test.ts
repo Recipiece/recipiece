@@ -198,6 +198,11 @@ describe("Bulk Set Meal Plan Items", () => {
       status: "accepted",
     });
 
+    await generateMealPlanShare({
+      user_kitchen_membership_id: membership.id,
+      meal_plan_id: mealPlan.id,
+    });
+
     const recipeToAdd = await generateRecipe({
       user_id: user.id,
     });

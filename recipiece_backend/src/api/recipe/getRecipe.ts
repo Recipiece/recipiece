@@ -1,5 +1,5 @@
 import { PrismaTransaction } from "@recipiece/database";
-import { RecipeSchema } from "@recipiece/types";
+import { RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { getRecipeByIdQuery } from "./query";
@@ -24,5 +24,5 @@ export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction
     ];
   }
 
-  return [StatusCodes.OK, recipe as RecipeSchema];
+  return [StatusCodes.OK, YRecipeSchema.cast(recipe)];
 };

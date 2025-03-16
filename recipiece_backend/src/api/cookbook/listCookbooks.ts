@@ -1,9 +1,8 @@
 import { Constant } from "@recipiece/constant";
-import { KyselyCore, PrismaTransaction } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ListCookbooksQuerySchema, ListCookbooksResponseSchema, YListCookbooksResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { cookbookSharesSubquery } from "./query";
 
 export const listCookbooks = async (
   req: AuthenticatedRequest<any, ListCookbooksQuerySchema>,
@@ -24,48 +23,40 @@ export const listCookbooks = async (
       return db
         .selectFrom("cookbooks")
         .selectAll("cookbooks")
-        .select((eb) => cookbookSharesSubquery(eb, user.id).as("shares"))
+        .select((eb) => {
+          return eb.lit(-1).as("user_kitchen_membership_id");
+        })
         .where("cookbooks.user_id", "=", user.id);
     })
-    .with("all_grant_shared_cookbooks", (db) => {
-      return (
-        db
-          .selectFrom("user_kitchen_memberships")
-          .innerJoin("users", "users.id", "user_kitchen_memberships.source_user_id")
-          .innerJoin("cookbooks", "cookbooks.user_id", "user_id")
-          .where((eb) => {
-            return eb.and([
+    .with("shared_cookbooks", (db) => {
+      return db
+        .selectFrom("user_kitchen_memberships")
+        .innerJoin("users", "users.id", "user_kitchen_memberships.source_user_id")
+        .innerJoin("cookbooks", "cookbooks.user_id", "user_id")
+        .where((eb) => {
+          return eb.or([
+            eb.and([
               eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
-            ]);
-          })
-          .whereRef("user_kitchen_memberships.source_user_id", "=", "cookbooks.user_id")
-          .selectAll("cookbooks")
-          // these shares are synthetic because we don't explicitly create shares for "ALL" records
-          .select((eb) => {
-            return eb
-              .fn("jsonb_build_array", [
-                eb.fn("jsonb_build_object", [
-                  KyselyCore.sql.lit("id"),
-                  eb.lit(-1),
-                  KyselyCore.sql.lit("created_at"),
-                  eb.fn("now"),
-                  KyselyCore.sql.lit("cookbook_id"),
-                  "cookbooks.id",
-                  KyselyCore.sql.lit("user_kitchen_membership_id"),
-                  "user_kitchen_memberships.id",
-                ]),
-              ])
-              .as("shares");
-          })
-      );
+              eb("user_kitchen_memberships.source_user_id", "=", eb.ref("cookbooks.user_id")),
+            ]),
+            eb.and([
+              eb("user_kitchen_memberships.source_user_id", "=", user.id),
+              eb("user_kitchen_memberships.destination_user_id", "=", eb.ref("cookbooks.user_id")),
+            ]),
+          ]);
+        })
+        .where((eb) => {
+          return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted");
+        })
+        .selectAll("cookbooks")
+        .select("user_kitchen_memberships.id as user_kitchen_membership_id");
     })
     .with("all_cookbooks", (db) => {
       if (shared_cookbooks_filter === "include") {
         return db
           .selectFrom("owned_cookbooks")
           .union((eb) => {
-            return eb.selectFrom("all_grant_shared_cookbooks").selectAll();
+            return eb.selectFrom("shared_cookbooks").selectAll();
           })
           .selectAll();
       } else {
@@ -112,8 +103,9 @@ export const listCookbooks = async (
               eb
                 .selectFrom("user_kitchen_memberships")
                 .select("user_kitchen_memberships.id")
+                .whereRef("user_kitchen_memberships.destination_user_id", "=", "all_cookbooks.user_id")
                 .where((_eb) => _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"))
-                .where("user_kitchen_memberships.destination_user_id", "=", user.id),
+                .where("user_kitchen_memberships.source_user_id", "=", user.id),
               "is not",
               null
             ),

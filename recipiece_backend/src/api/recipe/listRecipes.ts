@@ -1,9 +1,9 @@
 import { Constant } from "@recipiece/constant";
-import { KyselyCore, KyselyGenerated, PrismaTransaction, Recipe } from "@recipiece/database";
-import { ListRecipesQuerySchema, ListRecipesResponseSchema } from "@recipiece/types";
+import { KyselyCore, KyselyGenerated, PrismaTransaction } from "@recipiece/database";
+import { ListRecipesQuerySchema, ListRecipesResponseSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { ingredientsSubquery, recipeSharesSubquery, stepsSubquery, tagsSubquery } from "./query";
+import { ingredientsSubquery, stepsSubquery, tagsSubquery } from "./query";
 
 export const listRecipes = async (
   request: AuthenticatedRequest<any, ListRecipesQuerySchema>,
@@ -46,41 +46,34 @@ export const listRecipes = async (
         .selectFrom("recipes")
         .selectAll("recipes")
         .select(selectableSubqueries)
-        .select((eb) => recipeSharesSubquery(eb, user.id).as("shares"))
+        .select((eb) => {
+          return eb.lit(-1).as("user_kitchen_membership_id");
+        })
         .where("recipes.user_id", "=", user.id);
     })
-    .with("all_grant_shared_recipes", (db) => {
+    .with("shared_recipes", (db) => {
       let base = db
         .selectFrom("user_kitchen_memberships")
         .innerJoin("users", "users.id", "user_kitchen_memberships.source_user_id")
         .innerJoin("recipes", "recipes.user_id", "user_id")
         .where((eb) => {
-          return eb.and([
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-            eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
+          return eb.or([
+            eb.and([
+              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              eb("user_kitchen_memberships.source_user_id", "=", eb.ref("recipes.user_id")),
+            ]),
+            eb.and([
+              eb("user_kitchen_memberships.source_user_id", "=", user.id),
+              eb("user_kitchen_memberships.destination_user_id", "=", eb.ref("recipes.user_id")),
+            ]),
           ]);
         })
-        .whereRef("user_kitchen_memberships.source_user_id", "=", "recipes.user_id")
+        .where((eb) => {
+          return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted");
+        })
         .selectAll("recipes")
         .select(selectableSubqueries)
-        // these shares are synthetic because we don't explicitly create shares for "ALL" records
-        .select((eb) => {
-          return eb
-            .fn("jsonb_build_array", [
-              eb.fn("jsonb_build_object", [
-                KyselyCore.sql.lit("id"),
-                eb.lit(-1),
-                KyselyCore.sql.lit("created_at"),
-                eb.fn("now"),
-                KyselyCore.sql.lit("recipe_id"),
-                "recipes.id",
-                KyselyCore.sql.lit("user_kitchen_membership_id"),
-                "user_kitchen_memberships.id",
-              ]),
-            ])
-            .as("shares");
-        });
-
+        .select("user_kitchen_memberships.id as user_kitchen_membership_id")
       if (membershipIds.length > 0) {
         base = base.where("user_kitchen_memberships.id", "in", membershipIds);
       }
@@ -92,11 +85,11 @@ export const listRecipes = async (
         return db
           .selectFrom("owned_recipes")
           .union((eb) => {
-            return eb.selectFrom("all_grant_shared_recipes").selectAll();
+            return eb.selectFrom("shared_recipes").selectAll();
           })
           .selectAll();
       } else if (!showUserRecipes && membershipIds.length > 0) {
-        return db.selectFrom("all_grant_shared_recipes").selectAll();
+        return db.selectFrom("shared_recipes").selectAll();
       } else if (showUserRecipes && membershipIds.length === 0) {
         return db.selectFrom("owned_recipes").selectAll();
       } else {
@@ -168,7 +161,7 @@ export const listRecipes = async (
   const recipes = await query.execute();
 
   const hasNextPage = recipes.length > actualPageSize;
-  const resultsData = recipes.splice(0, actualPageSize) as Recipe[];
+  const resultsData = recipes.splice(0, actualPageSize).map((val) => YRecipeSchema.cast(val));
 
   return [
     StatusCodes.OK,

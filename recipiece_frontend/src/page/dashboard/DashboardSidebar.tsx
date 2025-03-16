@@ -2,9 +2,10 @@ import { DataTestId } from "@recipiece/constant";
 import { CookbookSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { FC, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useListCookbooksQuery, useListUserKitchenMembershipsQuery } from "../../api";
+import { useGetSelfQuery, useListCookbooksQuery, useListUserKitchenMembershipsQuery } from "../../api";
 import {
   LoadingGroup,
+  MembershipAvatar,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -15,7 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-  useSidebar,
+  useSidebar
 } from "../../component";
 import { useLayout } from "../../hooks";
 
@@ -37,8 +38,12 @@ export const DashboardSidebar: FC = () => {
 
   const { data: memberships, isLoading: isLoadingMemberships } = useListUserKitchenMembershipsQuery({
     targeting_self: true,
+    from_self: true,
+    status: ["accepted"],
     page_number: 0,
   });
+
+  const { data: user, isLoading: isLoadingUser} = useGetSelfQuery();
 
   const onNavigate = useCallback(
     (dest: string) => {
@@ -61,7 +66,7 @@ export const DashboardSidebar: FC = () => {
             <SidebarGroupLabel>Kitchens</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <LoadingGroup isLoading={isLoadingMemberships} variant="spinner" className="w-6 h-6">
+                <LoadingGroup isLoading={isLoadingMemberships || isLoadingUser} variant="spinner" className="w-6 h-6">
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_YOUR_RECIPES}
@@ -91,7 +96,8 @@ export const DashboardSidebar: FC = () => {
                           isActive={location.pathname.endsWith(`/kitchen/${membership.id}`)}
                           onClick={() => onNavigate(`/kitchen/${membership.id}`)}
                         >
-                          {membership.source_user.username}
+                          {membership.source_user.id === user?.id && membership.destination_user.username}
+                          {membership.destination_user.id === user?.id && membership.source_user.username}
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     );
@@ -117,7 +123,10 @@ export const DashboardSidebar: FC = () => {
                           asChild
                           onClick={() => onNavigate(`/cookbook/${cookbook.id}`)}
                         >
-                          <span>{cookbook.name}</span>
+                          <div className="flex flex-row gap-2">
+                            <MembershipAvatar size="small" membershipId={cookbook.user_kitchen_membership_id} />
+                            <span>{cookbook.name}</span>
+                          </div>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     );

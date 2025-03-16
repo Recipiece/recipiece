@@ -43,6 +43,32 @@ describe("Update User Kitchen Membership", () => {
     }
   );
 
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
+    "should not allow the source user to change the status to accepted",
+    async (oldStatus) => {
+      const membership = await generateUserKitchenMembership({
+        source_user_id: user.id,
+        status: oldStatus,
+      });
+
+      const response = await request(server)
+        .put("/user-kitchen-membership")
+        .set("Authorization", `Bearer ${bearerToken}`)
+        .send(<UpdateUserKitchenMembershipRequestSchema>{
+          id: membership.id,
+          status: "accepted",
+        });
+      expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+
+      const dbMembership = await prisma.userKitchenMembership.findFirst({
+        where: {
+          source_user_id: user.id,
+        },
+      });
+      expect(dbMembership?.status).toBe(oldStatus);
+    }
+  );
+
   it("should not allow a user to change the status to pending", async () => {
     const membership = await generateUserKitchenMembership({
       destination_user_id: user.id,

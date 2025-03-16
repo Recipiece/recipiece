@@ -46,6 +46,10 @@ describe("Get Shopping List", () => {
       destination_user_id: user.id,
       status: "accepted",
     });
+    const share = await generateShoppingListShare({
+      shopping_list_id: othersShoppingList.id,
+      user_kitchen_membership_id: membership.id,
+    });
 
     // make a membership and share going the other way to ensure we dont pick up stray records
     const mirroredMembership = await generateUserKitchenMembership({
@@ -67,7 +71,7 @@ describe("Get Shopping List", () => {
     const responseData: ShoppingListSchema = response.body;
 
     expect(responseData.shares?.length).toBe(1);
-    expect(responseData.shares![0].id).toBe(-1);
+    expect(responseData.shares![0].id).toBe(share.id);
     expect(responseData.shares![0].shopping_list_id).toBe(othersShoppingList.id);
   });
 

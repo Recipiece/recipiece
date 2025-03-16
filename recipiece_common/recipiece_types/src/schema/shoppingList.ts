@@ -157,7 +157,6 @@ export const YListShoppingListSharesResponseSchema = generateYListQueryResponseS
       id: number().required(),
       name: string().required(),
     }).required(),
-    user_kitchen_membership: YUserKitchenMembershipSchema.required(),
   })
 ).noUnknown();
 

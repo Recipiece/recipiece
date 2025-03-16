@@ -1,15 +1,11 @@
 import {
   YAddRecipeToCookbookRequestSchema,
   YCookbookSchema,
-  YCookbookShareSchema,
   YCreateCookbookRequestSchema,
-  YCreateCookbookShareRequestSchema,
-  YListCookbookSharesQuerySchema,
-  YListCookbookSharesResponseSchema,
   YListCookbooksQuerySchema,
   YListCookbooksResponseSchema,
   YRemoveRecipeFromCookbookRequestSchema,
-  YUpdateCookbookRequestSchema,
+  YUpdateCookbookRequestSchema
 } from "@recipiece/types";
 import { Route } from "../../types";
 import { addRecipeToCookbook } from "./addRecipeToCookbook";
@@ -18,7 +14,6 @@ import { deleteCookbook } from "./deleteCookbook";
 import { getCookbook } from "./getCookbook";
 import { listCookbooks } from "./listCookbooks";
 import { removeRecipeFromCookbook } from "./removeRecipeFromCookbook";
-import { createCookbookShare, deleteCookbookShare, listCookbookShares } from "./share";
 import { updateCookbook } from "./updateCookbook";
 
 export const COOKBOOK_ROUTES: Route[] = [
@@ -72,27 +67,5 @@ export const COOKBOOK_ROUTES: Route[] = [
     function: updateCookbook,
     requestSchema: YUpdateCookbookRequestSchema,
     responseSchema: YCookbookSchema,
-  },
-  {
-    path: "/cookbook/share",
-    method: "POST",
-    authentication: "access_token",
-    function: createCookbookShare,
-    requestSchema: YCreateCookbookShareRequestSchema,
-    responseSchema: YCookbookShareSchema,
-  },
-  {
-    path: "/cookbook/share/list",
-    method: "GET",
-    authentication: "access_token",
-    function: listCookbookShares,
-    requestSchema: YListCookbookSharesQuerySchema,
-    responseSchema: YListCookbookSharesResponseSchema,
-  },
-  {
-    path: "/cookbook/share/:id",
-    method: "DELETE",
-    authentication: "access_token",
-    function: deleteCookbookShare,
   },
 ];

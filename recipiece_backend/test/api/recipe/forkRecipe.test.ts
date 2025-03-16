@@ -1,7 +1,6 @@
 import { prisma, User } from "@recipiece/database";
 import {
   generateRecipe,
-  generateRecipeShare,
   generateRecipeWithIngredientsAndSteps,
   generateUserKitchenMembership,
 } from "@recipiece/test";
@@ -23,14 +22,10 @@ describe("Fork Recipe", () => {
     const originalRecipe = await generateRecipeWithIngredientsAndSteps({
       user_id: otherUser.id,
     });
-    const membership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
-    });
-    const share = await generateRecipeShare({
-      user_kitchen_membership_id: membership.id,
-      recipe_id: originalRecipe.id,
     });
 
     const response = await request(server)
@@ -87,14 +82,10 @@ describe("Fork Recipe", () => {
     const recipe = await generateRecipe({
       user_id: otherUser.id,
     });
-    const membership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "accepted",
-    });
-    await generateRecipeShare({
-      recipe_id: recipe.id,
-      user_kitchen_membership_id: membership.id,
     });
 
     const response = await request(server)
@@ -121,14 +112,10 @@ describe("Fork Recipe", () => {
     const recipe = await generateRecipe({
       user_id: otherUser.id,
     });
-    const membership = await generateUserKitchenMembership({
+    await generateUserKitchenMembership({
       source_user_id: otherUser.id,
       destination_user_id: user.id,
       status: "pending",
-    });
-    await generateRecipeShare({
-      recipe_id: recipe.id,
-      user_kitchen_membership_id: membership.id,
     });
 
     const response = await request(server)
@@ -167,6 +154,6 @@ describe("Fork Recipe", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+    expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });

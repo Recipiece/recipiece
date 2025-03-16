@@ -45,10 +45,14 @@ describe("Append Shopping List Items", () => {
   it("should allow a shared user to append items to a shared meal plan", async () => {
     const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
     const shoppingList = await generateShoppingList({ user_id: user.id });
-    await generateUserKitchenMembership({
+    const membership = await generateUserKitchenMembership({
       source_user_id: user.id,
       destination_user_id: otherUser.id,
       status: "accepted",
+    });
+    await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     const appendedItem: Partial<ShoppingListItem> = {

@@ -51,8 +51,16 @@ export const createUserKitchenMembership = async (
 
   const existingInvitation = await tx.userKitchenMembership.findFirst({
     where: {
-      destination_user_id: targetUser.id,
-      source_user_id: request.user.id,
+      OR: [
+        {
+          destination_user_id: targetUser.id,
+          source_user_id: request.user.id,
+        },
+        {
+          source_user_id: targetUser.id,
+          destination_user_id: request.user.id,
+        },
+      ],
     },
   });
 

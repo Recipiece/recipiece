@@ -15,8 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "../../shadcn";
 import { Shelf, ShelfSpacer } from "../Layout";
+import { MembershipAvatar } from "../MembershipAvatar";
 import { RecipeContextMenu } from "../RecipeContextMenu";
-import { SharedAvatar } from "../SharedAvatar";
 
 export interface RecipeCardProps {
   readonly recipe: RecipeSchema;
@@ -26,7 +26,7 @@ export interface RecipeCardProps {
 export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
   const navigate = useNavigate();
   const { data: user } = useGetSelfQuery();
-  const userKitchenMembershipId = (recipe.shares ?? [])[0]?.user_kitchen_membership_id;
+  const userKitchenMembershipId = recipe.user_kitchen_membership_id;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const onView = useCallback(() => {
@@ -60,7 +60,7 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
         </CardContent>
         <CardFooter>
           <div className="flex w-full flex-row items-center">
-            <SharedAvatar userKitchenMembershipId={userKitchenMembershipId} />
+            <MembershipAvatar membershipId={userKitchenMembershipId} />
             <DropdownMenuTrigger className="ml-auto" asChild>
               <Button
                 data-testid={DataTestId.RecipeCard.BUTTON_RECIPE_CONTEXT_MENU_TRIGGER(recipe.id)}
@@ -77,7 +77,6 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
               canRemoveFromCookbook={!!cookbookId}
               canDelete={recipe.user_id === user?.id}
               canEdit={recipe.user_id === user?.id}
-              canShare={recipe.user_id === user?.id}
               canFork={recipe.user_id !== user?.id}
               canAddToCookbook={recipe.user_id === user?.id}
               canAddToShoppingList

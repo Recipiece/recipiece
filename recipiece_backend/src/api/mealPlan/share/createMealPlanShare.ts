@@ -18,7 +18,10 @@ export const createMealPlanShare = async (
   const membership = await tx.userKitchenMembership.findUnique({
     where: {
       id: user_kitchen_membership_id,
-      source_user_id: user.id,
+      OR: [
+        {source_user_id: user.id},
+        {destination_user_id: user.id},
+      ],
       status: "accepted",
     },
     include: {
@@ -65,16 +68,20 @@ export const createMealPlanShare = async (
 
     const subscriptions = await tx.userPushNotificationSubscription.findMany({
       where: {
-        user_id: membership.destination_user_id,
+        user_id: membership.source_user_id === user.id ? membership.destination_user_id : membership.source_user_id,
       },
     });
     if (subscriptions.length > 0) {
       subscriptions.forEach(async (sub) => {
-        await sendMealPlanSharedPushNotification(sub, membership.source_user, mealPlan);
+        await sendMealPlanSharedPushNotification(
+          sub,
+          membership.source_user_id === user.id ? membership.destination_user : membership.source_user,
+          mealPlan,
+        );
       });
     }
 
-    return [StatusCodes.OK, share];
+    return [StatusCodes.CREATED, share];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {
       throw new ConflictError("Meal plan has already been shared");

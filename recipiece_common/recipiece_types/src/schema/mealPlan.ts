@@ -196,7 +196,7 @@ export const YListMealPlanSharesResponseSchema = generateYListQueryResponseSchem
       id: number().required(),
       name: string().required(),
     }).required(),
-    user_kitchen_membership: YUserKitchenMembershipSchema.required(),
+    // user_kitchen_membership: YUserKitchenMembershipSchema.required(),
   })
 ).noUnknown();
 

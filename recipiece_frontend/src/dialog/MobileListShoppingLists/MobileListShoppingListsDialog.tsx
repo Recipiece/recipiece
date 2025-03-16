@@ -1,7 +1,7 @@
 import { ShoppingListSchema } from "@recipiece/types";
 import { FC } from "react";
 import { useListShoppingListsQuery } from "../../api";
-import { Button, LoadingGroup, SharedAvatar } from "../../component";
+import { Button, LoadingGroup, MembershipAvatar } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
@@ -10,7 +10,7 @@ const ShoppingListDisplay: FC<{ readonly shoppingList: ShoppingListSchema }> = (
 
   return (
     <div className="flex flex-row items-center gap-2">
-      {membershipId && <SharedAvatar size="small" userKitchenMembershipId={membershipId}></SharedAvatar>}
+      <MembershipAvatar size="small" membershipId={membershipId} />
       {shoppingList.name}
     </div>
   );
