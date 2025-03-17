@@ -11,7 +11,7 @@ export const ShoppingListMenuItem: FC<
   return (
     <MenubarItem {...restProps}>
       <div className="flex flex-row items-center gap-2">
-        {membershipId && <MembershipAvatar size="small" membershipId={membershipId} />}
+        {membershipId && <MembershipAvatar entity={shoppingList} size="small" membershipId={membershipId} />}
         {shoppingList.name}
       </div>
     </MenubarItem>

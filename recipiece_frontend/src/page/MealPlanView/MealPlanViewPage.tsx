@@ -81,8 +81,6 @@ export const MealPlanViewPage: FC = () => {
   });
   const { mutateAsync: batchSetMealPlanItems } = useBulkSetMealPlanItemsMutation();
 
-  const sharedMembershipId = mealPlan?.shares?.[0]?.user_kitchen_membership_id;
-
   const form = useForm<MealPlanItemsForm>({
     defaultValues: {
       mealPlanItems: [],
@@ -334,11 +332,8 @@ export const MealPlanViewPage: FC = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2">
-            <div className="flex flex-row items-center">
-              <div className="flex flex-row items-center gap-2">
-                <H2>{mealPlan?.name}</H2>
-                <MembershipAvatar membershipId={sharedMembershipId} />
-              </div>
+            <div className="flex flex-row items-center gap-2">
+              <H2 className="flex-grow">{mealPlan?.name}</H2>
 
               {isMobile &&
                 mobileMenuPortalRef &&

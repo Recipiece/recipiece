@@ -16,10 +16,9 @@ import {
   DropdownMenuTrigger,
   H2,
   LoadingGroup,
-  MembershipAvatar,
   NotFound,
   RecipeContextMenu,
-  RecipieceMenuBarContext,
+  RecipieceMenuBarContext
 } from "../../component";
 import { useLayout } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
@@ -34,8 +33,6 @@ export const RecipeViewPage: FC = () => {
   } = useGetRecipeByIdQuery(+id!, {
     enabled: !!id,
   });
-
-  const userKitchenMembershipId = originalRecipe?.user_kitchen_membership_id;
 
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { isMobile } = useLayout();
@@ -172,8 +169,7 @@ export const RecipeViewPage: FC = () => {
         <div className="grid gap-3">
           <LoadingGroup isLoading={isLoading} className="h-[40px] w-full">
             <div className="flex flex-row items-center gap-2">
-              <H2 className="text-4xl font-medium">{recipe?.name}</H2>
-              <MembershipAvatar membershipId={userKitchenMembershipId!} />
+              <H2 className="flex-grow">{recipe?.name}</H2>
               {recipe && (
                 <>
                   {isMobile &&

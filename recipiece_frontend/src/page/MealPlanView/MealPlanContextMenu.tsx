@@ -113,9 +113,10 @@ export const MealPlanContextMenu: FC<{ readonly mealPlan?: MealPlanSchema }> = (
             meal_plan_id: mealPlan!.id,
             user_kitchen_membership_id: membership.id,
           });
+          const username = membership.source_user.id === user!.id ? membership.destination_user.username : membership.source_user.username;
           toast({
             title: "Meal Plan Shared",
-            description: `Your meal plan has been shared to ${membership.destination_user.username}`,
+            description: `Your meal plan has been shared to ${username}`,
           });
         } catch {
           toast({
@@ -128,7 +129,7 @@ export const MealPlanContextMenu: FC<{ readonly mealPlan?: MealPlanSchema }> = (
         }
       },
     });
-  }, [pushDialog, mealPlan, popDialog, shareMealPlan, toast]);
+  }, [pushDialog, mealPlan, popDialog, shareMealPlan, user, toast]);
 
   const onModifyMealPlan = useCallback(() => {
     pushDialog("modifyMealPlan", {

@@ -1,5 +1,5 @@
 import { User } from "@recipiece/database";
-import { generateRecipe, generateUserKitchenMembership } from "@recipiece/test";
+import { generateShoppingList, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
 import {
   ListUserKitchenMembershipsQuerySchema,
   ListUserKitchenMembershipsResponseSchema,
@@ -190,18 +190,22 @@ describe("List User Kitchen Memberships", () => {
       destination_user_id: otherUser.id,
       status: "accepted",
     });
-    const recipe = await generateRecipe({ user_id: user.id });
+    const shoppingList = await generateShoppingList({ user_id: user.id });
     const thirdMembership = await generateUserKitchenMembership({
       source_user_id: user.id,
       status: "accepted",
+    });
+    await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: thirdMembership.id,
     });
 
     const response = await request(server)
       .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         entity_filter: "exclude",
-        entity_id: recipe.id,
-        entity_type: "recipe",
+        entity_id: shoppingList.id,
+        entity_type: "shopping_list",
         page_number: 0,
         from_self: true,
       })
@@ -220,20 +224,24 @@ describe("List User Kitchen Memberships", () => {
       destination_user_id: otherUser.id,
       status: "accepted",
     });
-    const recipe = await generateRecipe({
+    const shoppingList = await generateShoppingList({
       user_id: user.id,
     });
     const thirdMembership = await generateUserKitchenMembership({
       source_user_id: user.id,
       status: "accepted",
     });
+    await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: thirdMembership.id,
+    });
 
     const response = await request(server)
       .get("/user-kitchen-membership/list")
       .query(<ListUserKitchenMembershipsQuerySchema>{
         entity_filter: "include",
-        entity_id: recipe.id,
-        entity_type: "recipe",
+        entity_id: shoppingList.id,
+        entity_type: "shopping_list",
         from_self: true,
         page_number: 0,
       })

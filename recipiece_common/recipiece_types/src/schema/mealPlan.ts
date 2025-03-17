@@ -1,7 +1,6 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YRecipeSchema } from "./recipe";
-import { YUserKitchenMembershipSchema } from "./user";
 
 export const YMealPlanShareSchema = object({
   id: number().required(),

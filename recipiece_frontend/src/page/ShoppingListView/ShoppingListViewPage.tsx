@@ -22,13 +22,10 @@ import {
   Input,
   LoadingGroup,
   LoadingSpinner,
-  MembershipAvatar,
   Popover,
   PopoverContent,
   PopoverTrigger,
   RecipieceMenuBarContext,
-  Shelf,
-  ShelfSpacer,
   Stack,
   useToast,
 } from "../../component";
@@ -59,8 +56,6 @@ export const ShoppingListViewPage: FC = () => {
     clearItems,
     setItemNotes,
   } = useShoppingListItemsSubscription(+shoppingListId!);
-
-  const sharedMembershipId = shoppingList?.shares?.[0]?.user_kitchen_membership_id;
 
   const { mutateAsync: deleteShoppingList } = useDeleteShoppingListMutation();
   const { mutateAsync: createShoppingListShare } = useCreateShoppingListShareMutation();
@@ -258,9 +253,13 @@ export const ShoppingListViewPage: FC = () => {
             shopping_list_id: shoppingList!.id,
             user_kitchen_membership_id: membership.id,
           });
+          const username =
+            membership.source_user.id === user!.id
+              ? membership.destination_user.username
+              : membership.source_user.username;
           toast({
             title: "Shopping List Shared",
-            description: `Your shopping list has been shared with ${membership.destination_user.username}`,
+            description: `Your shopping list has been shared with ${username}`,
           });
         } catch {
           toast({
@@ -272,7 +271,7 @@ export const ShoppingListViewPage: FC = () => {
         }
       },
     });
-  }, [createShoppingListShare, popDialog, pushDialog, shoppingList, toast]);
+  }, [createShoppingListShare, popDialog, pushDialog, shoppingList, toast, user]);
 
   const contextMenu = useMemo(() => {
     return (
@@ -311,12 +310,8 @@ export const ShoppingListViewPage: FC = () => {
     <Popover open={isAutoCompleteOpen}>
       <Stack>
         <LoadingGroup isLoading={isLoadingShoppingList} className="h-6 w-[200px]">
-          <Shelf>
-            <div className="flex flex-row items-center gap-2">
-              <H2>{shoppingList?.name}</H2>
-              <MembershipAvatar membershipId={sharedMembershipId} />
-            </div>
-            <ShelfSpacer />
+          <div className="flex flex-row gap-2">
+            <H2 className="flex-grow">{shoppingList?.name}</H2>
             {shoppingList && (
               <>
                 {isMobile &&
@@ -326,7 +321,7 @@ export const ShoppingListViewPage: FC = () => {
                 {!isMobile && <>{contextMenu}</>}
               </>
             )}
-          </Shelf>
+          </div>
         </LoadingGroup>
         <div className="p-2">
           <Stack>

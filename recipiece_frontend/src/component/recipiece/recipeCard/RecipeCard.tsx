@@ -60,7 +60,7 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
         </CardContent>
         <CardFooter>
           <div className="flex w-full flex-row items-center">
-            <MembershipAvatar membershipId={userKitchenMembershipId} />
+            <MembershipAvatar entity={recipe} membershipId={userKitchenMembershipId} />
             <DropdownMenuTrigger className="ml-auto" asChild>
               <Button
                 data-testid={DataTestId.RecipeCard.BUTTON_RECIPE_CONTEXT_MENU_TRIGGER(recipe.id)}

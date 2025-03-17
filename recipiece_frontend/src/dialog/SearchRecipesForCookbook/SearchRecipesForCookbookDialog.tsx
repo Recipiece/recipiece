@@ -104,7 +104,7 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>
                 <div className="flex flex-row gap-2 items-center">
-                  <MembershipAvatar membershipId={recipe.user_kitchen_membership_id} size="small" />
+                  <MembershipAvatar entity={recipe} membershipId={recipe.user_kitchen_membership_id} size="small" />
                   {recipe.name}
                 </div>
               </Button>

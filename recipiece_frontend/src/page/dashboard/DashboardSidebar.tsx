@@ -124,7 +124,7 @@ export const DashboardSidebar: FC = () => {
                           onClick={() => onNavigate(`/cookbook/${cookbook.id}`)}
                         >
                           <div className="flex flex-row gap-2">
-                            <MembershipAvatar size="small" membershipId={cookbook.user_kitchen_membership_id} />
+                            <MembershipAvatar entity={cookbook} size="small" membershipId={cookbook.user_kitchen_membership_id} />
                             <span>{cookbook.name}</span>
                           </div>
                         </SidebarMenuButton>

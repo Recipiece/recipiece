@@ -12,7 +12,7 @@ export const MealPlanMenuItem: FC<{ readonly mealPlan: MealPlanSchema } & Compon
   return (
     <MenubarItem {...restProps}>
       <div className="flex flex-row items-center gap-2">
-        <MembershipAvatar size="small" membershipId={membershipId} />
+        <MembershipAvatar entity={mealPlan} size="small" membershipId={membershipId} />
         {mealPlan.name}
       </div>
     </MenubarItem>

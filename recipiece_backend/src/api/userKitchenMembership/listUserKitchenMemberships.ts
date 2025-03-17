@@ -62,21 +62,6 @@ export const listUserKitchenMemberships = async (
           };
         }
         break;
-      case "recipe":
-        if (entity_filter === "include") {
-          where.recipe_shares = {
-            some: {
-              recipe_id: entity_id,
-            },
-          };
-        } else if (entity_filter === "exclude") {
-          where.recipe_shares = {
-            none: {
-              recipe_id: entity_id,
-            },
-          };
-        }
-        break;
       case "meal_plan":
         if (entity_filter === "include") {
           where.meal_plan_shares = {
@@ -88,21 +73,6 @@ export const listUserKitchenMemberships = async (
           where.meal_plan_shares = {
             none: {
               meal_plan_id: entity_id,
-            },
-          };
-        }
-        break;
-      case "cookbook":
-        if (entity_filter === "include") {
-          where.cookbook_shares = {
-            some: {
-              cookbook_id: entity_id,
-            },
-          };
-        } else if (entity_filter === "exclude") {
-          where.cookbook_shares = {
-            none: {
-              cookbook_id: entity_id,
             },
           };
         }
