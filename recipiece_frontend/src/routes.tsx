@@ -37,6 +37,10 @@ export const unauthenticatedRoutes = [
     path: "/reset-password",
     element: ResetPasswordPage,
   },
+  {
+    path: "/out-404",
+    element: NotFoundPage,
+  },
 ];
 
 export const authenticatedRoutes = [
@@ -88,6 +92,10 @@ export const authenticatedRoutes = [
     path: "/memberships",
     element: MembershipsPage,
   },
+  {
+    path: "/in-404",
+    element: NotFoundPage,
+  },
   // {
   //   path: "/notifications",
   //   element: NotificationsViewPage,
@@ -97,11 +105,4 @@ export const authenticatedRoutes = [
 export const unauthenticatedPaths = unauthenticatedRoutes.map((r) => r.path);
 export const authenticatedPaths = authenticatedRoutes.map((r) => r.path);
 
-export const allRoutes = [
-  ...unauthenticatedRoutes,
-  ...authenticatedRoutes,
-  {
-    path: "*",
-    element: NotFoundPage,
-  },
-];
+export const allRoutes = [...unauthenticatedRoutes, ...authenticatedRoutes];

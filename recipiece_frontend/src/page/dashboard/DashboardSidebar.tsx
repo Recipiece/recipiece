@@ -1,8 +1,14 @@
 import { DataTestId } from "@recipiece/constant";
 import { CookbookSchema, UserKitchenMembershipSchema } from "@recipiece/types";
-import { FC, useCallback } from "react";
+import { BookPlus } from "lucide-react";
+import { FC, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetSelfQuery, useListCookbooksQuery, useListUserKitchenMembershipsQuery } from "../../api";
+import {
+  useCreateCookbookMutation,
+  useGetSelfQuery,
+  useListCookbooksQuery,
+  useListUserKitchenMembershipsQuery,
+} from "../../api";
 import {
   LoadingGroup,
   MembershipAvatar,
@@ -17,7 +23,10 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
+  useToast,
 } from "../../component";
+import { DialogContext } from "../../context";
+import { CreateCookbookForm } from "../../dialog";
 import { useLayout } from "../../hooks";
 
 export interface DashboardSidebarProps {
@@ -29,6 +38,8 @@ export interface DashboardSidebarProps {
 
 export const DashboardSidebar: FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { pushDialog, popDialog } = useContext(DialogContext);
   const { open, setOpenMobile } = useSidebar();
   const { isMobile } = useLayout();
 
@@ -45,6 +56,8 @@ export const DashboardSidebar: FC = () => {
 
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
 
+  const { mutateAsync: createCookbook, isPending: isCreatingCookbook } = useCreateCookbookMutation();
+
   const onNavigate = useCallback(
     (dest: string) => {
       if (isMobile) {
@@ -54,6 +67,30 @@ export const DashboardSidebar: FC = () => {
     },
     [isMobile, navigate, setOpenMobile]
   );
+
+  const onCreateCookbook = useCallback(() => {
+    pushDialog("createCookbook", {
+      onClose: () => popDialog("createCookbook"),
+      onSubmit: async (data: CreateCookbookForm) => {
+        try {
+          const newCookbook = await createCookbook({ ...data });
+          toast({
+            title: "Cookbook Created",
+            description: "Your cookbook has been created",
+          });
+          navigate(`/cookbook/${newCookbook.id}`);
+        } catch {
+          toast({
+            title: "Unable to Create Cookbook",
+            description: "Your cookbook could not be created. Try again later.",
+            variant: "destructive",
+          });
+        } finally {
+          popDialog("createCookbook");
+        }
+      },
+    });
+  }, [createCookbook, navigate, popDialog, pushDialog, toast]);
 
   return (
     <Sidebar className="mt-16 h-[calc(100%-64px)]" collapsible="icon">
@@ -112,6 +149,11 @@ export const DashboardSidebar: FC = () => {
             <SidebarGroupLabel>Cookbooks</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={onCreateCookbook} disabled={isCreatingCookbook}>
+                    <BookPlus /> New Cookbook
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <LoadingGroup isLoading={isLoadingCookbooks} variant="spinner" className="w-6 h-6">
                   {(cookbooks?.data ?? []).map((cookbook) => {
                     return (
@@ -124,7 +166,11 @@ export const DashboardSidebar: FC = () => {
                           onClick={() => onNavigate(`/cookbook/${cookbook.id}`)}
                         >
                           <div className="flex flex-row gap-2">
-                            <MembershipAvatar entity={cookbook} size="small" membershipId={cookbook.user_kitchen_membership_id} />
+                            <MembershipAvatar
+                              entity={cookbook}
+                              size="small"
+                              membershipId={cookbook.user_kitchen_membership_id}
+                            />
                             <span>{cookbook.name}</span>
                           </div>
                         </SidebarMenuButton>

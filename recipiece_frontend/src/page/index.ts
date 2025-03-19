@@ -2,7 +2,6 @@ export * from "./AccountView";
 export * from "./CreateAccount";
 export * from "./Dashboard";
 export * from "./ForgotPassword";
-export * from "./Kitchen";
 export * from "./MembershipView";
 export * from "./Login";
 export * from "./MealPlanConfiguration";

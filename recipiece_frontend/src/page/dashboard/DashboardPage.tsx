@@ -2,6 +2,7 @@ import { Constant, DataTestId } from "@recipiece/constant";
 import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { Plus } from "lucide-react";
 import { FC, Fragment, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useParams } from "react-router-dom";
 import {
   useAttachRecipeToCookbookMutation,
@@ -19,18 +20,23 @@ import {
   Pager,
   RecipeCard,
   RecipeSearch,
+  RecipieceMenuBarContext,
   SidebarProvider,
   SidebarTrigger,
   Stack,
   useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
+import { useLayout } from "../../hooks";
+import { CookbookContextMenu } from "./CookbookContextMenu";
 import { DashboardSidebar } from "./DashboardSidebar";
 
 export const DashboardPage: FC = () => {
   const { cookbookId, membershipId } = useParams();
   const location = useLocation();
   const { pushDialog, popDialog } = useContext(DialogContext);
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
+  const { isMobile } = useLayout();
 
   const defaultFilters: ListRecipesQuerySchema = useMemo(() => {
     if (cookbookId) {
@@ -168,42 +174,28 @@ export const DashboardPage: FC = () => {
       <DashboardSidebar />
       <div className="flex flex-col gap-2 w-full h-full">
         <LoadingGroup variant="skeleton" isLoading={isLoadingTitle} className="h-[49px] w-full">
-          {title && (
-            <H2 className="flex-grow basis-full">
-              <div className="inline sm:flex sm:flex-row">
-                <SidebarTrigger
-                  data-testid={DataTestId.DashboardSidebar.SIDEBAR_TRIGGER_MOBILE}
-                  className="sm:hidden mr-2"
-                />
-                <span data-testid={DataTestId.DashboardPage.HEADING_TITLE}>{title}</span>
-                {cookbookId && (
-                  <div className="hidden sm:inline-block ml-auto">
-                    <Button
-                      data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
-                      onClick={onFindRecipe}
-                      variant="outline"
-                    >
-                      <Plus size={20} /> <span className="ml-1">Add a recipe</span>
-                    </Button>
+          <div className="flex flex-row gap-2">
+            {title && (
+              <>
+                <H2 className="flex-grow basis-full">
+                  <div className="inline sm:flex sm:flex-row">
+                    <SidebarTrigger
+                      data-testid={DataTestId.DashboardSidebar.SIDEBAR_TRIGGER_MOBILE}
+                      className="sm:hidden mr-2"
+                    />
+                    <span data-testid={DataTestId.DashboardPage.HEADING_TITLE}>{title}</span>
                   </div>
-                )}
-              </div>
-            </H2>
-          )}
+                </H2>
+                {!!cookbook &&
+                  isMobile &&
+                  mobileMenuPortalRef &&
+                  mobileMenuPortalRef.current &&
+                  createPortal(<CookbookContextMenu cookbook={cookbook} />, mobileMenuPortalRef.current)}
+                {!!cookbook && !isMobile && <>{<CookbookContextMenu cookbook={cookbook} />}</>}
+              </>
+            )}
+          </div>
         </LoadingGroup>
-        {cookbookId && (
-          <LoadingGroup isLoading={isLoadingTitle} className="h-[24px]">
-            <p data-testid={DataTestId.DashboardPage.PARAGRAPH_DESCRIPTION}>{cookbook?.description}</p>
-            <Button
-              data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
-              onClick={onFindRecipe}
-              variant="outline"
-              className="sm:hidden"
-            >
-              <Plus size={20} /> <span className="ml-1">Add a recipe</span>
-            </Button>
-          </LoadingGroup>
-        )}
         <RecipeSearch
           dataTestId={DataTestId.DashboardPage.RECIPE_SEARCH_BAR}
           isLoading={isLoading}
@@ -224,7 +216,7 @@ export const DashboardPage: FC = () => {
                       onClick={onFindRecipe}
                       variant="outline"
                     >
-                      <Plus size={20} /> <span className="ml-1 hidden sm:inline-block">Add a recipe</span>
+                      <Plus size={20} /> <span className="ml-2">Add a recipe</span>
                     </Button>
                   </div>
                 )}

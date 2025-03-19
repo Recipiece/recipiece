@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DataTestId } from "@recipiece/constant";
 import { FC, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -46,7 +47,7 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
   );
 
   return (
-    <ResponsiveContent className="p-6">
+    <ResponsiveContent data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.DIALOG_WRAPPER} className="p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onInviteUser)}>
           <ResponsiveHeader>
@@ -57,14 +58,30 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
           </ResponsiveHeader>
 
           <div className="mb-2">
-            <FormInput autoComplete="off" name="username" label="Username" required />
+            <FormInput
+              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.INPUT_USERNAME}
+              autoComplete="off"
+              name="username"
+              label="Username"
+              required
+            />
           </div>
 
           <ResponsiveFooter className="flex-col-reverse">
-            <Button variant="outline" disabled={isSubmitting || isLoadingUser} onClick={() => onClose?.()}>
+            <Button
+              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.BUTTON_CANCEL}
+              variant="outline"
+              disabled={isSubmitting || isLoadingUser}
+              onClick={() => onClose?.()}
+            >
               Cancel
             </Button>
-            <SubmitButton disabled={isSubmitting || isLoadingUser}>Send Invitation</SubmitButton>
+            <SubmitButton
+              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.BUTTON_SEND_INVITE}
+              disabled={isSubmitting || isLoadingUser}
+            >
+              Send Invitation
+            </SubmitButton>
           </ResponsiveFooter>
         </form>
       </Form>

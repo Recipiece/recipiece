@@ -20,7 +20,10 @@ export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesQuery({ search: filters.search!, page_number: 0, page_size: 5 }, { enabled: (filters.search || "").length >= 2 });
+  } = useListRecipesQuery(
+    { search: filters.search!, page_number: 0, page_size: 5 },
+    { enabled: (filters.search || "").length >= 2 }
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -62,7 +65,7 @@ export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose
           {(recipeData?.data || []).map((recipe) => {
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>
-                <MembershipAvatar entity={recipe} membershipId={recipe.user_kitchen_membership_id} size="small"/>
+                <MembershipAvatar entity={recipe} membershipId={recipe.user_kitchen_membership_id} size="small" />
                 <span className="ml-2">{recipe.name}</span>
               </Button>
             );

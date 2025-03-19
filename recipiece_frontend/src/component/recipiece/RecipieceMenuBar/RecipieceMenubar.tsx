@@ -230,17 +230,17 @@ export const RecipieceMenubar: FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT}
+                data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT_MOBILE}
                 variant="link"
                 className="text-primary dark:text-white"
               >
                 <CircleUserRound />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent data-testid={DataTestId.MenuBar.DROPDOWN_MENU_ACCOUNT_MOBILE}>
               <DropdownMenuItem
-                data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN}
-                onClick={() => navigate("/kitchen")}
+                data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_MEMBERSHIPS}
+                onClick={() => navigate("/memberships")}
               >
                 Kitchens
               </DropdownMenuItem>
@@ -261,7 +261,7 @@ export const RecipieceMenubar: FC = () => {
         <span className="ml-auto block sm:hidden" ref={mobileMenuPortalRef} />
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_ITEM_HOME} onClick={onGoHome}>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_ITEM_HOME_DESKTOP} onClick={onGoHome}>
               Home
             </MenubarTrigger>
           </MenubarMenu>
@@ -342,10 +342,10 @@ export const RecipieceMenubar: FC = () => {
 
         <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT}>Account</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT_DESKTOP}>Account</MenubarTrigger>
             <MenubarContent>
               <MenubarItem
-                data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_KITCHEN}
+                data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_MEMBERSHIPS}
                 onClick={() => navigate("/memberships")}
               >
                 Kitchens
@@ -369,8 +369,8 @@ export const RecipieceMenubar: FC = () => {
       >
         <div className="flex h-full flex-row items-center justify-center">
           <Button
-            data-testid={DataTestId.MenuBar.MENU_ITEM_HOME}
-            onClick={() => navigate("/")}
+            data-testid={DataTestId.MenuBar.MENU_ITEM_HOME_MOBILE}
+            onClick={() => navigate("/dashboard")}
             variant="link"
             className="grow text-white"
           >

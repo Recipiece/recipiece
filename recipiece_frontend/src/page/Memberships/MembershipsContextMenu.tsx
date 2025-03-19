@@ -1,3 +1,4 @@
+import { DataTestId } from "@recipiece/constant";
 import { MoreVertical, Send } from "lucide-react";
 import { FC, useCallback, useContext, useState } from "react";
 import { useCreateKitchenMembershipMutation } from "../../api";
@@ -30,13 +31,17 @@ export const MembershipsContextMenu: FC = () => {
           toast({
             title: "Invitation Sent",
             description: `Your invitation was sent to ${formData.username}`,
+            dataTestId: DataTestId.MembershipsPage.TOAST_INVITE_SENT,
           });
         } catch {
           toast({
             title: "Unable to Send Invitation",
-            description: `Your invitation could not be sent to ${formData.username}. Try again later`,
+            description: `Your invitation could not be sent to ${formData.username}. Try again later.`,
             variant: "destructive",
+            dataTestId: DataTestId.MembershipsPage.TOAST_INVITE_SEND_FAILED,
           });
+        } finally {
+          popDialog("extendKitchenInvitation");
         }
       },
     });
@@ -44,13 +49,16 @@ export const MembershipsContextMenu: FC = () => {
 
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger data-testid={DataTestId.MembershipsPage.CONTEXT_MENU_TRIGGER} asChild>
         <Button variant="ghost" className="ml-auto text-primary" onClick={() => setIsMenuOpen(!isMenuOpen)}>
           <MoreVertical />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={onExtendInvitation}>
+        <DropdownMenuItem
+          data-testid={DataTestId.MembershipsPage.CONTEXT_MENU_ITEM_SEND_INVITATION}
+          onClick={onExtendInvitation}
+        >
           <Send /> Invite
         </DropdownMenuItem>
       </DropdownMenuContent>

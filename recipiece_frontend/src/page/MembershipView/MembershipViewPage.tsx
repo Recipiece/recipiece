@@ -1,8 +1,20 @@
-import { FC, useCallback, useEffect } from "react";
+import { FC, useCallback, useContext, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useGetSelfQuery, useGetUserKitchenMembershipQuery } from "../../api";
-import { H2, LoadingGroup, NotFound, Tabs, TabsContent, TabsList, TabsTrigger } from "../../component";
+import {
+  H2,
+  LoadingGroup,
+  NotFound,
+  RecipieceMenuBarContext,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../component";
+import { useLayout } from "../../hooks";
 import { MealPlanTab } from "./MealPlanTab";
+import { MembershipContextMenu } from "./MembershipContextMenu";
 import { ShoppingListTab } from "./ShoppingListTab";
 
 const TAB_SHOPPING_LISTS = "shopping-lists";
@@ -11,6 +23,8 @@ const TAB_MEAL_PLANS = "meal-plans";
 export const MembershipViewPage: FC = () => {
   const { membershipId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
+  const { isMobile } = useLayout();
 
   const {
     data: membership,
@@ -47,7 +61,14 @@ export const MembershipViewPage: FC = () => {
   return (
     <div className="flex flex-col gap-2">
       <LoadingGroup variant="skeleton" className="h-[49px] w-full" isLoading={isLoadingMembership || isLoadingUser}>
-        <H2>{title ?? ""}</H2>
+        <div className="flex flex-row gap-2">
+          <H2 className="flex-grow">{title ?? ""}</H2>
+          {isMobile &&
+            mobileMenuPortalRef &&
+            mobileMenuPortalRef.current &&
+            createPortal(<MembershipContextMenu membership={membership!} />, mobileMenuPortalRef.current)}
+          {!isMobile && <>{<MembershipContextMenu membership={membership!} />}</>}
+        </div>
         <span className="text-xs">
           Recipes and Cookbooks are shared by default. Manage your meal plans and shopping lists shared with this user.
         </span>

@@ -1,10 +1,12 @@
 export class MenuBar {
-  public static readonly MENU_TRIGGER_ACCOUNT = "menu-trigger-account";
-  public static readonly MENU_ITEM_GOTO_KITCHEN = "menu-item-goto-kitchen";
+  public static readonly MENU_TRIGGER_ACCOUNT_DESKTOP = "menu-trigger-account-desktop";
+  public static readonly MENU_TRIGGER_ACCOUNT_MOBILE = "menu-trigger-account-mobile";
+  public static readonly MENU_ITEM_GOTO_MEMBERSHIPS = "menu-item-goto-memberships";
   public static readonly MENU_ITEM_GOTO_ACCOUNT = "menu-item-goto-account";
   public static readonly MENU_ITEM_SIGN_OUT = "menu-item-sign-out";
 
-  public static readonly MENU_ITEM_HOME = "menu-item-home";
+  public static readonly MENU_ITEM_HOME_DESKTOP = "menu-item-home-desktop";
+  public static readonly MENU_ITEM_HOME_MOBILE = "menu-item-home-mobile";
 
   public static readonly MENU_TRIGGER_CREATE = "menu-trigger-create";
   public static readonly MENU_ITEM_RECIPE_FROM_URL = "menu-item-recipe-from-url";
@@ -30,5 +32,7 @@ export class MenuBar {
 
   public static readonly FOOTER_MOBILE_MENU_BAR = "footer-mobile-menu-bar";
   public static readonly NAV_DESKTOP_MENU_BAR = "nav-desktop-menu-bar";
+
+  public static readonly DROPDOWN_MENU_ACCOUNT_MOBILE = "dropdown-menu-mobile-account";
   
 }

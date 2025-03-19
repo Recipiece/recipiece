@@ -18,7 +18,7 @@ import {
   LoadingGroup,
   NotFound,
   RecipeContextMenu,
-  RecipieceMenuBarContext
+  RecipieceMenuBarContext,
 } from "../../component";
 import { useLayout } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
