@@ -1,8 +1,11 @@
-import { StatusCodes } from "http-status-codes";
 import { PrismaTransaction } from "@recipiece/database";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const deleteRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{ readonly deleted: boolean }> => {
+export const deleteRecipe = async (
+  req: AuthenticatedRequest,
+  tx: PrismaTransaction
+): ApiResponse<{ readonly deleted: boolean }> => {
   const recipeId = +req.params.id;
   const user = req.user;
 

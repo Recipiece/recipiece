@@ -3,13 +3,13 @@ import { generateMealPlan, generateMealPlanShare, generateUserKitchenMembership 
 import { MealPlanConfigurationSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { JobType } from "../../../../src/util/constant";
 import { mealPlanConfigurationQueue } from "../../../../src/job";
+import { JobType } from "../../../../src/util/constant";
 
 describe("Set Meal Plan Configuration", () => {
+  let addToMealPlanConfigSpy;
   let user: User;
   let bearerToken: string;
-  let addToMealPlanConfigSpy;
 
   beforeEach(async () => {
     [user, bearerToken] = await fixtures.createUserAndToken();

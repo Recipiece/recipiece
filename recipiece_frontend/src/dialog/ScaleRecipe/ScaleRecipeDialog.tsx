@@ -35,7 +35,8 @@ const ScaleRecipeFormSchema = z.object({
 export type ScaleRecipeForm = z.infer<typeof ScaleRecipeFormSchema>;
 
 export const ScaleRecipeDialog: FC<ScaleRecipeDialogProps> = ({ onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
 
   const form = useForm<ScaleRecipeForm>({
     resolver: zodResolver(ScaleRecipeFormSchema),
@@ -65,7 +66,13 @@ export const ScaleRecipeDialog: FC<ScaleRecipeDialogProps> = ({ onClose, onSubmi
           </ResponsiveHeader>
 
           <div className="flex flex-row items-end gap-2">
-            <FormInput placeholder="How much more or less do you want?" name="amount" label="Scale By" required className="flex-grow" />
+            <FormInput
+              placeholder="How much more or less do you want?"
+              name="amount"
+              label="Scale By"
+              required
+              className="flex-grow"
+            />
           </div>
 
           <ResponsiveFooter className="mt-4 flex-col-reverse">

@@ -1,5 +1,10 @@
-import { ShoppingListItem, User, prisma } from "@recipiece/database";
-import { generateShoppingList, generateShoppingListItem, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
+import { prisma, ShoppingListItem, User } from "@recipiece/database";
+import {
+  generateShoppingList,
+  generateShoppingListItem,
+  generateShoppingListShare,
+  generateUserKitchenMembership,
+} from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
@@ -37,7 +42,7 @@ describe("Append Shopping List Items", () => {
     expect(listItems.length).toBe(0);
   });
 
-  it("should allow a shared user to append items", async () => {
+  it("should allow a shared user to append items to a shared meal plan", async () => {
     const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
     const shoppingList = await generateShoppingList({ user_id: user.id });
     const membership = await generateUserKitchenMembership({
@@ -45,7 +50,7 @@ describe("Append Shopping List Items", () => {
       destination_user_id: otherUser.id,
       status: "accepted",
     });
-    const share = await generateShoppingListShare({
+    await generateShoppingListShare({
       shopping_list_id: shoppingList.id,
       user_kitchen_membership_id: membership.id,
     });

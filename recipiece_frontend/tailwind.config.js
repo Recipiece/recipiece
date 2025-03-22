@@ -1,6 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
 const { fontFamily } = require("tailwindcss/defaultTheme");
 
 /** @type {import('tailwindcss').Config} */
+// eslint-disable-next-line no-undef
 module.exports = {
   darkMode: ["class"],
   content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
@@ -82,5 +84,6 @@ module.exports = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
   plugins: [require("tailwindcss-animate")],
 };

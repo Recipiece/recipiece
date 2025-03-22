@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 import { PrismaTransaction } from "@recipiece/database";
 import { LoginResponseSchema } from "@recipiece/types";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserSessions } from "../../util/constant";
-import { StatusCodes } from "http-status-codes";
 import { generateToken } from "../../util/token";
 
 /**
@@ -16,7 +16,10 @@ import { generateToken } from "../../util/token";
  * When the user logs out, we will kill the session, which will effectively invalidate any access token issued
  * for that session.
  */
-export const loginUser = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<LoginResponseSchema> => {
+export const loginUser = async (
+  request: AuthenticatedRequest,
+  tx: PrismaTransaction
+): ApiResponse<LoginResponseSchema> => {
   const userId = request.user.id;
 
   const session = await tx.userSession.create({

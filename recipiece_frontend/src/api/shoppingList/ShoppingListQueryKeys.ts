@@ -29,7 +29,9 @@ export class ShoppingListQueryKeys {
     return ["shoppingListSession", { id: listId }];
   };
 
-  public static readonly LIST_SHOPPING_LIST_SHARES = (filters?: Partial<ListShoppingListSharesQuerySchema>): RcpQueryKey => {
+  public static readonly LIST_SHOPPING_LIST_SHARES = (
+    filters?: Partial<ListShoppingListSharesQuerySchema>
+  ): RcpQueryKey => {
     const base: RcpQueryKey = ["listShoppingListShares"];
 
     const { targeting_self, from_self, page_number, user_kitchen_membership_id } = filters ?? {};

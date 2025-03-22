@@ -75,14 +75,19 @@ export const ChangePasswordSection: FC = () => {
         <div className="flex flex-col gap-2">
           <H3>Password</H3>
           <p className="text-sm">
-            You can change your password by clicking the button below. If you change your password, you will be logged out immediately from all devices and will need to login again
-            with your new password.
+            You can change your password by clicking the button below. If you change your password, you will be logged
+            out immediately from all devices and will need to login again with your new password.
           </p>
           {isEditing && (
             <>
               <FormInput name="currentPassword" type="password" label="Current Password" className="sm:pr-[50%]" />
               <FormInput name="newPassword" label="New Password" type="password" className="sm:pr-[50%]" />
-              <FormInput name="confirmNewPassword" label="Confirm New Password" type="password" className="sm:pr-[50%]" />
+              <FormInput
+                name="confirmNewPassword"
+                label="Confirm New Password"
+                type="password"
+                className="sm:pr-[50%]"
+              />
             </>
           )}
 

@@ -34,7 +34,8 @@ export const NotificationConfigCard: FC = () => {
       <div className="flex flex-col gap-2">
         <CardTitle>Notifications</CardTitle>
         <CardDescription>
-          Configure notification settings for your meal plan. Push notifications will only be sent to devices where you have granted notification permissions in your{" "}
+          Configure notification settings for your meal plan. Push notifications will only be sent to devices where you
+          have granted notification permissions in your{" "}
           <a href="/account" className="underline">
             settings
           </a>
@@ -57,7 +58,10 @@ export const NotificationConfigCard: FC = () => {
                 <p className="text-xs">Send notifications for beginning the thawing process for meat ingredients.</p>
               </>
 
-              <FormSwitch name="meats.send_thawing_notification" disabled={!canRequestPushNotificationPermissions || hasDeniedPushNotifications} />
+              <FormSwitch
+                name="meats.send_thawing_notification"
+                disabled={!canRequestPushNotificationPermissions || hasDeniedPushNotifications}
+              />
             </PreferenceEntry>
           </div>
         </CardContent>

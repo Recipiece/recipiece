@@ -1,10 +1,13 @@
 import { PrismaTransaction } from "@recipiece/database";
-import { ParseRecipeFromURLRequestSchema, ParsedFromURLRecipe, RecipeSchema } from "@recipiece/types";
+import { ParsedFromURLRecipe, ParseRecipeFromURLRequestSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UnprocessableEntityError } from "../../util/error";
 
-export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>, _: PrismaTransaction): ApiResponse<RecipeSchema> => {
+export const parseRecipeFromUrl = async (
+  req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>,
+  _: PrismaTransaction
+): ApiResponse<RecipeSchema> => {
   const recipeBody = req.body;
 
   try {

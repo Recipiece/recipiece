@@ -1,5 +1,6 @@
-import { Cookbook, User, prisma } from "@recipiece/database";
-import { generateCookbook, generateRecipe, generateRecipeCookbookAttachment } from "@recipiece/test";
+import { Cookbook, User, UserKitchenMembershipStatus } from "@recipiece/database";
+import { generateCookbook, generateRecipe, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import { ListCookbooksQuerySchema, ListCookbooksResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { generateCookbookWithRecipe } from "./fixtures";
@@ -53,6 +54,7 @@ describe("List Cookbooks", () => {
   });
 
   it("should page", async () => {
+    const [user, bearerToken] = await fixtures.createUserAndToken();
     for (let i = 0; i < 10; i++) {
       await generateCookbook({ user_id: user.id });
     }
@@ -77,9 +79,10 @@ describe("List Cookbooks", () => {
 
     const response = await request(server)
       .get("/cookbook/list")
-      .query({
+      .query(<ListCookbooksQuerySchema>{
         page_number: 0,
-        exclude_containing_recipe_id: recipe.id,
+        recipe_id: recipe.id,
+        recipe_id_filter: "exclude",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -89,5 +92,141 @@ describe("List Cookbooks", () => {
 
     expect(data.length).toBe(1);
     expect(data[0].id).toBe(notContainingCookbook.id);
+  });
+
+  it("should include cookbooks containing a certain recipe", async () => {
+    await generateCookbook({ user_id: user.id });
+    const [containingCookbook, recipe] = await generateCookbookWithRecipe(user.id);
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        recipe_id: recipe.id,
+        recipe_id_filter: "include",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.status).toBe(StatusCodes.OK);
+    const data: Cookbook[] = response.body.data;
+
+    expect(data.length).toBe(1);
+    expect(data[0].id).toBe(containingCookbook.id);
+  });
+
+  it.each([true, false])("should include shared cookbooks when user is source user is %o", async (isUserSourceUser) => {
+    const otherUser = await generateUser();
+    await generateUserKitchenMembership({
+      source_user_id: isUserSourceUser ? user.id : otherUser.id,
+      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
+      status: "accepted",
+    });
+    const otherUserCookbook = await generateCookbook({ user_id: otherUser.id });
+    const userCookbook = await generateCookbook({ user_id: user.id });
+
+    // make some noise!
+    await generateCookbook();
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        shared_cookbooks_filter: "include",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
+
+    expect(responseData.data.length).toBe(2);
+    expect(responseData.data.find((c) => c.id === otherUserCookbook.id)).toBeTruthy();
+    expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
+  });
+
+  it("should exclude shared cookbooks", async () => {
+    const otherUserAll = await generateUser();
+    await generateUserKitchenMembership({
+      source_user_id: otherUserAll.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+    await generateCookbook({ user_id: otherUserAll.id });
+
+    const userCookbook = await generateCookbook({ user_id: user.id });
+
+    await generateCookbook();
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        shared_cookbooks_filter: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
+
+    expect(responseData.data.length).toBe(1);
+    expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
+  });
+
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
+    "should not list cookbooks belonging membership with status %o",
+    async (membershipStatus) => {
+      const otherUserAll = await generateUser();
+      await generateUserKitchenMembership({
+        source_user_id: otherUserAll.id,
+        destination_user_id: user.id,
+        status: membershipStatus,
+      });
+      await generateCookbook({ user_id: otherUserAll.id });
+
+      const userCookbook = await generateCookbook({ user_id: user.id });
+
+      const response = await request(server)
+        .get("/cookbook/list")
+        .query(<ListCookbooksQuerySchema>{
+          page_number: 0,
+          shared_cookbooks_filter: "exclude",
+        })
+        .set("Content-Type", "application/json")
+        .set("Authorization", `Bearer ${bearerToken}`);
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseData: ListCookbooksResponseSchema = response.body;
+
+      expect(responseData.data.length).toBe(1);
+      expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
+    }
+  );
+
+  it("should not list cookbooks for a recipe where the cookbook owner does not have access to the recipe", async () => {
+    const membership = await generateUserKitchenMembership({
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+    const recipe = await generateRecipe({ user_id: user.id });
+    const userCookbook = await generateCookbook({ user_id: user.id });
+    const sharedCookbook = await generateCookbook({ user_id: membership.source_user_id });
+
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        recipe_id: recipe.id,
+        recipe_id_filter: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
+
+    expect(responseData.data.length).toBe(1);
+    expect(responseData.data[0].id).toBe(userCookbook.id);
   });
 });

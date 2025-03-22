@@ -1,15 +1,18 @@
+import { CookbookSchema, ListCookbooksQuerySchema } from "@recipiece/types";
 import { FC, useMemo } from "react";
 import { useListCookbooksQuery } from "../../api";
 import { Button, LoadingGroup } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
-import { CookbookSchema, ListCookbooksQuerySchema } from "@recipiece/types";
 
 export interface MobileListCookbooksDialogProps extends BaseDialogProps<CookbookSchema> {
   readonly excludeContainingRecipeId?: number;
 }
 
-export const MobileListCookbooksDialog: FC<MobileListCookbooksDialogProps> = ({ onSubmit, excludeContainingRecipeId }) => {
+export const MobileListCookbooksDialog: FC<MobileListCookbooksDialogProps> = ({
+  onSubmit,
+  excludeContainingRecipeId,
+}) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveTitle } = useResponsiveDialogComponents();
 
   const queryFilters: ListCookbooksQuerySchema = useMemo(() => {

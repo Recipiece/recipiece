@@ -1,10 +1,13 @@
+import { Prisma, PrismaTransaction } from "@recipiece/database";
 import { CookbookSchema, CreateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { Prisma, PrismaTransaction } from "@recipiece/database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ConflictError } from "../../util/error";
 
-export const createCookbook = async (req: AuthenticatedRequest<CreateCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<CookbookSchema> => {
+export const createCookbook = async (
+  req: AuthenticatedRequest<CreateCookbookRequestSchema>,
+  tx: PrismaTransaction
+): ApiResponse<CookbookSchema> => {
   const cookbookBody = req.body;
   const user = req.user;
 

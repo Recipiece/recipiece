@@ -1,5 +1,5 @@
 import { PrismaTransaction, User, UserSession } from "@recipiece/database";
-import { Request, Response, ParamsDictionary, NextFunction } from "express";
+import { NextFunction, ParamsDictionary, Request, Response } from "express";
 import { WSRequest, WSRequestHandler } from "websocket-express";
 import { ObjectSchema } from "yup";
 
@@ -24,7 +24,9 @@ export type ApiMethod<BodyType = any, QueryType = any, ResponseType = any> =
   | ((req: Request<any, any, BodyType, QueryType>, tx: PrismaTransaction) => ResponseType | Promise<ResponseType>)
   | ((req: AuthenticatedRequest<BodyType, QueryType>, tx: PrismaTransaction) => ResponseType | Promise<ResponseType>);
 
-export type WebsocketMethod<RequestType = any, ResponseType = any> = (req: WebsocketRequest<RequestType>) => Promise<[number, ResponseType | ErrorResponse]>;
+export type WebsocketMethod<RequestType = any, ResponseType = any> = (
+  req: WebsocketRequest<RequestType>
+) => Promise<[number, ResponseType | ErrorResponse]>;
 
 export interface ErrorResponse {
   readonly message: string;

@@ -1,5 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ALL_UNITS, convertIngredientInDifferentCategory, convertIngredientInSameCategory } from "@recipiece/conversion";
+import {
+  ALL_UNITS,
+  convertIngredientInDifferentCategory,
+  convertIngredientInSameCategory,
+} from "@recipiece/conversion";
 import { KnownIngredientSchema, RecipeIngredientSchema } from "@recipiece/types";
 import { Unit } from "convert-units";
 import { search as fuzzySearch } from "fast-fuzzy";
@@ -38,7 +42,8 @@ const CONVERT_OPTIONS = ALL_UNITS.map((unitBlob) => {
 });
 
 export const ConvertIngredientDialog: FC<ConvertIngredientDialogProps> = ({ onClose, onSubmit, ingredient }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
+    useResponsiveDialogComponents();
   const [matchingKnownIngredient, setMatchingKnownIngredient] = useState<KnownIngredientSchema | undefined>(undefined);
   const [isSussingOutIngredient, setIsSussingOutIngredient] = useState(true);
   const { data: knownIngredients, isLoading: isLoadingKnownIngredients } = useListKnownIngredientsQuery();
@@ -132,7 +137,9 @@ export const ConvertIngredientDialog: FC<ConvertIngredientDialogProps> = ({ onCl
         const matchingConverter = ALL_UNITS.find((item) => item.convert_symbol === targetUnit)!;
         onSubmit?.({
           amount: newAmount,
-          unit: (newAmount === 1 ? matchingConverter.display_name.singular : matchingConverter.display_name.plural) as Unit,
+          unit: (newAmount === 1
+            ? matchingConverter.display_name.singular
+            : matchingConverter.display_name.plural) as Unit,
         });
       } else {
         form.setError(
@@ -188,13 +195,15 @@ export const ConvertIngredientDialog: FC<ConvertIngredientDialogProps> = ({ onCl
                     <>
                       {matchingKnownIngredient && (
                         <p className="text-xs">
-                          Recipiece thinks your <i>{ingredient.name}</i> matches what it knows as <i>{matchingKnownIngredient.ingredient_name}</i>, but you can change this if you
-                          are using something else.
+                          Recipiece thinks your <i>{ingredient.name}</i> matches what it knows as{" "}
+                          <i>{matchingKnownIngredient.ingredient_name}</i>, but you can change this if you are using
+                          something else.
                         </p>
                       )}
                       {!matchingKnownIngredient && (
                         <p className="text-xs">
-                          Recipiece was unable to match your <i>{ingredient.name}</i> to something it knows. You will need to select an ingredient to match with.
+                          Recipiece was unable to match your <i>{ingredient.name}</i> to something it knows. You will
+                          need to select an ingredient to match with.
                         </p>
                       )}
                     </>

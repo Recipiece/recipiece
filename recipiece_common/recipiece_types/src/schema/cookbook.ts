@@ -7,6 +7,7 @@ export const YCookbookSchema = object({
   name: string().required(),
   description: string().notRequired(),
   created_at: date().required(),
+  user_kitchen_membership_id: number().notRequired(),
 }).noUnknown();
 
 export interface CookbookSchema extends InferType<typeof YCookbookSchema> {}
@@ -58,9 +59,18 @@ export interface RemoveRecipeFromCookbookRequestSchema extends InferType<typeof 
  * List cookbooks schema
  */
 export const YListCookbooksQuerySchema = YListQuerySchema.shape({
-  exclude_containing_recipe_id: number().notRequired(),
+  recipe_id: number().notRequired(),
+  recipe_id_filter: string().oneOf(["include", "exclude"]).notRequired(),
   search: string().notRequired(),
-}).noUnknown();
+  shared_cookbooks_filter: string().oneOf(["include", "exclude"]).notRequired(),
+})
+  .transform((val) => {
+    return {
+      ...val,
+      shared_cookbooks_filter: val.shared_cookbooks_filter ?? "include",
+    };
+  })
+  .noUnknown();
 
 export interface ListCookbooksQuerySchema extends InferType<typeof YListCookbooksQuerySchema> {}
 

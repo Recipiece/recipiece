@@ -55,6 +55,7 @@ export const SHOPPING_LIST_ROUTES: Route[] = [
     authentication: "access_token",
     method: "GET",
     function: getShoppingList,
+    responseSchema: YShoppingListSchema,
   },
   {
     path: "/shopping-list/:id(\\d+)",

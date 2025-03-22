@@ -7,6 +7,7 @@ import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router
 import { AuthenticatedLayout, Toaster, ToastProvider, TooltipProvider, UnauthenticatedLayout } from "./component";
 import { AuthContextProvider, DialogContextProvider, PushNotificationContextProvider } from "./context";
 import { useLayout } from "./hooks";
+import { NotFoundLandingPage } from "./page";
 import { authenticatedRoutes, unauthenticatedRoutes } from "./routes";
 
 const queryClient = new QueryClient({
@@ -54,6 +55,7 @@ export const AppRoutes: FC = () => {
                         return <Route key={r.path} path={r.path} element={<r.element />} />;
                       })}
                     </Route>
+                    <Route element={<NotFoundLandingPage />} path="*" />
                   </Routes>
                 </DialogContextProvider>
               </DndProvider>

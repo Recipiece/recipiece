@@ -1,7 +1,6 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YRecipeSchema } from "./recipe";
-import { YUserKitchenMembershipSchema } from "./user";
 
 export const YMealPlanShareSchema = object({
   id: number().required(),
@@ -77,12 +76,12 @@ export interface UpdateMealPlanRequestSchema extends InferType<typeof YUpdateMea
  * List meal plans
  */
 export const YListMealPlansQuerySchema = YListQuerySchema.shape({
-  shared_meal_plans: string().oneOf(["include", "exclude"]).notRequired(),
+  shared_meal_plans_filter: string().oneOf(["include", "exclude"]).notRequired(),
 })
   .transform((val) => {
     return {
       ...val,
-      shared_meal_plans: val.shared_meal_plans ?? "include",
+      shared_meal_plans_filter: val.shared_meal_plans_filter ?? "include",
     };
   })
   .noUnknown();
@@ -196,7 +195,7 @@ export const YListMealPlanSharesResponseSchema = generateYListQueryResponseSchem
       id: number().required(),
       name: string().required(),
     }).required(),
-    user_kitchen_membership: YUserKitchenMembershipSchema.required(),
+    // user_kitchen_membership: YUserKitchenMembershipSchema.required(),
   })
 ).noUnknown();
 

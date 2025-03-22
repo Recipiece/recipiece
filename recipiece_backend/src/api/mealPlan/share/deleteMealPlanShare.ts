@@ -9,7 +9,7 @@ export const deleteMealPlanShare = async (request: AuthenticatedRequest, tx: Pri
     where: {
       id: shareId,
       user_kitchen_membership: {
-        source_user_id: request.user.id,
+        OR: [{ source_user_id: request.user.id }, { destination_user_id: request.user.id }],
       },
       meal_plan: {
         user_id: request.user.id,

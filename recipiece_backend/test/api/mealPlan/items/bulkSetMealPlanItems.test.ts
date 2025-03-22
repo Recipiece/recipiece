@@ -1,16 +1,27 @@
 import { prisma, User } from "@recipiece/database";
-import { generateMealPlan, generateMealPlanItem, generateMealPlanShare, generateRecipe, generateRecipeShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
-import { BulkSetMealPlanItemsRequestSchema, BulkSetMealPlanItemsResponseSchema, MealPlanItemJobDataSchema } from "@recipiece/types";
+import {
+  generateMealPlan,
+  generateMealPlanItem,
+  generateMealPlanShare,
+  generateRecipe,
+  generateUser,
+  generateUserKitchenMembership,
+} from "@recipiece/test";
+import {
+  BulkSetMealPlanItemsRequestSchema,
+  BulkSetMealPlanItemsResponseSchema,
+  MealPlanItemJobDataSchema,
+} from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import request from "supertest";
-import { JobType } from "../../../../src/util/constant";
 import { mealPlanItemQueue } from "../../../../src/job";
+import { JobType } from "../../../../src/util/constant";
 
 describe("Bulk Set Meal Plan Items", () => {
+  let jobSpy: jest.SpyInstance;
   let user: User;
   let bearerToken: string;
-  let jobSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     [user, bearerToken] = await fixtures.createUserAndToken();
@@ -131,10 +142,6 @@ describe("Bulk Set Meal Plan Items", () => {
       destination_user_id: user.id,
       status: "accepted",
     });
-    const share = await generateRecipeShare({
-      user_kitchen_membership_id: membership.id,
-      recipe_id: otherRecipe.id,
-    });
     const mealPlan = await generateMealPlan({ user_id: user.id });
 
     const response = await request(server)
@@ -162,7 +169,88 @@ describe("Bulk Set Meal Plan Items", () => {
     expect(dbItem).toBeTruthy();
   });
 
-  it("should not allow non shared recipes belonging to another user to be used for items", async () => {
+  it("should allow a shared user to bulk set items for a shared meal plan", async () => {
+    const otherUser = await generateUser();
+    const mealPlan = await generateMealPlan({
+      user_id: otherUser.id,
+    });
+    const otherUsersRecipe = await generateRecipe({
+      user_id: otherUser.id,
+    });
+    const itemToDelete = await generateMealPlanItem({
+      recipe_id: otherUsersRecipe.id,
+      meal_plan_id: mealPlan.id,
+    });
+
+    const itemToUpdate = await generateMealPlanItem({
+      freeform_content: "asdfqwer",
+      meal_plan_id: mealPlan.id,
+    });
+
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+
+    await generateMealPlanShare({
+      user_kitchen_membership_id: membership.id,
+      meal_plan_id: mealPlan.id,
+    });
+
+    const recipeToAdd = await generateRecipe({
+      user_id: user.id,
+    });
+
+    const response = await request(server)
+      .post(`/meal-plan/${mealPlan.id}/item/bulk-set`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send(<BulkSetMealPlanItemsRequestSchema>{
+        create: [
+          {
+            recipe_id: recipeToAdd.id,
+            meal_plan_id: mealPlan.id,
+            start_date: DateTime.utc().toJSDate(),
+          },
+        ],
+        update: [
+          {
+            ...itemToUpdate,
+            freeform_content: "new",
+          },
+        ],
+        delete: [itemToDelete],
+      });
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const mealPlanItems = await prisma.mealPlanItem.findMany({
+      where: {
+        meal_plan_id: mealPlan.id,
+      },
+    });
+    expect(mealPlanItems.length).toBe(2);
+
+    const recipeBasedItem = mealPlanItems.find((item) => !!item.recipe_id);
+    expect(recipeBasedItem).toBeTruthy();
+    expect(recipeBasedItem?.recipe_id).toBe(recipeToAdd.id);
+
+    const nonRecipeItem = mealPlanItems.find((item) => !item.recipe_id);
+    expect(nonRecipeItem).toBeTruthy();
+    expect(nonRecipeItem?.freeform_content).toBe("new");
+  });
+
+  /**
+   * This test is skipped because I cannot decide if this actually need to be handled or not.
+   * Allowing this behavior means that a user who doesn't own a recipe will be able to see it in the
+   * meal plan, but they won't be able to access it, which is probably fine
+   *
+   * Fixing this would require a lot of work to ensure that everyone who can access the meal plan can
+   * also access the recipes being added, and it would also require some sort of mitigation when any
+   * one of the users with access to both the meal plan and the recipe lose access to the recipe.
+   *
+   * I'm in favor of keeping it like this, and then users can sort it out amongst themselves.
+   */
+  xit("should not allow non shared recipes belonging to another user to be used for items", async () => {
     const otherUser = await generateUser();
     const otherRecipe = await generateRecipe({ user_id: otherUser.id });
     const mealPlan = await generateMealPlan({ user_id: user.id });

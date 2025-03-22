@@ -23,7 +23,10 @@ export const filtersToSearchParams = (filters: Record<string, any>) => {
   return searchParams;
 };
 
-export type MutationArgs<Result = unknown, Input = void> = Omit<UseMutationOptions<Result, AxiosError, Input>, "mutationFn" | "mutationKey">;
+export type MutationArgs<Result = unknown, Input = void> = Omit<
+  UseMutationOptions<Result, AxiosError, Input>,
+  "mutationFn" | "mutationKey"
+>;
 
 export type QueryArgs<T> = Omit<UseQueryOptions<T, AxiosError>, "queryFn" | "queryKey">;
 

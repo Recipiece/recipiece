@@ -1,10 +1,10 @@
+import { RecipeIngredientSchema } from "@recipiece/types";
 import Fraction from "fraction.js";
 import { MoreVertical, PencilRuler, Scale } from "lucide-react";
 import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../component";
 import { DialogContext } from "../../context";
 import { ConvertIngredientDialogSubmit, RelativeScaleIngredientSubmit } from "../../dialog";
-import { RecipeIngredientSchema } from "@recipiece/types";
 
 export interface IngredientContextMenuProps {
   readonly ingredient: RecipeIngredientSchema;
@@ -12,7 +12,11 @@ export interface IngredientContextMenuProps {
   readonly onIngredientRelativeScaled: (scaleFactor: number) => void;
 }
 
-export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredient, onIngredientConverted, onIngredientRelativeScaled }) => {
+export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({
+  ingredient,
+  onIngredientConverted,
+  onIngredientRelativeScaled,
+}) => {
   const { pushDialog, popDialog } = useContext(DialogContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -65,7 +69,10 @@ export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredie
         <DropdownMenuItem onClick={onConvertIngredient} disabled={!ingredient.amount || !isNumericIngredientAmount}>
           <PencilRuler /> Convert
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onRelativeScaleIngredient} disabled={!ingredient.amount || !isNumericIngredientAmount}>
+        <DropdownMenuItem
+          onClick={onRelativeScaleIngredient}
+          disabled={!ingredient.amount || !isNumericIngredientAmount}
+        >
           <Scale /> Relative Scale
         </DropdownMenuItem>
       </DropdownMenuContent>

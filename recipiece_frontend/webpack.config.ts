@@ -1,7 +1,7 @@
-import CopyWebpackPlugin from "copy-webpack-plugin";
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 import { Configuration, DefinePlugin } from "webpack";
 import "webpack-dev-server";
 
@@ -18,7 +18,11 @@ const config: Configuration = {
         use: {
           loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env", "@babel/preset-typescript", ["@babel/preset-react", { runtime: "automatic" }]],
+            presets: [
+              "@babel/preset-env",
+              "@babel/preset-typescript",
+              ["@babel/preset-react", { runtime: "automatic" }],
+            ],
           },
         },
         exclude: /node_modules/,

@@ -38,7 +38,8 @@ export const DeleteAccountSection: FC = () => {
     <div className="flex flex-col gap-2">
       <H3>Delete Account</H3>
       <p className="text-sm">
-        You can delete your account using the button below. Deleting your account will remove all of you user data from Recipiece.
+        You can delete your account using the button below. Deleting your account will remove all of you user data from
+        Recipiece.
         <b className="text-destructive"> THIS ACTION IS PERMANENT AND CANNOT BE UNDONE!</b>
       </p>
       <div className="flex flex-row justify-end">

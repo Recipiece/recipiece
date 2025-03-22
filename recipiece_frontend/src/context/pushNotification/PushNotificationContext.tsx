@@ -1,9 +1,9 @@
 import { YCreatePushNotificationRequestSubscriptionDataSchema } from "@recipiece/types";
+import { AxiosError } from "axios";
 import { createContext, FC, PropsWithChildren, useCallback, useEffect } from "react";
 import { v4 } from "uuid";
 import { TokenManager, useOptIntoPushNotificationsMutation } from "../../api";
 import { StorageKeys } from "../../util";
-import { AxiosError } from "axios";
 
 const generateServiceWorkerPushNotificationSubscription = async () => {
   if (process.env.NODE_ENV !== "development") {
@@ -155,5 +155,9 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenManager.isLoggedIn]);
 
-  return <PushNotificationContext.Provider value={{ requestAndSaveNotificationPermissions }}>{children}</PushNotificationContext.Provider>;
+  return (
+    <PushNotificationContext.Provider value={{ requestAndSaveNotificationPermissions }}>
+      {children}
+    </PushNotificationContext.Provider>
+  );
 };

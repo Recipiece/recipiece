@@ -13,7 +13,8 @@ const ParseRecipeFromURLFormSchema = z.object({
 export type ParseRecipeFromURLForm = z.infer<typeof ParseRecipeFromURLFormSchema>;
 
 export const ParseRecipeFromURLDialog: FC<BaseDialogProps<ParseRecipeFromURLForm>> = ({ onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
 
   const form = useForm<ParseRecipeFromURLForm>({
     resolver: zodResolver(ParseRecipeFromURLFormSchema),
@@ -34,7 +35,9 @@ export const ParseRecipeFromURLDialog: FC<BaseDialogProps<ParseRecipeFromURLForm
         <form onSubmit={form.handleSubmit(onParseRecipe)}>
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>Create a Recipe from a URL</ResponsiveTitle>
-            <ResponsiveDescription>Create a recipe from a URL. Be sure to double check the results!</ResponsiveDescription>
+            <ResponsiveDescription>
+              Create a recipe from a URL. Be sure to double check the results!
+            </ResponsiveDescription>
           </ResponsiveHeader>
 
           <FormInput placeholder="URL" name="url" type="text" label="URL" />

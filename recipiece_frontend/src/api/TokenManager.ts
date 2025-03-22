@@ -49,6 +49,7 @@ export class TokenManager {
       }
     } else {
       localStorage.removeItem(StorageKeys.REFRESH_TOKEN);
+      sessionStorage.removeItem(StorageKeys.REFRESH_TOKEN);
     }
   }
 

@@ -1,11 +1,11 @@
+import { prisma } from "@recipiece/database";
 import { generateMealPlan, generateMealPlanItem } from "@recipiece/test";
+import { MealPlanConfigurationJobDataSchema } from "@recipiece/types";
+import { Job } from "bullmq";
 import { DateTime } from "luxon";
 import { mealPlanItemQueue } from "../../../../src/job";
-import { prisma } from "@recipiece/database";
-import { JobType } from "../../../../src/util/constant";
-import { MealPlanConfigurationJobDataSchema } from "@recipiece/types";
 import { processMealPlanConfigurationUpdate } from "../../../../src/job/processors";
-import { Job } from "bullmq";
+import { JobType } from "../../../../src/util/constant";
 
 describe("Meal Plan Configuration Jobs", () => {
   let mealPlanItemSpy: jest.SpyInstance;

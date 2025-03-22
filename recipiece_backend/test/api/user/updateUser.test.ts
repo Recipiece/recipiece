@@ -1,4 +1,4 @@
-import { User, prisma } from "@recipiece/database";
+import { prisma, User } from "@recipiece/database";
 import { generateUser } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -70,20 +70,28 @@ describe("Update User", () => {
 
   it("should not allow a duplicate username, case insensitive", async () => {
     const otherUser = await generateUser();
-    const response = await request(server).put("/user").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
-      id: user.id,
-      username: otherUser.username.toUpperCase(),
-    });
+    const response = await request(server)
+      .put("/user")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({
+        id: user.id,
+        username: otherUser.username.toUpperCase(),
+      });
 
     expect(response.statusCode).toBe(StatusCodes.CONFLICT);
   });
 
   it("should not allow a duplicate email, case insensitive", async () => {
     const otherUser = await generateUser();
-    const response = await request(server).put("/user").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
-      id: user.id,
-      email: otherUser.email.toUpperCase(),
-    });
+    const response = await request(server)
+      .put("/user")
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send({
+        id: user.id,
+        email: otherUser.email.toUpperCase(),
+      });
 
     expect(response.statusCode).toBe(StatusCodes.CONFLICT);
   });

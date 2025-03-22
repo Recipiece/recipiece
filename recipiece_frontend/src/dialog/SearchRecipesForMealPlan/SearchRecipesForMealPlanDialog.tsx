@@ -1,12 +1,13 @@
+import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useListRecipesForMealPlanQuery } from "../../api";
 import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
-import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 
 export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -19,7 +20,10 @@ export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<RecipeSchema>> =
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesForMealPlanQuery({ search: filters.search!, page_number: 0 }, { enabled: (filters.search || "").length >= 2 });
+  } = useListRecipesForMealPlanQuery(
+    { search: filters.search!, page_number: 0 },
+    { enabled: (filters.search || "").length >= 2 }
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -66,7 +70,9 @@ export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<RecipeSchema>> =
               </Button>
             );
           })}
-          {!!recipeData && recipeData.data.length === 0 && <p className="text-sm">No recipes found, try searching for something else.</p>}
+          {!!recipeData && recipeData.data.length === 0 && (
+            <p className="text-sm">No recipes found, try searching for something else.</p>
+          )}
         </LoadingGroup>
       </Stack>
       <ResponsiveFooter>

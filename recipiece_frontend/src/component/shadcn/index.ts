@@ -16,7 +16,7 @@ export * from "./Input";
 export * from "./Label";
 export * from "./LoadingSpinner";
 export * from "./MenuBar";
-export * from "./MultiSelect";
+export * from "./MultipleSelector";
 export * from "./Pagination";
 export * from "./Popover";
 export * from "./Progress";

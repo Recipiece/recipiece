@@ -2,10 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useGetSelfQuery } from "../../api";
 import { Button, Form, FormInput, SubmitButton } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
-import { useGetSelfQuery } from "../../api";
 
 const DeleteAccountFormSchema = z.object({
   username: z.string(),
@@ -15,7 +15,8 @@ const DeleteAccountFormSchema = z.object({
 export type DeleteAccountForm = z.infer<typeof DeleteAccountFormSchema>;
 
 export const DeleteAccountDialog: FC<BaseDialogProps<DeleteAccountForm>> = ({ onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const { data: user } = useGetSelfQuery();
 
   const form = useForm({

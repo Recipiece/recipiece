@@ -1,8 +1,8 @@
 import { PrismaTransaction } from "@recipiece/database";
-import { RecipeSchema } from "@recipiece/types";
+import { RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships, stepsSubquery, tagsSubquery } from "./util";
+import { getRecipeByIdQuery } from "./query";
 
 /**
  * Get a recipe by id.
@@ -13,21 +13,7 @@ import { ingredientsSubquery, recipeSharesSubquery, recipeSharesWithMemberships,
 export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const recipeId = +req.params.id;
   const user = req.user;
-
-  const query = tx.$kysely
-    .selectFrom("recipes")
-    .selectAll("recipes")
-    .select((eb) => {
-      return [stepsSubquery(eb).as("steps"), ingredientsSubquery(eb).as("ingredients"), recipeSharesSubquery(eb, user.id).as("shares"), tagsSubquery(eb).as("tags")];
-    })
-    .where((eb) => {
-      return eb.and([
-        eb("recipes.id", "=", recipeId),
-        eb.or([eb("recipes.user_id", "=", user.id), eb.exists(recipeSharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1))]),
-      ]);
-    });
-
-  const recipe = await query.executeTakeFirst();
+  const recipe = await getRecipeByIdQuery(tx, user, recipeId).executeTakeFirst();
 
   if (!recipe) {
     return [
@@ -38,5 +24,5 @@ export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction
     ];
   }
 
-  return [StatusCodes.OK, recipe as RecipeSchema];
+  return [StatusCodes.OK, YRecipeSchema.cast(recipe)];
 };

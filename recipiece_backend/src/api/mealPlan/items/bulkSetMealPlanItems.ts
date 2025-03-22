@@ -1,9 +1,15 @@
-import { KyselyCore, MealPlanItem, mealPlanSharesWithMemberships, PrismaTransaction } from "@recipiece/database";
-import { BulkSetMealPlanItemsRequestSchema, BulkSetMealPlanItemsResponseSchema, MealPlanItemJobDataSchema } from "@recipiece/types";
+import { KyselyCore, MealPlanItem, PrismaTransaction, User } from "@recipiece/database";
+import {
+  BulkSetMealPlanItemsRequestSchema,
+  BulkSetMealPlanItemsResponseSchema,
+  MealPlanItemJobDataSchema,
+} from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanItemQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 import { JobType } from "../../../util/constant";
+import { getRecipeByIdQuery } from "../../recipe/query";
+import { getMealPlanByIdQuery } from "../query";
 
 export const bulkSetMealPlanItems = async (
   request: AuthenticatedRequest<BulkSetMealPlanItemsRequestSchema>,
@@ -12,16 +18,7 @@ export const bulkSetMealPlanItems = async (
   const mealPlanId = +request.params.id;
   const user = request.user;
 
-  const mealPlan = await tx.$kysely
-    .selectFrom("meal_plans")
-    .selectAll("meal_plans")
-    .where((eb) => {
-      return eb.and([
-        eb("meal_plans.id", "=", mealPlanId),
-        eb.or([eb("meal_plans.user_id", "=", user.id), eb.exists(mealPlanSharesWithMemberships(eb, user.id).select("meal_plan_shares.id").limit(1))]),
-      ]);
-    })
-    .executeTakeFirst();
+  const mealPlan = await getMealPlanByIdQuery(tx, user, mealPlanId).executeTakeFirst();
 
   if (!mealPlan) {
     return [
@@ -39,33 +36,18 @@ export const bulkSetMealPlanItems = async (
   const allRecipeIds = new Set<number>([...createRecipeIds, ...updateRecipeIds]);
 
   if (allRecipeIds.size > 0) {
-    // we should find as many recipes as ids
-    const ownedRecipes = await tx.$kysely
-      .selectFrom("recipes")
-      .select("recipes.id")
-      .where("recipes.id", "in", [...allRecipeIds])
-      .where("recipes.user_id", "=", user.id)
-      .execute();
-    if (ownedRecipes.length !== allRecipeIds.size) {
-      // mkay, they don't own all the recipes they sent in, so check the shares
-      const sharedRecipes = await tx.$kysely
-        .selectFrom("recipe_shares")
-        .select("recipe_shares.recipe_id")
-        .leftJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "recipe_shares.user_kitchen_membership_id")
-        .where("user_kitchen_memberships.destination_user_id", "=", user.id)
-        .where((eb) => {
-          return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted");
-        })
-        .where("recipe_shares.recipe_id", "in", [...allRecipeIds])
-        .execute();
-      if (ownedRecipes.length + sharedRecipes.length !== allRecipeIds.size) {
-        return [
-          StatusCodes.NOT_FOUND,
-          {
-            message: "User does not have access to all recipes",
-          },
-        ];
-      }
+    const allFoundRecipes = await Promise.all(
+      [...allRecipeIds].map((recipeId) => {
+        return getRecipeByIdQuery(tx, user, recipeId).executeTakeFirst();
+      })
+    );
+    if (allFoundRecipes.length !== allRecipeIds.size) {
+      return [
+        StatusCodes.NOT_FOUND,
+        {
+          message: "User does not have access to all recipes",
+        },
+      ];
     }
   }
 
@@ -139,7 +121,10 @@ export const bulkSetMealPlanItems = async (
     await tx.$kysely
       .deleteFrom("side_jobs")
       .where((eb) => {
-        return eb.or([eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM), eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION)]);
+        return eb.or([
+          eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM),
+          eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION),
+        ]);
       })
       .where(() => {
         return KyselyCore.sql`(side_jobs.job_data->>'meal_plan_item_id')::int = any(${updatedIds})`;

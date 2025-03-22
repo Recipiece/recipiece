@@ -1,5 +1,5 @@
-import { User, prisma } from "@recipiece/database";
-import { generateRecipe, generateRecipeShare, generateUserKitchenMembership } from "@recipiece/test";
+import { prisma, User, UserKitchenMembershipStatus } from "@recipiece/database";
+import { generateRecipe, generateUserKitchenMembership } from "@recipiece/test";
 import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -12,10 +12,12 @@ describe("Get Recipe", () => {
     [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
-  it("should allow a user to get a recipe", async () => {
+  it("should allow a user to get their own recipe", async () => {
     const existingRecipe = await generateRecipe({ user_id: user.id });
 
-    const response = await request(server).get(`/recipe/${existingRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/recipe/${existingRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const recipeBody = response.body as RecipeSchema;
@@ -25,7 +27,9 @@ describe("Get Recipe", () => {
   it("should not retrieve a recipe that is not shared and does not belong to the requesting user", async () => {
     const otherRecipe = await generateRecipe();
 
-    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/recipe/${otherRecipe.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
@@ -35,63 +39,43 @@ describe("Get Recipe", () => {
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
-  it("should get a shared recipe", async () => {
-    const otherRecipe = await generateRecipe();
+  it.each([true, false])(
+    "should get a recipe shared with a user when source user is user is %o",
+    async (isUserSourceUser) => {
+      const otherRecipe = await generateRecipe();
+      const membership = await generateUserKitchenMembership({
+        source_user_id: isUserSourceUser ? user.id : otherRecipe.user_id,
+        destination_user_id: isUserSourceUser ? otherRecipe.user_id : user.id,
+        status: "accepted",
+      });
 
-    const membership = await generateUserKitchenMembership({
-      source_user_id: otherRecipe.user_id,
-      destination_user_id: user.id,
-      status: "accepted",
-    });
+      const response = await request(server)
+        .get(`/recipe/${otherRecipe.id}`)
+        .set("Authorization", `Bearer ${bearerToken}`);
 
-    const share = await generateRecipeShare({
-      recipe_id: otherRecipe.id,
-      user_kitchen_membership_id: membership.id,
-    });
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseData: RecipeSchema = response.body;
+      expect(responseData.user_kitchen_membership_id).toBe(membership.id);
+    }
+  );
 
-    // make a membership and share going the other way to ensure we dont pick up stray records
-    const mirroredMembership = await generateUserKitchenMembership({
-      destination_user_id: otherRecipe.user_id,
-      source_user_id: user.id,
-      status: "accepted",
-    });
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
+    "should not get a shared recipe where the membership has status %o",
+    async (membershipStatus) => {
+      const otherRecipe = await generateRecipe();
+      const membership = await prisma.userKitchenMembership.create({
+        data: {
+          source_user_id: otherRecipe.user_id,
+          destination_user_id: user.id,
+          status: membershipStatus,
+        },
+      });
 
-    const usersRecipe = await generateRecipe({ user_id: user.id });
+      const response = await request(server)
+        .get(`/recipe/${otherRecipe.id}`)
+        .set("Authorization", `Bearer ${bearerToken}`);
 
-    const usersRecipeShare = await generateRecipeShare({
-      user_kitchen_membership_id: mirroredMembership.id,
-      recipe_id: usersRecipe.id,
-    });
-
-    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: RecipeSchema = response.body;
-
-    expect(responseData.shares?.length).toBe(1);
-    expect(responseData.shares![0].id).toBe(share.id);
-  });
-
-  it("should not get a shared recipe where the membership is not accepted", async () => {
-    const otherRecipe = await generateRecipe();
-
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherRecipe.user_id,
-        destination_user_id: user.id,
-        status: "denied",
-      },
-    });
-
-    const share = await prisma.recipeShare.create({
-      data: {
-        recipe_id: otherRecipe.id,
-        user_kitchen_membership_id: membership.id,
-      },
-    });
-
-    const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-  });
+      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+    }
+  );
 });

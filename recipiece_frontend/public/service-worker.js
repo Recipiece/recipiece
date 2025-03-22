@@ -45,9 +45,7 @@ self.addEventListener("notificationclick", (event) => {
   const { tag, data } = event.notification;
 
   let destinationUrl = "";
-  if (tag.startsWith("recipeShare")) {
-    destinationUrl = `/recipe/view/${data.id}`;
-  } else if (tag.startsWith("shoppingListShare")) {
+  if (tag.startsWith("shoppingListShare")) {
     destinationUrl = `/shopping-list/${data.id}`;
   } else if (tag.startsWith("mealPlanShare")) {
     destinationUrl = `/meal-plan/view/${data.id}`;

@@ -1,3 +1,4 @@
+import { DataTestId } from "@recipiece/constant";
 import { ListUserTagsQuerySchema } from "@recipiece/types";
 import { XIcon } from "lucide-react";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
@@ -6,9 +7,11 @@ import { useListUserTagsQuery } from "../../../api";
 import { Badge, FormField, FormItem, FormLabel } from "../../shadcn";
 import { TypeaheadInput } from "../TypeaheadInput";
 import { RecipeSearchForm } from "./RecipeSearchFormSchema";
-import { DataTestId } from "@recipiece/constant";
 
-export const TagSearch: FC<{ readonly disabled: boolean; readonly dataTestId?: string }> = ({ disabled, dataTestId }) => {
+export const TagSearch: FC<{ readonly disabled: boolean; readonly dataTestId?: string }> = ({
+  disabled,
+  dataTestId,
+}) => {
   const baseDataTestId = DataTestId.RecipeSearchBar.INPUT_TAG_SEARCH(dataTestId);
   const [filters, setFilters] = useState<ListUserTagsQuerySchema>({
     page_number: 0,
@@ -101,7 +104,12 @@ export const TagSearch: FC<{ readonly disabled: boolean; readonly dataTestId?: s
       <div className="flex flex-row flex-wrap gap-2">
         {fields.map((field, index) => {
           return (
-            <Badge data-testid={DataTestId.RecipeSearchBar.BADGE_TAG(dataTestId)} key={field.id} className="cursor-pointer dark:text-white" onClick={() => remove(index)}>
+            <Badge
+              data-testid={DataTestId.RecipeSearchBar.BADGE_TAG(dataTestId)}
+              key={field.id}
+              className="cursor-pointer dark:text-white"
+              onClick={() => remove(index)}
+            >
               {field.content}
               <XIcon className="ml-2" size={12} />
             </Badge>

@@ -1,5 +1,4 @@
 import { User } from "@recipiece/database";
-import { generateCookbook } from "@recipiece/test";
 import { CookbookSchema, CreateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -18,7 +17,11 @@ describe("Create Cookbooks", () => {
       description: "The best recipes ever",
     };
 
-    const response = await request(server).post("/cookbook").send(expectedBody).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .post("/cookbook")
+      .send(expectedBody)
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const responseBody = response.body as CookbookSchema;

@@ -18,7 +18,11 @@ type UseSessionStorageOptions<T> = {
 
 const IS_SERVER = typeof window === "undefined";
 
-export function useSessionStorage<T>(key: string, initialValue: T | (() => T), options: UseSessionStorageOptions<T> = {}): [T, Dispatch<SetStateAction<T>>, () => void] {
+export function useSessionStorage<T>(
+  key: string,
+  initialValue: T | (() => T),
+  options: UseSessionStorageOptions<T> = {}
+): [T, Dispatch<SetStateAction<T>>, () => void] {
   const { initializeWithValue = true } = options;
 
   const serializer = useCallback<(value: T) => string>(

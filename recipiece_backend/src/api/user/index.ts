@@ -4,8 +4,6 @@ import {
   YCreateUserRequestSchema,
   YCreateUserResponseSchema,
   YIssueForgotPasswordTokenRequestSchema,
-  YListUserTagsQuerySchema,
-  YListUserTagsResponseSchema,
   YLoginResponseSchema,
   YRefreshTokenResponseSchema,
   YResetPasswordRequestSchema,
@@ -23,13 +21,11 @@ import { deleteSelf } from "./deleteSelf";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
-import { USER_KITCHEN_MEMBERSHIP_ROUTES } from "./kitchenMembership";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
 import { refreshToken } from "./refreshToken";
 import { requestImportRecipes } from "./requestImportRecipes";
 import { resetPassword } from "./resetPassword";
-import { deleteUserTag, listUserTags } from "./tag";
 import { updateUser } from "./updateUser";
 import { validateUser } from "./validateUser";
 
@@ -132,19 +128,4 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "access_token",
     requestSchema: YCreatePushNotificationRequestSchema,
   },
-  {
-    path: "/user/tag/list",
-    method: "GET",
-    function: listUserTags,
-    authentication: "access_token",
-    requestSchema: YListUserTagsQuerySchema,
-    responseSchema: YListUserTagsResponseSchema,
-  },
-  {
-    path: "/user/tag/:id",
-    method: "DELETE",
-    function: deleteUserTag,
-    authentication: "access_token",
-  },
-  ...USER_KITCHEN_MEMBERSHIP_ROUTES,
 ];

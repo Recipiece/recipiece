@@ -1,7 +1,7 @@
+import { randomUUID } from "crypto";
 import { prisma, Redis, ShoppingList, ShoppingListItem, User } from "@recipiece/database";
 import { generateShoppingListItem } from "@recipiece/test";
 import { ModifyShoppingListResponse } from "@recipiece/types";
-import { randomUUID } from "crypto";
 import "jest-expect-message";
 import request from "superwstest";
 
@@ -9,7 +9,14 @@ const setShoppingListToken = async (shoppingListId: number): Promise<string> => 
   const wsToken = randomUUID().toString();
   const redis = await Redis.getInstance();
 
-  await redis.hSet(`ws:${wsToken}`, ["purpose", "/shopping-list/modify", "entity_id", shoppingListId, "entity_type", "modifyShoppingListSession"]);
+  await redis.hSet(`ws:${wsToken}`, [
+    "purpose",
+    "/shopping-list/modify",
+    "entity_id",
+    shoppingListId,
+    "entity_type",
+    "modifyShoppingListSession",
+  ]);
   await redis.sAdd(`modifyShoppingListSession:${shoppingListId}`, wsToken);
 
   return wsToken;

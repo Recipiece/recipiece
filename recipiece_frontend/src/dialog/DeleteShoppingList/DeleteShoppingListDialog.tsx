@@ -9,7 +9,8 @@ export interface DeleteShoppingListDialogProps extends BaseDialogProps<ShoppingL
 }
 
 export const DeleteShoppingListDialog: FC<DeleteShoppingListDialogProps> = ({ shoppingList, onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
+    useResponsiveDialogComponents();
   const [isDisabled, setIsDisabled] = useState(false);
 
   const onDeleteShoppingList = async () => {
@@ -27,7 +28,8 @@ export const DeleteShoppingListDialog: FC<DeleteShoppingListDialogProps> = ({ sh
       <ResponsiveHeader>
         <ResponsiveTitle>Delete {shoppingList.name}?</ResponsiveTitle>
         <ResponsiveDescription>
-          Click the Delete Shopping List button below to permanently delete <i>{shoppingList.name}</i>. This action is permanent and cannot be undone!
+          Click the Delete Shopping List button below to permanently delete <i>{shoppingList.name}</i>. This action is
+          permanent and cannot be undone!
         </ResponsiveDescription>
       </ResponsiveHeader>
       <ResponsiveFooter className="flex-col-reverse">

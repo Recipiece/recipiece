@@ -21,13 +21,16 @@ const ImportRecipesFormSchema = z.object({
     .refine((fileData) => {
       return fileData[0].size <= 40000000;
     }, "File must be under 40 MB"),
-  source: z.string().refine((val) => SUPPORTED_FILES.map((f) => f.format).includes(val), "File must come from a supported application"),
+  source: z
+    .string()
+    .refine((val) => SUPPORTED_FILES.map((f) => f.format).includes(val), "File must come from a supported application"),
 });
 
 export type ImportRecipesForm = z.infer<typeof ImportRecipesFormSchema>;
 
 export const ImportRecipesDialog: FC<BaseDialogProps<ImportRecipesForm>> = ({ onSubmit, onClose }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ImportRecipesForm>({
@@ -71,7 +74,14 @@ export const ImportRecipesDialog: FC<BaseDialogProps<ImportRecipesForm>> = ({ on
                 );
               })}
             </FormSelect>
-            <FormFile disabled={isSubmitting} required type="file" name="file" label="File" accept={availableExtensions} />
+            <FormFile
+              disabled={isSubmitting}
+              required
+              type="file"
+              name="file"
+              label="File"
+              accept={availableExtensions}
+            />
 
             <ResponsiveFooter>
               <Button variant="outline" disabled={isSubmitting} onClick={() => onClose?.()}>

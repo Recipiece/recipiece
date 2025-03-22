@@ -13,7 +13,10 @@ import { UserQueryKeys } from "../user";
 import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
 
 export const useCreateShoppingListShareMutation = (
-  args?: MutationArgs<ShoppingListShareSchema, { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }>
+  args?: MutationArgs<
+    ShoppingListShareSchema,
+    { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }
+  >
 ) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
@@ -49,7 +52,7 @@ export const useCreateShoppingListShareMutation = (
         queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            entity: "exclude",
+            entity_filter: "exclude",
             entity_id: data.shopping_list_id,
             entity_type: "shopping_list",
           })
@@ -80,15 +83,18 @@ export const useCreateShoppingListShareMutation = (
           return undefined;
         }
       );
-      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingListSchema | undefined) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            shares: [...(oldData.shares ?? []), data],
-          };
+      queryClient.setQueryData(
+        ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id),
+        (oldData: ShoppingListSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              shares: [...(oldData.shares ?? []), data],
+            };
+          }
+          return undefined;
         }
-        return undefined;
-      });
+      );
 
       onSuccess?.(data, params, ctx);
     },
@@ -96,7 +102,7 @@ export const useCreateShoppingListShareMutation = (
   });
 };
 
-export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, ShoppingListShareSchema>) => {
+export const useDeleteShoppingListShareMutation = (args?: MutationArgs<unknown, ShoppingListShareSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
@@ -127,7 +133,7 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
         queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
         predicate: generatePartialMatchPredicate(
           UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            entity: "exclude",
+            entity_filter: "exclude",
             entity_id: params.shopping_list_id,
             entity_type: "shopping_list",
           })
@@ -158,15 +164,18 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
           return undefined;
         }
       );
-      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingListSchema | undefined) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
-          };
+      queryClient.setQueryData(
+        ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id),
+        (oldData: ShoppingListSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
+            };
+          }
+          return undefined;
         }
-        return undefined;
-      });
+      );
 
       onSuccess?.(data, params, ctx);
     },
@@ -174,7 +183,10 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<{}, Shopp
   });
 };
 
-export const useListShoppingListSharesQuery = (filters: ListShoppingListSharesQuerySchema, args?: QueryArgs<ListShoppingListSharesResponseSchema>) => {
+export const useListShoppingListSharesQuery = (
+  filters: ListShoppingListSharesQuerySchema,
+  args?: QueryArgs<ListShoppingListSharesResponseSchema>
+) => {
   const { getter } = useGet();
 
   const searchParams = filtersToSearchParams(filters);

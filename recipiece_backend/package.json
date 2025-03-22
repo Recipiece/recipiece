@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "dotenvx run -f .env.test -- jest --runInBand --forceExit",
+    "test": "dotenvx run -f .env.test -- jest --forceExit",
     "lint": "prettier . --write",
     "seed": "dotenvx run -f .env.dev -- yarn ts-node ./seed/index.ts",
     "migrate:test": "dotenvx run -f .env.test -- yarn --cwd ../recipiece_common/recipiece_database run migrate",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",
     "@faker-js/faker": "^9.5.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@types/archiver": "^6.0.3",
     "@types/body-parser": "^1.19.5",
     "@types/convert-units": "^2.3.11",

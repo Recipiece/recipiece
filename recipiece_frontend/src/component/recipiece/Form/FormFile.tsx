@@ -1,8 +1,17 @@
+import { DataTestId } from "@recipiece/constant";
 import { FC, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, InputProps } from "../../shadcn";
-import { DataTestId } from "@recipiece/constant";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+  InputProps,
+} from "../../shadcn";
 
 export interface FormFileProps extends InputProps {
   readonly name: string;
@@ -37,7 +46,9 @@ export const FormFile: FC<FormFileProps> = ({ isLoading, name, className, label,
               <Input type="file" {...restInputProps} {...fileRef} />
             </FormControl>
             <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
-            {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
+            {instructions && (
+              <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>
+            )}
           </FormItem>
         );
       }}

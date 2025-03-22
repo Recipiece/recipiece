@@ -1,14 +1,14 @@
-import { User, prisma } from "@recipiece/database";
-import archiver from "archiver";
-import { Job } from "bullmq";
 import { createWriteStream, mkdirSync, rmSync } from "fs";
-import fetch from "jest-fetch-mock";
-import { DateTime } from "luxon";
 import path from "path";
 import { gzipSync } from "zlib";
-import { JobType, RecipeImportFiles } from "../../../../src/util/constant";
-import { importRecipes } from "../../../../src/job/processors";
+import { prisma, User } from "@recipiece/database";
 import { RecipeImportJobDataSchema } from "@recipiece/types";
+import archiver from "archiver";
+import { Job } from "bullmq";
+import fetch from "jest-fetch-mock";
+import { DateTime } from "luxon";
+import { importRecipes } from "../../../../src/job/processors";
+import { JobType, RecipeImportFiles } from "../../../../src/util/constant";
 
 describe("Import Recipes", () => {
   describe("From Paprika", () => {
@@ -35,7 +35,14 @@ describe("Import Recipes", () => {
       image_url: null,
       photo_data: null,
       total_time: "",
-      ingredients: "1 pound ground beef\n" + "½ onion\n" + "1 bell pepper\n" + "4 oz green chile\n" + "2 cloves garlic\n" + "spices\n" + "4 flour tortillas ",
+      ingredients:
+        "1 pound ground beef\n" +
+        "½ onion\n" +
+        "1 bell pepper\n" +
+        "4 oz green chile\n" +
+        "2 cloves garlic\n" +
+        "spices\n" +
+        "4 flour tortillas ",
       name: "Beef Burritos",
     };
 
@@ -72,7 +79,8 @@ describe("Import Recipes", () => {
       source_url: "https://cooking.nytimes.com/recipes/1018638-apple-crumble",
       hash: "24B5115609295BF99DC4920B25AC23DD44F439959FD859E485BCB925ECCF0444",
       source: "cooking.nytimes.com",
-      image_url: "https://static01.nyt.com/images/2018/10/18/dining/27COOKING-APPLE-CRUMB-ICECREAM1/27COOKING-APPLE-CRUMB-ICECREAM1-square640-v2.jpg",
+      image_url:
+        "https://static01.nyt.com/images/2018/10/18/dining/27COOKING-APPLE-CRUMB-ICECREAM1/27COOKING-APPLE-CRUMB-ICECREAM1-square640-v2.jpg",
       photo_data: "big_ol_blob_of_data===",
       total_time: "1 hr 10 min",
       ingredients:
@@ -115,7 +123,11 @@ describe("Import Recipes", () => {
 
     beforeEach(() => {
       // patch up the constants to point to the right file
-      jest.replaceProperty(RecipeImportFiles, "TMP_DIR", path.resolve(__dirname, `./tmp/${seed}`) as typeof RecipeImportFiles.TMP_DIR);
+      jest.replaceProperty(
+        RecipeImportFiles,
+        "TMP_DIR",
+        path.resolve(__dirname, `./tmp/${seed}`) as typeof RecipeImportFiles.TMP_DIR
+      );
       fetch.doMock();
     });
 

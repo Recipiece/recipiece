@@ -1,5 +1,5 @@
 {
   "trailingComma": "es5",
-  "printWidth": 180,
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "printWidth": 120,
+  "plugins": ["prettier-plugin-tailwindcss", "@ianvs/prettier-plugin-sort-imports"]
 }

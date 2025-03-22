@@ -3,7 +3,18 @@ import { Minus } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useMemo } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Button, Card, CardContent, CardTitle, FormInput, FormTextarea, H3, H4, Separator, Skeleton } from "../../component";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardTitle,
+  FormInput,
+  FormTextarea,
+  H3,
+  H4,
+  Separator,
+  Skeleton,
+} from "../../component";
 import { DialogContext } from "../../context";
 import { MealPlanItemsForm } from "./MealPlanForm";
 
@@ -98,13 +109,26 @@ const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate,
           if (!isEditing) {
             component = <p className="text-sm">{item.freeform_content}</p>;
           } else {
-            component = <FormTextarea required name={`mealPlanItems.${dayId}.${target}.${index}.freeform_content`} label="Meal" placeholder="What are you thinking about?" />;
+            component = (
+              <FormTextarea
+                required
+                name={`mealPlanItems.${dayId}.${target}.${index}.freeform_content`}
+                label="Meal"
+                placeholder="What are you thinking about?"
+              />
+            );
           }
         }
 
         let notesComponent = undefined;
         if (isEditing) {
-          notesComponent = <FormInput name={`mealPlanItems.${dayId}.${target}.${index}.notes`} placeholder="Anything to note?" label="Notes" />;
+          notesComponent = (
+            <FormInput
+              name={`mealPlanItems.${dayId}.${target}.${index}.notes`}
+              placeholder="Anything to note?"
+              label="Notes"
+            />
+          );
         } else {
           notesComponent = <p className="text-xs">{item.notes ?? ""}</p>;
         }
@@ -162,9 +186,27 @@ export const MealPlanItemCard: FC<MealPlanItemCardProps> = ({ isLoading, isEditi
           )}
           {!isLoading && (
             <>
-              <MealPlanSection dayId={dayId} mealPlan={mealPlan} baseDate={date} target="morningItems" isEditing={isEditing} />
-              <MealPlanSection dayId={dayId} mealPlan={mealPlan} baseDate={date} target="middayItems" isEditing={isEditing} />
-              <MealPlanSection dayId={dayId} mealPlan={mealPlan} baseDate={date} target="eveningItems" isEditing={isEditing} />
+              <MealPlanSection
+                dayId={dayId}
+                mealPlan={mealPlan}
+                baseDate={date}
+                target="morningItems"
+                isEditing={isEditing}
+              />
+              <MealPlanSection
+                dayId={dayId}
+                mealPlan={mealPlan}
+                baseDate={date}
+                target="middayItems"
+                isEditing={isEditing}
+              />
+              <MealPlanSection
+                dayId={dayId}
+                mealPlan={mealPlan}
+                baseDate={date}
+                target="eveningItems"
+                isEditing={isEditing}
+              />
             </>
           )}
         </div>

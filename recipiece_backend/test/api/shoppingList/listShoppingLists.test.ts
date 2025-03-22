@@ -1,5 +1,10 @@
 import { ShoppingList, User } from "@recipiece/database";
-import { generateShoppingList, generateShoppingListShare, generateUser, generateUserKitchenMembership } from "@recipiece/test";
+import {
+  generateShoppingList,
+  generateShoppingListShare,
+  generateUser,
+  generateUserKitchenMembership,
+} from "@recipiece/test";
 import { ListShoppingListsQuerySchema, ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -57,12 +62,10 @@ describe("List Shopping Lists", () => {
       destination_user_id: user.id,
       status: "accepted",
     });
-
     const otherShoppingList = await generateShoppingList({ user_id: otherUser.id });
-
     await generateShoppingListShare({
-      user_kitchen_membership_id: membership.id,
       shopping_list_id: otherShoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     for (let i = 0; i < 10; i++) {
@@ -106,7 +109,7 @@ describe("List Shopping Lists", () => {
       .get("/shopping-list/list")
       .query(<ListShoppingListsQuerySchema>{
         page_number: 0,
-        shared_shopping_lists: "exclude",
+        shared_shopping_lists_filter: "exclude",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -140,7 +143,7 @@ describe("List Shopping Lists", () => {
       .get("/shopping-list/list")
       .query(<ListShoppingListsQuerySchema>{
         page_number: 0,
-        shared_shopping_lists: "exclude",
+        shared_shopping_lists_filter: "exclude",
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);

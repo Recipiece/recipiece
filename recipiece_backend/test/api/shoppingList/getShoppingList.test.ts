@@ -15,7 +15,9 @@ describe("Get Shopping List", () => {
   it("should allow a user to get a shopping list", async () => {
     const existingShoppingList = await generateShoppingList({ user_id: user.id });
 
-    const response = await request(server).get(`/shopping-list/${existingShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/shopping-list/${existingShoppingList.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const shoppingListBody = response.body as ShoppingListSchema;
@@ -25,7 +27,9 @@ describe("Get Shopping List", () => {
   it("should not retrieve a shopping list that is not shared and does not belong to the requesting user", async () => {
     const existingShoppingList = await generateShoppingList();
 
-    const response = await request(server).get(`/shopping-list/${existingShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/shopping-list/${existingShoppingList.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
@@ -59,13 +63,16 @@ describe("Get Shopping List", () => {
       shopping_list_id: usersShoppingList.id,
     });
 
-    const response = await request(server).get(`/shopping-list/${othersShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/shopping-list/${othersShoppingList.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: ShoppingListSchema = response.body;
 
     expect(responseData.shares?.length).toBe(1);
     expect(responseData.shares![0].id).toBe(share.id);
+    expect(responseData.shares![0].shopping_list_id).toBe(othersShoppingList.id);
   });
 
   it("should not get a shared shopping list where the membership is not accepted", async () => {
@@ -82,7 +89,9 @@ describe("Get Shopping List", () => {
       user_kitchen_membership_id: membership.id,
     });
 
-    const response = await request(server).get(`/shopping-list/${otherShoppingList.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get(`/shopping-list/${otherShoppingList.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

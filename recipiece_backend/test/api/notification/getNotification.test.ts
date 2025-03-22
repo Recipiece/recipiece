@@ -1,5 +1,9 @@
 import { User } from "@recipiece/database";
-import { generateNotification, generateUserKitchenMembership, generateUserKitchenMembershipNotificationAttachment } from "@recipiece/test";
+import {
+  generateNotification,
+  generateUserKitchenMembership,
+  generateUserKitchenMembershipNotificationAttachment,
+} from "@recipiece/test";
 import { NotificationSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
@@ -14,7 +18,10 @@ describe("Get Notification", () => {
 
   it("should get a notification that the user owns", async () => {
     const notification = await generateNotification({ user_id: user.id, read_by_user_id: null });
-    const response = await request(server).get(`/notification/${notification.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
+    const response = await request(server)
+      .get(`/notification/${notification.id}`)
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const returnedNotification = response.body as NotificationSchema;
@@ -38,7 +45,10 @@ describe("Get Notification", () => {
       notification_id: notification.id,
     });
 
-    const response = await request(server).get(`/notification/${notification.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
+    const response = await request(server)
+      .get(`/notification/${notification.id}`)
+      .set("Authorization", `Bearer ${otherBearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const returnedNotification = response.body as NotificationSchema;
@@ -62,7 +72,10 @@ describe("Get Notification", () => {
       notification_id: notification.id,
     });
 
-    const response = await request(server).get(`/notification/${notification.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
+    const response = await request(server)
+      .get(`/notification/${notification.id}`)
+      .set("Authorization", `Bearer ${otherBearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
@@ -75,7 +88,10 @@ describe("Get Notification", () => {
       read_by_user_id: null,
     });
 
-    const response = await request(server).get(`/notification/${notification.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
+    const response = await request(server)
+      .get(`/notification/${notification.id}`)
+      .set("Authorization", `Bearer ${otherBearerToken}`)
+      .send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

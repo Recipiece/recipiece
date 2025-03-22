@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useCallback } from "react";
+import { DataTestId } from "@recipiece/constant";
+import { FC, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useGetSelfQuery } from "../../api";
@@ -13,9 +14,14 @@ export const ExtendKitchenInvitationFormSchema = z.object({
 
 export type ExtendKitchenInvitationForm = z.infer<typeof ExtendKitchenInvitationFormSchema>;
 
-export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvitationForm>> = ({ onClose, onSubmit }) => {
+export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvitationForm>> = ({
+  onClose,
+  onSubmit,
+}) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
+    useResponsiveDialogComponents();
 
   const form = useForm<ExtendKitchenInvitationForm>({
     resolver: zodResolver(ExtendKitchenInvitationFormSchema),
@@ -32,30 +38,50 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
           message: "You cannot invite yourself",
         });
       } else {
-        onSubmit?.(formData);
+        setIsSubmitting(true);
+        await onSubmit?.(formData);
+        setIsSubmitting(false);
       }
     },
     [form, onSubmit, user]
   );
 
   return (
-    <ResponsiveContent className="p-6">
+    <ResponsiveContent data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.DIALOG_WRAPPER} className="p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onInviteUser)}>
           <ResponsiveHeader>
             <ResponsiveTitle>Invite a User</ResponsiveTitle>
-            <ResponsiveDescription>Invite a user to your kitchen by entering their username below.</ResponsiveDescription>
+            <ResponsiveDescription>
+              Invite a user to your kitchen by entering their username below.
+            </ResponsiveDescription>
           </ResponsiveHeader>
 
           <div className="mb-2">
-            <FormInput autoComplete="off" name="username" label="Username" required />
+            <FormInput
+              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.INPUT_USERNAME}
+              autoComplete="off"
+              name="username"
+              label="Username"
+              required
+            />
           </div>
 
           <ResponsiveFooter className="flex-col-reverse">
-            <Button variant="outline" disabled={form.formState.isSubmitting || isLoadingUser} onClick={() => onClose?.()}>
+            <Button
+              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.BUTTON_CANCEL}
+              variant="outline"
+              disabled={isSubmitting || isLoadingUser}
+              onClick={() => onClose?.()}
+            >
               Cancel
             </Button>
-            <SubmitButton disabled={isLoadingUser}>Send Invitation</SubmitButton>
+            <SubmitButton
+              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.BUTTON_SEND_INVITE}
+              disabled={isSubmitting || isLoadingUser}
+            >
+              Send Invitation
+            </SubmitButton>
           </ResponsiveFooter>
         </form>
       </Form>

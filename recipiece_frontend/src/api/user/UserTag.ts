@@ -1,16 +1,26 @@
-import { ListRecipesResponseSchema, ListUserTagsQuerySchema, ListUserTagsResponseSchema, RecipeSchema, UserTagSchema, YListUserTagsResponseSchema } from "@recipiece/types";
+import {
+  ListRecipesResponseSchema,
+  ListUserTagsQuerySchema,
+  ListUserTagsResponseSchema,
+  RecipeSchema,
+  UserTagSchema,
+  YListUserTagsResponseSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataDeleter } from "../QueryKeys";
+import { RecipeQueryKeys } from "../recipe";
 import { MutationArgs, QueryArgs, useDelete, useGet } from "../Request";
 import { UserQueryKeys } from "./UserQueryKeys";
-import { RecipeQueryKeys } from "../recipe";
 
-export const useListUserTagsQuery = (filters?: ListUserTagsQuerySchema, args?: QueryArgs<ListUserTagsResponseSchema>) => {
+export const useListUserTagsQuery = (
+  filters?: ListUserTagsQuerySchema,
+  args?: QueryArgs<ListUserTagsResponseSchema>
+) => {
   const { getter } = useGet();
 
   const query = async () => {
     const data = await getter<ListUserTagsQuerySchema, ListUserTagsResponseSchema>({
-      path: "/user/tag/list",
+      path: "/user-tag/list",
       withAuth: "access_token",
       query: {
         ...(filters ?? { page_number: 0, page_size: 100 }),
@@ -32,7 +42,7 @@ export const useDeleteUserTagMutation = (args?: MutationArgs<unknown, UserTagSch
 
   const mutation = async (tag: UserTagSchema) => {
     return await deleter({
-      path: "/user/tag",
+      path: "/user-tag",
       id: tag.id,
       withAuth: "access_token",
     });

@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { MealPlanSchema, ShoppingListSchema } from "@recipiece/types";
 import { DateTime } from "luxon";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
@@ -8,7 +9,6 @@ import { useListMealPlanItemsQuery } from "../../api";
 import { Button, Calendar, Form, FormCheckbox, LoadingGroup, ScrollArea, SubmitButton } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 export interface AddMealPlanToShoppingListDialogProps extends BaseDialogProps<AddMealPlanToShoppingListForm> {
   readonly mealPlan: MealPlanSchema;
@@ -29,7 +29,8 @@ const AddMealPlanToShoppingListFormSchema = z.object({
 export type AddMealPlanToShoppingListForm = z.infer<typeof AddMealPlanToShoppingListFormSchema>;
 
 export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialogProps> = ({ onSubmit, mealPlan }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const [page, setPage] = useState<"date_select" | "items_select">("date_select");
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: DateTime.utc().toLocal().toJSDate(),
@@ -198,7 +199,8 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
               )}
               {fields.length === 0 && (
                 <p className="text-center text-sm">
-                  There are no recipes with ingredients between {dataStartDate.toFormat("MMM. dd")} and {dataEndDate.toFormat("MMM. dd")}. Select a different date range.
+                  There are no recipes with ingredients between {dataStartDate.toFormat("MMM. dd")} and{" "}
+                  {dataEndDate.toFormat("MMM. dd")}. Select a different date range.
                 </p>
               )}
             </LoadingGroup>
@@ -206,7 +208,12 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
 
           <ResponsiveFooter className="mt-auto flex-col">
             {page === "date_select" && (
-              <Button disabled={!dateRange?.from || !dateRange?.to} type="button" variant="outline" onClick={() => setPage("items_select")}>
+              <Button
+                disabled={!dateRange?.from || !dateRange?.to}
+                type="button"
+                variant="outline"
+                onClick={() => setPage("items_select")}
+              >
                 Next
               </Button>
             )}

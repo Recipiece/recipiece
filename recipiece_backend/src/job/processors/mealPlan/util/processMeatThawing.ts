@@ -1,4 +1,8 @@
-import { convertIngredientInDifferentCategory, convertIngredientInSameCategory, getMatchingUnitConverter } from "@recipiece/conversion";
+import {
+  convertIngredientInDifferentCategory,
+  convertIngredientInSameCategory,
+  getMatchingUnitConverter,
+} from "@recipiece/conversion";
 import { KnownIngredient, MealPlanItem, PrismaTransaction, RecipeIngredient } from "@recipiece/database";
 import { MealPlanConfigurationSchema, MealPlanNotificationJobDataSchema } from "@recipiece/types";
 import { search as fuzzySearch } from "fast-fuzzy";
@@ -7,7 +11,23 @@ import { DateTime, Duration } from "luxon";
 import { JobType } from "../../../../util/constant";
 import { mealPlanNotificationsQueue } from "../../../queues";
 
-export const MEAT_LIKE_INGREDIENTS = ["chicken", "beef", "steak", "pork", "meat", "lamb", "venison", "rabbit", "deer", "duck", "goat", "fish", "mutton", "veal", "bison"];
+export const MEAT_LIKE_INGREDIENTS = [
+  "chicken",
+  "beef",
+  "steak",
+  "pork",
+  "meat",
+  "lamb",
+  "venison",
+  "rabbit",
+  "deer",
+  "duck",
+  "goat",
+  "fish",
+  "mutton",
+  "veal",
+  "bison",
+];
 
 /**
  * Processes the provided ingredients and enqueue a meal plan notification
@@ -65,7 +85,10 @@ export const processMeatThawing = async (
           }
         }
       } catch (err) {
-        console.error(`failed to convert ingredient name=${ing.name}, unit=${ing.unit}, amount=${ing.amount} to targetUnit=lb\n`, err);
+        console.error(
+          `failed to convert ingredient name=${ing.name}, unit=${ing.unit}, amount=${ing.amount} to targetUnit=lb\n`,
+          err
+        );
         return;
       }
     })

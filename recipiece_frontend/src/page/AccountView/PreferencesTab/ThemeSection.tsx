@@ -1,7 +1,7 @@
 import { FC, useCallback } from "react";
 import { H3, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../component";
-import { StorageKeys } from "../../../util";
 import { useLocalStorage } from "../../../hooks";
+import { StorageKeys } from "../../../util";
 
 export const ThemeSection: FC = () => {
   const [selectedTheme, setSelectedTheme, clearSelectedTheme] = useLocalStorage(StorageKeys.UI_THEME, "system");

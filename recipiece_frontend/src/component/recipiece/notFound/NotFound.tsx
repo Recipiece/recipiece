@@ -1,7 +1,7 @@
+import { DataTestId } from "@recipiece/constant";
 import { FC, ReactNode, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../shadcn";
-import { DataTestId } from "@recipiece/constant";
 
 export interface NotFoundProps {
   readonly message?: ReactNode;
@@ -26,7 +26,12 @@ export const NotFound: FC<NotFoundProps> = ({ message, backNav, dataTestId }) =>
         {messageToDisplay}
       </p>
       {backNav && (
-        <Button data-testid={DataTestId.NotFound.BUTTON_GO_BACK(dataTestId)} onClick={() => navigate(backNav)} type="button" variant="link">
+        <Button
+          data-testid={DataTestId.NotFound.BUTTON_GO_BACK(dataTestId)}
+          onClick={() => navigate(backNav)}
+          type="button"
+          variant="link"
+        >
           Go Back
         </Button>
       )}

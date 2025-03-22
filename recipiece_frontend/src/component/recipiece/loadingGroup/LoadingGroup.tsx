@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren, useMemo } from "react";
-import { LoadingSpinner, Skeleton } from "../../shadcn";
 import { cn } from "../../../util";
+import { LoadingSpinner, Skeleton } from "../../shadcn";
 
 export interface LoadingGroupProps extends PropsWithChildren {
   readonly isLoading: boolean;

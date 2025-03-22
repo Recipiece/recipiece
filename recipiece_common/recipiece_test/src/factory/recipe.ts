@@ -1,18 +1,6 @@
 import { faker } from "@faker-js/faker";
-import {
-  Prisma,
-  prisma,
-  PrismaTransaction,
-  Recipe,
-  RecipeIngredient,
-  RecipeShare,
-  RecipeStep,
-  RecipeTagAttachment,
-  User,
-  UserKitchenMembership,
-  UserTag,
-} from "@recipiece/database";
-import { generateUser, generateUserKitchenMembership, generateUserTag } from "./user";
+import { Prisma, prisma, PrismaTransaction, Recipe, RecipeIngredient, RecipeStep, RecipeTagAttachment, User, UserTag } from "@recipiece/database";
+import { generateUser, generateUserTag } from "./user";
 
 export const INGREDIENT_UNIT_CHOICES = ["cups", "c", "tablespoons", "tbs", "tbsp", "teaspoons", "tsp", "tsps", "grams", "g", "kilograms", "ounces", "pounds", "lbs"];
 
@@ -76,50 +64,6 @@ export const generateRecipeWithIngredientsAndSteps = async (recipe?: FullRecipeI
     steps: [...dbSteps],
     ingredients: [...dbIngredients],
   };
-};
-
-export const generateRecipeShare = async (recipeShare?: Partial<Omit<RecipeShare, "id">>, tx?: PrismaTransaction) => {
-  let recipe: Recipe | undefined = undefined;
-  if (recipeShare?.recipe_id) {
-    recipe =
-      (await (tx ?? prisma).recipe.findFirst({
-        where: {
-          id: recipeShare.recipe_id,
-        },
-      })) ?? undefined;
-  }
-
-  if (!recipe) {
-    recipe = await generateRecipe(undefined, tx);
-  }
-
-  let membership: UserKitchenMembership | undefined = undefined;
-  if (recipeShare?.user_kitchen_membership_id) {
-    membership =
-      (await (tx ?? prisma).userKitchenMembership.findFirst({
-        where: {
-          id: recipeShare.user_kitchen_membership_id,
-        },
-      })) ?? undefined;
-  }
-
-  if (!membership) {
-    membership = await generateUserKitchenMembership(
-      {
-        source_user_id: recipe.user_id,
-        status: "accepted",
-      },
-      tx
-    );
-  }
-
-  return (tx ?? prisma).recipeShare.create({
-    data: {
-      recipe_id: recipe.id,
-      user_kitchen_membership_id: membership.id,
-      created_at: recipeShare?.created_at ?? new Date(),
-    },
-  });
 };
 
 export const generateRecipeStep = async (recipeStep?: Partial<Omit<RecipeStep, "id" | "order">>, tx?: PrismaTransaction) => {

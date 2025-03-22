@@ -1,5 +1,14 @@
 import { FC } from "react";
-import { Card, CardContent, CardDescription, CardTitle, FormSelect, Label, PreferenceEntry, SelectItem } from "../../component";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+  FormSelect,
+  Label,
+  PreferenceEntry,
+  SelectItem,
+} from "../../component";
 
 export const GeneralConfigCard: FC = () => {
   return (

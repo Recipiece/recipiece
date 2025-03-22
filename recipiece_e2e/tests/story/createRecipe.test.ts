@@ -131,10 +131,10 @@ test.describe("Create Recipe Story", () => {
 
     if(isMobile) {
       const mobileFooter = page.getByTestId(DataTestId.MenuBar.FOOTER_MOBILE_MENU_BAR);
-      await mobileFooter.getByTestId(DataTestId.MenuBar.MENU_ITEM_HOME).click();
+      await mobileFooter.getByTestId(DataTestId.MenuBar.MENU_ITEM_HOME_DESKTOP).click();
     } else {
       const menuBar = page.getByTestId(DataTestId.MenuBar.NAV_DESKTOP_MENU_BAR);
-      await menuBar.getByTestId(DataTestId.MenuBar.MENU_ITEM_HOME).click();
+      await menuBar.getByTestId(DataTestId.MenuBar.MENU_ITEM_HOME_DESKTOP).click();
     }
     await page.waitForURL("**/dashboard");
     

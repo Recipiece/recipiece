@@ -1,3 +1,3 @@
-export * from "./queues";
-
 import "./workers";
+
+export * from "./queues";

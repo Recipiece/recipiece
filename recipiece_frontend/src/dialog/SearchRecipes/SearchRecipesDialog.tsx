@@ -1,12 +1,13 @@
 import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useListRecipesQuery } from "../../api";
-import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
+import { Button, Input, LoadingGroup, MembershipAvatar, Shelf, ShelfSpacer, Stack } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
+    useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -19,7 +20,10 @@ export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesQuery({ search: filters.search!, page_number: 0 }, { enabled: (filters.search || "").length >= 2 });
+  } = useListRecipesQuery(
+    { search: filters.search!, page_number: 0, page_size: 5 },
+    { enabled: (filters.search || "").length >= 2 }
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -42,7 +46,6 @@ export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose
       setIsDisabled(true);
       try {
         await Promise.resolve(onSubmit?.(recipe));
-      } catch {
       } finally {
         setIsDisabled(false);
       }
@@ -62,11 +65,14 @@ export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose
           {(recipeData?.data || []).map((recipe) => {
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>
-                {recipe.name}
+                <MembershipAvatar entity={recipe} membershipId={recipe.user_kitchen_membership_id} size="small" />
+                <span className="ml-2">{recipe.name}</span>
               </Button>
             );
           })}
-          {!!recipeData && recipeData.data.length === 0 && <p className="text-sm">No recipes found, try searching for something else.</p>}
+          {!!recipeData && recipeData.data.length === 0 && (
+            <p className="text-sm">No recipes found, try searching for something else.</p>
+          )}
         </LoadingGroup>
       </Stack>
       <ResponsiveFooter>

@@ -1,12 +1,15 @@
+import { DataTestId } from "@recipiece/constant";
 import { XIcon } from "lucide-react";
 import { FC, useCallback } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Badge } from "../../shadcn";
 import { FormInput } from "../Form";
 import { RecipeSearchForm } from "./RecipeSearchFormSchema";
-import { DataTestId } from "@recipiece/constant";
 
-export const IngredientSearch: FC<{ readonly disabled?: boolean; readonly dataTestId?: string }> = ({ disabled, dataTestId }) => {
+export const IngredientSearch: FC<{ readonly disabled?: boolean; readonly dataTestId?: string }> = ({
+  disabled,
+  dataTestId,
+}) => {
   const form = useFormContext<RecipeSearchForm>();
 
   const { fields, append, remove } = useFieldArray({

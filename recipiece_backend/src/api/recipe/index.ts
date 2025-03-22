@@ -1,8 +1,8 @@
 import {
   YCreateRecipeRequestSchema,
   YForkRecipeRequestSchema,
-  YListCookbooksResponseSchema,
   YListRecipesQuerySchema,
+  YListRecipesResponseSchema,
   YParseRecipeFromURLRequestSchema,
   YRecipeSchema,
   YUpdateRecipeRequestSchema,
@@ -14,7 +14,6 @@ import { forkRecipe } from "./forkRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
 import { parseRecipeFromUrl } from "./parseFromUrl";
-import { RECIPE_SHARE_ROUTES } from "./share";
 import { updateRecipe } from "./updateRecipe";
 
 export const RECIPE_ROUTES: Route[] = [
@@ -48,7 +47,7 @@ export const RECIPE_ROUTES: Route[] = [
     method: "GET",
     function: listRecipes,
     requestSchema: YListRecipesQuerySchema,
-    responseSchema: YListCookbooksResponseSchema,
+    responseSchema: YListRecipesResponseSchema,
   },
   {
     path: "/recipe/:id(\\d+)",
@@ -71,5 +70,4 @@ export const RECIPE_ROUTES: Route[] = [
     requestSchema: YForkRecipeRequestSchema,
     responseSchema: YRecipeSchema,
   },
-  ...RECIPE_SHARE_ROUTES,
 ];

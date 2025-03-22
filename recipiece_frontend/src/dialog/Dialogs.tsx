@@ -4,6 +4,7 @@ import { ConvertIngredientDialog } from "./ConvertIngredient";
 import { CreateCookbookDialog } from "./CreateCookbook";
 import { CreateShoppingListDialog } from "./CreateShoppingList";
 import { DeleteAccountDialog } from "./DeleteAccount";
+import { DeleteCookbookDialog } from "./DeleteCookbook";
 import { DeleteMealPlanDialog } from "./DeleteMealPlan";
 import { DeleteRecipeDialog } from "./DeleteRecipe";
 import { DeleteShoppingListDialog } from "./DeleteShoppingList";
@@ -95,5 +96,8 @@ export const Dialogs = {
   },
   deleteUserKitchenMembership: {
     component: DeleteUserKitchenMembershipDialog,
+  },
+  deleteCookbook: {
+    component: DeleteCookbookDialog,
   },
 };

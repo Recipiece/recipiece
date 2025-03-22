@@ -1,23 +1,18 @@
-import { PrismaTransaction, Redis, shoppingListSharesWithMemberships } from "@recipiece/database";
-import { RequestShoppingListSessionResponseSchema } from "@recipiece/types";
 import { randomUUID } from "crypto";
+import { PrismaTransaction, Redis } from "@recipiece/database";
+import { RequestShoppingListSessionResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { getShoppingListByIdQuery } from "./query";
 
-export const requestShoppingListSession = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<RequestShoppingListSessionResponseSchema> => {
+export const requestShoppingListSession = async (
+  req: AuthenticatedRequest,
+  tx: PrismaTransaction
+): ApiResponse<RequestShoppingListSessionResponseSchema> => {
   const user = req.user;
   const shoppingListId = +req.params.id;
 
-  const shoppingList = await tx.$kysely
-    .selectFrom("shopping_lists")
-    .selectAll("shopping_lists")
-    .where((eb) => {
-      return eb.and([
-        eb("shopping_lists.id", "=", shoppingListId),
-        eb.or([eb("shopping_lists.user_id", "=", user.id), eb.exists(shoppingListSharesWithMemberships(eb, user.id).select("shopping_list_shares.id").limit(1))]),
-      ]);
-    })
-    .executeTakeFirst();
+  const shoppingList = await getShoppingListByIdQuery(tx, user, shoppingListId).executeTakeFirst();
 
   if (!shoppingList) {
     return [
@@ -31,7 +26,14 @@ export const requestShoppingListSession = async (req: AuthenticatedRequest, tx: 
   const wsToken = randomUUID().toString();
   const redis = await Redis.getInstance();
 
-  await redis.hSet(`ws:${wsToken}`, ["purpose", "/shopping-list/modify", "entity_id", shoppingListId, "entity_type", "modifyShoppingListSession"]);
+  await redis.hSet(`ws:${wsToken}`, [
+    "purpose",
+    "/shopping-list/modify",
+    "entity_id",
+    shoppingListId,
+    "entity_type",
+    "modifyShoppingListSession",
+  ]);
   await redis.sAdd(`modifyShoppingListSession:${shoppingListId}`, wsToken);
 
   return [

@@ -1,8 +1,8 @@
+import { DataTestId } from "@recipiece/constant";
 import { FC, PropsWithChildren } from "react";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Switch } from "../../shadcn";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
-import { DataTestId } from "@recipiece/constant";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Switch } from "../../shadcn";
 
 export interface FormSwitchProps extends PropsWithChildren {
   readonly name: string;
@@ -13,7 +13,14 @@ export interface FormSwitchProps extends PropsWithChildren {
   readonly disabled?: boolean;
 }
 
-export const FormSwitch: FC<FormSwitchProps> = ({ name, instructions, label, className, disabled }) => {
+export const FormSwitch: FC<FormSwitchProps> = ({
+  name,
+  instructions,
+  label,
+  className,
+  disabled,
+  ...restInputProps
+}) => {
   const form = useFormContext();
 
   // @ts-expect-error data test id is not type on the props
@@ -24,13 +31,23 @@ export const FormSwitch: FC<FormSwitchProps> = ({ name, instructions, label, cla
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)} className={cn("flex flex-col gap-2", className)}>
+        <FormItem
+          data-testid={DataTestId.Form.CONTAINER(dataTestId)}
+          className={cn("flex flex-col gap-2 pt-1", className)}
+        >
           {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
           <FormControl>
-            <Switch data-testid={dataTestId} disabled={disabled} checked={field.value} onCheckedChange={field.onChange} />
+            <Switch
+              data-testid={dataTestId}
+              disabled={disabled}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
           </FormControl>
           <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
-          {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
+          {instructions && (
+            <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>
+          )}
         </FormItem>
       )}
     />

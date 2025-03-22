@@ -1,9 +1,12 @@
-import { NotificationSchema } from "@recipiece/types";
-import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { prisma, PrismaTransaction } from "@recipiece/database";
+import { NotificationSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getNotification = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<NotificationSchema> => {
+export const getNotification = async (
+  request: AuthenticatedRequest,
+  tx: PrismaTransaction
+): ApiResponse<NotificationSchema> => {
   const user = request.user;
   const notificationId = +request.params.id;
 

@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { Cookbook, prisma, PrismaTransaction, RecipeCookbookAttachment } from "@recipiece/database";
+import { cookbookNameGenerator } from "../generator";
 import { generateRecipe } from "./recipe";
 import { generateUser } from "./user";
-import { cookbookNameGenerator } from "../generator";
 
 export const generateRecipeCookbookAttachment = async (attachment?: Partial<RecipeCookbookAttachment>, tx?: PrismaTransaction) => {
   const recipeId = attachment?.recipe_id ?? (await generateRecipe(undefined, tx)).id;

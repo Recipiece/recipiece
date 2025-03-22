@@ -9,14 +9,16 @@ export interface DeleteMealPlanDialogProps extends BaseDialogProps<MealPlanSchem
 }
 
 export const DeleteMealPlanDialog: FC<DeleteMealPlanDialogProps> = ({ mealPlan, onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
+    useResponsiveDialogComponents();
 
   return (
     <ResponsiveContent className="p-6">
       <ResponsiveHeader>
         <ResponsiveTitle>Delete {mealPlan.name}?</ResponsiveTitle>
         <ResponsiveDescription>
-          Click the Delete Meal Plan button below to permanently delete <i>{mealPlan.name}</i>. This action is permanent and cannot be undone!
+          Click the Delete Meal Plan button below to permanently delete <i>{mealPlan.name}</i>. This action is permanent
+          and cannot be undone!
         </ResponsiveDescription>
       </ResponsiveHeader>
       <ResponsiveFooter className="flex-col-reverse">

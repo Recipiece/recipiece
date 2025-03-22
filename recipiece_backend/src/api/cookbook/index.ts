@@ -43,6 +43,7 @@ export const COOKBOOK_ROUTES: Route[] = [
     authentication: "access_token",
     method: "GET",
     function: getCookbook,
+    responseSchema: YCookbookSchema,
   },
   {
     path: "/cookbook/list",

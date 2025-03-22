@@ -34,7 +34,7 @@ export const YUserKitchenMembershipSchema = object({
     username: string().required(),
   }),
   status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED, UserKitchenInvitationStatus.PENDING]).required(),
-}).noUnknown();
+});
 
 export interface UserSchema extends InferType<typeof YUserSchema> {}
 
@@ -51,8 +51,8 @@ export type UserKitchenMembershipSchemaStatus = UserKitchenMembershipSchema["sta
  */
 export const YCreateUserRequestSchema = object({
   email: string().required(),
-  username: string().required().min(5),
-  password: string().required().min(8),
+  username: string().required().min(5).max(32),
+  password: string().required().min(8).max(128),
 }).noUnknown();
 
 export interface CreateUserRequestSchema extends InferType<typeof YCreateUserRequestSchema> {}
@@ -72,7 +72,7 @@ export interface CreateUserResponseSchema extends InferType<typeof YCreateUserRe
  */
 export const YUpdateUserRequestSchema = object({
   id: number().required(),
-  username: string().optional(),
+  username: string().optional().min(5).max(32),
   email: string().optional(),
   preferences: YUserPreferencesSchema.optional(),
 }).noUnknown();
@@ -117,7 +117,7 @@ export interface IssueForgotPasswordTokenRequestSchema extends InferType<typeof 
  * Reset password
  */
 export const YResetPasswordRequestSchema = object({
-  password: string().required(),
+  password: string().required().min(8).max(128),
   token: string().required(),
 }).noUnknown();
 
@@ -176,7 +176,7 @@ export interface CreatePushNotificationRequestSchema extends InferType<typeof YC
  * Change password
  */
 export const YChangePasswordRequestSchema = object({
-  new_password: string().required(),
+  new_password: string().required().min(8).max(128),
 }).noUnknown();
 
 export interface ChangePasswordRequestSchema extends InferType<typeof YChangePasswordRequestSchema> {}
@@ -185,7 +185,7 @@ export interface ChangePasswordRequestSchema extends InferType<typeof YChangePas
  * Invite user to kitchen
  */
 export const YCreateUserKitchenMembershipRequestSchema = object({
-  username: string().required().min(5),
+  username: string().required().min(5).max(32),
 }).noUnknown();
 
 export interface CreateUserKitchenMembershipRequestSchema extends InferType<typeof YCreateUserKitchenMembershipRequestSchema> {}
@@ -193,18 +193,12 @@ export interface CreateUserKitchenMembershipRequestSchema extends InferType<type
 /**
  * Set kitchen membership status
  */
-export const YSetUserKitchenMembershipStatusRequestSchema = object({
+export const YUpdateUserKitchenMembershipRequestSchema = object({
   id: number().required(),
-  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).required(),
+  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).notRequired(),
 }).noUnknown();
 
-export interface SetUserKitchenMembershipStatusRequestSchema extends InferType<typeof YSetUserKitchenMembershipStatusRequestSchema> {}
-
-export const YSetUserKitchenMembershipStatusResponseSchema = YUserKitchenMembershipSchema.shape({
-  status: string().oneOf([UserKitchenInvitationStatus.ACCEPTED, UserKitchenInvitationStatus.DENIED]).required(),
-});
-
-export interface SetUserKitchenMembershipStatusResponseSchema extends InferType<typeof YSetUserKitchenMembershipStatusResponseSchema> {}
+export interface UpdateUserKitchenMembershipRequestSchema extends InferType<typeof YUpdateUserKitchenMembershipRequestSchema> {}
 
 /**
  * List kitchen memberships
@@ -218,15 +212,15 @@ export const YListUserKitchenMembershipsQuerySchema = YListQuerySchema.shape({
       return val.split(",");
     }),
   entity_id: number().notRequired(),
-  entity: string().oneOf(["include", "exclude"]).notRequired(),
-  entity_type: string().oneOf(["shopping_list", "recipe", "meal_plan"]).notRequired(),
+  entity_filter: string().oneOf(["include", "exclude"]).notRequired(),
+  entity_type: string().oneOf(["shopping_list", "meal_plan"]).notRequired(),
 })
   .test("oneOfTargetingSelfOrFromSelf", "Must specify at least one of targeting_self or from_self", (ctx) => {
     return !!ctx.from_self || !!ctx.targeting_self;
   })
-  .test("entityHasProperContext", "Must specify entity_id, entity, and entity_type together", (ctx) => {
-    if (!!ctx.entity_id || !!ctx.entity || !!ctx.entity_type) {
-      return !!ctx.entity_id && !!ctx.entity && !!ctx.entity_type;
+  .test("entityHasProperContext", "Must specify entity_id, entity_filter, and entity_type together", (ctx) => {
+    if (!!ctx.entity_id || !!ctx.entity_filter || !!ctx.entity_type) {
+      return !!ctx.entity_id && !!ctx.entity_filter && !!ctx.entity_type;
     }
     return true;
   })
