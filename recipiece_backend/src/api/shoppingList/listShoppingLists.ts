@@ -1,5 +1,5 @@
 import { Constant } from "@recipiece/constant";
-import { KyselyCore, PrismaTransaction } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ListShoppingListsQuerySchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { AuthenticatedRequest } from "../../types";
@@ -32,7 +32,10 @@ export const listShoppingLists = async (
         .innerJoin("shopping_lists", "shopping_lists.id", "shopping_list_shares.shopping_list_id")
         .where((eb) => {
           return eb.and([
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+            eb.or([
+              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              eb("user_kitchen_memberships.source_user_id", "=", user.id),
+            ]),
             eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
           ]);
         })

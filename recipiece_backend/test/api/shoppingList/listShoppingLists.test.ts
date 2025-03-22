@@ -54,12 +54,12 @@ describe("List Shopping Lists", () => {
     expect(results.length).toEqual(5);
   });
 
-  it("should list shared shopping lists", async () => {
+  it.each([true, false])("should list shared shopping lists when user is source user is %o", async (isUserSourceUser) => {
     const otherUser = await generateUser();
     // allow otherUser to share a shopping list to user
     const membership = await generateUserKitchenMembership({
-      source_user_id: otherUser.id,
-      destination_user_id: user.id,
+      source_user_id: isUserSourceUser ? user.id : otherUser.id,
+      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
       status: "accepted",
     });
     const otherShoppingList = await generateShoppingList({ user_id: otherUser.id });
@@ -68,8 +68,13 @@ describe("List Shopping Lists", () => {
       user_kitchen_membership_id: membership.id,
     });
 
+    // make some noise
+    await generateShoppingList({ user_id: otherUser.id });
+    await generateShoppingList();
+
+    const shoppingLists = [];
     for (let i = 0; i < 10; i++) {
-      await generateShoppingList({ user_id: user.id });
+      shoppingLists.push(await generateShoppingList({ user_id: user.id }));
     }
 
     const response = await request(server)
@@ -84,6 +89,11 @@ describe("List Shopping Lists", () => {
     const responseShoppingLists: ShoppingListSchema[] = response.body.data;
 
     expect(responseShoppingLists.length).toBe(11);
+    const expectedIds = [...shoppingLists.map((sl) => sl.id), otherShoppingList.id];
+    const actualIds = responseShoppingLists.map((sl) => sl.id);
+    expectedIds.forEach((id) => {
+      expect(actualIds.includes(id)).toBeTruthy();
+    });
   });
 
   it("should not list shared shopping lists", async () => {

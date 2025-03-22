@@ -32,7 +32,10 @@ export const listMealPlans = async (
         .innerJoin("meal_plans", "meal_plans.id", "meal_plan_shares.meal_plan_id")
         .where((eb) => {
           return eb.and([
-            eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+            eb.or([
+              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              eb("user_kitchen_memberships.source_user_id", "=", user.id),
+            ]),
             eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
           ]);
         })
