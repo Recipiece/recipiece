@@ -215,7 +215,7 @@ describe("List User Kitchen Memberships", () => {
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData = (response.body as ListUserKitchenMembershipsResponseSchema).data;
     expect(responseData.length).toBe(1);
-    expect(responseData[0].id).toBe(thirdMembership.id);
+    expect(responseData[0].id).toBe(membership.id);
   });
 
   it("should include only a provided shared entity", async () => {
@@ -227,13 +227,15 @@ describe("List User Kitchen Memberships", () => {
     const shoppingList = await generateShoppingList({
       user_id: user.id,
     });
-    const thirdMembership = await generateUserKitchenMembership({
-      source_user_id: user.id,
-      status: "accepted",
-    });
     await generateShoppingListShare({
       shopping_list_id: shoppingList.id,
-      user_kitchen_membership_id: thirdMembership.id,
+      user_kitchen_membership_id: membership.id,
+    });
+
+    // make some noise!
+    await generateUserKitchenMembership({
+      source_user_id: user.id,
+      status: "accepted",
     });
 
     const response = await request(server)

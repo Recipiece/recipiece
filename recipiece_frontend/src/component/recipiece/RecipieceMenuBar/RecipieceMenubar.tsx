@@ -4,7 +4,6 @@ import { CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } f
 import { createContext, createRef, FC, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  useCreateCookbookMutation,
   useCreateMealPlanMutation,
   useCreateShoppingListMutation,
   useListMealPlansQuery,
@@ -12,12 +11,7 @@ import {
   useLogoutUserMutation,
 } from "../../../api";
 import { DialogContext } from "../../../context";
-import {
-  CreateCookbookForm,
-  CreateShoppingListForm,
-  MobileCreateMenuDialogOption,
-  ModifyMealPlanForm,
-} from "../../../dialog";
+import { CreateShoppingListForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
 import {
   Button,
   DropdownMenu,
@@ -83,7 +77,6 @@ export const RecipieceMenubar: FC = () => {
   });
 
   const { mutateAsync: createMealPlan } = useCreateMealPlanMutation();
-  const { mutateAsync: createCookbook } = useCreateCookbookMutation();
   const { mutateAsync: createShoppingList } = useCreateShoppingListMutation();
   const { mutateAsync: logoutUser } = useLogoutUserMutation();
 
@@ -96,30 +89,6 @@ export const RecipieceMenubar: FC = () => {
       navigate("/login");
     }
   }, [logoutUser, navigate]);
-
-  const onStartCreateCookbook = useCallback(() => {
-    pushDialog("createCookbook", {
-      onSubmit: async (data: CreateCookbookForm) => {
-        try {
-          const createdCookbook = await createCookbook({ ...data });
-          toast({
-            title: "Cookbook Created",
-            description: "Your cookbook has been successfully created!",
-          });
-          navigate(`/cookbook/${createdCookbook.id}`);
-        } catch {
-          toast({
-            title: "Could not Create Cookbook",
-            description: "This cookbook couldn't be created. Try again later.",
-            variant: "destructive",
-          });
-        } finally {
-          popDialog("createCookbook");
-        }
-      },
-      onClose: () => popDialog("createCookbook"),
-    });
-  }, [pushDialog, popDialog, createCookbook, toast, navigate]);
 
   const onStartCreateShoppingList = useCallback(() => {
     pushDialog("createShoppingList", {
@@ -179,9 +148,6 @@ export const RecipieceMenubar: FC = () => {
       onSubmit: (createType: MobileCreateMenuDialogOption) => {
         popDialog("mobileCreateMenu");
         switch (createType) {
-          case "cookbook":
-            onStartCreateCookbook();
-            break;
           case "recipe_from_url":
             navigate("/recipe/edit/new?source=url");
             break;
@@ -197,7 +163,7 @@ export const RecipieceMenubar: FC = () => {
         }
       },
     });
-  }, [pushDialog, popDialog, navigate, onStartCreateCookbook, onStartCreateMealPlan, onStartCreateShoppingList]);
+  }, [pushDialog, popDialog, navigate, onStartCreateMealPlan, onStartCreateShoppingList]);
 
   const onMobileViewShoppingLists = useCallback(() => {
     pushDialog("mobileShoppingLists", {
@@ -369,29 +335,21 @@ export const RecipieceMenubar: FC = () => {
       >
         <div className="flex h-full flex-row items-center justify-center">
           <Button
-            data-testid={DataTestId.MenuBar.MENU_ITEM_HOME_MOBILE}
-            onClick={() => navigate("/dashboard")}
-            variant="link"
-            className="grow text-white"
-          >
-            <Home />
-          </Button>
-
-          {/* <Button
-            data-testid={DataTestId.MenuBar.MENU_TRIGGER_COOKBOOK}
-            className="grow text-white"
-            onClick={onMobileViewCookbooks}
-          >
-            <Book />
-          </Button> */}
-
-          <Button
             data-testid={DataTestId.MenuBar.MENU_TRIGGER_CREATE}
             onClick={onCreatePressed}
             variant="link"
             className="grow text-white"
           >
             <CirclePlus />
+          </Button>
+
+          <Button
+            data-testid={DataTestId.MenuBar.MENU_ITEM_HOME_MOBILE}
+            onClick={() => navigate("/dashboard")}
+            variant="link"
+            className="grow text-white"
+          >
+            <Home />
           </Button>
 
           <Button

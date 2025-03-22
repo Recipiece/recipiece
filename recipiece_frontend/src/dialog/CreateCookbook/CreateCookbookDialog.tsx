@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DataTestId } from "@recipiece/constant";
 import { FC, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -40,7 +41,7 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
   };
 
   return (
-    <ResponsiveContent className="p-6">
+    <ResponsiveContent className="p-6" data-testid={DataTestId.Dialog.CreateCookbookDialog.DIALOG_WRAPPER}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onCreateCookbook)}>
           <ResponsiveHeader className="mb-4">
@@ -50,6 +51,7 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
 
           <Stack>
             <FormInput
+              data-testid={DataTestId.Dialog.CreateCookbookDialog.INPUT_COOKBOOK_NAME}
               disabled={isSubmitting}
               placeholder="What do you want to call your cookbook?"
               name="name"
@@ -57,6 +59,7 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
               label="Name"
             />
             <FormTextarea
+              data-testid={DataTestId.Dialog.CreateCookbookDialog.INPUT_COOKBOOK_DESCRIPTION}
               disabled={isSubmitting}
               placeholder="What is this cookbook all about?"
               name="description"
@@ -68,7 +71,9 @@ export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ 
             <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => popDialog("createCookbook")}>
               Cancel
             </Button>
-            <SubmitButton disabled={isSubmitting}>Create Cookbook</SubmitButton>
+            <SubmitButton data-testid={DataTestId.Dialog.CreateCookbookDialog.BUTTON_SUBMIT} disabled={isSubmitting}>
+              Create Cookbook
+            </SubmitButton>
           </ResponsiveFooter>
         </form>
       </Form>

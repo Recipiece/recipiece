@@ -1,5 +1,5 @@
 import { DataTestId } from "@recipiece/constant";
-import { BookPlus, Link, Pencil, ShoppingBasket, SquareKanban } from "lucide-react";
+import { Link, Pencil, ShoppingBasket, SquareKanban } from "lucide-react";
 import { FC } from "react";
 import { Button } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
@@ -33,14 +33,6 @@ export const MobileCreateMenuDialog: FC<BaseDialogProps<MobileCreateMenuDialogOp
         >
           <Pencil className="mr-2" />
           Recipe from Scratch
-        </Button>
-        <Button
-          data-testid={DataTestId.Dialog.MobileCreateMenuDialog.BUTTON_COOKBOOK}
-          onClick={() => onSubmit?.("cookbook")}
-          className="dark:text-white"
-        >
-          <BookPlus className="mr-2" />
-          Cookbook
         </Button>
         <Button
           data-testid={DataTestId.Dialog.MobileCreateMenuDialog.BUTTON_MEAL_PLAN}

@@ -77,6 +77,7 @@ export const DashboardSidebar: FC = () => {
           toast({
             title: "Cookbook Created",
             description: "Your cookbook has been created",
+            dataTestId: DataTestId.DashboardSidebar.TOAST_COOKBOOK_CREATED,
           });
           navigate(`/cookbook/${newCookbook.id}`);
         } catch {
@@ -84,6 +85,7 @@ export const DashboardSidebar: FC = () => {
             title: "Unable to Create Cookbook",
             description: "Your cookbook could not be created. Try again later.",
             variant: "destructive",
+            dataTestId: DataTestId.DashboardSidebar.TOAST_COOKBOOK_CREATED_FAILED,
           });
         } finally {
           popDialog("createCookbook");
@@ -150,7 +152,11 @@ export const DashboardSidebar: FC = () => {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton onClick={onCreateCookbook} disabled={isCreatingCookbook}>
+                  <SidebarMenuButton
+                    data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_CREATE_COOKBOOK}
+                    onClick={onCreateCookbook}
+                    disabled={isCreatingCookbook}
+                  >
                     <BookPlus /> New Cookbook
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -4,9 +4,9 @@ import { prisma } from "@recipiece/database";
 import { generateCookbook, generateRecipe, generateUserWithPassword } from "@recipiece/test";
 import { loginUser, logoutUser } from "../fixture/login.fixture";
 import { AuthenticatedNav } from "../fixture/pagenav.fixture";
-import { dismissDashboardSidebar } from "../fixture/util.fixture";
+import { dismissDashboardSidebar, summonDashboardSidebar } from "../fixture/util.fixture";
 
-test.describe("Invite User To Kitchen", () => {
+test.describe("Invite User To Kitchen Story", () => {
   /**
    * This story
    * 1. Logs into recipiece
@@ -71,9 +71,7 @@ test.describe("Invite User To Kitchen", () => {
       await expect(page.getByTestId(DataTestId.RecipeCard.CARD_TITLE(userRecipe.id))).toBeVisible();
       await expect(page.getByTestId(DataTestId.RecipeCard.CARD_TITLE(otherUserRecipe.id))).not.toBeVisible();
 
-      if (isMobile) {
-        await page.getByTestId(DataTestId.DashboardSidebar.SIDEBAR_TRIGGER_MOBILE).click();
-      }
+      await summonDashboardSidebar(page, isMobile);
       await expect(page.getByTestId(DataTestId.DashboardSidebar.SIDEBAR_BUTTON_COOKBOOK(userCookbook.id))).toBeVisible();
       await expect(page.getByTestId(DataTestId.DashboardSidebar.SIDEBAR_BUTTON_COOKBOOK(otherUserCookbook.id))).not.toBeVisible();
       await dismissDashboardSidebar(page, isMobile);
