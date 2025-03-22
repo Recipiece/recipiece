@@ -78,6 +78,13 @@ export const YParseRecipeFromURLRequestSchema = object({
 
 export interface ParseRecipeFromURLRequestSchema extends InferType<typeof YParseRecipeFromURLRequestSchema> {}
 
+export const YParseRecipeFromURLResponseSchema = YRecipeSchema.omit(["id", "user_id", "tags", "user_kitchen_membership_id", "created_at"]).shape({
+  steps: array(YRecipeStepSchema.omit(["id", "recipe_id"])),
+  ingredients: array(YRecipeIngredientSchema.omit(["id", "recipe_id"])),
+});
+
+export interface ParseRecipeFromURLResponseSchema extends InferType<typeof YParseRecipeFromURLResponseSchema> {}
+
 export interface ParsedFromURLRecipe {
   readonly author?: string;
   readonly description?: string;

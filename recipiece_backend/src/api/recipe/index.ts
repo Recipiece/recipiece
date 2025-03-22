@@ -4,6 +4,7 @@ import {
   YListRecipesQuerySchema,
   YListRecipesResponseSchema,
   YParseRecipeFromURLRequestSchema,
+  YParseRecipeFromURLResponseSchema,
   YRecipeSchema,
   YUpdateRecipeRequestSchema,
 } from "@recipiece/types";
@@ -39,7 +40,7 @@ export const RECIPE_ROUTES: Route[] = [
     method: "POST",
     function: parseRecipeFromUrl,
     requestSchema: YParseRecipeFromURLRequestSchema,
-    responseSchema: YRecipeSchema,
+    responseSchema: YParseRecipeFromURLResponseSchema,
   },
   {
     path: "/recipe/list",
