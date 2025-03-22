@@ -1,5 +1,10 @@
 import { PrismaTransaction } from "@recipiece/database";
-import { ParsedFromURLRecipe, ParseRecipeFromURLRequestSchema, RecipeSchema } from "@recipiece/types";
+import {
+  ParsedFromURLRecipe,
+  ParseRecipeFromURLRequestSchema,
+  ParseRecipeFromURLResponseSchema,
+  RecipeSchema,
+} from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UnprocessableEntityError } from "../../util/error";
@@ -7,7 +12,7 @@ import { UnprocessableEntityError } from "../../util/error";
 export const parseRecipeFromUrl = async (
   req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>,
   _: PrismaTransaction
-): ApiResponse<RecipeSchema> => {
+): ApiResponse<ParseRecipeFromURLResponseSchema> => {
   const recipeBody = req.body;
 
   try {
@@ -41,8 +46,8 @@ export const parseRecipeFromUrl = async (
 
       return [
         StatusCodes.OK,
-        <RecipeSchema>{
-          name: responseBody.title,
+        {
+          name: responseBody.title!,
           description: responseBody.description,
           ingredients: [...ingredients],
           steps: [...steps],

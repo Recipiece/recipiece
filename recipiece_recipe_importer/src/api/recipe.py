@@ -17,8 +17,8 @@ def parse_freetext_ingredients(ingredients: List[str]) -> List[ParsedIngredient]
         try:
             parsed_ingredient = parse_ingredient(ingredient) 
 
-            if parsed_ingredient and parsed_ingredient.name:
-                ing_name = parsed_ingredient.name.text
+            if parsed_ingredient and parsed_ingredient.name and len(parsed_ingredient.name) > 0:
+                ing_name = parsed_ingredient.name[0].text
                 if parsed_ingredient.preparation and parsed_ingredient.preparation.text:
                     ing_name += f", {parsed_ingredient.preparation.text}"
 

@@ -21,7 +21,18 @@
     "lint:conversion": "yarn --cwd ./recipiece_common/recipiece_conversion lint",
     "lint:test": "yarn --cwd ./recipiece_common/recipiece_test lint",
     "lint:constant": "yarn --cwd ./recipiece_common/recipiece_constant lint",
-    "lint": "yarn lint:backend && yarn lint:frontend && yarn lint:types && yarn lint:database && yarn lint:conversion && yarn lint:test"
+    "lint": "yarn lint:backend && yarn lint:frontend && yarn lint:types && yarn lint:database && yarn lint:conversion && yarn lint:test",
+    "install:root": "yarn install",
+    "install:backend": "yarn --cwd ./recipiece_backend install",
+    "install:constants": "yarn --cwd ./recipiece_common/recipiece_constant install",
+    "install:conversion": "yarn --cwd ./recipiece_common/recipiece_conversion install",
+    "install:database": "yarn --cwd ./recipiece_common/recipiece_database install",
+    "install:test": "yarn --cwd ./recipiece_common/recipiece_test install",
+    "install:types": "yarn --cwd ./recipiece_common/recipiece_types install",
+    "install:e2e": "yarn --cwd ./recipiece_e2e install",
+    "install:frontend": "yarn --cwd ./recipiece_frontend install",
+    "install:recipe_importer": "python3 -m venv .venv && PATH=\"./.venv/bin:$PATH\" pip install -r ./recipiece_recipe_importer/requirements.txt",
+    "install:fresh": "yarn install:root && yarn install:backend && yarn install:constants && yarn install:conversion && yarn install:database && yarn install:test && yarn install:types && yarn install:e2e && yarn install:frontend && yarn install:recipe_importer"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
