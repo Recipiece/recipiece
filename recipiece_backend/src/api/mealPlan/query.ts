@@ -13,12 +13,14 @@ export const getMealPlanByIdQuery = (tx: PrismaTransaction, user: User, mealPlan
         )
         .where((_eb) => {
           return _eb.and([
-            _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+            _eb.or([
+              _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              _eb("user_kitchen_memberships.source_user_id", "=", user.id),
+            ]),
             _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
           ]);
         })
         .whereRef("meal_plan_shares.meal_plan_id", "=", "meal_plans.id")
-        .whereRef("user_kitchen_memberships.source_user_id", "=", "meal_plans.user_id")
         .limit(1)
     );
   };

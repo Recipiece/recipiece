@@ -61,46 +61,49 @@ describe("List Meal Plan", () => {
   });
 
   describe("Shared Meal Plan", () => {
-    it.each([true, false])("should list meal plans shared to you when user is source user is %o", async (isUserSourceUser) => {
-      const otherUser = await generateUser();
-      const allMembership = await generateUserKitchenMembership({
-        source_user_id: isUserSourceUser ? user.id : otherUser.id,
-        destination_user_id: isUserSourceUser ? otherUser.id : user.id,
-        status: "accepted",
-      });
-      const otherMealPlan = await generateMealPlan({ user_id: otherUser.id });
-      await generateMealPlanShare({
-        user_kitchen_membership_id: allMembership.id,
-        meal_plan_id: otherMealPlan.id,
-      });
+    it.each([true, false])(
+      "should list meal plans shared to you when user is source user is %o",
+      async (isUserSourceUser) => {
+        const otherUser = await generateUser();
+        const allMembership = await generateUserKitchenMembership({
+          source_user_id: isUserSourceUser ? user.id : otherUser.id,
+          destination_user_id: isUserSourceUser ? otherUser.id : user.id,
+          status: "accepted",
+        });
+        const otherMealPlan = await generateMealPlan({ user_id: otherUser.id });
+        await generateMealPlanShare({
+          user_kitchen_membership_id: allMembership.id,
+          meal_plan_id: otherMealPlan.id,
+        });
 
-      // make some noise
-      await generateMealPlan({ user_id: otherUser.id });
-      await generateMealPlan();
+        // make some noise
+        await generateMealPlan({ user_id: otherUser.id });
+        await generateMealPlan();
 
-      const userMealPlans = [];
-      for (let i = 0; i < 10; i++) {
-        userMealPlans.push(await generateMealPlan({ user_id: user.id }));
+        const userMealPlans = [];
+        for (let i = 0; i < 10; i++) {
+          userMealPlans.push(await generateMealPlan({ user_id: user.id }));
+        }
+
+        const response = await request(server)
+          .get("/meal-plan/list")
+          .query(<ListMealPlansQuerySchema>{
+            page_number: 0,
+            shared_meal_plans_filter: "include",
+          })
+          .set("Authorization", `Bearer ${bearerToken}`)
+          .send();
+
+        expect(response.statusCode).toBe(StatusCodes.OK);
+        const responseData: ListMealPlansResponseSchema = response.body;
+
+        expect(responseData.data.length).toBe(11);
+        const expectedIds = [...userMealPlans, otherMealPlan].map((mp) => mp.id);
+        responseData.data.forEach((mp) => {
+          expect(expectedIds.includes(mp.id)).toBeTruthy();
+        });
       }
-
-      const response = await request(server)
-        .get("/meal-plan/list")
-        .query(<ListMealPlansQuerySchema>{
-          page_number: 0,
-          shared_meal_plans_filter: "include",
-        })
-        .set("Authorization", `Bearer ${bearerToken}`)
-        .send();
-
-      expect(response.statusCode).toBe(StatusCodes.OK);
-      const responseData: ListMealPlansResponseSchema = response.body;
-
-      expect(responseData.data.length).toBe(11);
-      const expectedIds = [...userMealPlans, otherMealPlan].map((mp) => mp.id);
-      responseData.data.forEach((mp) => {
-        expect(expectedIds.includes(mp.id)).toBeTruthy();
-      });
-    });
+    );
 
     it("should not list meal plans shared to you", async () => {
       const otherUserAll = await generateUser();
