@@ -54,37 +54,50 @@ describe("List Shopping Lists", () => {
     expect(results.length).toEqual(5);
   });
 
-  it("should list shared shopping lists", async () => {
-    const otherUser = await generateUser();
-    // allow otherUser to share a shopping list to user
-    const membership = await generateUserKitchenMembership({
-      source_user_id: otherUser.id,
-      destination_user_id: user.id,
-      status: "accepted",
-    });
-    const otherShoppingList = await generateShoppingList({ user_id: otherUser.id });
-    await generateShoppingListShare({
-      shopping_list_id: otherShoppingList.id,
-      user_kitchen_membership_id: membership.id,
-    });
+  it.each([true, false])(
+    "should list shared shopping lists when user is source user is %o",
+    async (isUserSourceUser) => {
+      const otherUser = await generateUser();
+      // allow otherUser to share a shopping list to user
+      const membership = await generateUserKitchenMembership({
+        source_user_id: isUserSourceUser ? user.id : otherUser.id,
+        destination_user_id: isUserSourceUser ? otherUser.id : user.id,
+        status: "accepted",
+      });
+      const otherShoppingList = await generateShoppingList({ user_id: otherUser.id });
+      await generateShoppingListShare({
+        shopping_list_id: otherShoppingList.id,
+        user_kitchen_membership_id: membership.id,
+      });
 
-    for (let i = 0; i < 10; i++) {
-      await generateShoppingList({ user_id: user.id });
+      // make some noise
+      await generateShoppingList({ user_id: otherUser.id });
+      await generateShoppingList();
+
+      const shoppingLists = [];
+      for (let i = 0; i < 10; i++) {
+        shoppingLists.push(await generateShoppingList({ user_id: user.id }));
+      }
+
+      const response = await request(server)
+        .get("/shopping-list/list")
+        .query(<ListShoppingListsQuerySchema>{
+          page_number: 0,
+        })
+        .set("Content-Type", "application/json")
+        .set("Authorization", `Bearer ${bearerToken}`);
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseShoppingLists: ShoppingListSchema[] = response.body.data;
+
+      expect(responseShoppingLists.length).toBe(11);
+      const expectedIds = [...shoppingLists.map((sl) => sl.id), otherShoppingList.id];
+      const actualIds = responseShoppingLists.map((sl) => sl.id);
+      expectedIds.forEach((id) => {
+        expect(actualIds.includes(id)).toBeTruthy();
+      });
     }
-
-    const response = await request(server)
-      .get("/shopping-list/list")
-      .query(<ListShoppingListsQuerySchema>{
-        page_number: 0,
-      })
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseShoppingLists: ShoppingListSchema[] = response.body.data;
-
-    expect(responseShoppingLists.length).toBe(11);
-  });
+  );
 
   it("should not list shared shopping lists", async () => {
     const otherUser = await generateUser();

@@ -1,4 +1,4 @@
-import { User } from "@recipiece/database";
+import { User, UserKitchenMembershipStatus } from "@recipiece/database";
 import { generateShoppingList, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
 import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
@@ -39,60 +39,54 @@ describe("Get Shopping List", () => {
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 
-  it("should get a shared shopping list", async () => {
-    const othersShoppingList = await generateShoppingList();
-    const membership = await generateUserKitchenMembership({
-      source_user_id: othersShoppingList.user_id,
-      destination_user_id: user.id,
-      status: "accepted",
-    });
-    const share = await generateShoppingListShare({
-      shopping_list_id: othersShoppingList.id,
-      user_kitchen_membership_id: membership.id,
-    });
+  it.each([true, false])(
+    "should get a shared shopping list when user is source user is %o",
+    async (isUserSourceUser) => {
+      const othersShoppingList = await generateShoppingList();
+      const membership = await generateUserKitchenMembership({
+        source_user_id: isUserSourceUser ? user.id : othersShoppingList.user_id,
+        destination_user_id: isUserSourceUser ? othersShoppingList.user_id : user.id,
+        status: "accepted",
+      });
+      const share = await generateShoppingListShare({
+        shopping_list_id: othersShoppingList.id,
+        user_kitchen_membership_id: membership.id,
+      });
 
-    // make a membership and share going the other way to ensure we dont pick up stray records
-    const mirroredMembership = await generateUserKitchenMembership({
-      destination_user_id: othersShoppingList.user_id,
-      source_user_id: user.id,
-      status: "accepted",
-    });
-    const usersShoppingList = await generateShoppingList({ user_id: user.id });
-    const usersShoppingListShare = await generateShoppingListShare({
-      user_kitchen_membership_id: mirroredMembership.id,
-      shopping_list_id: usersShoppingList.id,
-    });
+      const response = await request(server)
+        .get(`/shopping-list/${othersShoppingList.id}`)
+        .set("Authorization", `Bearer ${bearerToken}`);
 
-    const response = await request(server)
-      .get(`/shopping-list/${othersShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      const responseData: ShoppingListSchema = response.body;
 
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const responseData: ShoppingListSchema = response.body;
+      expect(responseData.shares?.length).toBe(1);
+      expect(responseData.shares![0].id).toBe(share.id);
+      expect(responseData.shares![0].shopping_list_id).toBe(othersShoppingList.id);
+    }
+  );
 
-    expect(responseData.shares?.length).toBe(1);
-    expect(responseData.shares![0].id).toBe(share.id);
-    expect(responseData.shares![0].shopping_list_id).toBe(othersShoppingList.id);
-  });
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
+    "should not get a shared shopping list where the membership has a status of %o",
+    async (status) => {
+      const otherShoppingList = await generateShoppingList();
 
-  it("should not get a shared shopping list where the membership is not accepted", async () => {
-    const otherShoppingList = await generateShoppingList();
+      const membership = await generateUserKitchenMembership({
+        source_user_id: otherShoppingList.user_id,
+        destination_user_id: user.id,
+        status: status,
+      });
 
-    const membership = await generateUserKitchenMembership({
-      source_user_id: otherShoppingList.user_id,
-      destination_user_id: user.id,
-      status: "denied",
-    });
+      const share = await generateShoppingListShare({
+        shopping_list_id: otherShoppingList.id,
+        user_kitchen_membership_id: membership.id,
+      });
 
-    const share = await generateShoppingListShare({
-      shopping_list_id: otherShoppingList.id,
-      user_kitchen_membership_id: membership.id,
-    });
+      const response = await request(server)
+        .get(`/shopping-list/${otherShoppingList.id}`)
+        .set("Authorization", `Bearer ${bearerToken}`);
 
-    const response = await request(server)
-      .get(`/shopping-list/${otherShoppingList.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
-
-    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-  });
+      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+    }
+  );
 });

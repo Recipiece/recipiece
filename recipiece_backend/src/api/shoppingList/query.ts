@@ -61,12 +61,14 @@ export const getShoppingListByIdQuery = (tx: PrismaTransaction, user: User, shop
         )
         .where((_eb) => {
           return _eb.and([
-            _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+            _eb.or([
+              _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
+              _eb("user_kitchen_memberships.source_user_id", "=", user.id),
+            ]),
             _eb(_eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
           ]);
         })
         .whereRef("shopping_list_shares.shopping_list_id", "=", "shopping_lists.id")
-        .whereRef("user_kitchen_memberships.source_user_id", "=", "shopping_lists.user_id")
         .limit(1)
     );
   };
