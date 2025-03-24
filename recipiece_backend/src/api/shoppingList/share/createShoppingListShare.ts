@@ -8,10 +8,7 @@ import { sendShoppingListSharedPushNotification } from "../../../util/pushNotifi
 /**
  * Allow a user to share a shopping list they own with another user.
  */
-export const createShoppingListShare = async (
-  request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<ShoppingListShareSchema> => {
+export const createShoppingListShare = async (request: AuthenticatedRequest<CreateShoppingListShareRequestSchema>, tx: PrismaTransaction): ApiResponse<ShoppingListShareSchema> => {
   const { shopping_list_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 
@@ -70,11 +67,7 @@ export const createShoppingListShare = async (
     });
     if (subscriptions.length > 0) {
       subscriptions.forEach(async (sub) => {
-        await sendShoppingListSharedPushNotification(
-          sub,
-          membership.source_user_id === user.id ? membership.destination_user : membership.source_user,
-          shoppingList
-        );
+        await sendShoppingListSharedPushNotification(sub, membership.source_user_id === user.id ? membership.destination_user : membership.source_user, shoppingList);
       });
     }
 

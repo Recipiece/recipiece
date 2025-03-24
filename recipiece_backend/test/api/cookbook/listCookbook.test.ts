@@ -174,35 +174,32 @@ describe("List Cookbooks", () => {
     expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
   });
 
-  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
-    "should not list cookbooks belonging membership with status %o",
-    async (membershipStatus) => {
-      const otherUserAll = await generateUser();
-      await generateUserKitchenMembership({
-        source_user_id: otherUserAll.id,
-        destination_user_id: user.id,
-        status: membershipStatus,
-      });
-      await generateCookbook({ user_id: otherUserAll.id });
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])("should not list cookbooks belonging membership with status %o", async (membershipStatus) => {
+    const otherUserAll = await generateUser();
+    await generateUserKitchenMembership({
+      source_user_id: otherUserAll.id,
+      destination_user_id: user.id,
+      status: membershipStatus,
+    });
+    await generateCookbook({ user_id: otherUserAll.id });
 
-      const userCookbook = await generateCookbook({ user_id: user.id });
+    const userCookbook = await generateCookbook({ user_id: user.id });
 
-      const response = await request(server)
-        .get("/cookbook/list")
-        .query(<ListCookbooksQuerySchema>{
-          page_number: 0,
-          shared_cookbooks_filter: "exclude",
-        })
-        .set("Content-Type", "application/json")
-        .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server)
+      .get("/cookbook/list")
+      .query(<ListCookbooksQuerySchema>{
+        page_number: 0,
+        shared_cookbooks_filter: "exclude",
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
 
-      expect(response.statusCode).toBe(StatusCodes.OK);
-      const responseData: ListCookbooksResponseSchema = response.body;
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListCookbooksResponseSchema = response.body;
 
-      expect(responseData.data.length).toBe(1);
-      expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
-    }
-  );
+    expect(responseData.data.length).toBe(1);
+    expect(responseData.data.find((c) => c.id === userCookbook.id)).toBeTruthy();
+  });
 
   it("should not list cookbooks for a recipe where the cookbook owner does not have access to the recipe", async () => {
     const membership = await generateUserKitchenMembership({

@@ -23,7 +23,7 @@ test("Forgot Password Story", async ( {page}) => {
   await expect(page).toHaveURL("http://127.0.0.1:3001/forgot-password");
   await page.getByTestId(DataTestId.ForgotPasswordPage.INPUT_EMAIL).fill(user.email);
   await page.getByTestId(DataTestId.ForgotPasswordPage.BUTTON_FORGOT_PASSWORD).click();
-  await page.waitForLoadState("networkidle");
+  await expect(page.getByTestId(DataTestId.ForgotPasswordPage.PARAGRAPH_SENT)).toBeVisible();
 
   const createdToken = await prisma.userValidationToken.findFirst({
     where: {

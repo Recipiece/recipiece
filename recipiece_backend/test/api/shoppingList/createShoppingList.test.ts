@@ -15,11 +15,7 @@ describe("Create Shopping List", () => {
       name: "My Test List",
     };
 
-    const response = await request(server)
-      .post("/shopping-list")
-      .send(expectedBody)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).post("/shopping-list").send(expectedBody).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.CREATED);
     const responseBody = response.body;

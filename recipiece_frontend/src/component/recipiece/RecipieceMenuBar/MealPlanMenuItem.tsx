@@ -3,10 +3,7 @@ import { ComponentProps, FC } from "react";
 import { MenubarItem } from "../../shadcn";
 import { MembershipAvatar } from "../MembershipAvatar";
 
-export const MealPlanMenuItem: FC<{ readonly mealPlan: MealPlanSchema } & ComponentProps<typeof MenubarItem>> = ({
-  mealPlan,
-  ...restProps
-}) => {
+export const MealPlanMenuItem: FC<{ readonly mealPlan: MealPlanSchema } & ComponentProps<typeof MenubarItem>> = ({ mealPlan, ...restProps }) => {
   const membershipId = mealPlan.shares?.[0]?.user_kitchen_membership_id;
 
   return (

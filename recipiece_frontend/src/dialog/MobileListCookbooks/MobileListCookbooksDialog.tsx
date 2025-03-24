@@ -9,10 +9,7 @@ export interface MobileListCookbooksDialogProps extends BaseDialogProps<Cookbook
   readonly excludeContainingRecipeId?: number;
 }
 
-export const MobileListCookbooksDialog: FC<MobileListCookbooksDialogProps> = ({
-  onSubmit,
-  excludeContainingRecipeId,
-}) => {
+export const MobileListCookbooksDialog: FC<MobileListCookbooksDialogProps> = ({ onSubmit, excludeContainingRecipeId }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveTitle } = useResponsiveDialogComponents();
 
   const queryFilters: ListCookbooksQuerySchema = useMemo(() => {

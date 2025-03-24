@@ -2,16 +2,7 @@ import { DataTestId } from "@recipiece/constant";
 import { FC, ReactElement, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Textarea,
-  TextareaProps,
-} from "../../shadcn";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Textarea, TextareaProps } from "../../shadcn";
 
 export interface FormTextareaProps extends TextareaProps {
   readonly name: string;
@@ -43,9 +34,7 @@ export const FormTextarea: FC<FormTextareaProps> = ({ name, instructions, label,
             <FormControl>
               <Textarea {...restProps} {...field} />
             </FormControl>
-            {instructions && (
-              <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>
-            )}
+            {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
             <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
           </FormItem>
         );

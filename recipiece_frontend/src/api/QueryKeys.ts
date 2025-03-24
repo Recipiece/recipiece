@@ -7,11 +7,7 @@ export function oldDataUpdater<DataArrayType extends { id: number }>(updatedItem
   return (oldData: { data: DataArrayType[] } | undefined) => {
     if (oldData) {
       const indexOfUpdatedRecord = oldData.data.findIndex((r) => r.id === updatedItem.id);
-      const newData = [
-        ...oldData.data.splice(0, indexOfUpdatedRecord),
-        { ...updatedItem },
-        ...oldData.data.splice(indexOfUpdatedRecord + 1),
-      ];
+      const newData = [...oldData.data.splice(0, indexOfUpdatedRecord), { ...updatedItem }, ...oldData.data.splice(indexOfUpdatedRecord + 1)];
       return {
         ...oldData,
         data: [...newData],

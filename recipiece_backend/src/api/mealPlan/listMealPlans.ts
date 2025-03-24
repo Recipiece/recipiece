@@ -1,14 +1,11 @@
 import { Constant } from "@recipiece/constant";
-import { KyselyCore, PrismaTransaction } from "@recipiece/database";
+import { PrismaTransaction } from "@recipiece/database";
 import { ListMealPlansQuerySchema, ListMealPlansResponseSchema, MealPlanSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { mealPlanSharesSubquery } from "./query";
 
-export const listMealPlans = async (
-  request: AuthenticatedRequest<any, ListMealPlansQuerySchema>,
-  tx: PrismaTransaction
-): ApiResponse<ListMealPlansResponseSchema> => {
+export const listMealPlans = async (request: AuthenticatedRequest<any, ListMealPlansQuerySchema>, tx: PrismaTransaction): ApiResponse<ListMealPlansResponseSchema> => {
   const user = request.user;
   const { page_number, page_size, shared_meal_plans_filter = "include" } = request.query;
   const pageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
@@ -24,18 +21,11 @@ export const listMealPlans = async (
     .with("selective_grant_shared_meal_plans", (db) => {
       return db
         .selectFrom("meal_plan_shares")
-        .innerJoin(
-          "user_kitchen_memberships",
-          "user_kitchen_memberships.id",
-          "meal_plan_shares.user_kitchen_membership_id"
-        )
+        .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "meal_plan_shares.user_kitchen_membership_id")
         .innerJoin("meal_plans", "meal_plans.id", "meal_plan_shares.meal_plan_id")
         .where((eb) => {
           return eb.and([
-            eb.or([
-              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              eb("user_kitchen_memberships.source_user_id", "=", user.id),
-            ]),
+            eb.or([eb("user_kitchen_memberships.destination_user_id", "=", user.id), eb("user_kitchen_memberships.source_user_id", "=", user.id)]),
             eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted"),
           ]);
         })

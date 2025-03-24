@@ -16,10 +16,7 @@ describe("Create Meal Plan", () => {
       name: "Test Meal Plan",
     };
 
-    const response = await request(server)
-      .post("/meal-plan")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send(expectedBody);
+    const response = await request(server).post("/meal-plan").set("Authorization", `Bearer ${bearerToken}`).send(expectedBody);
 
     expect(response.statusCode).toBe(StatusCodes.CREATED);
 

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useEventCallback } from "./useEventCallback";
 import { useEventListener } from "./useEventListener";
 
@@ -18,11 +18,7 @@ type UseLocalStorageOptions<T> = {
 
 const IS_SERVER = typeof window === "undefined";
 
-export function useLocalStorage<T>(
-  key: string,
-  initialValue: T | (() => T),
-  options: UseLocalStorageOptions<T> = {}
-): [T, Dispatch<SetStateAction<T>>, () => void] {
+export function useLocalStorage<T>(key: string, initialValue: T | (() => T), options: UseLocalStorageOptions<T> = {}): [T, Dispatch<SetStateAction<T>>, () => void] {
   const { initializeWithValue = true } = options;
 
   const serializer = useCallback<(value: T) => string>(

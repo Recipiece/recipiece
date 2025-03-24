@@ -1,7 +1,7 @@
-import path from "path";
-import nodeExternals from "webpack-node-externals";
 import CopyPlugin from "copy-webpack-plugin";
+import path from "path";
 import { Configuration } from "webpack";
+import nodeExternals from "webpack-node-externals";
 
 const isProduction = process.env.NODE_ENV === "production";
 const arch = process.env.TARGET_ARCH ?? "osx";

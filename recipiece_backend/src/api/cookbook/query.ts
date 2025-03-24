@@ -7,14 +7,8 @@ export const getCookbookByIdQuery = (tx: PrismaTransaction, user: User, cookbook
         .selectFrom("user_kitchen_memberships")
         .where((_eb) => {
           return _eb.or([
-            _eb.and([
-              _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("cookbooks.user_id")),
-            ]),
-            _eb.and([
-              _eb("user_kitchen_memberships.source_user_id", "=", user.id),
-              _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("cookbooks.user_id")),
-            ]),
+            _eb.and([_eb("user_kitchen_memberships.destination_user_id", "=", user.id), _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("cookbooks.user_id"))]),
+            _eb.and([_eb("user_kitchen_memberships.source_user_id", "=", user.id), _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("cookbooks.user_id"))]),
           ]);
         })
         .where((_eb) => {
@@ -38,14 +32,8 @@ export const getCookbookByIdQuery = (tx: PrismaTransaction, user: User, cookbook
             .select("user_kitchen_memberships.id")
             .where((_eb) => {
               return _eb.or([
-                _eb.and([
-                  _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-                  _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("cookbooks.user_id")),
-                ]),
-                _eb.and([
-                  _eb("user_kitchen_memberships.source_user_id", "=", user.id),
-                  _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("cookbooks.user_id")),
-                ]),
+                _eb.and([_eb("user_kitchen_memberships.destination_user_id", "=", user.id), _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("cookbooks.user_id"))]),
+                _eb.and([_eb("user_kitchen_memberships.source_user_id", "=", user.id), _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("cookbooks.user_id"))]),
               ]);
             })
             .where((_eb) => {

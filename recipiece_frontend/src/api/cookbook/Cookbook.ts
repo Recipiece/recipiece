@@ -31,10 +31,7 @@ export const useGetCookbookByIdQuery = (cookbookId: number, args?: QueryArgs<Coo
   });
 };
 
-export const useListCookbooksQuery = (
-  filters: ListCookbooksQuerySchema,
-  args?: QueryArgs<ListCookbooksResponseSchema>
-) => {
+export const useListCookbooksQuery = (filters: ListCookbooksQuerySchema, args?: QueryArgs<ListCookbooksResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
   const searchParams = filtersToSearchParams(filters);
@@ -145,9 +142,7 @@ export const useDeleteCookbookMutation = (args?: MutationArgs<unknown, CookbookS
   });
 };
 
-export const useAttachRecipeToCookbookMutation = (
-  args?: MutationArgs<void, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>
-) => {
+export const useAttachRecipeToCookbookMutation = (args?: MutationArgs<void, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
@@ -218,9 +213,7 @@ export const useAttachRecipeToCookbookMutation = (
   });
 };
 
-export const useRemoveRecipeFromCookbookMutation = (
-  args?: MutationArgs<unknown, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>
-) => {
+export const useRemoveRecipeFromCookbookMutation = (args?: MutationArgs<unknown, { readonly recipe: RecipeSchema; readonly cookbook: CookbookSchema }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 

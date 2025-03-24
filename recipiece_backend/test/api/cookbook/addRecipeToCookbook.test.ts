@@ -1,4 +1,3 @@
-import { access } from "fs";
 import { prisma, User } from "@recipiece/database";
 import { generateCookbook, generateRecipe, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";

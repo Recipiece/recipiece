@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { MealPlan, MealPlanItem, MealPlanShare, Prisma, prisma, PrismaTransaction, UserKitchenMembership } from "@recipiece/database";
+import { MealPlan, MealPlanItem, MealPlanShare, prisma, PrismaTransaction, UserKitchenMembership } from "@recipiece/database";
 import { generateRecipe } from "./recipe";
 import { generateUser, generateUserKitchenMembership } from "./user";
 

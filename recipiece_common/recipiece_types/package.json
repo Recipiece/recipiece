@@ -16,6 +16,7 @@
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.13.5",
     "prettier": "^3.4.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.7.3",
     "webpack": "^5.97.1",

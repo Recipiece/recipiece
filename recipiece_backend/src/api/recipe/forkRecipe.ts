@@ -5,10 +5,7 @@ import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { getRecipeByIdQuery } from "./query";
 
-export const forkRecipe = async (
-  request: AuthenticatedRequest<ForkRecipeRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<RecipeSchema> => {
+export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const { original_recipe_id } = request.body;
   const user = request.user;
   const originalRecipe = await getRecipeByIdQuery(tx, user, original_recipe_id).executeTakeFirst();
@@ -31,8 +28,7 @@ export const forkRecipe = async (
     ];
   }
 
-  const { id, user_id, created_at, ingredients, metadata, steps, tags, user_kitchen_membership_id, ...restRecipe } =
-    originalRecipe;
+  const { id, user_id, created_at, ingredients, metadata, steps, tags, user_kitchen_membership_id, ...restRecipe } = originalRecipe;
   const metadataCast = metadata as any;
   const idLessIngredients = (ingredients ?? []).map((ing) => {
     const { id, recipe_id, ...restIng } = ing;

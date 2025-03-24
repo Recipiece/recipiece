@@ -2,10 +2,7 @@ import { PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const deleteShoppingListShare = async (
-  request: AuthenticatedRequest,
-  tx: PrismaTransaction
-): ApiResponse<{}> => {
+export const deleteShoppingListShare = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const shareId = +request.params.id;
 
   const share = await tx.shoppingListShare.findFirst({

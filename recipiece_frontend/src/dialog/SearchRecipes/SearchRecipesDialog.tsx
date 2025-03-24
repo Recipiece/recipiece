@@ -6,8 +6,7 @@ import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
-    useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -20,10 +19,7 @@ export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesQuery(
-    { search: filters.search!, page_number: 0, page_size: 5 },
-    { enabled: (filters.search || "").length >= 2 }
-  );
+  } = useListRecipesQuery({ search: filters.search!, page_number: 0, page_size: 5 }, { enabled: (filters.search || "").length >= 2 });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -70,9 +66,7 @@ export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose
               </Button>
             );
           })}
-          {!!recipeData && recipeData.data.length === 0 && (
-            <p className="text-sm">No recipes found, try searching for something else.</p>
-          )}
+          {!!recipeData && recipeData.data.length === 0 && <p className="text-sm">No recipes found, try searching for something else.</p>}
         </LoadingGroup>
       </Stack>
       <ResponsiveFooter>

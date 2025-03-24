@@ -4,13 +4,7 @@ import { Plus } from "lucide-react";
 import { FC, Fragment, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useParams } from "react-router-dom";
-import {
-  useAttachRecipeToCookbookMutation,
-  useGetCookbookByIdQuery,
-  useGetSelfQuery,
-  useGetUserKitchenMembershipQuery,
-  useListRecipesQuery,
-} from "../../api";
+import { useAttachRecipeToCookbookMutation, useGetCookbookByIdQuery, useGetSelfQuery, useGetUserKitchenMembershipQuery, useListRecipesQuery } from "../../api";
 import {
   Button,
   Grid,
@@ -105,12 +99,9 @@ export const DashboardPage: FC = () => {
   const { data: cookbook, isLoading: isLoadingCookbook } = useGetCookbookByIdQuery(cookbookId ? +cookbookId : -1, {
     enabled: !!cookbookId,
   });
-  const { data: membership, isLoading: isLoadingMembership } = useGetUserKitchenMembershipQuery(
-    membershipId ? +membershipId : -1,
-    {
-      enabled: !!membershipId,
-    }
-  );
+  const { data: membership, isLoading: isLoadingMembership } = useGetUserKitchenMembershipQuery(membershipId ? +membershipId : -1, {
+    enabled: !!membershipId,
+  });
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
 
   const recipes = useMemo(() => {
@@ -159,15 +150,9 @@ export const DashboardPage: FC = () => {
     }
   }, [cookbook, cookbookId, location.pathname, membership, membershipId, user]);
 
-  const isLoading =
-    isLoadingUser ||
-    isLoadingRecipes ||
-    isFetchingRecipes ||
-    (!!cookbookId && isLoadingCookbook) ||
-    (!!membershipId && isLoadingMembership);
+  const isLoading = isLoadingUser || isLoadingRecipes || isFetchingRecipes || (!!cookbookId && isLoadingCookbook) || (!!membershipId && isLoadingMembership);
 
-  const isLoadingTitle =
-    isLoadingUser || (!!cookbookId && isLoadingCookbook) || (!!membershipId && isLoadingMembership);
+  const isLoadingTitle = isLoadingUser || (!!cookbookId && isLoadingCookbook) || (!!membershipId && isLoadingMembership);
 
   return (
     <SidebarProvider className="h-[calc(100%-64px)] min-h-[calc(100%-64px)]">
@@ -179,10 +164,7 @@ export const DashboardPage: FC = () => {
               <>
                 <H2 className="flex-grow basis-full">
                   <div className="inline sm:flex sm:flex-row">
-                    <SidebarTrigger
-                      data-testid={DataTestId.DashboardSidebar.SIDEBAR_TRIGGER_MOBILE}
-                      className="sm:hidden mr-2"
-                    />
+                    <SidebarTrigger data-testid={DataTestId.DashboardSidebar.SIDEBAR_TRIGGER_MOBILE} className="sm:hidden mr-2" />
                     <span data-testid={DataTestId.DashboardPage.HEADING_TITLE}>{title}</span>
                   </div>
                 </H2>
@@ -196,26 +178,15 @@ export const DashboardPage: FC = () => {
             )}
           </div>
         </LoadingGroup>
-        <RecipeSearch
-          dataTestId={DataTestId.DashboardPage.RECIPE_SEARCH_BAR}
-          isLoading={isLoading}
-          onSubmit={onSearch}
-        />
+        <RecipeSearch dataTestId={DataTestId.DashboardPage.RECIPE_SEARCH_BAR} isLoading={isLoading} onSubmit={onSearch} />
         <LoadingGroup variant="spinner" isLoading={isLoading}>
           <Stack>
             {!isLoadingRecipes && recipes.length === 0 && (
               <>
-                <NotFound
-                  dataTestId={DataTestId.DashboardPage.NOT_FOUND}
-                  message="No recipes to be had, time to get cooking!"
-                />
+                <NotFound dataTestId={DataTestId.DashboardPage.NOT_FOUND} message="No recipes to be had, time to get cooking!" />
                 {cookbookId && (
                   <div className="text-center">
-                    <Button
-                      data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY}
-                      onClick={onFindRecipe}
-                      variant="outline"
-                    >
+                    <Button data-testid={DataTestId.DashboardPage.BUTTON_ADD_RECIPE_EMPTY} onClick={onFindRecipe} variant="outline">
                       <Plus size={20} /> <span className="ml-2">Add a recipe</span>
                     </Button>
                   </div>
@@ -231,14 +202,7 @@ export const DashboardPage: FC = () => {
                 );
               })}
             </Grid>
-            {recipes.length > 0 && (
-              <Pager
-                dataTestId={DataTestId.DashboardPage.PAGER}
-                page={filters.page_number}
-                onPage={onPageChange}
-                hasNextPage={!!recipeData?.has_next_page}
-              />
-            )}
+            {recipes.length > 0 && <Pager dataTestId={DataTestId.DashboardPage.PAGER} page={filters.page_number} onPage={onPageChange} hasNextPage={!!recipeData?.has_next_page} />}
           </Stack>
         </LoadingGroup>
       </div>

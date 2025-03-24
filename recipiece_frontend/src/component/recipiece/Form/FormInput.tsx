@@ -2,16 +2,7 @@ import { DataTestId } from "@recipiece/constant";
 import { FC, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  InputProps,
-} from "../../shadcn";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, InputProps } from "../../shadcn";
 
 export interface FormInputProps extends InputProps {
   readonly name: string;
@@ -21,15 +12,7 @@ export interface FormInputProps extends InputProps {
   readonly isLoading?: boolean;
 }
 
-export const FormInput: FC<FormInputProps> = ({
-  isLoading,
-  name,
-  className,
-  label,
-  instructions,
-  onBlur,
-  ...restInputProps
-}) => {
+export const FormInput: FC<FormInputProps> = ({ isLoading, name, className, label, instructions, onBlur, ...restInputProps }) => {
   const form = useFormContext();
   const { isSubmitting } = form.formState;
 
@@ -64,9 +47,7 @@ export const FormInput: FC<FormInputProps> = ({
               />
             </FormControl>
             <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
-            {instructions && (
-              <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>
-            )}
+            {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
           </FormItem>
         );
       }}

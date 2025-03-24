@@ -1,7 +1,7 @@
-import path from "path";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import path from "path";
 import { Configuration, DefinePlugin } from "webpack";
 import "webpack-dev-server";
 
@@ -18,11 +18,7 @@ const config: Configuration = {
         use: {
           loader: "babel-loader",
           options: {
-            presets: [
-              "@babel/preset-env",
-              "@babel/preset-typescript",
-              ["@babel/preset-react", { runtime: "automatic" }],
-            ],
+            presets: ["@babel/preset-env", "@babel/preset-typescript", ["@babel/preset-react", { runtime: "automatic" }]],
           },
         },
         exclude: /node_modules/,
@@ -90,6 +86,7 @@ const config: Configuration = {
       "process.env.RECIPIECE_WEBSOCKET_URL": JSON.stringify(process.env.RECIPIECE_WEBSOCKET_URL),
       "process.env.RECIPIECE_API_URL": JSON.stringify(process.env.RECIPIECE_API_URL),
       "process.env.RECIPIECE_VERSION": JSON.stringify(process.env.RECIPIECE_VERSION),
+      "process.env.RECIPIECE_TURNSTILE_SITE_KEY": process.env.RECIPIECE_TURNSTILE_SITE_KEY ? JSON.stringify(process.env.RECIPIECE_TURNSTILE_SITE_KEY) : false,
     }),
   ],
   devServer: {

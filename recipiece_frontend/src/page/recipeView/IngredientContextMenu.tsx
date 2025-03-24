@@ -12,11 +12,7 @@ export interface IngredientContextMenuProps {
   readonly onIngredientRelativeScaled: (scaleFactor: number) => void;
 }
 
-export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({
-  ingredient,
-  onIngredientConverted,
-  onIngredientRelativeScaled,
-}) => {
+export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredient, onIngredientConverted, onIngredientRelativeScaled }) => {
   const { pushDialog, popDialog } = useContext(DialogContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -69,10 +65,7 @@ export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({
         <DropdownMenuItem onClick={onConvertIngredient} disabled={!ingredient.amount || !isNumericIngredientAmount}>
           <PencilRuler /> Convert
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={onRelativeScaleIngredient}
-          disabled={!ingredient.amount || !isNumericIngredientAmount}
-        >
+        <DropdownMenuItem onClick={onRelativeScaleIngredient} disabled={!ingredient.amount || !isNumericIngredientAmount}>
           <Scale /> Relative Scale
         </DropdownMenuItem>
       </DropdownMenuContent>

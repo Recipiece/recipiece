@@ -23,13 +23,8 @@ const AddRecipeToShoppingListFormSchema = z.object({
 
 export type AddRecipeToShoppingListForm = z.infer<typeof AddRecipeToShoppingListFormSchema>;
 
-export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProps> = ({
-  onSubmit,
-  onClose,
-  recipe,
-}) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
-    useResponsiveDialogComponents();
+export const AddRecipeToShoppingListDialog: FC<AddRecipeToShoppingListDialogProps> = ({ onSubmit, onClose, recipe }) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AddRecipeToShoppingListForm>({

@@ -1,9 +1,5 @@
-import { KyselyCore, MealPlanItem, PrismaTransaction, User } from "@recipiece/database";
-import {
-  BulkSetMealPlanItemsRequestSchema,
-  BulkSetMealPlanItemsResponseSchema,
-  MealPlanItemJobDataSchema,
-} from "@recipiece/types";
+import { KyselyCore, MealPlanItem, PrismaTransaction } from "@recipiece/database";
+import { BulkSetMealPlanItemsRequestSchema, BulkSetMealPlanItemsResponseSchema, MealPlanItemJobDataSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { mealPlanItemQueue } from "../../../job";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
@@ -121,10 +117,7 @@ export const bulkSetMealPlanItems = async (
     await tx.$kysely
       .deleteFrom("side_jobs")
       .where((eb) => {
-        return eb.or([
-          eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM),
-          eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION),
-        ]);
+        return eb.or([eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM), eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION)]);
       })
       .where(() => {
         return KyselyCore.sql`(side_jobs.job_data->>'meal_plan_item_id')::int = any(${updatedIds})`;

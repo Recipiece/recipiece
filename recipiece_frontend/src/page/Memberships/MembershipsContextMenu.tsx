@@ -2,14 +2,7 @@ import { DataTestId } from "@recipiece/constant";
 import { MoreVertical, Send } from "lucide-react";
 import { FC, useCallback, useContext, useState } from "react";
 import { useCreateKitchenMembershipMutation } from "../../api";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  useToast,
-} from "../../component";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ExtendKitchenInvitationForm } from "../../dialog";
 
@@ -55,10 +48,7 @@ export const MembershipsContextMenu: FC = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem
-          data-testid={DataTestId.MembershipsPage.CONTEXT_MENU_ITEM_SEND_INVITATION}
-          onClick={onExtendInvitation}
-        >
+        <DropdownMenuItem data-testid={DataTestId.MembershipsPage.CONTEXT_MENU_ITEM_SEND_INVITATION} onClick={onExtendInvitation}>
           <Send /> Invite
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,8 +1,4 @@
-import {
-  ListItemsForMealPlanQuerySchema,
-  ListMealPlanSharesQuerySchema,
-  ListMealPlansQuerySchema,
-} from "@recipiece/types";
+import { ListItemsForMealPlanQuerySchema, ListMealPlanSharesQuerySchema, ListMealPlansQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class MealPlanQueryKeys {
@@ -31,10 +27,7 @@ export class MealPlanQueryKeys {
     return ["mealPlanSession", { id: mealPlanId }];
   };
 
-  public static readonly LIST_MEAL_PLAN_ITEMS = (
-    mealPlanId: number,
-    filters?: ListItemsForMealPlanQuerySchema
-  ): RcpQueryKey => {
+  public static readonly LIST_MEAL_PLAN_ITEMS = (mealPlanId: number, filters?: ListItemsForMealPlanQuerySchema): RcpQueryKey => {
     const base: RcpQueryKey = [
       "listMealPlanItems",
       {

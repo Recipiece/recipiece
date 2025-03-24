@@ -70,10 +70,7 @@ interface MultipleSelectorProps {
   /** Props of `Command` */
   commandProps?: React.ComponentPropsWithoutRef<typeof Command>;
   /** Props of `CommandInput` */
-  inputProps?: Omit<
-    React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
-    "value" | "placeholder" | "disabled"
-  >;
+  inputProps?: Omit<React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>, "value" | "placeholder" | "disabled">;
   /** hide the clear all button. */
   hideClearAllButton?: boolean;
 }
@@ -144,24 +141,22 @@ function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
  *
  * @reference: https://github.com/hsuanyi-chou/shadcn-ui-expansions/issues/34#issuecomment-1949561607
  **/
-const CommandEmpty = forwardRef<HTMLDivElement, React.ComponentProps<typeof CommandPrimitive.Empty>>(
-  ({ className, ...props }, forwardedRef) => {
-    const render = useCommandState((state) => state.filtered.count === 0);
+const CommandEmpty = forwardRef<HTMLDivElement, React.ComponentProps<typeof CommandPrimitive.Empty>>(({ className, ...props }, forwardedRef) => {
+  const render = useCommandState((state) => state.filtered.count === 0);
 
-    if (!render) return null;
+  if (!render) return null;
 
-    return (
-      <div
-        ref={forwardedRef}
-        className={cn("py-6 text-center text-sm", className)}
-        // eslint-disable-next-line react/no-unknown-property
-        cmdk-empty=""
-        role="presentation"
-        {...props}
-      />
-    );
-  }
-);
+  return (
+    <div
+      ref={forwardedRef}
+      className={cn("py-6 text-center text-sm", className)}
+      // eslint-disable-next-line react/no-unknown-property
+      cmdk-empty=""
+      role="presentation"
+      {...props}
+    />
+  );
+});
 
 CommandEmpty.displayName = "CommandEmpty";
 
@@ -217,12 +212,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
     );
 
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) && inputRef.current && !inputRef.current.contains(event.target as Node)) {
         setOpen(false);
         inputRef.current.blur();
       }
@@ -343,10 +333,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
 
     const CreatableItem = () => {
       if (!creatable) return undefined;
-      if (
-        isOptionsExist(options, [{ value: inputValue, label: inputValue }]) ||
-        selected.find((s) => s.value === inputValue)
-      ) {
+      if (isOptionsExist(options, [{ value: inputValue, label: inputValue }]) || selected.find((s) => s.value === inputValue)) {
         return undefined;
       }
 
@@ -459,10 +446,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 >
                   {option.label}
                   <button
-                    className={cn(
-                      "ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                      (disabled || option.fixed) && "hidden"
-                    )}
+                    className={cn("ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2", (disabled || option.fixed) && "hidden")}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleUnselect(option);
@@ -518,11 +502,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
               }}
               className={cn(
                 "absolute right-0 h-6 w-6 p-0",
-                (hideClearAllButton ||
-                  disabled ||
-                  selected.length < 1 ||
-                  selected.filter((s) => s.fixed).length === selected.length) &&
-                  "hidden"
+                (hideClearAllButton || disabled || selected.length < 1 || selected.filter((s) => s.fixed).length === selected.length) && "hidden"
               )}
             >
               <X />
@@ -593,9 +573,4 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
 );
 
 MultipleSelector.displayName = "MultipleSelector";
-export {
-  MultipleSelector,
-  type Option as MultipleSelectorOption,
-  type GroupOption as MultipleSelectorGroupOption,
-  type MultipleSelectorProps,
-};
+export { MultipleSelector, type Option as MultipleSelectorOption, type GroupOption as MultipleSelectorGroupOption, type MultipleSelectorProps };

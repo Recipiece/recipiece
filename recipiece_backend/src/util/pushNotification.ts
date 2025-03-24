@@ -1,12 +1,4 @@
-import {
-  Cookbook,
-  MealPlan,
-  prisma,
-  Recipe,
-  ShoppingList,
-  User,
-  UserPushNotificationSubscription,
-} from "@recipiece/database";
+import { MealPlan, prisma, ShoppingList, User, UserPushNotificationSubscription } from "@recipiece/database";
 import webpush, { PushSubscription, WebPushError } from "web-push";
 
 if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
@@ -17,15 +9,10 @@ if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
 export const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
   try {
     if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
-      await webpush.sendNotification(
-        subscription.subscription_data as unknown as PushSubscription,
-        JSON.stringify(payload)
-      );
+      await webpush.sendNotification(subscription.subscription_data as unknown as PushSubscription, JSON.stringify(payload));
       return Promise.resolve();
     } else {
-      console.log(
-        `APP_ENABLE_PUSH_NOTIFICATIONS is set to ${process.env.APP_ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`
-      );
+      console.log(`APP_ENABLE_PUSH_NOTIFICATIONS is set to ${process.env.APP_ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`);
       console.log("would have sent");
       console.log(payload);
       console.log(`to subscription ${subscription.subscription_data}`);
@@ -45,11 +32,7 @@ export const sendPushNotification = async (subscription: UserPushNotificationSub
   }
 };
 
-export const sendShoppingListSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  shoppingList: ShoppingList
-) => {
+export const sendShoppingListSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, shoppingList: ShoppingList) => {
   const message = {
     title: "Shopping List Shared",
     body: `${sourceUser.username} shared their shopping list ${shoppingList.name} with you`,
@@ -61,11 +44,7 @@ export const sendShoppingListSharedPushNotification = async (
   await sendPushNotification(subscription, message);
 };
 
-export const sendMealPlanSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  mealPlan: MealPlan
-) => {
+export const sendMealPlanSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, mealPlan: MealPlan) => {
   const message = {
     title: "Meal Plan Shared",
     body: `${sourceUser.username} shared their meal plan ${mealPlan.name} with you`,

@@ -2,16 +2,7 @@ import { DataTestId } from "@recipiece/constant";
 import { FC, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
-import {
-  Checkbox,
-  CheckboxProps,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../../shadcn";
+import { Checkbox, CheckboxProps, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../../shadcn";
 
 export interface FormCheckboxProps extends CheckboxProps {
   readonly name: string;
@@ -21,14 +12,7 @@ export interface FormCheckboxProps extends CheckboxProps {
   readonly isLoading?: boolean;
 }
 
-export const FormCheckbox: FC<FormCheckboxProps> = ({
-  isLoading,
-  name,
-  className,
-  label,
-  instructions,
-  ...restInputProps
-}) => {
+export const FormCheckbox: FC<FormCheckboxProps> = ({ isLoading, name, className, label, instructions, ...restInputProps }) => {
   const form = useFormContext();
   const { isSubmitting } = form.formState;
 
@@ -52,18 +36,12 @@ export const FormCheckbox: FC<FormCheckboxProps> = ({
             </FormControl>
             {/* Something is overriding the usual mt-0 class that i'd use here, so set the style directly */}
             {label && (
-              <FormLabel
-                data-testid={DataTestId.Form.LABEL(dataTestId)}
-                className="ml-2 inline"
-                style={{ marginTop: "0" }}
-              >
+              <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)} className="ml-2 inline" style={{ marginTop: "0" }}>
                 {label}
               </FormLabel>
             )}
             <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
-            {instructions && (
-              <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>
-            )}
+            {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
           </FormItem>
         );
       }}

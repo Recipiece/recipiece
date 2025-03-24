@@ -5,15 +5,7 @@ import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { useBulkSetMealPlanItemsMutation, useGetMealPlanByIdQuery, useListMealPlanItemsQuery } from "../../api";
-import {
-  Button,
-  Form,
-  H2,
-  LoadingGroup,
-  MembershipAvatar,
-  RecipieceMenuBarContext,
-  SubmitButton,
-} from "../../component";
+import { Button, Form, H2, LoadingGroup, RecipieceMenuBarContext, SubmitButton } from "../../component";
 import { useLayout } from "../../hooks";
 import { ceilDateToDay, floorDateToDay } from "../../util";
 import { MealPlanContextMenu } from "./MealPlanContextMenu";
@@ -299,10 +291,7 @@ export const MealPlanViewPage: FC = () => {
     const itemsToUpdate = flatFormData.filter((item) => {
       const matchingDataArrayItem = flatDataArrayData.find((val) => !!val.id && val.id === item.id);
       if (matchingDataArrayItem) {
-        return (
-          matchingDataArrayItem["notes"] !== item["notes"] ||
-          matchingDataArrayItem["freeform_content"] !== item["freeform_content"]
-        );
+        return matchingDataArrayItem["notes"] !== item["notes"] || matchingDataArrayItem["freeform_content"] !== item["freeform_content"];
       }
       return false;
     });
@@ -335,10 +324,7 @@ export const MealPlanViewPage: FC = () => {
             <div className="flex flex-row items-center gap-2">
               <H2 className="flex-grow">{mealPlan?.name}</H2>
 
-              {isMobile &&
-                mobileMenuPortalRef &&
-                mobileMenuPortalRef.current &&
-                createPortal(<MealPlanContextMenu mealPlan={mealPlan} />, mobileMenuPortalRef.current)}
+              {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(<MealPlanContextMenu mealPlan={mealPlan} />, mobileMenuPortalRef.current)}
               {!isMobile && <>{<MealPlanContextMenu mealPlan={mealPlan} />}</>}
             </div>
 
@@ -395,13 +381,7 @@ export const MealPlanViewPage: FC = () => {
                   >
                     {/* Do this so that we don't flash the far left end of the view window. It's jank but like... */}
                     {daysSpan > 3 && (
-                      <MealPlanItemCard
-                        dayId={dist}
-                        isEditing={isEditing}
-                        isLoading={matchingDataArrayItem === undefined}
-                        mealPlan={mealPlan!}
-                        date={displayDate}
-                      />
+                      <MealPlanItemCard dayId={dist} isEditing={isEditing} isLoading={matchingDataArrayItem === undefined} mealPlan={mealPlan!} date={displayDate} />
                     )}
                   </div>
                 );

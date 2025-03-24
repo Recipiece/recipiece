@@ -1,6 +1,6 @@
-import path from "path";
 import CopyPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import path from "path";
 import { Configuration } from "webpack";
 import nodeExternals from "webpack-node-externals";
 

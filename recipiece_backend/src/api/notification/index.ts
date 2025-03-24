@@ -1,9 +1,4 @@
-import {
-  YListNotificationsQuerySchema,
-  YListNotificationsResponseSchema,
-  YNotificationSchema,
-  YSetNotificationStatusRequestSchema,
-} from "@recipiece/types";
+import { YListNotificationsQuerySchema, YListNotificationsResponseSchema, YNotificationSchema, YSetNotificationStatusRequestSchema } from "@recipiece/types";
 import { Route } from "../../types";
 import { deleteNotification } from "./deleteNotification";
 import { getNotification } from "./getNotification";

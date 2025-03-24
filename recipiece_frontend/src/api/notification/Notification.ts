@@ -29,10 +29,7 @@ export const useGetNotificationQuery = (notificationId: number, args?: QueryArgs
   });
 };
 
-export const useListNotificationsQuery = (
-  filters?: Partial<ListNotificationsQuerySchema>,
-  args?: QueryArgs<ListNotificationsResponseSchema>
-) => {
+export const useListNotificationsQuery = (filters?: Partial<ListNotificationsQuerySchema>, args?: QueryArgs<ListNotificationsResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -59,9 +56,7 @@ export const useListNotificationsQuery = (
   });
 };
 
-export const useSetNotificationStatusMutation = (
-  args?: MutationArgs<NotificationSchema, SetNotificationStatusRequestSchema>
-) => {
+export const useSetNotificationStatusMutation = (args?: MutationArgs<NotificationSchema, SetNotificationStatusRequestSchema>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 

@@ -4,10 +4,7 @@ import { ListUserTagsQuerySchema, ListUserTagsResponseSchema } from "@recipiece/
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listUserTags = async (
-  request: AuthenticatedRequest<any, ListUserTagsQuerySchema>,
-  tx: PrismaTransaction
-): ApiResponse<ListUserTagsResponseSchema> => {
+export const listUserTags = async (request: AuthenticatedRequest<any, ListUserTagsQuerySchema>, tx: PrismaTransaction): ApiResponse<ListUserTagsResponseSchema> => {
   const user = request.user;
   const { page_number, search } = request.query;
   const pageSize = request.query.page_size ?? Constant.DEFAULT_PAGE_SIZE;

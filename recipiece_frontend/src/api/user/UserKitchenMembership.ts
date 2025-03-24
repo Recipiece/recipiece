@@ -13,13 +13,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CookbookQueryKeys } from "../cookbook";
 import { MealPlanQueryKeys } from "../mealPlan";
-import {
-  generatePartialMatchPredicate,
-  oldDataCreator,
-  oldDataDeleter,
-  oldDataUpdater,
-  RcpQueryKey,
-} from "../QueryKeys";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater, RcpQueryKey } from "../QueryKeys";
 import { RecipeQueryKeys } from "../recipe";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { ShoppingListQueryKeys } from "../shoppingList";
@@ -89,10 +83,7 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShareEntitiesList = <OldDataType extends ShareEntityListData>(
-    membership: UserKitchenMembershipSchema,
-    queryKey: RcpQueryKey
-  ) => {
+  const purgeShareEntitiesList = <OldDataType extends ShareEntityListData>(membership: UserKitchenMembershipSchema, queryKey: RcpQueryKey) => {
     queryClient.setQueriesData(
       {
         queryKey: queryKey,
@@ -136,10 +127,7 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShareEntity = <OldDataType extends ShareEntityData>(
-    membership: UserKitchenMembershipSchema,
-    queryKey: RcpQueryKey
-  ) => {
+  const purgeShareEntity = <OldDataType extends ShareEntityData>(membership: UserKitchenMembershipSchema, queryKey: RcpQueryKey) => {
     queryClient.setQueriesData(
       {
         queryKey: queryKey,
@@ -226,10 +214,7 @@ const usePurgeSharedQueries = () => {
   return { purgeRecipes, purgeShoppingLists, purgeMealPlans, purgeCookbooks };
 };
 
-export const useListUserKitchenMembershipsQuery = (
-  filters?: ListUserKitchenMembershipsQuerySchema,
-  args?: QueryArgs<ListUserKitchenMembershipsResponseSchema>
-) => {
+export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipsQuerySchema, args?: QueryArgs<ListUserKitchenMembershipsResponseSchema>) => {
   const { getter } = useGet();
   const queryClient = useQueryClient();
 
@@ -257,9 +242,7 @@ export const useListUserKitchenMembershipsQuery = (
   });
 };
 
-export const useCreateKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembershipSchema, { readonly username: string }>
-) => {
+export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, { readonly username: string }>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
@@ -296,9 +279,7 @@ export const useCreateKitchenMembershipMutation = (
   });
 };
 
-export const useUpdatePendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>
-) => {
+export const useUpdatePendingUserKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>) => {
   const queryClient = useQueryClient();
   const { onSuccess, ...restArgs } = args ?? {};
 
@@ -373,9 +354,7 @@ export const useUpdatePendingUserKitchenMembershipMutation = (
   return mutation;
 };
 
-export const useUpdatedNonPendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>
-) => {
+export const useUpdatedNonPendingUserKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>) => {
   const queryClient = useQueryClient();
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -513,9 +492,7 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
   return mutation;
 };
 
-export const useUpdateKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>
-) => {
+export const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>) => {
   const { putter } = usePut();
 
   const queryClient = useQueryClient();

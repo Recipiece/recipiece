@@ -83,27 +83,24 @@ export const RecipeViewPage: FC = () => {
     [checkedOffIngredients]
   );
 
-  const onIngredientConverted = useCallback(
-    (ingredient: RecipeIngredientSchema, newAmount: string, newUnit: string) => {
-      setRecipe((prev) => {
-        if (prev) {
-          return {
-            ...prev,
-            ingredients: (prev?.ingredients ?? []).map((ing) => {
-              if (ing.id === ingredient.id) {
-                return { ...ing, amount: newAmount, unit: newUnit };
-              } else {
-                return { ...ing };
-              }
-            }),
-          };
-        } else {
-          return undefined;
-        }
-      });
-    },
-    []
-  );
+  const onIngredientConverted = useCallback((ingredient: RecipeIngredientSchema, newAmount: string, newUnit: string) => {
+    setRecipe((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          ingredients: (prev?.ingredients ?? []).map((ing) => {
+            if (ing.id === ingredient.id) {
+              return { ...ing, amount: newAmount, unit: newUnit };
+            } else {
+              return { ...ing };
+            }
+          }),
+        };
+      } else {
+        return undefined;
+      }
+    });
+  }, []);
 
   const onScaleIngredients = useCallback((scaleFactor: number) => {
     setRecipe((prev) => {
@@ -172,9 +169,7 @@ export const RecipeViewPage: FC = () => {
               <H2 className="flex-grow">{recipe?.name}</H2>
               {recipe && (
                 <>
-                  {isMobile &&
-                    mobileMenuPortalRef?.current &&
-                    createPortal(dropdownMenuComponent, mobileMenuPortalRef.current)}
+                  {isMobile && mobileMenuPortalRef?.current && createPortal(dropdownMenuComponent, mobileMenuPortalRef.current)}
                   {!isMobile && <span className="ml-auto">{dropdownMenuComponent}</span>}
                 </>
               )}
@@ -210,16 +205,9 @@ export const RecipeViewPage: FC = () => {
                   {(recipe?.steps || []).map((step) => {
                     return (
                       <div key={step.id} className="items-top flex flex-row gap-1">
-                        <Checkbox
-                          checked={checkedOffSteps.includes(step.id)}
-                          onClick={() => onStepChecked(step.id)}
-                          className="mt-1"
-                        />
+                        <Checkbox checked={checkedOffSteps.includes(step.id)} onClick={() => onStepChecked(step.id)} className="mt-1" />
                         <span>{step.order + 1}. </span>
-                        <p
-                          onClick={() => onStepChecked(step.id)}
-                          className={`inline cursor-pointer ${checkedOffSteps.includes(step.id) ? "line-through" : ""}`}
-                        >
+                        <p onClick={() => onStepChecked(step.id)} className={`inline cursor-pointer ${checkedOffSteps.includes(step.id) ? "line-through" : ""}`}>
                           {step.content}
                         </p>
                       </div>
@@ -235,14 +223,8 @@ export const RecipeViewPage: FC = () => {
                   {(recipe?.ingredients ?? []).map((ing) => {
                     return (
                       <div key={ing.id} className="flex flex-row items-center gap-2">
-                        <Checkbox
-                          checked={checkedOffIngredients.includes(ing.id)}
-                          onClick={() => onIngredientChecked(ing.id)}
-                        />
-                        <span
-                          className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`}
-                          onClick={() => onIngredientChecked(ing.id)}
-                        >
+                        <Checkbox checked={checkedOffIngredients.includes(ing.id)} onClick={() => onIngredientChecked(ing.id)} />
+                        <span className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`} onClick={() => onIngredientChecked(ing.id)}>
                           {(!!ing.amount || !!ing.unit) && (
                             <span>
                               {formatIngredientAmount(ing.amount ?? "")} {ing.unit ?? ""}{" "}
@@ -250,11 +232,7 @@ export const RecipeViewPage: FC = () => {
                           )}
                           <span>{ing.name}</span>
                         </span>
-                        <IngredientContextMenu
-                          ingredient={ing}
-                          onIngredientConverted={onIngredientConverted}
-                          onIngredientRelativeScaled={onScaleIngredients}
-                        />
+                        <IngredientContextMenu ingredient={ing} onIngredientConverted={onIngredientConverted} onIngredientRelativeScaled={onScaleIngredients} />
                       </div>
                     );
                   })}

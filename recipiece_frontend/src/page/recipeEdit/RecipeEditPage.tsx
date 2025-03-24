@@ -1,33 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DataTestId } from "@recipiece/constant";
-import {
-  CreateRecipeRequestSchema,
-  RecipeIngredientSchema,
-  RecipeSchema,
-  RecipeStepSchema,
-  UpdateRecipeRequestSchema,
-} from "@recipiece/types";
+import { CreateRecipeRequestSchema, RecipeIngredientSchema, RecipeSchema, RecipeStepSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import {
-  useCreateRecipeMutation,
-  useGetRecipeByIdQuery,
-  useGetSelfQuery,
-  useParseRecipeFromURLMutation,
-  useUpdateRecipeMutation,
-} from "../../api";
-import {
-  Button,
-  Divider,
-  Form,
-  FormInput,
-  FormTextarea,
-  NotFound,
-  Stack,
-  SubmitButton,
-  useToast,
-} from "../../component";
+import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
+import { Button, Divider, Form, FormInput, FormTextarea, NotFound, Stack, SubmitButton, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ParseRecipeFromURLForm } from "../../dialog";
 import { formatIngredientAmount } from "../../util";
@@ -212,12 +190,7 @@ export const RecipeEditPage: FC = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Stack>
-            <FormInput
-              data-testid={DataTestId.RecipeEditPage.INPUT_NAME}
-              name="name"
-              label="Recipe Name"
-              placeholder="What do you want to call this recipe?"
-            />
+            <FormInput data-testid={DataTestId.RecipeEditPage.INPUT_NAME} name="name" label="Recipe Name" placeholder="What do you want to call this recipe?" />
             <FormInput
               data-testid={DataTestId.RecipeEditPage.INPUT_SERVINGS}
               min={1}

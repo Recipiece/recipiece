@@ -1,6 +1,6 @@
+import { faker } from "@faker-js/faker";
 import { prisma, PrismaTransaction, ShoppingList, ShoppingListItem, ShoppingListShare, UserKitchenMembership } from "@recipiece/database";
 import { generateUser, generateUserKitchenMembership } from "./user";
-import { faker } from "@faker-js/faker";
 
 type FullShoppingListInput = Partial<Omit<ShoppingList, "id">> & {
   readonly shopping_list_items?: Partial<Omit<ShoppingListItem, "id" | "order" | "shopping_list_id">>[];

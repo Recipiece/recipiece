@@ -12,9 +12,7 @@ import { DefaultRecipeSearchFormValues, RecipeSearchForm, RecipeSearchFormSchema
 import { TagSearch } from "./TagSearch";
 
 export interface RecipeSearchProps {
-  readonly onSubmit: (
-    filters: Omit<ListRecipesQuerySchema, "cookbook_id" | "cookbook_attachments" | "page_number" | "page_size">
-  ) => Promise<void>;
+  readonly onSubmit: (filters: Omit<ListRecipesQuerySchema, "cookbook_id" | "cookbook_attachments" | "page_number" | "page_size">) => Promise<void>;
   readonly isLoading: boolean;
   readonly dataTestId?: string;
 }
@@ -52,10 +50,7 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
       Object.keys(DefaultRecipeSearchFormValues)
         .filter((key) => key !== "search")
         .forEach((key: string) => {
-          form.setValue(
-            key as keyof typeof DefaultRecipeSearchFormValues,
-            DefaultRecipeSearchFormValues[key as keyof typeof DefaultRecipeSearchFormValues]
-          );
+          form.setValue(key as keyof typeof DefaultRecipeSearchFormValues, DefaultRecipeSearchFormValues[key as keyof typeof DefaultRecipeSearchFormValues]);
         });
     } else {
       form.reset({ ...DefaultRecipeSearchFormValues });
@@ -116,11 +111,7 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
               label="Search"
             />
             <CollapsibleTrigger asChild>
-              <Button
-                data-testid={DataTestId.RecipeSearchBar.BUTTON_TOGGLE_ADVANCED_SEARCH(dataTestId)}
-                variant="outline"
-                onClick={onToggleAdvancedSearch}
-              >
+              <Button data-testid={DataTestId.RecipeSearchBar.BUTTON_TOGGLE_ADVANCED_SEARCH(dataTestId)} variant="outline" onClick={onToggleAdvancedSearch}>
                 <ScanSearch />
               </Button>
             </CollapsibleTrigger>
@@ -128,14 +119,8 @@ export const RecipeSearch: FC<RecipeSearchProps> = ({ onSubmit, isLoading, dataT
 
           <CollapsibleContent>
             <div className="mt-2 flex flex-col gap-2">
-              <IngredientSearch
-                dataTestId={DataTestId.RecipeSearchBar.INGREDIENT_SEARCH(dataTestId)}
-                disabled={isLoading || isSubmitting}
-              />
-              <TagSearch
-                dataTestId={DataTestId.RecipeSearchBar.TAG_SEARCH(dataTestId)}
-                disabled={isLoading || isSubmitting}
-              />
+              <IngredientSearch dataTestId={DataTestId.RecipeSearchBar.INGREDIENT_SEARCH(dataTestId)} disabled={isLoading || isSubmitting} />
+              <TagSearch dataTestId={DataTestId.RecipeSearchBar.TAG_SEARCH(dataTestId)} disabled={isLoading || isSubmitting} />
             </div>
           </CollapsibleContent>
         </Collapsible>

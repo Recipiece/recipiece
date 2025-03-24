@@ -8,9 +8,9 @@
  * the actual api calls that are being made.
  */
 
-import { randomUUID } from "crypto";
 import { prisma, User } from "@recipiece/database";
 import { generateUser, generateUserCredentials } from "@recipiece/test";
+import { randomUUID } from "crypto";
 import { enableFetchMocks } from "jest-fetch-mock";
 import app from "./src/app";
 import { UserSessions } from "./src/util/constant";

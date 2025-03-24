@@ -4,19 +4,9 @@ import { ListCookbooksQuerySchema, ListCookbooksResponseSchema, YListCookbooksRe
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listCookbooks = async (
-  req: AuthenticatedRequest<any, ListCookbooksQuerySchema>,
-  tx: PrismaTransaction
-): ApiResponse<ListCookbooksResponseSchema> => {
+export const listCookbooks = async (req: AuthenticatedRequest<any, ListCookbooksQuerySchema>, tx: PrismaTransaction): ApiResponse<ListCookbooksResponseSchema> => {
   const user = req.user;
-  const {
-    page_number,
-    page_size = Constant.DEFAULT_PAGE_SIZE,
-    recipe_id,
-    recipe_id_filter,
-    search,
-    shared_cookbooks_filter,
-  } = req.query;
+  const { page_number, page_size = Constant.DEFAULT_PAGE_SIZE, recipe_id, recipe_id_filter, search, shared_cookbooks_filter } = req.query;
 
   let query = tx.$kysely
     .with("owned_cookbooks", (db) => {
@@ -35,14 +25,8 @@ export const listCookbooks = async (
         .innerJoin("cookbooks", "cookbooks.user_id", "user_id")
         .where((eb) => {
           return eb.or([
-            eb.and([
-              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              eb("user_kitchen_memberships.source_user_id", "=", eb.ref("cookbooks.user_id")),
-            ]),
-            eb.and([
-              eb("user_kitchen_memberships.source_user_id", "=", user.id),
-              eb("user_kitchen_memberships.destination_user_id", "=", eb.ref("cookbooks.user_id")),
-            ]),
+            eb.and([eb("user_kitchen_memberships.destination_user_id", "=", user.id), eb("user_kitchen_memberships.source_user_id", "=", eb.ref("cookbooks.user_id"))]),
+            eb.and([eb("user_kitchen_memberships.source_user_id", "=", user.id), eb("user_kitchen_memberships.destination_user_id", "=", eb.ref("cookbooks.user_id"))]),
           ]);
         })
         .where((eb) => {

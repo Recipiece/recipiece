@@ -5,10 +5,7 @@ import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ConflictError } from "../../util/error";
 import { lazyAttachTags } from "./query";
 
-export const createRecipe = async (
-  req: AuthenticatedRequest<CreateRecipeRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<RecipeSchema> => {
+export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const recipeBody = req.body;
   const user = req.user;
 

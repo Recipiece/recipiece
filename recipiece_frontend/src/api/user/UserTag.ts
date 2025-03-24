@@ -1,21 +1,11 @@
-import {
-  ListRecipesResponseSchema,
-  ListUserTagsQuerySchema,
-  ListUserTagsResponseSchema,
-  RecipeSchema,
-  UserTagSchema,
-  YListUserTagsResponseSchema,
-} from "@recipiece/types";
+import { ListRecipesResponseSchema, ListUserTagsQuerySchema, ListUserTagsResponseSchema, RecipeSchema, UserTagSchema, YListUserTagsResponseSchema } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataDeleter } from "../QueryKeys";
 import { RecipeQueryKeys } from "../recipe";
 import { MutationArgs, QueryArgs, useDelete, useGet } from "../Request";
 import { UserQueryKeys } from "./UserQueryKeys";
 
-export const useListUserTagsQuery = (
-  filters?: ListUserTagsQuerySchema,
-  args?: QueryArgs<ListUserTagsResponseSchema>
-) => {
+export const useListUserTagsQuery = (filters?: ListUserTagsQuerySchema, args?: QueryArgs<ListUserTagsResponseSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {

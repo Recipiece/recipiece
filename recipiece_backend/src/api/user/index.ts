@@ -12,7 +12,7 @@ import {
   YValidateUserRequestSchema,
   YValidateUserResponseSchema,
 } from "@recipiece/types";
-import { recipeImportUploader } from "../../middleware";
+import { recipeImportUploader, turnstileMiddleware } from "../../middleware";
 import { Route } from "../../types";
 import { changePassword } from "./changePassword";
 import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
@@ -36,6 +36,7 @@ export const LOGIN_ROUTES: Route[] = [
     function: loginUser,
     authentication: "basic",
     responseSchema: YLoginResponseSchema,
+    preMiddleware: [turnstileMiddleware],
   },
   {
     path: "/user/logout",
@@ -71,6 +72,7 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "none",
     requestSchema: YCreateUserRequestSchema,
     responseSchema: YCreateUserResponseSchema,
+    preMiddleware: [turnstileMiddleware],
   },
   {
     path: "/user/verify-email",
@@ -92,6 +94,7 @@ export const LOGIN_ROUTES: Route[] = [
     function: issueForgotPasswordToken,
     authentication: "none",
     requestSchema: YIssueForgotPasswordTokenRequestSchema,
+    preMiddleware: [turnstileMiddleware],
   },
   {
     path: "/user/reset-password",

@@ -1,12 +1,4 @@
-import {
-  KyselyCore,
-  KyselyGenerated,
-  PrismaTransaction,
-  Recipe,
-  RecipeIngredient,
-  User,
-  UserTag,
-} from "@recipiece/database";
+import { KyselyCore, KyselyGenerated, PrismaTransaction, Recipe, RecipeIngredient, User, UserTag } from "@recipiece/database";
 
 export const getRecipeByIdQuery = (tx: PrismaTransaction, user: User, recipeId: number) => {
   const allShareCheck = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">) => {
@@ -15,14 +7,8 @@ export const getRecipeByIdQuery = (tx: PrismaTransaction, user: User, recipeId: 
         .selectFrom("user_kitchen_memberships")
         .where((_eb) => {
           return _eb.or([
-            _eb.and([
-              _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("recipes.user_id")),
-            ]),
-            _eb.and([
-              _eb("user_kitchen_memberships.source_user_id", "=", user.id),
-              _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("recipes.user_id")),
-            ]),
+            _eb.and([_eb("user_kitchen_memberships.destination_user_id", "=", user.id), _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("recipes.user_id"))]),
+            _eb.and([_eb("user_kitchen_memberships.source_user_id", "=", user.id), _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("recipes.user_id"))]),
           ]);
         })
         .where((_eb) => {
@@ -49,14 +35,8 @@ export const getRecipeByIdQuery = (tx: PrismaTransaction, user: User, recipeId: 
             .select("user_kitchen_memberships.id")
             .where((_eb) => {
               return _eb.or([
-                _eb.and([
-                  _eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-                  _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("recipes.user_id")),
-                ]),
-                _eb.and([
-                  _eb("user_kitchen_memberships.source_user_id", "=", user.id),
-                  _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("recipes.user_id")),
-                ]),
+                _eb.and([_eb("user_kitchen_memberships.destination_user_id", "=", user.id), _eb("user_kitchen_memberships.source_user_id", "=", _eb.ref("recipes.user_id"))]),
+                _eb.and([_eb("user_kitchen_memberships.source_user_id", "=", user.id), _eb("user_kitchen_memberships.destination_user_id", "=", _eb.ref("recipes.user_id"))]),
               ]);
             })
             .where((_eb) => {

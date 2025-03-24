@@ -3,14 +3,14 @@ import { InferType, object, string } from "yup";
 export * from "./convert";
 export * from "./cookbook";
 export * from "./knownIngredient";
+export * from "./list";
 export * from "./mealPlan";
+export * from "./notification";
 export * from "./recipe";
 export * from "./shoppingList";
 export * from "./sideJob";
 export * from "./user";
 export * from "./websocket";
-export * from "./list";
-export * from "./notification";
 
 export const YEmptySchema = object({}).noUnknown();
 

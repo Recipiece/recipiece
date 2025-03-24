@@ -18,10 +18,7 @@ describe("Refresh Token", () => {
   });
 
   it("should refresh the access token", async () => {
-    const response = await request(server)
-      .post(`/user/refresh-token`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${refreshToken}`);
+    const response = await request(server).post(`/user/refresh-token`).set("Content-Type", "application/json").set("Authorization", `Bearer ${refreshToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseBody: RefreshTokenResponseSchema = response.body;
@@ -59,10 +56,7 @@ describe("Refresh Token", () => {
       },
     });
 
-    const response = await request(server)
-      .post(`/user/refresh-token`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${refreshToken}`);
+    const response = await request(server).post(`/user/refresh-token`).set("Content-Type", "application/json").set("Authorization", `Bearer ${refreshToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseBody: RefreshTokenResponseSchema = response.body;
@@ -72,10 +66,7 @@ describe("Refresh Token", () => {
   });
 
   it("should not accept the access token in the authorization header", async () => {
-    const response = await request(server)
-      .post(`/user/refresh-token`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).post(`/user/refresh-token`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
   });

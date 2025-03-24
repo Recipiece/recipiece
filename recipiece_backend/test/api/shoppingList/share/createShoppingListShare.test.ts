@@ -80,36 +80,33 @@ describe("Create Shopping List Share", () => {
     expect(record).toBeFalsy();
   });
 
-  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
-    "should not allow a user to share a shopping list to a non-accepted membership",
-    async (membershipStatus) => {
-      const shoppingList = await generateShoppingList({
-        user_id: otherUser.id,
-      });
-      const membership = await generateUserKitchenMembership({
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: membershipStatus,
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])("should not allow a user to share a shopping list to a non-accepted membership", async (membershipStatus) => {
+    const shoppingList = await generateShoppingList({
+      user_id: otherUser.id,
+    });
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: membershipStatus,
+    });
+
+    const response = await request(server)
+      .post("/shopping-list/share")
+      .set("Authorization", bearerToken)
+      .send(<CreateShoppingListShareRequestSchema>{
+        shopping_list_id: shoppingList.id,
+        user_kitchen_membership_id: membership.id,
       });
 
-      const response = await request(server)
-        .post("/shopping-list/share")
-        .set("Authorization", bearerToken)
-        .send(<CreateShoppingListShareRequestSchema>{
-          shopping_list_id: shoppingList.id,
-          user_kitchen_membership_id: membership.id,
-        });
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 
-      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-
-      const record = await prisma.shoppingListShare.findFirst({
-        where: {
-          shopping_list_id: shoppingList.id,
-        },
-      });
-      expect(record).toBeFalsy();
-    }
-  );
+    const record = await prisma.shoppingListShare.findFirst({
+      where: {
+        shopping_list_id: shoppingList.id,
+      },
+    });
+    expect(record).toBeFalsy();
+  });
 
   it("should not share a shopping list that does not exist", async () => {
     const membership = await generateUserKitchenMembership({

@@ -52,9 +52,7 @@ describe("User Kitchen Membership Schemas", () => {
   });
 
   it("should not display the emails when getting memberships", async () => {
-    const response = await request(server)
-      .get(`/user-kitchen-membership/${membership.id}`)
-      .set("Authorization", `Bearer ${destBearerToken}`);
+    const response = await request(server).get(`/user-kitchen-membership/${membership.id}`).set("Authorization", `Bearer ${destBearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseBody: UserKitchenMembershipSchema = response.body;

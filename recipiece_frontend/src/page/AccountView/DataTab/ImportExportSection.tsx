@@ -1,21 +1,7 @@
 import { Download } from "lucide-react";
 import { FC, useCallback, useContext } from "react";
 import { useGetSelfQuery, useRequestRecipeImportMutation } from "../../../api";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  H3,
-  H4,
-  InlineCode,
-  Stack,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  useToast,
-} from "../../../component";
+import { Button, Card, CardContent, CardFooter, CardHeader, H3, H4, InlineCode, Stack, Tooltip, TooltipContent, TooltipTrigger, useToast } from "../../../component";
 import { DialogContext } from "../../../context";
 import { ImportRecipesForm } from "../../../dialog";
 
@@ -57,10 +43,8 @@ export const ImportExportSection: FC = () => {
           </CardHeader>
           <CardContent className="grow">
             <p className="text-sm">
-              If you use another recipe application, or you have previously exported data from Recipiece, you can import
-              that data into Recipiece using the below button. This operation can take some time depending on how much
-              data you want to import. You will be emailed at <InlineCode>{user?.email}</InlineCode> when the import is
-              finished.
+              If you use another recipe application, or you have previously exported data from Recipiece, you can import that data into Recipiece using the below button. This
+              operation can take some time depending on how much data you want to import. You will be emailed at <InlineCode>{user?.email}</InlineCode> when the import is finished.
             </p>
           </CardContent>
           <CardFooter>
@@ -70,9 +54,7 @@ export const ImportExportSection: FC = () => {
                   Import Data <Download className="ml-2" />
                 </Button>
               </TooltipTrigger>
-              {!user?.validated && (
-                <TooltipContent>You must verify your email address before using this feature.</TooltipContent>
-              )}
+              {!user?.validated && <TooltipContent>You must verify your email address before using this feature.</TooltipContent>}
             </Tooltip>
           </CardFooter>
         </Card>

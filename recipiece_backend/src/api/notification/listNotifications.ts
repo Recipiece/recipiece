@@ -4,10 +4,7 @@ import { ListNotificationsQuerySchema, ListNotificationsResponseSchema } from "@
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listNotifications = async (
-  request: AuthenticatedRequest<any, ListNotificationsQuerySchema>,
-  tx: PrismaTransaction
-): ApiResponse<ListNotificationsResponseSchema> => {
+export const listNotifications = async (request: AuthenticatedRequest<any, ListNotificationsQuerySchema>, tx: PrismaTransaction): ApiResponse<ListNotificationsResponseSchema> => {
   const user = request.user;
   const { page_number, page_size } = request.query;
   const pageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;

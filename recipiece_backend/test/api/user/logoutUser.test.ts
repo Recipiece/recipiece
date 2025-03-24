@@ -14,10 +14,7 @@ describe("Logout User", () => {
   });
 
   it("should remove the user session", async () => {
-    const response = await request(server)
-      .post(`/user/logout`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).post(`/user/logout`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 

@@ -16,8 +16,7 @@ const CreateCookbookFormSchema = z.object({
 export type CreateCookbookForm = z.infer<typeof CreateCookbookFormSchema>;
 
 export const CreateCookbookDialog: FC<BaseDialogProps<CreateCookbookForm>> = ({ onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
-    useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
   const { popDialog } = useContext(DialogContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

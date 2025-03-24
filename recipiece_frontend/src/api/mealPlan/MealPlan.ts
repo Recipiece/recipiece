@@ -22,10 +22,7 @@ import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, useP
 import { MealPlanQueryKeys } from "./MealPlanQueryKeys";
 
 export const useSetMealPlanConfigurationMutation = (
-  args?: MutationArgs<
-    MealPlanConfigurationSchema,
-    { readonly mealPlanId: number; readonly configuration: MealPlanConfigurationSchema }
-  >
+  args?: MutationArgs<MealPlanConfigurationSchema, { readonly mealPlanId: number; readonly configuration: MealPlanConfigurationSchema }>
 ) => {
   const { putter } = usePut();
   const queryClient = useQueryClient();
@@ -97,10 +94,7 @@ export const useGetMealPlanByIdQuery = (listId: number, args?: QueryArgs<MealPla
   });
 };
 
-export const useListMealPlansQuery = (
-  filters: ListMealPlansQuerySchema,
-  args?: QueryArgs<ListMealPlansResponseSchema>
-) => {
+export const useListMealPlansQuery = (filters: ListMealPlansQuerySchema, args?: QueryArgs<ListMealPlansResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -229,11 +223,7 @@ export const useDeleteMealPlanMutation = (args?: MutationArgs<unknown, MealPlanS
   });
 };
 
-export const useListMealPlanItemsQuery = (
-  mealPlanId: number,
-  filters: ListItemsForMealPlanQuerySchema,
-  args?: QueryArgs<ListItemsForMealPlanResponseSchema>
-) => {
+export const useListMealPlanItemsQuery = (mealPlanId: number, filters: ListItemsForMealPlanQuerySchema, args?: QueryArgs<ListItemsForMealPlanResponseSchema>) => {
   const { getter } = useGet();
   const searchParams = filtersToSearchParams(filters);
 
@@ -252,9 +242,7 @@ export const useListMealPlanItemsQuery = (
   });
 };
 
-export const useBulkSetMealPlanItemsMutation = (
-  args?: MutationArgs<BulkSetMealPlanItemsResponseSchema, { mealPlanId: number } & BulkSetMealPlanItemsRequestSchema>
-) => {
+export const useBulkSetMealPlanItemsMutation = (args?: MutationArgs<BulkSetMealPlanItemsResponseSchema, { mealPlanId: number } & BulkSetMealPlanItemsRequestSchema>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
@@ -377,10 +365,7 @@ export const useDeleteMealPlanItemMutation = (args?: MutationArgs<unknown, MealP
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(
-        MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(vars.meal_plan_id),
-        oldDataDeleter({ id: vars.id })
-      );
+      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(vars.meal_plan_id), oldDataDeleter({ id: vars.id }));
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,

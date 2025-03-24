@@ -1,14 +1,7 @@
 import { DataTestId } from "@recipiece/constant";
 import { ChevronFirst } from "lucide-react";
 import { FC, useMemo } from "react";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "../../shadcn";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../../shadcn";
 
 export interface PagerProps {
   readonly page: number;

@@ -14,14 +14,10 @@ export const ExtendKitchenInvitationFormSchema = z.object({
 
 export type ExtendKitchenInvitationForm = z.infer<typeof ExtendKitchenInvitationFormSchema>;
 
-export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvitationForm>> = ({
-  onClose,
-  onSubmit,
-}) => {
+export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvitationForm>> = ({ onClose, onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
-    useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
 
   const form = useForm<ExtendKitchenInvitationForm>({
     resolver: zodResolver(ExtendKitchenInvitationFormSchema),
@@ -52,19 +48,11 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
         <form onSubmit={form.handleSubmit(onInviteUser)}>
           <ResponsiveHeader>
             <ResponsiveTitle>Invite a User</ResponsiveTitle>
-            <ResponsiveDescription>
-              Invite a user to your kitchen by entering their username below.
-            </ResponsiveDescription>
+            <ResponsiveDescription>Invite a user to your kitchen by entering their username below.</ResponsiveDescription>
           </ResponsiveHeader>
 
           <div className="mb-2">
-            <FormInput
-              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.INPUT_USERNAME}
-              autoComplete="off"
-              name="username"
-              label="Username"
-              required
-            />
+            <FormInput data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.INPUT_USERNAME} autoComplete="off" name="username" label="Username" required />
           </div>
 
           <ResponsiveFooter className="flex-col-reverse">
@@ -76,10 +64,7 @@ export const ExtendKitchenInvitationDialog: FC<BaseDialogProps<ExtendKitchenInvi
             >
               Cancel
             </Button>
-            <SubmitButton
-              data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.BUTTON_SEND_INVITE}
-              disabled={isSubmitting || isLoadingUser}
-            >
+            <SubmitButton data-testid={DataTestId.Dialog.ExtendUserKitchenInvitationDialog.BUTTON_SEND_INVITE} disabled={isSubmitting || isLoadingUser}>
               Send Invitation
             </SubmitButton>
           </ResponsiveFooter>

@@ -34,11 +34,11 @@ export class UserKitchenInvitationStatus {
   public static readonly DENIED = "denied";
   public static readonly ACCEPTED = "accepted";
 
-  public static readonly ALL_STATUSES: [
-    typeof UserKitchenInvitationStatus.PENDING,
-    typeof UserKitchenInvitationStatus.DENIED,
-    typeof UserKitchenInvitationStatus.ACCEPTED,
-  ] = [UserKitchenInvitationStatus.PENDING, UserKitchenInvitationStatus.DENIED, UserKitchenInvitationStatus.ACCEPTED];
+  public static readonly ALL_STATUSES: [typeof UserKitchenInvitationStatus.PENDING, typeof UserKitchenInvitationStatus.DENIED, typeof UserKitchenInvitationStatus.ACCEPTED] = [
+    UserKitchenInvitationStatus.PENDING,
+    UserKitchenInvitationStatus.DENIED,
+    UserKitchenInvitationStatus.ACCEPTED,
+  ];
 }
 
 export class JobType {

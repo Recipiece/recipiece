@@ -2,16 +2,7 @@ import { FC, useCallback, useContext, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useGetSelfQuery, useGetUserKitchenMembershipQuery } from "../../api";
-import {
-  H2,
-  LoadingGroup,
-  NotFound,
-  RecipieceMenuBarContext,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../component";
+import { H2, LoadingGroup, NotFound, RecipieceMenuBarContext, Tabs, TabsContent, TabsList, TabsTrigger } from "../../component";
 import { useLayout } from "../../hooks";
 import { MealPlanTab } from "./MealPlanTab";
 import { MembershipContextMenu } from "./MembershipContextMenu";
@@ -26,11 +17,7 @@ export const MembershipViewPage: FC = () => {
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { isMobile } = useLayout();
 
-  const {
-    data: membership,
-    isLoading: isLoadingMembership,
-    isError: isMembershipError,
-  } = useGetUserKitchenMembershipQuery(+membershipId!);
+  const { data: membership, isLoading: isLoadingMembership, isError: isMembershipError } = useGetUserKitchenMembershipQuery(+membershipId!);
 
   const { data: user, isLoading: isLoadingUser } = useGetSelfQuery();
 
@@ -63,15 +50,10 @@ export const MembershipViewPage: FC = () => {
       <LoadingGroup variant="skeleton" className="h-[49px] w-full" isLoading={isLoadingMembership || isLoadingUser}>
         <div className="flex flex-row gap-2">
           <H2 className="flex-grow">{title ?? ""}</H2>
-          {isMobile &&
-            mobileMenuPortalRef &&
-            mobileMenuPortalRef.current &&
-            createPortal(<MembershipContextMenu membership={membership!} />, mobileMenuPortalRef.current)}
+          {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(<MembershipContextMenu membership={membership!} />, mobileMenuPortalRef.current)}
           {!isMobile && <>{<MembershipContextMenu membership={membership!} />}</>}
         </div>
-        <span className="text-xs">
-          Recipes and Cookbooks are shared by default. Manage your meal plans and shopping lists shared with this user.
-        </span>
+        <span className="text-xs">Recipes and Cookbooks are shared by default. Manage your meal plans and shopping lists shared with this user.</span>
       </LoadingGroup>
       <Tabs defaultValue={searchParams.get("tab") ?? TAB_MEAL_PLANS} onValueChange={onTabChange}>
         <TabsList className="w-full justify-start">

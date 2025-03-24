@@ -5,36 +5,17 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ingredientsSubquery, stepsSubquery, tagsSubquery } from "./query";
 
-export const listRecipes = async (
-  request: AuthenticatedRequest<any, ListRecipesQuerySchema>,
-  tx: PrismaTransaction
-): ApiResponse<ListRecipesResponseSchema> => {
-  const {
-    page_number,
-    page_size,
-    user_kitchen_membership_ids,
-    search,
-    cookbook_id,
-    cookbook_attachments_filter,
-    ingredients,
-    tags,
-    ingredients_filter,
-    tags_filter,
-  } = request.query;
+export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipesResponseSchema> => {
+  const { page_number, page_size, user_kitchen_membership_ids, search, cookbook_id, cookbook_attachments_filter, ingredients, tags, ingredients_filter, tags_filter } =
+    request.query;
   const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
   const user = request.user;
 
   const membershipIds = (user_kitchen_membership_ids ?? [])
-    .filter(
-      (val) => val !== Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL && val !== Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER
-    )
+    .filter((val) => val !== Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL && val !== Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER)
     .map((val) => +val!);
-  const showUserRecipes =
-    user_kitchen_membership_ids &&
-    !!user_kitchen_membership_ids.find((id) => id === Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER);
-  const showAllRecipes =
-    user_kitchen_membership_ids &&
-    !!user_kitchen_membership_ids.find((id) => id === Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL);
+  const showUserRecipes = user_kitchen_membership_ids && !!user_kitchen_membership_ids.find((id) => id === Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER);
+  const showAllRecipes = user_kitchen_membership_ids && !!user_kitchen_membership_ids.find((id) => id === Constant.USER_KITCHEN_MEMBERSHIP_IDS_ALL);
 
   const selectableSubqueries = (eb: KyselyCore.ExpressionBuilder<KyselyGenerated.DB, "recipes">) => {
     return [ingredientsSubquery(eb).as("ingredients"), stepsSubquery(eb).as("steps"), tagsSubquery(eb).as("tags")];
@@ -58,14 +39,8 @@ export const listRecipes = async (
         .innerJoin("recipes", "recipes.user_id", "user_id")
         .where((eb) => {
           return eb.or([
-            eb.and([
-              eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-              eb("user_kitchen_memberships.source_user_id", "=", eb.ref("recipes.user_id")),
-            ]),
-            eb.and([
-              eb("user_kitchen_memberships.source_user_id", "=", user.id),
-              eb("user_kitchen_memberships.destination_user_id", "=", eb.ref("recipes.user_id")),
-            ]),
+            eb.and([eb("user_kitchen_memberships.destination_user_id", "=", user.id), eb("user_kitchen_memberships.source_user_id", "=", eb.ref("recipes.user_id"))]),
+            eb.and([eb("user_kitchen_memberships.source_user_id", "=", user.id), eb("user_kitchen_memberships.destination_user_id", "=", eb.ref("recipes.user_id"))]),
           ]);
         })
         .where((eb) => {
@@ -136,10 +111,7 @@ export const listRecipes = async (
       return eb(
         "all_recipes.id",
         "in",
-        eb
-          .selectFrom("recipe_cookbook_attachments")
-          .select("recipe_cookbook_attachments.recipe_id")
-          .where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id)
+        eb.selectFrom("recipe_cookbook_attachments").select("recipe_cookbook_attachments.recipe_id").where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id)
       );
     });
   } else if (cookbook_id && cookbook_attachments_filter === "exclude") {
@@ -147,10 +119,7 @@ export const listRecipes = async (
       return eb(
         "all_recipes.id",
         "not in",
-        eb
-          .selectFrom("recipe_cookbook_attachments")
-          .select("recipe_cookbook_attachments.recipe_id")
-          .where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id)
+        eb.selectFrom("recipe_cookbook_attachments").select("recipe_cookbook_attachments.recipe_id").where("recipe_cookbook_attachments.cookbook_id", "=", cookbook_id)
       );
     });
   }

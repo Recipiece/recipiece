@@ -4,10 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { lazyAttachTags } from "./query";
 
-export const updateRecipe = async (
-  req: AuthenticatedRequest<UpdateRecipeRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<RecipeSchema> => {
+export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const recipeBody = req.body;
   const user = req.user;
 

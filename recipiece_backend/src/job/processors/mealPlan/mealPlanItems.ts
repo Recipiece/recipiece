@@ -51,14 +51,7 @@ export const processMealPlanItem = async (job: Job) => {
           if (meatyIngredients.length > 0) {
             console.log(`meal plan item ${mealPlanItem.id} has at least one meat like ingredient, processing thawing`);
             const knownIngredients = await tx.knownIngredient.findMany();
-            return await processMeatThawing(
-              tx,
-              sideJob.user_id,
-              mealPlanItem,
-              config,
-              meatyIngredients,
-              knownIngredients
-            );
+            return await processMeatThawing(tx, sideJob.user_id, mealPlanItem, config, meatyIngredients, knownIngredients);
           } else {
             console.log(`meal plan item ${mealPlanItem.id} has no meat-like ingredients`);
           }

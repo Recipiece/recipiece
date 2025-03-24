@@ -19,7 +19,6 @@
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.17.0",
     "@faker-js/faker": "^9.5.0",
-    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@types/archiver": "^6.0.3",
     "@types/body-parser": "^1.19.5",
     "@types/convert-units": "^2.3.11",
@@ -54,6 +53,7 @@
     "jest-silent-reporter": "^0.6.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.4.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
     "supertest": "^7.0.0",
     "superwstest": "^2.0.4",
     "ts-jest": "^29.2.5",

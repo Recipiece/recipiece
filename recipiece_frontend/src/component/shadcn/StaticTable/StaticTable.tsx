@@ -17,10 +17,7 @@ export const StaticTableHeader: FC<PropsWithChildren> = ({ children }) => {
       <tr className="m-0 border-t p-0 even:bg-muted">
         {allChildren.map((ch, index) => {
           return (
-            <th
-              key={index}
-              className="border px-4 py-2 text-left font-bold dark:border-muted [&[align=center]]:text-center [&[align=right]]:text-right"
-            >
+            <th key={index} className="border px-4 py-2 text-left font-bold dark:border-muted [&[align=center]]:text-center [&[align=right]]:text-right">
               {ch}
             </th>
           );
@@ -50,10 +47,7 @@ export const StaticTableRow: FC<PropsWithChildren> = ({ children }) => {
     <tr className="m-0 border-t p-0">
       {allChildren.map((ch, index) => {
         return (
-          <td
-            key={index}
-            className="border px-4 py-2 text-left dark:border-muted [&[align=center]]:text-center [&[align=right]]:text-right"
-          >
+          <td key={index} className="border px-4 py-2 text-left dark:border-muted [&[align=center]]:text-center [&[align=right]]:text-right">
             {ch}
           </td>
         );

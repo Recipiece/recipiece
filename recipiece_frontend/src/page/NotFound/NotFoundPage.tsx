@@ -8,11 +8,7 @@ export const NotFoundPage: FC = () => {
 
   return (
     <div>
-      <NotFound
-        dataTestId={DataTestId.NotFoundPage.NOT_FOUND}
-        message="Nothing cooking in this kitchen!"
-        backNav={isLoggedIn ? "/dashboard" : "/login"}
-      />
+      <NotFound dataTestId={DataTestId.NotFoundPage.NOT_FOUND} message="Nothing cooking in this kitchen!" backNav={isLoggedIn ? "/dashboard" : "/login"} />
     </div>
   );
 };
