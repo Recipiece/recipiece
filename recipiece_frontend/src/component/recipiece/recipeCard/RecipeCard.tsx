@@ -29,7 +29,7 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
       <Card className="flex h-full flex-col hover:drop-shadow-md">
         <CardHeader data-testid={DataTestId.RecipeCard.CONTAINER_CARD_HEADER(recipe.id)} onClick={onView} className="hover:cursor-pointer">
           <Shelf>
-            <CardTitle data-testid={DataTestId.RecipeCard.CARD_TITLE(recipe.id)}>{recipe.name}</CardTitle>
+            <CardTitle className="line-clamp-2 max-h-32 overflow-hidden" data-testid={DataTestId.RecipeCard.CARD_TITLE(recipe.id)}>{recipe.name}</CardTitle>
             <ShelfSpacer />
           </Shelf>
         </CardHeader>

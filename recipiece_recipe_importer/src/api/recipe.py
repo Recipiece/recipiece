@@ -1,5 +1,5 @@
 from typing import List
-from ..model.recipe import ParseRecipeResponse, ParseIngredientsResponse, ParsedIngredient
+from ..model.recipe import ParseRecipeResponse, ParsedIngredient
 from http import HTTPStatus
 from fastapi import HTTPException
 from recipe_scrapers import scrape_html, WebsiteNotImplementedError

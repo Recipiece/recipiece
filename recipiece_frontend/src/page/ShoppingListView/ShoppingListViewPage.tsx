@@ -217,7 +217,7 @@ export const ShoppingListViewPage: FC = () => {
             title: "Shopping List Deleted",
             description: "Your shopping list has been deleted.",
           });
-          navigate("/");
+          navigate("/dashboard");
         } catch {
           toast({
             title: "Error Deleting Shopping List",

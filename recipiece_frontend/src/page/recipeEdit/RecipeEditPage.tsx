@@ -224,7 +224,7 @@ export const RecipeEditPage: FC = () => {
                 <Button
                   data-testid={DataTestId.RecipeEditPage.BUTTON_CANCEL}
                   disabled={form?.formState?.isSubmitting}
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/dashboard")}
                   variant="secondary"
                   type="button"
                   className="mr-2"
