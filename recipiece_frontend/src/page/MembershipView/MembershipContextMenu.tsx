@@ -3,14 +3,7 @@ import { MoreVertical, X } from "lucide-react";
 import { FC, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeleteUserKitchenMembershipMutation } from "../../api";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  useToast,
-} from "../../component";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, useToast } from "../../component";
 import { DialogContext } from "../../context";
 
 export const MembershipContextMenu: FC<{ readonly membership: UserKitchenMembershipSchema }> = ({ membership }) => {

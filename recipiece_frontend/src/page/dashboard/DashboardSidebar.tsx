@@ -3,12 +3,7 @@ import { CookbookSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { BookPlus } from "lucide-react";
 import { FC, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useCreateCookbookMutation,
-  useGetSelfQuery,
-  useListCookbooksQuery,
-  useListUserKitchenMembershipsQuery,
-} from "../../api";
+import { useCreateCookbookMutation, useGetSelfQuery, useListCookbooksQuery, useListUserKitchenMembershipsQuery } from "../../api";
 import {
   LoadingGroup,
   MembershipAvatar,
@@ -152,11 +147,7 @@ export const DashboardSidebar: FC = () => {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_CREATE_COOKBOOK}
-                    onClick={onCreateCookbook}
-                    disabled={isCreatingCookbook}
-                  >
+                  <SidebarMenuButton data-testid={DataTestId.DashboardSidebar.SIDEBAR_BUTTON_CREATE_COOKBOOK} onClick={onCreateCookbook} disabled={isCreatingCookbook}>
                     <BookPlus /> New Cookbook
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -172,11 +163,7 @@ export const DashboardSidebar: FC = () => {
                           onClick={() => onNavigate(`/cookbook/${cookbook.id}`)}
                         >
                           <div className="flex flex-row gap-2">
-                            <MembershipAvatar
-                              entity={cookbook}
-                              size="small"
-                              membershipId={cookbook.user_kitchen_membership_id}
-                            />
+                            <MembershipAvatar entity={cookbook} size="small" membershipId={cookbook.user_kitchen_membership_id} />
                             <span>{cookbook.name}</span>
                           </div>
                         </SidebarMenuButton>

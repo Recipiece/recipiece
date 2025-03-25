@@ -15,26 +15,21 @@ describe("Get User Kitchen Membership", () => {
     [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
   });
 
-  it.each([true, false])(
-    "should get a membership where the source user is the requesting user",
-    async (isUserSourceUser) => {
-      const membership = await generateUserKitchenMembership({
-        source_user_id: isUserSourceUser ? user.id : otherUser.id,
-        destination_user_id: isUserSourceUser ? otherUser.id : user.id,
-        status: "pending",
-      });
+  it.each([true, false])("should get a membership where the source user is the requesting user", async (isUserSourceUser) => {
+    const membership = await generateUserKitchenMembership({
+      source_user_id: isUserSourceUser ? user.id : otherUser.id,
+      destination_user_id: isUserSourceUser ? otherUser.id : user.id,
+      status: "pending",
+    });
 
-      const response = await request(server)
-        .get(`/user-kitchen-membership/${membership.id}`)
-        .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/user-kitchen-membership/${membership.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
-      expect(response.statusCode).toBe(StatusCodes.OK);
-      const responseData: UserKitchenMembershipSchema = response.body;
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: UserKitchenMembershipSchema = response.body;
 
-      expect(responseData.id).toBe(membership.id);
-      expect(responseData.status).toBe(membership.status);
-    }
-  );
+    expect(responseData.id).toBe(membership.id);
+    expect(responseData.status).toBe(membership.status);
+  });
 
   it("should not get a membership the requesting user is not a part of", async () => {
     const thirdUser = await generateUser();
@@ -44,16 +39,12 @@ describe("Get User Kitchen Membership", () => {
       status: "pending",
     });
 
-    const response = await request(server)
-      .get(`/user-kitchen-membership/${membership.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`);
+    const response = await request(server).get(`/user-kitchen-membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`);
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 
   it("should not get a membership that does not exist", async () => {
-    const response = await request(server)
-      .get(`/user-kitchen-membership/100000000`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/user-kitchen-membership/100000000`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

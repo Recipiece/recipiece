@@ -31,11 +31,7 @@ describe("Create Recipe", () => {
       ],
     };
 
-    const response = await request(server)
-      .post("/recipe")
-      .send(expectedBody)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).post("/recipe").send(expectedBody).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const responseBody = response.body;
@@ -78,11 +74,7 @@ describe("Create Recipe", () => {
       tags: [newTagContent.toUpperCase(), `  ${existingTagToAttach.content}  `],
     };
 
-    const response = await request(server)
-      .post("/recipe")
-      .send(expectedBody)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).post("/recipe").send(expectedBody).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const createdRecipeResponse = <RecipeSchema>response.body;

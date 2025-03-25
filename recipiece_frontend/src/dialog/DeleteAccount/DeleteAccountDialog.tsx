@@ -15,8 +15,7 @@ const DeleteAccountFormSchema = z.object({
 export type DeleteAccountForm = z.infer<typeof DeleteAccountFormSchema>;
 
 export const DeleteAccountDialog: FC<BaseDialogProps<DeleteAccountForm>> = ({ onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
-    useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const { data: user } = useGetSelfQuery();
 
   const form = useForm({

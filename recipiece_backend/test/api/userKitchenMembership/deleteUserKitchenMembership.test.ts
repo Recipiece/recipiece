@@ -22,10 +22,7 @@ describe("Delete User Kitchen Membership", () => {
       status: UserKitchenInvitationStatus.PENDING,
     });
 
-    const response = await request(server)
-      .delete(`/user-kitchen-membership/${membership.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).delete(`/user-kitchen-membership/${membership.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -45,10 +42,7 @@ describe("Delete User Kitchen Membership", () => {
       status: UserKitchenInvitationStatus.PENDING,
     });
 
-    const response = await request(server)
-      .delete(`/user-kitchen-membership/${membership.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/user-kitchen-membership/${membership.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 

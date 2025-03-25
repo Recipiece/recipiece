@@ -17,24 +17,16 @@ describe("Create User Kitchen Memberships", () => {
   });
 
   it("should not allow a user to create a membership for themselves", async () => {
-    const response = await request(server)
-      .post("/user-kitchen-membership")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send({
-        username: user.username,
-      });
+    const response = await request(server).post("/user-kitchen-membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
+      username: user.username,
+    });
     expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 
   it("should allow a user to create a membership targeting another user", async () => {
-    const response = await request(server)
-      .post("/user-kitchen-membership")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send({
-        username: otherUser.username,
-      });
+    const response = await request(server).post("/user-kitchen-membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
+      username: otherUser.username,
+    });
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const invitation = await prisma.userKitchenMembership.findFirst({
@@ -92,13 +84,9 @@ describe("Create User Kitchen Memberships", () => {
         account_visibility: "private",
       },
     });
-    const response = await request(server)
-      .post("/user-kitchen-membership")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send({
-        username: privateUser.username,
-      });
+    const response = await request(server).post("/user-kitchen-membership").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send({
+      username: privateUser.username,
+    });
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });

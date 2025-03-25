@@ -19,18 +19,11 @@ export const NotificationsSection: FC = () => {
         <div className="basis-9/12 flex-col sm:basis-1/2">
           <Label>Allow Push Notifications on this Device</Label>
           {hasGrantedPushNotifications && (
-            <p className="text-xs">
-              You have already granted push notifications on this device. To disable push notifications, look in your
-              system settings.
-            </p>
+            <p className="text-xs">You have already granted push notifications on this device. To disable push notifications, look in your system settings.</p>
           )}
         </div>
         <div className="ml-auto sm:ml-0">
-          <Switch
-            checked={hasGrantedPushNotifications}
-            onCheckedChange={onChangePushNotifications}
-            disabled={!canRequestPushNotifications || hasGrantedPushNotifications}
-          />
+          <Switch checked={hasGrantedPushNotifications} onCheckedChange={onChangePushNotifications} disabled={!canRequestPushNotifications || hasGrantedPushNotifications} />
         </div>
       </div>
     </>

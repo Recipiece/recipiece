@@ -155,9 +155,5 @@ export const PushNotificationContextProvider: FC<PropsWithChildren> = ({ childre
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenManager.isLoggedIn]);
 
-  return (
-    <PushNotificationContext.Provider value={{ requestAndSaveNotificationPermissions }}>
-      {children}
-    </PushNotificationContext.Provider>
-  );
+  return <PushNotificationContext.Provider value={{ requestAndSaveNotificationPermissions }}>{children}</PushNotificationContext.Provider>;
 };

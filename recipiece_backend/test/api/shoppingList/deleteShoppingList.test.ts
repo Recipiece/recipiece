@@ -14,10 +14,7 @@ describe("Delete Shopping List", () => {
   it("should allow a user to delete their shopping list", async () => {
     const shoppingList = await generateShoppingList({ user_id: user.id });
 
-    const response = await request(server)
-      .delete(`/shopping-list/${shoppingList.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).delete(`/shopping-list/${shoppingList.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
 
@@ -33,10 +30,7 @@ describe("Delete Shopping List", () => {
     const otherUser = await generateUser();
     const shoppingList = await generateShoppingList({ user_id: otherUser.id });
 
-    const response = await request(server)
-      .delete(`/shopping-list/${shoppingList.id}`)
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).delete(`/shopping-list/${shoppingList.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
 
@@ -49,10 +43,7 @@ describe("Delete Shopping List", () => {
   });
 
   it("should not delete a non-existent shopping list", async () => {
-    const response = await request(server)
-      .delete("/shopping-list/500000")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).delete("/shopping-list/500000").set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`);
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
 });

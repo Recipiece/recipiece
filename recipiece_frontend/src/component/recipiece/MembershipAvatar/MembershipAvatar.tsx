@@ -52,40 +52,20 @@ export const MembershipAvatar: FC<MembershipAvatarProps> = ({ entity, membership
       {isValidMembershipId && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <div
-              className={SIZE_CLASSNAME_MAP[size]}
-              data-testid={DataTestId.MembershipAvatar.TOOLTIP_TRIGGER(membershipId)}
-            >
+            <div className={SIZE_CLASSNAME_MAP[size]} data-testid={DataTestId.MembershipAvatar.TOOLTIP_TRIGGER(membershipId)}>
               <Avatar className={SIZE_CLASSNAME_MAP[size]}>
                 <AvatarFallback className={cn(SIZE_CLASSNAME_MAP[size], "cursor-pointer bg-primary text-white")}>
                   <LoadingGroup isLoading={isLoadingMembership || isLoadingUser} variant="spinner" className="w-4 h-4">
-                    {!isOwnedByUser && (
-                      <span data-testid={DataTestId.MembershipAvatar.DISPLAY_CONTENT(membershipId)}>
-                        {owner.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    {isOwnedByUser && (
-                      <Share2
-                        data-testid={DataTestId.MembershipAvatar.DISPLAY_CONTENT(membershipId)}
-                        className={ICON_SIZE_CLASSNAME_MAP[size]}
-                      />
-                    )}
+                    {!isOwnedByUser && <span data-testid={DataTestId.MembershipAvatar.DISPLAY_CONTENT(membershipId)}>{owner.charAt(0).toUpperCase()}</span>}
+                    {isOwnedByUser && <Share2 data-testid={DataTestId.MembershipAvatar.DISPLAY_CONTENT(membershipId)} className={ICON_SIZE_CLASSNAME_MAP[size]} />}
                   </LoadingGroup>
                 </AvatarFallback>
               </Avatar>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <>
-              {!!owner && !isOwnedByUser && (
-                <span data-testid={DataTestId.MembershipAvatar.TOOLTIP_CONTENT(membershipId)}>{owner}</span>
-              )}
-            </>
-            <>
-              {isOwnedByUser && (
-                <span data-testid={DataTestId.MembershipAvatar.TOOLTIP_CONTENT(membershipId)}>Shared with others</span>
-              )}
-            </>
+            <>{!!owner && !isOwnedByUser && <span data-testid={DataTestId.MembershipAvatar.TOOLTIP_CONTENT(membershipId)}>{owner}</span>}</>
+            <>{isOwnedByUser && <span data-testid={DataTestId.MembershipAvatar.TOOLTIP_CONTENT(membershipId)}>Shared with others</span>}</>
           </TooltipContent>
         </Tooltip>
       )}

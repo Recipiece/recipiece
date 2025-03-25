@@ -1,9 +1,5 @@
 import { prisma, User } from "@recipiece/database";
-import {
-  generateNotification,
-  generateUserKitchenMembership,
-  generateUserKitchenMembershipNotificationAttachment,
-} from "@recipiece/test";
+import { generateNotification, generateUserKitchenMembership, generateUserKitchenMembershipNotificationAttachment } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
@@ -17,10 +13,7 @@ describe("Delete Notification", () => {
 
   it("should delete a notification you own", async () => {
     const notification = await generateNotification({ user_id: user.id, read_by_user_id: null });
-    const response = await request(server)
-      .delete(`/notification/${notification.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/notification/${notification.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -47,10 +40,7 @@ describe("Delete Notification", () => {
       notification_id: notification.id,
     });
 
-    const response = await request(server)
-      .delete(`/notification/${notification.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/notification/${notification.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -75,10 +65,7 @@ describe("Delete Notification", () => {
       notification_id: notification.id,
     });
 
-    const response = await request(server)
-      .delete(`/notification/${notification.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/notification/${notification.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 
@@ -93,10 +80,7 @@ describe("Delete Notification", () => {
 
   it("should not delete a notification that you do not own", async () => {
     const notification = await generateNotification({ read_by_user_id: null });
-    const response = await request(server)
-      .delete(`/notification/${notification.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/notification/${notification.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 

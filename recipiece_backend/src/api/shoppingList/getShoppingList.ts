@@ -4,10 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { getShoppingListByIdQuery } from "./query";
 
-export const getShoppingList = async (
-  request: AuthenticatedRequest,
-  tx: PrismaTransaction
-): ApiResponse<ShoppingListSchema> => {
+export const getShoppingList = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<ShoppingListSchema> => {
   const user = request.user;
   const listId = +request.params.id;
   const list = await getShoppingListByIdQuery(tx, user, listId).executeTakeFirst();

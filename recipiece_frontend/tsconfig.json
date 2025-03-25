@@ -23,10 +23,5 @@
       "@recipiece/constant": ["../recipiece_common/recipiece_constant/src/index.ts"]
     }
   },
-  "include": [
-    "./src/**/*",
-    "../recipiece_common/recipiece_types/src/**/*",
-    "../recipiece_common/recipiece_conversion/src/**/*",
-    "../recipiece_common/recipiece_constant/src/**/*"
-  ]
+  "include": ["./src/**/*", "../recipiece_common/recipiece_types/src/**/*", "../recipiece_common/recipiece_conversion/src/**/*", "../recipiece_common/recipiece_constant/src/**/*"]
 }

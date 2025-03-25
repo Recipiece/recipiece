@@ -10,8 +10,7 @@ export interface DeleteRecipeDialogProps extends BaseDialogProps<RecipeSchema> {
 
 export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, onClose, onSubmit }) => {
   const [isDisabled, setIsDisabled] = useState(false);
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
-    useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
 
   const onDeleteRecipe = async () => {
     setIsDisabled(true);
@@ -28,8 +27,7 @@ export const DeleteRecipeDialog: FC<DeleteRecipeDialogProps> = ({ recipe, onClos
       <ResponsiveHeader>
         <ResponsiveTitle>Delete {recipe.name}?</ResponsiveTitle>
         <ResponsiveDescription>
-          Click the Delete Recipe button below to permanently delete <i>{recipe.name}</i>. This action is permanent and
-          cannot be undone!
+          Click the Delete Recipe button below to permanently delete <i>{recipe.name}</i>. This action is permanent and cannot be undone!
         </ResponsiveDescription>
       </ResponsiveHeader>
       <ResponsiveFooter className="flex-col-reverse">

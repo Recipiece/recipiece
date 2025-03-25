@@ -13,10 +13,7 @@ import { UserQueryKeys } from "../user";
 import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
 
 export const useCreateShoppingListShareMutation = (
-  args?: MutationArgs<
-    ShoppingListShareSchema,
-    { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }
-  >
+  args?: MutationArgs<ShoppingListShareSchema, { readonly shopping_list_id: number; readonly user_kitchen_membership_id: number }>
 ) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
@@ -83,18 +80,15 @@ export const useCreateShoppingListShareMutation = (
           return undefined;
         }
       );
-      queryClient.setQueryData(
-        ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id),
-        (oldData: ShoppingListSchema | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              shares: [...(oldData.shares ?? []), data],
-            };
-          }
-          return undefined;
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingListSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            shares: [...(oldData.shares ?? []), data],
+          };
         }
-      );
+        return undefined;
+      });
 
       onSuccess?.(data, params, ctx);
     },
@@ -164,18 +158,15 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<unknown, 
           return undefined;
         }
       );
-      queryClient.setQueryData(
-        ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id),
-        (oldData: ShoppingListSchema | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
-            };
-          }
-          return undefined;
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingListSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            shares: (oldData.shares ?? []).filter((share) => share.id !== params.id),
+          };
         }
-      );
+        return undefined;
+      });
 
       onSuccess?.(data, params, ctx);
     },
@@ -183,10 +174,7 @@ export const useDeleteShoppingListShareMutation = (args?: MutationArgs<unknown, 
   });
 };
 
-export const useListShoppingListSharesQuery = (
-  filters: ListShoppingListSharesQuerySchema,
-  args?: QueryArgs<ListShoppingListSharesResponseSchema>
-) => {
+export const useListShoppingListSharesQuery = (filters: ListShoppingListSharesQuerySchema, args?: QueryArgs<ListShoppingListSharesResponseSchema>) => {
   const { getter } = useGet();
 
   const searchParams = filtersToSearchParams(filters);

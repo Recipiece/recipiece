@@ -3,13 +3,7 @@ import { Edit, Eraser, Minus, MoreVertical, Share, Trash } from "lucide-react";
 import React, { createRef, FC, KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  useCreateShoppingListShareMutation,
-  useDeleteShoppingListMutation,
-  useGetSelfQuery,
-  useGetShoppingListByIdQuery,
-  useShoppingListItemsSubscription,
-} from "../../api";
+import { useCreateShoppingListShareMutation, useDeleteShoppingListMutation, useGetSelfQuery, useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
 import {
   Button,
   Divider,
@@ -196,10 +190,7 @@ export const ShoppingListViewPage: FC = () => {
     return shoppingListItems
       .filter((item) => item.completed)
       .filter((item) => {
-        return (
-          item.content.toLowerCase().includes(newestShoppingListItem.toLowerCase()) &&
-          item.content.toLowerCase() !== newestShoppingListItem.toLowerCase()
-        );
+        return item.content.toLowerCase().includes(newestShoppingListItem.toLowerCase()) && item.content.toLowerCase() !== newestShoppingListItem.toLowerCase();
       });
   }, [shoppingListItems, newestShoppingListItem]);
 
@@ -226,7 +217,7 @@ export const ShoppingListViewPage: FC = () => {
             title: "Shopping List Deleted",
             description: "Your shopping list has been deleted.",
           });
-          navigate("/");
+          navigate("/dashboard");
         } catch {
           toast({
             title: "Error Deleting Shopping List",
@@ -253,10 +244,7 @@ export const ShoppingListViewPage: FC = () => {
             shopping_list_id: shoppingList!.id,
             user_kitchen_membership_id: membership.id,
           });
-          const username =
-            membership.source_user.id === user!.id
-              ? membership.destination_user.username
-              : membership.source_user.username;
+          const username = membership.source_user.id === user!.id ? membership.destination_user.username : membership.source_user.username;
           toast({
             title: "Shopping List Shared",
             description: `Your shopping list has been shared with ${username}`,
@@ -314,10 +302,7 @@ export const ShoppingListViewPage: FC = () => {
             <H2 className="flex-grow">{shoppingList?.name}</H2>
             {shoppingList && (
               <>
-                {isMobile &&
-                  mobileMenuPortalRef &&
-                  mobileMenuPortalRef.current &&
-                  createPortal(contextMenu, mobileMenuPortalRef.current)}
+                {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(contextMenu, mobileMenuPortalRef.current)}
                 {!isMobile && <>{contextMenu}</>}
               </>
             )}
@@ -336,9 +321,7 @@ export const ShoppingListViewPage: FC = () => {
                   onChange={onNewestItemTextChange}
                   onKeyDown={onNewItemKeyDown}
                   onBlur={() => setIsAutoCompleteOpen(false)}
-                  onFocus={() =>
-                    setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)
-                  }
+                  onFocus={() => setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)}
                 />
                 <Button variant="outline" onClick={onAddItem}>
                   Add Item
@@ -359,12 +342,7 @@ export const ShoppingListViewPage: FC = () => {
                   <div className="grid grid-cols-1">
                     {autocompleteSuggestions.map((item) => {
                       return (
-                        <Button
-                          className="h-auto justify-start p-1"
-                          variant="ghost"
-                          key={item.id}
-                          onClick={() => onSelectAutocompleteItem(item)}
-                        >
+                        <Button className="h-auto justify-start p-1" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
                           {item.content}
                         </Button>
                       );
@@ -404,12 +382,7 @@ export const ShoppingListViewPage: FC = () => {
             {completeShoppingListItems.map((item) => {
               return (
                 <div key={item.id} className="flex flex-row items-center gap-2 opacity-70">
-                  <CheckableShoppingListItemInput
-                    disabled={isPerformingAction}
-                    shoppingListItem={item}
-                    onCheck={markItemIncomplete}
-                    readOnly
-                  />
+                  <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} readOnly />
                   <Button onClick={() => onDeleteItem(item)} variant="ghost">
                     <Minus className="text-destructive" />
                   </Button>

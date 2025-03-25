@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DataTestId } from "@recipiece/constant";
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useCreateUserMutation } from "../../api";
 import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../component";
+import { TurnstileContext } from "../../context";
 
 const CreateAccountFormSchema = z
   .object({
@@ -35,6 +36,8 @@ type CreateAccountForm = z.infer<typeof CreateAccountFormSchema>;
 export const CreateAccountPage: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getTurnstileToken, isTurnstileEnabled } = useContext(TurnstileContext);
+
   const { mutateAsync: createAccount } = useCreateUserMutation();
 
   const form = useForm<CreateAccountForm>({
@@ -47,11 +50,21 @@ export const CreateAccountPage: FC = () => {
   });
 
   const onSubmit = async (formData: CreateAccountForm) => {
+    let turnstileToken: string | undefined;
+    if (isTurnstileEnabled) {
+      try {
+        turnstileToken = await getTurnstileToken(3000);
+      } catch {
+        turnstileToken = undefined;
+      }
+    }
+
     try {
       await createAccount({
         username: formData.username,
         email: formData.email,
         password: formData.password,
+        turnstileToken: turnstileToken,
       });
       toast({
         title: "Account Created!",
@@ -75,24 +88,9 @@ export const CreateAccountPage: FC = () => {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Stack>
             <FormInput data-testid={DataTestId.RegisterPage.INPUT_EMAIL} type="text" name="email" label="Email" />
-            <FormInput
-              data-testid={DataTestId.RegisterPage.INPUT_USERNAME}
-              type="text"
-              name="username"
-              label="Username"
-            />
-            <FormInput
-              data-testid={DataTestId.RegisterPage.INPUT_PASSWORD}
-              type="password"
-              name="password"
-              label="Password"
-            />
-            <FormInput
-              data-testid={DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD}
-              type="password"
-              name="confirmPassword"
-              label="Confirm Password"
-            />
+            <FormInput data-testid={DataTestId.RegisterPage.INPUT_USERNAME} type="text" name="username" label="Username" />
+            <FormInput data-testid={DataTestId.RegisterPage.INPUT_PASSWORD} type="password" name="password" label="Password" />
+            <FormInput data-testid={DataTestId.RegisterPage.INPUT_CONFIRM_PASSWORD} type="password" name="confirmPassword" label="Confirm Password" />
             <SubmitButton data-testid={DataTestId.RegisterPage.BUTTON_CREATE_ACCOUNT}>Create Account</SubmitButton>
             <Button
               data-testid={DataTestId.RegisterPage.BUTTON_LOGIN}

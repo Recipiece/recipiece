@@ -5,10 +5,7 @@ import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { sendAccountVerificationEmail } from "../../util/email";
 
-export const issueEmailVerificationToken = async (
-  request: AuthenticatedRequest,
-  tx: PrismaTransaction
-): ApiResponse<{}> => {
+export const issueEmailVerificationToken = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const user = request.user;
 
   const accountToken = await tx.userValidationToken.findFirst({

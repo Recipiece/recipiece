@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetMealPlanByIdQuery, useGetSelfQuery, useSetMealPlanConfigurationMutation } from "../../api";
 import { Button, Form, H2, LoadingGroup, SubmitButton, useToast } from "../../component";
-import { GeneralConfigCard } from "./GeneralConfigCard";
 import { MeatConfigCard } from "./MeatConfigCard";
 import { NotificationConfigCard } from "./NotificationConfigCard";
 

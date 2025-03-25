@@ -14,10 +14,7 @@ describe("Delete Meal Plan", () => {
 
   it("should delete a meal plan", async () => {
     const mealPlan = await generateMealPlan({ user_id: user.id });
-    const response = await request(server)
-      .delete(`/meal-plan/${mealPlan.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/meal-plan/${mealPlan.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
@@ -33,10 +30,7 @@ describe("Delete Meal Plan", () => {
     const [_, otherBearerToken] = await fixtures.createUserAndToken();
 
     const mealPlan = await generateMealPlan({ user_id: user.id });
-    const response = await request(server)
-      .delete(`/meal-plan/${mealPlan.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).delete(`/meal-plan/${mealPlan.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 
@@ -62,10 +56,7 @@ describe("Delete Meal Plan", () => {
       meal_plan_id: mealPlan.id,
     });
 
-    const response = await request(server)
-      .delete(`/meal-plan/${mealPlan.id}`)
-      .set("Authorization", `Bearer ${otherBearerToken}`)
-      .send();
+    const response = await request(server).delete(`/meal-plan/${mealPlan.id}`).set("Authorization", `Bearer ${otherBearerToken}`).send();
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
 
     const matchingPlan = await prisma.mealPlan.findFirst({
@@ -88,10 +79,7 @@ describe("Delete Meal Plan", () => {
       },
     });
 
-    const response = await request(server)
-      .delete(`/meal-plan/${mealPlan.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`)
-      .send();
+    const response = await request(server).delete(`/meal-plan/${mealPlan.id}`).set("Authorization", `Bearer ${bearerToken}`).send();
     expect(response.statusCode).toBe(StatusCodes.OK);
 
     const deletedJob = await prisma.sideJob.findFirst({

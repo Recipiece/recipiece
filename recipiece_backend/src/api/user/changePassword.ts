@@ -8,10 +8,7 @@ import { hashPassword } from "../../util/password";
  * Change the users password. This is authenticated through basic auth, so if they were able to get here
  * then we know who they are already.
  */
-export const changePassword = async (
-  request: AuthenticatedRequest<ChangePasswordRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<{}> => {
+export const changePassword = async (request: AuthenticatedRequest<ChangePasswordRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const user = request.user;
   const { new_password } = request.body;
 

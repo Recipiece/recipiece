@@ -4,10 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const setNotificationStatus = async (
-  request: AuthenticatedRequest<SetNotificationStatusRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<NotificationSchema> => {
+export const setNotificationStatus = async (request: AuthenticatedRequest<SetNotificationStatusRequestSchema>, tx: PrismaTransaction): ApiResponse<NotificationSchema> => {
   const user = request.user;
   const { status, id: notificationId } = request.body;
 

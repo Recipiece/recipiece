@@ -3,10 +3,7 @@ import { ShoppingListSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateShoppingList = async (
-  request: AuthenticatedRequest,
-  tx: PrismaTransaction
-): ApiResponse<ShoppingListSchema> => {
+export const updateShoppingList = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<ShoppingListSchema> => {
   const user = request.user;
   const { id, ...restBody } = request.body;
 

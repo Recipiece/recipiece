@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
+import { Constant } from "@recipiece/constant";
 import { prisma, PrismaTransaction, User, UserCredentials, UserKitchenMembership, UserTag, UserValidationToken } from "@recipiece/database";
 import argon2 from "argon2";
 import { emailGenerator, tagGenerator, usernameGenerator } from "../generator";
-import { Constant } from "@recipiece/constant";
 
 export const generateUserTag = async (tag?: Partial<Omit<UserTag, "id">>, tx?: PrismaTransaction) => {
   const userId = tag?.user_id ?? (await generateUser(undefined, tx)).id;

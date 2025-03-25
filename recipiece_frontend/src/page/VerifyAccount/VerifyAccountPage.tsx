@@ -22,12 +22,7 @@ export const VerifyAccountPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput
-            name="token"
-            type="text"
-            label="Token"
-            instructions="Enter the token that was sent to your email address"
-          />
+          <FormInput name="token" type="text" label="Token" instructions="Enter the token that was sent to your email address" />
           <Button type="submit">Verify Account</Button>
         </Stack>
       </form>

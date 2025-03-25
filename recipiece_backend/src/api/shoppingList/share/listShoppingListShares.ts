@@ -27,17 +27,10 @@ export const listShoppingListShares = async (
     .select(() => {
       return KyselyCore.sql<ShoppingList>`to_json(shopping_lists.*)`.as("shopping_list");
     })
-    .innerJoin(
-      "user_kitchen_memberships",
-      "user_kitchen_memberships.id",
-      "shopping_list_shares.user_kitchen_membership_id"
-    )
+    .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "shopping_list_shares.user_kitchen_membership_id")
     .innerJoin("shopping_lists", "shopping_list_shares.shopping_list_id", "shopping_lists.id")
     .where((eb) => {
-      return eb.or([
-        eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-        eb("user_kitchen_memberships.source_user_id", "=", user.id),
-      ]);
+      return eb.or([eb("user_kitchen_memberships.destination_user_id", "=", user.id), eb("user_kitchen_memberships.source_user_id", "=", user.id)]);
     })
     .where((eb) => {
       return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted");

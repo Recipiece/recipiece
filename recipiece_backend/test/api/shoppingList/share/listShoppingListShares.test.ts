@@ -136,50 +136,47 @@ describe("List Shopping List Shares", () => {
     expect(actualIds).toEqual(expectedIds);
   });
 
-  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
-    "should not list shares belonging to a membership with status %o",
-    async (membershipStatus) => {
-      const shoppingLists = [];
-      for (let i = 0; i < 3; i++) {
-        shoppingLists.push(await generateShoppingList({ user_id: user.id }));
-      }
-
-      // make some noise
-      await generateShoppingList();
-      await generateShoppingList();
-
-      const membership = await generateUserKitchenMembership({
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: membershipStatus,
-      });
-
-      const shares = [];
-      for (let shoppingList of shoppingLists) {
-        shares.push(
-          await generateShoppingListShare({
-            shopping_list_id: shoppingList.id,
-            user_kitchen_membership_id: membership.id,
-          })
-        );
-      }
-
-      const response = await request(server)
-        .get("/shopping-list/share/list")
-        .query(<ListShoppingListSharesQuerySchema>{
-          from_self: true,
-          page_number: 0,
-        })
-        .set("Authorization", `Bearer ${bearerToken}`)
-        .send();
-
-      expect(response.statusCode).toBe(StatusCodes.OK);
-
-      const responseBody: ListShoppingListSharesResponseSchema = response.body;
-
-      expect(responseBody.data.length).toBe(0);
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])("should not list shares belonging to a membership with status %o", async (membershipStatus) => {
+    const shoppingLists = [];
+    for (let i = 0; i < 3; i++) {
+      shoppingLists.push(await generateShoppingList({ user_id: user.id }));
     }
-  );
+
+    // make some noise
+    await generateShoppingList();
+    await generateShoppingList();
+
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: membershipStatus,
+    });
+
+    const shares = [];
+    for (let shoppingList of shoppingLists) {
+      shares.push(
+        await generateShoppingListShare({
+          shopping_list_id: shoppingList.id,
+          user_kitchen_membership_id: membership.id,
+        })
+      );
+    }
+
+    const response = await request(server)
+      .get("/shopping-list/share/list")
+      .query(<ListShoppingListSharesQuerySchema>{
+        from_self: true,
+        page_number: 0,
+      })
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .send();
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+
+    const responseBody: ListShoppingListSharesResponseSchema = response.body;
+
+    expect(responseBody.data.length).toBe(0);
+  });
 
   it.each([true, false])("should list shares belonging only to a single membership", async (isUserSourceUser) => {
     const shoppingLists = [];

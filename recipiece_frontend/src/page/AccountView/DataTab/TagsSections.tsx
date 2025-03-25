@@ -33,19 +33,14 @@ export const TagsSection: FC = () => {
     <Stack>
       <H3>Tags</H3>
       <p className="text-sm">
-        Below are all of your tags. Tags are automatically created when you tag Recipes while editing/creating them. You
-        can remove a tag by clicking on it here.
+        Below are all of your tags. Tags are automatically created when you tag Recipes while editing/creating them. You can remove a tag by clicking on it here.
       </p>
       <LoadingGroup isLoading={isLoadingUserTags} variant="spinner" className="mr-auto h-6 w-6">
         <div className="flex flex-row flex-wrap gap-2">
           {(userTags?.data ?? []).length === 0 && <p className="text-center text-sm">You have no tags.</p>}
           {userTags?.data.map((tag) => {
             return (
-              <Badge
-                className="cursor-pointer dark:text-white"
-                key={tag.id}
-                onClick={() => !isDeletingTag && onTagClicked(tag)}
-              >
+              <Badge className="cursor-pointer dark:text-white" key={tag.id} onClick={() => !isDeletingTag && onTagClicked(tag)}>
                 {tag.content} <XIcon size={12} className="ml-2" />
               </Badge>
             );

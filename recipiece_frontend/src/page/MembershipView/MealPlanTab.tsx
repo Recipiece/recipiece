@@ -41,9 +41,7 @@ export const MealPlanTab: FC<TabProps> = ({ userKitchenMembershipId }) => {
   return (
     <LoadingGroup variant="spinner" className="text-center w-6 h-6" isLoading={isLoadingSharesFromUser}>
       <div className="flex flex-col gap-2">
-        {sharesFromUser?.data?.length === 0 && (
-          <span className="text-center">You haven&apos;t shared any meal plans with this user.</span>
-        )}
+        {sharesFromUser?.data?.length === 0 && <span className="text-center">You haven&apos;t shared any meal plans with this user.</span>}
         {(sharesFromUser?.data ?? []).map((share) => {
           return (
             <div key={share.id} className="flex flex-row gap-2 items-center border-b pb-2">
@@ -57,9 +55,7 @@ export const MealPlanTab: FC<TabProps> = ({ userKitchenMembershipId }) => {
             </div>
           );
         })}
-        {sharesFromUser && (sharesFromUser?.data?.length ?? 0) !== 0 && (
-          <Pager page={pageNumber} onPage={setPageNumber} hasNextPage={sharesFromUser.has_next_page} />
-        )}
+        {sharesFromUser && (sharesFromUser?.data?.length ?? 0) !== 0 && <Pager page={pageNumber} onPage={setPageNumber} hasNextPage={sharesFromUser.has_next_page} />}
       </div>
     </LoadingGroup>
   );

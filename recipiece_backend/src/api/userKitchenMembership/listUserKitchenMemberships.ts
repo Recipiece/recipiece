@@ -9,16 +9,7 @@ export const listUserKitchenMemberships = async (
   request: AuthenticatedRequest<any, ListUserKitchenMembershipsQuerySchema>,
   tx: PrismaTransaction
 ): ApiResponse<ListUserKitchenMembershipsResponseSchema> => {
-  const {
-    targeting_self,
-    from_self,
-    page_number,
-    page_size,
-    status = UserKitchenInvitationStatus.ALL_STATUSES,
-    entity_filter,
-    entity_id,
-    entity_type,
-  } = request.query;
+  const { targeting_self, from_self, page_number, page_size, status = UserKitchenInvitationStatus.ALL_STATUSES, entity_filter, entity_id, entity_type } = request.query;
 
   const actualPageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
 

@@ -79,10 +79,7 @@ const IngredientFormUnitInput: FC<{
   useEffect(() => {
     if (currentUnit?.length >= 1) {
       const newUnits = UNIT_AUTOCOMPLETE_OPTIONS.filter((opt) => {
-        return (
-          opt.toLowerCase().startsWith(currentUnit.toLowerCase().trim()) &&
-          opt.toLowerCase() !== currentUnit.toLowerCase().trim()
-        );
+        return opt.toLowerCase().startsWith(currentUnit.toLowerCase().trim()) && opt.toLowerCase() !== currentUnit.toLowerCase().trim();
       });
       setCurrentAutocompleteItems(newUnits);
     } else {
@@ -165,17 +162,8 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
   return (
     // @ts-expect-error merge refs type def is funky
     <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
-      <div
-        data-testid={DataTestId.RecipeEditPage.DIV_INGREDIENT_DROP_TARGET(index)}
-        ref={dragRef}
-        className="flex flex-row sm:block"
-      >
-        {draggable && (
-          <Grip
-            data-testid={DataTestId.RecipeEditPage.INGREDIENT_DRAG_HANDLE(index)}
-            className="m-0 h-full flex-shrink cursor-grab p-0 text-primary"
-          />
-        )}
+      <div data-testid={DataTestId.RecipeEditPage.DIV_INGREDIENT_DROP_TARGET(index)} ref={dragRef} className="flex flex-row sm:block">
+        {draggable && <Grip data-testid={DataTestId.RecipeEditPage.INGREDIENT_DRAG_HANDLE(index)} className="m-0 h-full flex-shrink cursor-grab p-0 text-primary" />}
         <Button
           data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_INGREDIENT(index)}
           className="m-0 ml-auto block p-0 sm:hidden"
@@ -246,13 +234,7 @@ export const IngredientsForm: FC<IngredientsFormProps> = () => {
     <div>
       <div className="mb-4 flex flex-row items-center">
         <h1 className="inline text-lg">Ingredients</h1>
-        <Button
-          data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_INGREDIENT}
-          type="button"
-          onClick={addIngredient}
-          variant="secondary"
-          className="ml-auto"
-        >
+        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_INGREDIENT} type="button" onClick={addIngredient} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Ingredient
         </Button>
@@ -260,13 +242,7 @@ export const IngredientsForm: FC<IngredientsFormProps> = () => {
       {ingredientsFieldArray.fields.map((fieldArrayValue, index) => {
         return (
           <Fragment key={fieldArrayValue.id}>
-            <IngredientFormItem
-              onKeyDown={onKeyDown}
-              draggable={ingredientsFieldArray.fields.length > 1}
-              index={index}
-              onRemove={removeIngredient}
-              onMove={onMoveIngredient}
-            />
+            <IngredientFormItem onKeyDown={onKeyDown} draggable={ingredientsFieldArray.fields.length > 1} index={index} onRemove={removeIngredient} onMove={onMoveIngredient} />
           </Fragment>
         );
       })}

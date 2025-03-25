@@ -62,18 +62,11 @@ const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggabl
       <div className="flex flex-row items-center gap-2">
         {draggable && (
           <div data-testid={DataTestId.RecipeEditPage.DIV_STEP_DROP_TARGET(index)} ref={dragRef}>
-            <Grip
-              data-testid={DataTestId.RecipeEditPage.STEP_DRAG_HANDLE(index)}
-              className="cursor-grab text-primary"
-            />
+            <Grip data-testid={DataTestId.RecipeEditPage.STEP_DRAG_HANDLE(index)} className="cursor-grab text-primary" />
           </div>
         )}
         <p className="mr-auto leading-6">Step {index + 1}</p>
-        <Button
-          data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_STEP(index)}
-          variant="link"
-          onClick={() => onRemove(index)}
-        >
+        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_STEP(index)} variant="link" onClick={() => onRemove(index)}>
           <Minus className="text-destructive" />
         </Button>
       </div>
@@ -120,13 +113,7 @@ export const StepsForm: FC<StepsFormProps> = () => {
     <div>
       <div className="mb-2 flex flex-row items-center">
         <h1 className="inline text-lg">Steps</h1>
-        <Button
-          data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_STEP}
-          type="button"
-          onClick={addStep}
-          variant="secondary"
-          className="ml-auto"
-        >
+        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_STEP} type="button" onClick={addStep} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Step
         </Button>
@@ -134,12 +121,7 @@ export const StepsForm: FC<StepsFormProps> = () => {
       {stepsFieldArray.fields.map((fieldArrayValue, index) => {
         return (
           <Fragment key={fieldArrayValue.id}>
-            <StepFormItem
-              draggable={stepsFieldArray.fields.length > 1}
-              index={index}
-              onRemove={removeStep}
-              onMove={moveStep}
-            />
+            <StepFormItem draggable={stepsFieldArray.fields.length > 1} index={index} onRemove={removeStep} onMove={moveStep} />
           </Fragment>
         );
       })}

@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useGetSelfQuery } from "../../../api";
-import { H2, H3, LoadingGroup, Stack } from "../../../component";
+import { H2, LoadingGroup, Stack } from "../../../component";
 import { NotificationsSection } from "./NotificationsSection";
 import { PrivacySection } from "./PrivacySection";
 import { ThemeSection } from "./ThemeSection";

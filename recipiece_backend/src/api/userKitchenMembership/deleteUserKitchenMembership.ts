@@ -5,10 +5,7 @@ import { ApiResponse, AuthenticatedRequest } from "../../types";
 /**
  * Allow a user to delete a membership
  */
-export const deleteUserKitchenMembership = async (
-  request: AuthenticatedRequest,
-  tx: PrismaTransaction
-): ApiResponse<{}> => {
+export const deleteUserKitchenMembership = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const entityId = +request.params.id;
   const existingInvitation = await tx.userKitchenMembership.findFirst({
     where: {

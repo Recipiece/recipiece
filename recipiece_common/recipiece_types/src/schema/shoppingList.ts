@@ -1,6 +1,5 @@
 import { array, boolean, date, InferType, number, object, string } from "yup";
 import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
-import { YUserKitchenMembershipSchema } from "./user";
 
 export const YShoppingListItemSchema = object({
   id: number().required(),

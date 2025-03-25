@@ -26,12 +26,7 @@ export const NotFound: FC<NotFoundProps> = ({ message, backNav, dataTestId }) =>
         {messageToDisplay}
       </p>
       {backNav && (
-        <Button
-          data-testid={DataTestId.NotFound.BUTTON_GO_BACK(dataTestId)}
-          onClick={() => navigate(backNav)}
-          type="button"
-          variant="link"
-        >
+        <Button data-testid={DataTestId.NotFound.BUTTON_GO_BACK(dataTestId)} onClick={() => navigate(backNav)} type="button" variant="link">
           Go Back
         </Button>
       )}

@@ -9,16 +9,14 @@ export interface DeleteCookbookDialogProps extends BaseDialogProps<CookbookSchem
 }
 
 export const DeleteCookbookDialog: FC<DeleteCookbookDialogProps> = ({ cookbook, onClose, onSubmit }) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } =
-    useResponsiveDialogComponents();
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveFooter, ResponsiveTitle } = useResponsiveDialogComponents();
 
   return (
     <ResponsiveContent className="p-6">
       <ResponsiveHeader>
         <ResponsiveTitle>Delete {cookbook.name}?</ResponsiveTitle>
         <ResponsiveDescription>
-          Click the Delete Cookbook button below to permanently delete <i>{cookbook.name}</i>. This action is permanent
-          and cannot be undone!
+          Click the Delete Cookbook button below to permanently delete <i>{cookbook.name}</i>. This action is permanent and cannot be undone!
         </ResponsiveDescription>
       </ResponsiveHeader>
       <ResponsiveFooter className="flex-col-reverse">

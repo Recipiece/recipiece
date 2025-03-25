@@ -7,10 +7,7 @@ import { DateTime } from "luxon";
 import { ApiResponse } from "../../types";
 import { hashPassword } from "../../util/password";
 
-export const resetPassword = async (
-  request: Request<any, any, ResetPasswordRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<{}> => {
+export const resetPassword = async (request: Request<any, any, ResetPasswordRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const { password, token } = request.body;
 
   const accountToken = await tx.userValidationToken.findUnique({

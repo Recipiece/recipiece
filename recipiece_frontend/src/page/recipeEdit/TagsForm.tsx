@@ -105,12 +105,7 @@ export const TagsForm: FC = () => {
       <div className="flex flex-row flex-wrap gap-2">
         {fields.map((field, idx) => {
           return (
-            <Badge
-              data-testid={DataTestId.RecipeEditPage.BADGE_TAG(field.content)}
-              className="cursor-pointer dark:text-white"
-              key={field.id}
-              onClick={() => remove(idx)}
-            >
+            <Badge data-testid={DataTestId.RecipeEditPage.BADGE_TAG(field.content)} className="cursor-pointer dark:text-white" key={field.id} onClick={() => remove(idx)}>
               {field.content} <XIcon size={12} className="ml-2" />
             </Badge>
           );

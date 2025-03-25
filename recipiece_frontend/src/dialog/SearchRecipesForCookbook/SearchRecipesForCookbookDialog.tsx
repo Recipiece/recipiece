@@ -10,13 +10,8 @@ export interface SearchRecipesForCookbookDialogProps extends BaseDialogProps<Rec
   readonly cookbook: CookbookSchema;
 }
 
-export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogProps> = ({
-  onClose,
-  onSubmit,
-  cookbook,
-}) => {
-  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } =
-    useResponsiveDialogComponents();
+export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogProps> = ({ onClose, onSubmit, cookbook }) => {
+  const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [search, setSearch] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
@@ -39,10 +34,7 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
     if (cookbook.user_id !== user?.id && cookbook.user_kitchen_membership_id) {
       return {
         ...base,
-        user_kitchen_membership_ids: [
-          Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER,
-          cookbook.user_kitchen_membership_id.toString(),
-        ],
+        user_kitchen_membership_ids: [Constant.USER_KITCHEN_MEMBERSHIP_IDS_USER, cookbook.user_kitchen_membership_id.toString()],
       };
     } else {
       return {
@@ -94,25 +86,19 @@ export const SearchRecipesForCookbookDialog: FC<SearchRecipesForCookbookDialogPr
         <ResponsiveDescription>Search for a recipe to add to your cookbook.</ResponsiveDescription>
       </ResponsiveHeader>
       <Stack>
-        <Input
-          type="text"
-          value={debouncedSearchTerm}
-          onChange={(event) => setDebouncedSearchTerm(event.target.value)}
-        />
+        <Input type="text" value={debouncedSearchTerm} onChange={(event) => setDebouncedSearchTerm(event.target.value)} />
         <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="h-6 w-6">
           {(recipeData?.data || []).map((recipe) => {
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>
-                <div className="flex flex-row gap-2 items-center">
+                <div className="flex flex-row gap-2 items-center overflow-hidden">
                   <MembershipAvatar entity={recipe} membershipId={recipe.user_kitchen_membership_id} size="small" />
                   {recipe.name}
                 </div>
               </Button>
             );
           })}
-          {!!recipeData && recipeData.data.length === 0 && (
-            <p className="text-sm">No recipes found, try searching for something else.</p>
-          )}
+          {!!recipeData && recipeData.data.length === 0 && <p className="text-sm">No recipes found, try searching for something else.</p>}
         </LoadingGroup>
       </Stack>
       <ResponsiveFooter>

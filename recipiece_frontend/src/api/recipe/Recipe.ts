@@ -31,11 +31,7 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeS
   });
 };
 
-export const useListRecipesToAddToCookbook = (
-  search: string,
-  cookbook_id: number,
-  args?: QueryArgs<ListRecipesResponseSchema>
-) => {
+export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponseSchema>) => {
   let filters: Partial<ListRecipesQuerySchema> = {
     cookbook_id: cookbook_id,
     cookbook_attachments_filter: "exclude",
@@ -65,10 +61,7 @@ export const useListRecipesToAddToCookbook = (
   });
 };
 
-export const useListRecipesForMealPlanQuery = (
-  filters: ListRecipesQuerySchema,
-  args?: QueryArgs<ListRecipesResponseSchema>
-) => {
+export const useListRecipesForMealPlanQuery = (filters: ListRecipesQuerySchema, args?: QueryArgs<ListRecipesResponseSchema>) => {
   const { getter } = useGet();
 
   const searchParams = new URLSearchParams();
@@ -141,6 +134,22 @@ export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, Create
       queryClient.setQueriesData(
         {
           queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["ALL"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["USER"],
+            })
+          ),
         },
         oldDataCreator(data)
       );
@@ -264,7 +273,28 @@ export const useForkRecipeMutation = (args?: MutationArgs<RecipeSchema, { readon
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataCreator(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["ALL"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["USER"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,

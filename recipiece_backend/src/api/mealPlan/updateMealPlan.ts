@@ -3,10 +3,7 @@ import { MealPlanSchema, UpdateMealPlanRequestSchema, YMealPlanConfigurationSche
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const updateMealPlan = async (
-  request: AuthenticatedRequest<UpdateMealPlanRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<MealPlanSchema> => {
+export const updateMealPlan = async (request: AuthenticatedRequest<UpdateMealPlanRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanSchema> => {
   const { id: userId } = request.user;
   const { id: mealPlanId, ...restMealPlan } = request.body;
 

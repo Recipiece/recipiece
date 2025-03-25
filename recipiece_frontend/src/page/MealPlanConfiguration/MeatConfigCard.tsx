@@ -1,14 +1,5 @@
 import { FC } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-  FormSelect,
-  Label,
-  PreferenceEntry,
-  SelectItem,
-} from "../../component";
+import { Card, CardContent, CardDescription, CardTitle, FormSelect, Label, PreferenceEntry, SelectItem } from "../../component";
 
 export const MeatConfigCard: FC = () => {
   return (
@@ -32,10 +23,7 @@ export const MeatConfigCard: FC = () => {
             <PreferenceEntry>
               <>
                 <Label>Preferred Thawing Method</Label>
-                <p className="text-xs">
-                  How you prefer to defrost frozen meat. Notifications will only be sent when you are defrosting in the
-                  fridge or cold water.
-                </p>
+                <p className="text-xs">How you prefer to defrost frozen meat. Notifications will only be sent when you are defrosting in the fridge or cold water.</p>
               </>
 
               <FormSelect name="meats.preferred_thawing_method">

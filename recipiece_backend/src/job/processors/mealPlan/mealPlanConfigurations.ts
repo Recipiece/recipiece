@@ -34,10 +34,7 @@ export const processMealPlanConfigurationUpdate = async (job: Job) => {
     await tx.$kysely
       .deleteFrom("side_jobs")
       .where((eb) => {
-        return eb.or([
-          eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM),
-          eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION),
-        ]);
+        return eb.or([eb("side_jobs.type", "=", JobType.MEAL_PLAN_ITEM), eb("side_jobs.type", "=", JobType.MEAL_PLAN_NOTIFICATION)]);
       })
       .where(() => {
         return KyselyCore.sql`(side_jobs.job_data->>'meal_plan_id')::int = ${mealPlan.id}`;

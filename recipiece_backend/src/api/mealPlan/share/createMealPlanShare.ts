@@ -8,10 +8,7 @@ import { sendMealPlanSharedPushNotification } from "../../../util/pushNotificati
 /**
  * Allow a user to share a meal plan they own with another user.
  */
-export const createMealPlanShare = async (
-  request: AuthenticatedRequest<CreateMealPlanShareRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<MealPlanShareSchema> => {
+export const createMealPlanShare = async (request: AuthenticatedRequest<CreateMealPlanShareRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanShareSchema> => {
   const { meal_plan_id, user_kitchen_membership_id } = request.body;
   const user = request.user;
 
@@ -70,11 +67,7 @@ export const createMealPlanShare = async (
     });
     if (subscriptions.length > 0) {
       subscriptions.forEach(async (sub) => {
-        await sendMealPlanSharedPushNotification(
-          sub,
-          membership.source_user_id === user.id ? membership.destination_user : membership.source_user,
-          mealPlan
-        );
+        await sendMealPlanSharedPushNotification(sub, membership.source_user_id === user.id ? membership.destination_user : membership.source_user, mealPlan);
       });
     }
 

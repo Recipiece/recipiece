@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@marsidev/react-turnstile": "^1.1.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-checkbox": "^1.1.2",
@@ -74,7 +75,6 @@
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.26.0",
     "@eslint/js": "^9.19.0",
-    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@svgr/webpack": "^5.5.0",
     "@types/convert-units": "^2.3.11",
     "@types/fork-ts-checker-webpack-plugin": "^0.4.5",
@@ -99,6 +99,7 @@
     "jest-resolve": "^27.4.2",
     "jest-watch-typeahead": "^1.0.0",
     "prettier": "^3.4.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "resolve-url-loader": "^4.0.0",
     "sass-loader": "^12.3.0",

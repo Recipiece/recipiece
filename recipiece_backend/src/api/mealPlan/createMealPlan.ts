@@ -3,10 +3,7 @@ import { CreateMealPlanRequestSchema, MealPlanSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const createMealPlan = async (
-  request: AuthenticatedRequest<CreateMealPlanRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<MealPlanSchema> => {
+export const createMealPlan = async (request: AuthenticatedRequest<CreateMealPlanRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanSchema> => {
   const { id: userId } = request.user;
   const mealPlanBody = request.body;
 

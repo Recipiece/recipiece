@@ -4,10 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { ConflictError } from "../../util/error";
 
-export const createCookbook = async (
-  req: AuthenticatedRequest<CreateCookbookRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<CookbookSchema> => {
+export const createCookbook = async (req: AuthenticatedRequest<CreateCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<CookbookSchema> => {
   const cookbookBody = req.body;
   const user = req.user;
 

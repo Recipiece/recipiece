@@ -7,10 +7,7 @@ import { DateTime } from "luxon";
 import { ApiResponse } from "../../types";
 import { sendForgotPasswordEmail } from "../../util/email";
 
-export const issueForgotPasswordToken = async (
-  request: Request<any, any, IssueForgotPasswordTokenRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<{}> => {
+export const issueForgotPasswordToken = async (request: Request<any, any, IssueForgotPasswordTokenRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const { username_or_email } = request.body;
 
   const matchingUser = await tx.user.findFirst({

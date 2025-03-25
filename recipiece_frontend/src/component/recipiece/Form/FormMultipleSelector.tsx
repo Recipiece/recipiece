@@ -3,16 +3,7 @@
 import { DataTestId } from "@recipiece/constant";
 import { FC } from "react";
 import { useFormContext } from "react-hook-form";
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  MultipleSelector,
-  MultipleSelectorProps,
-} from "../../shadcn";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, MultipleSelector, MultipleSelectorProps } from "../../shadcn";
 
 export interface FormMultipleSelectorProps extends MultipleSelectorProps {
   readonly name: string;
@@ -36,9 +27,7 @@ export const FormMultipleSelector: FC<FormMultipleSelectorProps> = ({ name, labe
           <FormControl>
             <MultipleSelector data-testid={dataTestId} {...field} {...restProps} />
           </FormControl>
-          {instructions && (
-            <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>
-          )}
+          {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
           <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
         </FormItem>
       )}

@@ -13,14 +13,7 @@ export interface FormSwitchProps extends PropsWithChildren {
   readonly disabled?: boolean;
 }
 
-export const FormSwitch: FC<FormSwitchProps> = ({
-  name,
-  instructions,
-  label,
-  className,
-  disabled,
-  ...restInputProps
-}) => {
+export const FormSwitch: FC<FormSwitchProps> = ({ name, instructions, label, className, disabled, ...restInputProps }) => {
   const form = useFormContext();
 
   // @ts-expect-error data test id is not type on the props
@@ -31,23 +24,13 @@ export const FormSwitch: FC<FormSwitchProps> = ({
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem
-          data-testid={DataTestId.Form.CONTAINER(dataTestId)}
-          className={cn("flex flex-col gap-2 pt-1", className)}
-        >
+        <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)} className={cn("flex flex-col gap-2 pt-1", className)}>
           {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
           <FormControl>
-            <Switch
-              data-testid={dataTestId}
-              disabled={disabled}
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
+            <Switch data-testid={dataTestId} disabled={disabled} checked={field.value} onCheckedChange={field.onChange} />
           </FormControl>
           <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
-          {instructions && (
-            <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>
-          )}
+          {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
         </FormItem>
       )}
     />

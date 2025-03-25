@@ -15,25 +15,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useLayout } from "../../hooks";
 import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
-import {
-  filtersToSearchParams,
-  getWebsocketUrl,
-  MutationArgs,
-  QueryArgs,
-  useDelete,
-  useGet,
-  usePost,
-  usePut,
-} from "../Request";
+import { filtersToSearchParams, getWebsocketUrl, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { ShoppingListQueryKeys } from "./ShoppingListQueryKeys";
 
 export const useShoppingListItemsSubscription = (shoppingListId: number) => {
   const queryClient = useQueryClient();
-  const {
-    data: wsSession,
-    isLoading: isLoadingWsSession,
-    isFetching: isFetchingWsSession,
-  } = useRequestShoppingListSessionQuery(+shoppingListId!);
+  const { data: wsSession, isLoading: isLoadingWsSession, isFetching: isFetchingWsSession } = useRequestShoppingListSessionQuery(+shoppingListId!);
 
   const [isWebsocketLoading, setIsWebsocketLoading] = useState(true);
   const [isPerformingAction, setIsPerformingAction] = useState(false);
@@ -58,18 +45,15 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
       onMessage: (event) => {
         const { responding_to_action, items } = YModifyShoppingListResponse.cast(JSON.parse(event.data));
         if (responding_to_action !== "__ping__" && !!items) {
-          queryClient.setQueryData(
-            ShoppingListQueryKeys.GET_SHOPPING_LIST(shoppingListId),
-            (oldData: ShoppingListSchema | undefined) => {
-              if (oldData) {
-                return {
-                  ...oldData,
-                  items: [...items],
-                };
-              }
-              return undefined;
+          queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(shoppingListId), (oldData: ShoppingListSchema | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                items: [...items],
+              };
             }
-          );
+            return undefined;
+          });
           queryClient.setQueriesData(
             {
               queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
@@ -245,10 +229,7 @@ export const useShoppingListItemsSubscription = (shoppingListId: number) => {
   };
 };
 
-export const useRequestShoppingListSessionQuery = (
-  listId: number,
-  args?: QueryArgs<RequestShoppingListSessionResponseSchema>
-) => {
+export const useRequestShoppingListSessionQuery = (listId: number, args?: QueryArgs<RequestShoppingListSessionResponseSchema>) => {
   const { getter } = useGet();
   const { isMobile } = useLayout();
 
@@ -289,10 +270,7 @@ export const useGetShoppingListByIdQuery = (listId: number, args?: QueryArgs<Sho
   });
 };
 
-export const useListShoppingListsQuery = (
-  filters: ListShoppingListsQuerySchema,
-  args?: QueryArgs<ListShoppingListsResponseSchema>
-) => {
+export const useListShoppingListsQuery = (filters: ListShoppingListsQuerySchema, args?: QueryArgs<ListShoppingListsResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
@@ -425,18 +403,12 @@ export const useDeleteShoppingListMutation = (args?: MutationArgs<unknown, Shopp
 };
 
 export const useAppendShoppingListItemsMutation = (
-  args?: MutationArgs<
-    ShoppingListItemSchema[],
-    { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItemSchema>[] }
-  >
+  args?: MutationArgs<ShoppingListItemSchema[], { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItemSchema>[] }>
 ) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (body: {
-    readonly shopping_list_id: number;
-    readonly items: Partial<ShoppingListItemSchema>[];
-  }) => {
+  const mutation = async (body: { readonly shopping_list_id: number; readonly items: Partial<ShoppingListItemSchema>[] }) => {
     const response = await poster<typeof body, ShoppingListItemSchema[]>({
       path: "/shopping-list/append-items",
       body: body,
@@ -450,18 +422,15 @@ export const useAppendShoppingListItemsMutation = (
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, params, ctx) => {
-      queryClient.setQueryData(
-        ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id),
-        (oldData: ShoppingListSchema | undefined) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              items: [...data],
-            };
-          }
-          return undefined;
+      queryClient.setQueryData(ShoppingListQueryKeys.GET_SHOPPING_LIST(params.shopping_list_id), (oldData: ShoppingListSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            items: [...data],
+          };
         }
-      );
+        return undefined;
+      });
       queryClient.setQueriesData(
         {
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),

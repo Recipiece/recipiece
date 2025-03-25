@@ -10,15 +10,7 @@ export interface TypeaheadInputProps extends InputProps {
   readonly popoverClassName?: string;
 }
 
-export const TypeaheadInput: FC<TypeaheadInputProps> = ({
-  autocompleteOptions,
-  popoverClassName,
-  onSelectItem,
-  onFocus,
-  onBlur,
-  isLoading,
-  ...restInputProps
-}) => {
+export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, popoverClassName, onSelectItem, onFocus, onBlur, isLoading, ...restInputProps }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 

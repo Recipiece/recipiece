@@ -30,10 +30,7 @@ export const listMealPlanShares = async (
     .innerJoin("user_kitchen_memberships", "user_kitchen_memberships.id", "meal_plan_shares.user_kitchen_membership_id")
     .innerJoin("meal_plans", "meal_plan_shares.meal_plan_id", "meal_plans.id")
     .where((eb) => {
-      return eb.or([
-        eb("user_kitchen_memberships.destination_user_id", "=", user.id),
-        eb("user_kitchen_memberships.source_user_id", "=", user.id),
-      ]);
+      return eb.or([eb("user_kitchen_memberships.destination_user_id", "=", user.id), eb("user_kitchen_memberships.source_user_id", "=", user.id)]);
     })
     .where((eb) => {
       return eb(eb.cast("user_kitchen_memberships.status", "text"), "=", "accepted");

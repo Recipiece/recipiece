@@ -7,10 +7,7 @@ import { JobType } from "../../../util/constant";
 import { getRecipeByIdQuery } from "../../recipe/query";
 import { getMealPlanByIdQuery } from "../query";
 
-export const createItemForMealPlan = async (
-  request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<MealPlanItemSchema> => {
+export const createItemForMealPlan = async (request: AuthenticatedRequest<CreateMealPlanItemRequestSchema>, tx: PrismaTransaction): ApiResponse<MealPlanItemSchema> => {
   const user = request.user;
   const { meal_plan_id, ...restMealPlanItem } = request.body;
 

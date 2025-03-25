@@ -15,9 +15,7 @@ describe("Get Meal Plan", () => {
   it("should allow a user to get a meal plan", async () => {
     const existingMealPlan = await generateMealPlan({ user_id: user.id });
 
-    const response = await request(server)
-      .get(`/meal-plan/${existingMealPlan.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/meal-plan/${existingMealPlan.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     const mealPlanBody = response.body as MealPlanSchema;
@@ -27,9 +25,7 @@ describe("Get Meal Plan", () => {
   it("should not retrieve a meal plan that is not shared and does not belong to the requesting user", async () => {
     const existingMealPlan = await generateMealPlan();
 
-    const response = await request(server)
-      .get(`/meal-plan/${existingMealPlan.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/meal-plan/${existingMealPlan.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
   });
@@ -51,9 +47,7 @@ describe("Get Meal Plan", () => {
       user_kitchen_membership_id: membership.id,
     });
 
-    const response = await request(server)
-      .get(`/meal-plan/${othersMealPlan.id}`)
-      .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/meal-plan/${othersMealPlan.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     const responseData: MealPlanSchema = response.body;
@@ -63,27 +57,22 @@ describe("Get Meal Plan", () => {
     expect(responseData.shares![0].meal_plan_id).toBe(othersMealPlan.id);
   });
 
-  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])(
-    "should not get a shared meal plan where the membership has a status of %o",
-    async (status) => {
-      const otherMealPlan = await generateMealPlan();
+  it.each(<UserKitchenMembershipStatus[]>["pending", "denied"])("should not get a shared meal plan where the membership has a status of %o", async (status) => {
+    const otherMealPlan = await generateMealPlan();
 
-      const membership = await generateUserKitchenMembership({
-        source_user_id: otherMealPlan.user_id,
-        destination_user_id: user.id,
-        status: status,
-      });
+    const membership = await generateUserKitchenMembership({
+      source_user_id: otherMealPlan.user_id,
+      destination_user_id: user.id,
+      status: status,
+    });
 
-      const share = await generateMealPlanShare({
-        meal_plan_id: otherMealPlan.id,
-        user_kitchen_membership_id: membership.id,
-      });
+    const share = await generateMealPlanShare({
+      meal_plan_id: otherMealPlan.id,
+      user_kitchen_membership_id: membership.id,
+    });
 
-      const response = await request(server)
-        .get(`/meal-plan/${otherMealPlan.id}`)
-        .set("Authorization", `Bearer ${bearerToken}`);
+    const response = await request(server).get(`/meal-plan/${otherMealPlan.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
-      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
-    }
-  );
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+  });
 });

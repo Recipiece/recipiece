@@ -6,10 +6,7 @@ import { ConflictError } from "../../util/error";
 import { getRecipeByIdQuery } from "../recipe/query";
 import { getCookbookByIdQuery } from "./query";
 
-export const addRecipeToCookbook = async (
-  req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>,
-  tx: PrismaTransaction
-): ApiResponse<{}> => {
+export const addRecipeToCookbook = async (req: AuthenticatedRequest<AddRecipeToCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const attachBody = req.body;
   const user = req.user;
 

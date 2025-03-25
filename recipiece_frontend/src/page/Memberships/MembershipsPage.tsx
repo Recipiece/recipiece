@@ -4,21 +4,8 @@ import { Check, OctagonX } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext } from "react";
 import { createPortal } from "react-dom";
-import {
-  useGetSelfQuery,
-  useListUserKitchenMembershipsQuery,
-  useUpdatePendingUserKitchenMembershipMutation,
-} from "../../api";
-import {
-  Button,
-  Divider,
-  H2,
-  H3,
-  LoadingGroup,
-  MembershipAvatar,
-  RecipieceMenuBarContext,
-  useToast,
-} from "../../component";
+import { useGetSelfQuery, useListUserKitchenMembershipsQuery, useUpdatePendingUserKitchenMembershipMutation } from "../../api";
+import { Button, Divider, H2, H3, LoadingGroup, MembershipAvatar, RecipieceMenuBarContext, useToast } from "../../component";
 import { useLayout } from "../../hooks";
 import { MembershipsContextMenu } from "./MembershipsContextMenu";
 
@@ -42,8 +29,7 @@ export const MembershipsPage: FC = () => {
     page_number: 0,
   });
 
-  const { mutateAsync: updatePendingMembership, isPending: isUpdatingPendingMembership } =
-    useUpdatePendingUserKitchenMembershipMutation();
+  const { mutateAsync: updatePendingMembership, isPending: isUpdatingPendingMembership } = useUpdatePendingUserKitchenMembershipMutation();
 
   const onAcceptMembership = useCallback(
     async (membership: UserKitchenMembershipSchema) => {
@@ -95,36 +81,21 @@ export const MembershipsPage: FC = () => {
     <div className="flex flex-col gap-2">
       <div className="flex flex-row gap-2">
         <H2 className="flex-grow">Kitchens</H2>
-        {isMobile &&
-          mobileMenuPortalRef &&
-          mobileMenuPortalRef.current &&
-          createPortal(<MembershipsContextMenu />, mobileMenuPortalRef.current)}
+        {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(<MembershipsContextMenu />, mobileMenuPortalRef.current)}
         {!isMobile && <>{<MembershipsContextMenu />}</>}
       </div>
       <p className="text-sm">Manage yours and others&apos; kitchens</p>
-      <LoadingGroup
-        isLoading={isLoadingAcceptedMemberships || isLoadingPendingMemberships || isLoadingUser}
-        variant="spinner"
-        className="w-6 h-6"
-      >
+      <LoadingGroup isLoading={isLoadingAcceptedMemberships || isLoadingPendingMemberships || isLoadingUser} variant="spinner" className="w-6 h-6">
         {!!pendingMemberships?.data?.length && <H3>Pending Invites</H3>}
         {(pendingMemberships?.data ?? []).map((membership) => {
           return (
             <div key={membership.id} className="flex flex-row gap-2">
               <div className="flex flex-col gap-2 mr-auto">
-                <div
-                  className="flex flex-row gap-2"
-                  data-testid={DataTestId.MembershipsPage.PENDING_MEMBERSHIP_NAME(membership.id)}
-                >
+                <div className="flex flex-row gap-2" data-testid={DataTestId.MembershipsPage.PENDING_MEMBERSHIP_NAME(membership.id)}>
                   <MembershipAvatar membershipId={membership.id} size="small" />
-                  {membership.source_user.id === user!.id
-                    ? membership.destination_user.username
-                    : membership.source_user.username}
+                  {membership.source_user.id === user!.id ? membership.destination_user.username : membership.source_user.username}
                 </div>
-                <span
-                  data-testid={DataTestId.MembershipsPage.PENDING_MEMBERSHIP_SENT_AT(membership.id)}
-                  className="text-xs"
-                >
+                <span data-testid={DataTestId.MembershipsPage.PENDING_MEMBERSHIP_SENT_AT(membership.id)} className="text-xs">
                   Sent on {DateTime.fromJSDate(membership.created_at).toLocaleString(DateTime.DATE_MED)}
                 </span>
               </div>
@@ -157,14 +128,8 @@ export const MembershipsPage: FC = () => {
           return (
             <div key={membership.id} className="flex flex-row gap-2 items-center">
               <MembershipAvatar membershipId={membership.id} size="small" />
-              <a
-                data-testid={DataTestId.MembershipsPage.LINK_ACCEPTED_MEMBERSHIP(membership.id)}
-                href={`/memberships/${membership.id}`}
-                className="hover:underline"
-              >
-                {membership.source_user.id === user!.id
-                  ? membership.destination_user.username
-                  : membership.source_user.username}
+              <a data-testid={DataTestId.MembershipsPage.LINK_ACCEPTED_MEMBERSHIP(membership.id)} href={`/memberships/${membership.id}`} className="hover:underline">
+                {membership.source_user.id === user!.id ? membership.destination_user.username : membership.source_user.username}
               </a>
             </div>
           );

@@ -3,16 +3,7 @@ import { MoreVertical, Plus, Trash } from "lucide-react";
 import { FC, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAttachRecipeToCookbookMutation, useDeleteCookbookMutation, useGetSelfQuery } from "../../api";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  LoadingGroup,
-  useToast,
-} from "../../component";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, LoadingGroup, useToast } from "../../component";
 import { DialogContext } from "../../context";
 
 export const CookbookContextMenu: FC<{ readonly cookbook: CookbookSchema }> = ({ cookbook }) => {

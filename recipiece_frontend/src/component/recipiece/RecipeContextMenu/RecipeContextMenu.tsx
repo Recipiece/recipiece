@@ -1,18 +1,6 @@
 import { DataTestId } from "@recipiece/constant";
-import { CookbookSchema, RecipeSchema, ShoppingListSchema, UserKitchenMembershipSchema } from "@recipiece/types";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Book,
-  BookMinus,
-  Edit,
-  RefreshCw,
-  Scaling,
-  Share,
-  ShoppingBasket,
-  Trash,
-  Utensils,
-} from "lucide-react";
+import { CookbookSchema, RecipeSchema, ShoppingListSchema } from "@recipiece/types";
+import { ArrowDownLeft, ArrowUpRight, Book, BookMinus, Edit, RefreshCw, Scaling, ShoppingBasket, Trash, Utensils } from "lucide-react";
 import { FC, Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -221,10 +209,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
     if (canReset) {
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_RESET_CHANGES(dataTestId)}
-          onClick={() => onReset?.()}
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_RESET_CHANGES(dataTestId)} onClick={() => onReset?.()}>
           <RefreshCw /> Reset Changes
         </DropdownMenuItem>
       );
@@ -237,28 +222,19 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     const items = [];
     if (canScale) {
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_HALF_RECIPE(dataTestId)}
-          onClick={() => onScale?.(0.5)}
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_HALF_RECIPE(dataTestId)} onClick={() => onScale?.(0.5)}>
           <ArrowDownLeft />
           1/2 Recipe
         </DropdownMenuItem>
       );
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_DOUBLE_RECIPE(dataTestId)}
-          onClick={() => onScale?.(2)}
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_DOUBLE_RECIPE(dataTestId)} onClick={() => onScale?.(2)}>
           <ArrowUpRight />
           2x Recipe
         </DropdownMenuItem>
       );
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_SCALE_CUSTOM(dataTestId)}
-          onClick={onCustomScaleRecipe}
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_SCALE_CUSTOM(dataTestId)} onClick={onCustomScaleRecipe}>
           <Scaling />
           Scale Custom
         </DropdownMenuItem>
@@ -274,10 +250,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     if (canAddToCookbook) {
       if (isMobile) {
         items.push(
-          <DropdownMenuItem
-            data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_COOKBOOK(dataTestId)}
-            onClick={mobileOnAddToCookbook}
-          >
+          <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_COOKBOOK(dataTestId)} onClick={mobileOnAddToCookbook}>
             <Book />
             Add to Cookbook
           </DropdownMenuItem>
@@ -314,10 +287,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     if (canAddToShoppingList) {
       if (isMobile) {
         items.push(
-          <DropdownMenuItem
-            data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_SHOPPING_LIST(dataTestId)}
-            onClick={mobileOnAddToShoppingList}
-          >
+          <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_SHOPPING_LIST(dataTestId)} onClick={mobileOnAddToShoppingList}>
             <ShoppingBasket /> Add to Shopping List
           </DropdownMenuItem>
         );
@@ -370,10 +340,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     const items = [];
     if (canFork) {
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_FORK_RECIPE(dataTestId)}
-          onClick={onForkRecipe}
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_FORK_RECIPE(dataTestId)} onClick={onForkRecipe}>
           <Utensils /> Fork This Recipe
         </DropdownMenuItem>
       );
@@ -381,10 +348,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
     if (canEdit) {
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_EDIT_RECIPE(dataTestId)}
-          onClick={() => navigate(`/recipe/edit/${recipe!.id}`)}
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_EDIT_RECIPE(dataTestId)} onClick={() => navigate(`/recipe/edit/${recipe!.id}`)}>
           <Edit /> Edit This Recipe
         </DropdownMenuItem>
       );
@@ -397,11 +361,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     const items = [];
     if (canRemoveFromCookbook) {
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_REMOVE_FROM_COOKBOOK(dataTestId)}
-          onClick={onRemoveRecipeFromCookbook}
-          className="text-destructive"
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_REMOVE_FROM_COOKBOOK(dataTestId)} onClick={onRemoveRecipeFromCookbook} className="text-destructive">
           <BookMinus /> Remove from Cookbook
         </DropdownMenuItem>
       );
@@ -409,11 +369,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
     if (canDelete) {
       items.push(
-        <DropdownMenuItem
-          data-testid={DataTestId.RecipeContextMenu.BUTTON_DELETE_RECIPE(dataTestId)}
-          onClick={onDeleteRecipe}
-          className="text-destructive"
-        >
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_DELETE_RECIPE(dataTestId)} onClick={onDeleteRecipe} className="text-destructive">
           <Trash /> Delete Recipe
         </DropdownMenuItem>
       );

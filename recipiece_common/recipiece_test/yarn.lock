@@ -792,6 +792,11 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
+prettier-plugin-organize-imports@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-organize-imports/-/prettier-plugin-organize-imports-4.1.0.tgz#f3d3764046a8e7ba6491431158b9be6ffd83b90f"
+  integrity sha512-5aWRdCgv645xaa58X8lOxzZoiHAldAPChljr/MT0crXVOWTZ+Svl4hIWlz+niYSlO6ikE5UXkN1JrRvIP2ut0A==
+
 prettier@^3.4.2:
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.4.2.tgz#a5ce1fb522a588bf2b78ca44c6e6fe5aa5a2b13f"

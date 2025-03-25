@@ -3,10 +3,7 @@ import { UserKitchenMembershipSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const getUserKitchenMembership = async (
-  request: AuthenticatedRequest,
-  tx: PrismaTransaction
-): ApiResponse<UserKitchenMembershipSchema> => {
+export const getUserKitchenMembership = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<UserKitchenMembershipSchema> => {
   const membershipId = +request.params.id;
   const user = request.user;
 
