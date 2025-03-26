@@ -195,6 +195,7 @@ model Recipe {
   duration_ms Int?
   servings Int?
   metadata Json?
+  image_key String?
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id Int

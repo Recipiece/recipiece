@@ -1,8 +1,12 @@
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PrismaTransaction } from "@recipiece/database";
 import { RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { s3 } from "../../util/s3";
 import { getRecipeByIdQuery } from "./query";
+import { Environment } from "../../util/environment";
 
 /**
  * Get a recipe by id.
@@ -24,5 +28,11 @@ export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction
     ];
   }
 
-  return [StatusCodes.OK, YRecipeSchema.cast(recipe)];
+  const castRecipe = YRecipeSchema.cast(recipe);
+
+  if (recipe.image_key) {
+    castRecipe.image_url = `${Environment.S3_CDN_ENDPOINT}/${recipe.image_key}`;
+  }
+
+  return [StatusCodes.OK, castRecipe];
 };

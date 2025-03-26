@@ -32,3 +32,9 @@ export class BadRequestError extends ApiError {
     super(message, StatusCodes.BAD_REQUEST);
   }
 }
+
+export class ContentTooLargeError extends ApiError {
+  constructor(message: string) {
+    super(message, StatusCodes.REQUEST_TOO_LONG);
+  }
+}

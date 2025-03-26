@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Prisma, prisma, PrismaTransaction, Recipe, RecipeIngredient, RecipeStep, RecipeTagAttachment, User, UserTag } from "@recipiece/database";
 import { generateUser, generateUserTag } from "./user";
+import * as ImageGenerator from "js-image-generator";
 
 export const INGREDIENT_UNIT_CHOICES = ["cups", "c", "tablespoons", "tbs", "tbsp", "teaspoons", "tsp", "tsps", "grams", "g", "kilograms", "ounces", "pounds", "lbs"];
 
@@ -124,6 +125,11 @@ export const generateRecipeIngredient = async (recipeIngredient?: Partial<Omit<R
 
 export const generateRecipe = async (recipe?: Partial<Omit<Recipe, "id">>, tx?: PrismaTransaction): Promise<Recipe> => {
   const userId = recipe?.user_id ?? (await generateUser(undefined, tx)).id;
+
+  const shouldGenerateImage = recipe?.image_key === null;
+  if(shouldGenerateImage) {
+    
+  }
 
   return await (tx ?? prisma).recipe.create({
     data: {

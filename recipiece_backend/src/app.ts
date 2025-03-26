@@ -105,11 +105,19 @@ ROUTES.forEach((route) => {
       res.status(statusCode).send(sanitizedBody);
     } catch (err) {
       console.error(err);
+
       if (err instanceof ApiError) {
+        // if we raised an api error, send it here
         res.status(err.statusCode).send({
           message: err.message,
         });
+      } else if ((err as { readonly code: string })?.code === "LIMIT_FILE_SIZE") {
+        // multer raised this because our middleware limited file size
+        res.status(StatusCodes.REQUEST_TOO_LONG).send({
+          message: "Provided file was too large",
+        });
       } else {
+        // if we raised an
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
           message: "Internal Error",
         });

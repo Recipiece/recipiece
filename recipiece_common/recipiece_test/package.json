@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.4.0",
-    "argon2": "^0.41.1"
+    "argon2": "^0.41.1",
+    "js-image-generator": "^1.0.4"
   }
 }

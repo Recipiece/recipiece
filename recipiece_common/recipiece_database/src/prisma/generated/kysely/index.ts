@@ -73,6 +73,7 @@ export type Recipe = {
     duration_ms: number | null;
     servings: number | null;
     metadata: unknown | null;
+    image_key: string | null;
     user_id: number;
 };
 export type RecipeCookbookAttachment = {

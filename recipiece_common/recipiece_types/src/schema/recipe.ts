@@ -1,5 +1,5 @@
 import { Constant } from "@recipiece/constant";
-import { array, date, InferType, number, object, string } from "yup";
+import { array, date, InferType, mixed, number, object, string } from "yup";
 import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YUserTagSchema } from "./user";
 
@@ -31,6 +31,8 @@ export const YRecipeSchema = object({
   steps: array().of(YRecipeStepSchema).notRequired(),
   tags: array().of(YUserTagSchema).notRequired(),
   user_kitchen_membership_id: number().notRequired(),
+  // this is intentionally not the image_key
+  image_url: string().notRequired(),
 }).noUnknown();
 
 export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
