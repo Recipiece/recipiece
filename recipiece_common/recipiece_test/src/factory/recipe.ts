@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
+import { Constant } from "@recipiece/constant";
 import { Prisma, prisma, PrismaTransaction, Recipe, RecipeIngredient, RecipeStep, RecipeTagAttachment, User, UserTag } from "@recipiece/database";
 import { generateUser, generateUserTag } from "./user";
-import * as ImageGenerator from "js-image-generator";
+import { createAndUploadFakeImage } from "./util";
 
 export const INGREDIENT_UNIT_CHOICES = ["cups", "c", "tablespoons", "tbs", "tbsp", "teaspoons", "tsp", "tsps", "grams", "g", "kilograms", "ounces", "pounds", "lbs"];
 
@@ -126,11 +127,6 @@ export const generateRecipeIngredient = async (recipeIngredient?: Partial<Omit<R
 export const generateRecipe = async (recipe?: Partial<Omit<Recipe, "id">>, tx?: PrismaTransaction): Promise<Recipe> => {
   const userId = recipe?.user_id ?? (await generateUser(undefined, tx)).id;
 
-  const shouldGenerateImage = recipe?.image_key === null;
-  if(shouldGenerateImage) {
-    
-  }
-
   return await (tx ?? prisma).recipe.create({
     data: {
       user_id: userId,
@@ -139,8 +135,24 @@ export const generateRecipe = async (recipe?: Partial<Omit<Recipe, "id">>, tx?: 
       description: recipe?.description ?? faker.word.words({ count: { min: 5, max: 20 } }),
       servings: recipe?.servings ?? faker.number.int({ min: 1, max: 100 }),
       created_at: recipe?.created_at ?? new Date(),
+      image_key: recipe?.image_key,
     },
   });
+};
+
+export const generateRecipeImage = async <RcpType extends Recipe | FullRecipeOutput>(recipe: RcpType, tx?: PrismaTransaction): Promise<RcpType> => {
+  const newKey = `${Constant.RecipeImage.keyFor(recipe.user_id, recipe.id)}.jpg`;
+  await createAndUploadFakeImage(newKey);
+
+  const updatedRecipe = await (tx ?? prisma).recipe.update({
+    where: { id: recipe.id },
+    data: { image_key: newKey },
+  });
+
+  return {
+    ...recipe,
+    ...updatedRecipe,
+  }
 };
 
 export const generateRecipeTagAttachment = async (attachment?: Partial<RecipeTagAttachment>, tx?: PrismaTransaction): Promise<RecipeTagAttachment> => {

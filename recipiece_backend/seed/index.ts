@@ -1,3 +1,4 @@
+import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 import { faker } from "@faker-js/faker";
 import { prisma } from "@recipiece/database";
 import {
@@ -7,6 +8,7 @@ import {
   generateMealPlanItem,
   generateRecipe,
   generateRecipeCookbookAttachment,
+  generateRecipeImage,
   generateRecipeWithIngredientsAndSteps,
   generateShoppingList,
   generateShoppingListWithItems,
@@ -19,6 +21,39 @@ import { DateTime } from "luxon";
 
 const deleteExistingUsers = async () => {
   await prisma.user.deleteMany();
+
+  try {
+    const s3 = new S3Client({
+      endpoint: process.env.APP_S3_ENDPOINT!,
+      credentials: {
+        accessKeyId: process.env.APP_S3_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.APP_S3_SECRET_KEY!,
+      },
+    });
+
+    const listObjectsCommand = new ListObjectsV2Command({
+      Bucket: process.env.APP_S3_BUCKET,
+    });
+
+    const listObjectsResponse = await s3.send(listObjectsCommand);
+    const keys = (listObjectsResponse.Contents ?? []).map((obj) => {
+      return obj.Key;
+    });
+
+    if (keys.length > 0) {
+      const deleteObjectsCommand = new DeleteObjectsCommand({
+        Bucket: process.env.APP_S3_BUCKET,
+        Delete: {
+          Objects: keys.map((k) => {
+            return { Key: k };
+          }),
+        },
+      });
+      await s3.send(deleteObjectsCommand);
+    }
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 const seedDevUser = async () => {
@@ -37,12 +72,14 @@ const seedDevUser = async () => {
 
   const gennedRecipes = [];
   for (let i = 0; i < 120; i++) {
-    const recipe = await generateRecipeWithIngredientsAndSteps({
+    let recipe = await generateRecipeWithIngredientsAndSteps({
       user_id: user.id,
     });
+    if (i % 2 === 0) {
+      recipe = await generateRecipeImage(recipe);
+    }
     gennedRecipes.push(recipe);
   }
-
   for (let i = 0; i < 13; i++) {
     const cookbook = await generateCookbook({
       user_id: user.id,

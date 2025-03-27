@@ -1,19 +1,18 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
-import { SetRecipeImageRequestSchema, YSetRecipeImageRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { s3 } from "../../util/s3";
 
 
-export const setRecipeImage = async (request: AuthenticatedRequest<SetRecipeImageRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
+export const setRecipeImage = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const { user } = request;
-  const { recipe_id } = YSetRecipeImageRequestSchema.cast(request.body);
+  const { recipe_id } = request.body;
 
   const recipe = await tx.recipe.findUnique({
     where: {
-      id: recipe_id,
+      id: +recipe_id,
       user_id: user.id,
     },
   });
@@ -41,7 +40,7 @@ export const setRecipeImage = async (request: AuthenticatedRequest<SetRecipeImag
   await s3.send(putObjectCommand);
   await tx.recipe.update({
     where: {
-      id: recipe_id,
+      id: +recipe_id,
     },
     data: {
       image_key: key,

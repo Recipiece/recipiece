@@ -1,5 +1,6 @@
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Constant } from "@recipiece/constant";
-import { Recipe, User, UserKitchenMembershipStatus } from "@recipiece/database";
+import { prisma, Recipe, User, UserKitchenMembershipStatus } from "@recipiece/database";
 import {
   generateCookbook,
   generateRecipe,
@@ -12,7 +13,10 @@ import {
 } from "@recipiece/test";
 import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import request from "supertest";
+import { s3 } from "../../../src/util/s3";
 
 describe("List Recipes", () => {
   let user: User;
@@ -288,6 +292,52 @@ describe("List Recipes", () => {
     expect(responseRecipes.length).toBe(10);
     responseRecipes.forEach((rcp) => {
       expect(rcp.id).not.toBe(attachment.recipe_id);
+    });
+  });
+
+  it("should set image urls on recipes that have an image", async () => {
+    // generate some recipes
+    const recipes = [];
+    for (let i = 0; i < 10; i++) {
+      recipes.push(await generateRecipe({ name: `s3.${i}`, user_id: user.id }));
+    }
+
+    // set the images up for the first 5
+    for (let i = 0; i < 5; i++) {
+      const recipe = recipes[i];
+      const s3Key = `${Constant.RecipeImage.keyFor(user.id, recipe.id)}.png`;
+
+      const putRequest = new PutObjectCommand({
+        Bucket: process.env.APP_S3_BUCKET,
+        Key: s3Key,
+        Body: readFileSync(path.join(__dirname, "../../test_files/test_image.png")),
+      });
+      await s3.send(putRequest);
+
+      await prisma.recipe.update({
+        where: { id: recipe.id },
+        data: { image_key: s3Key },
+      });
+    }
+
+    const response = await request(server)
+      .get("/recipe/list")
+      .query({
+        page_number: 0,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseData: ListRecipesResponseSchema = response.body;
+
+    responseData.data.forEach((responseRecipe) => {
+      const parsedName = responseRecipe.name.split(".");
+      const num = Number.parseInt(parsedName[1]);
+
+      if (num < 5) {
+        expect(responseRecipe.image_url).toBeTruthy();
+      }
     });
   });
 

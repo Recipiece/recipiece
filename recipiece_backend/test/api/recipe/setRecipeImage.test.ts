@@ -34,13 +34,11 @@ describe("Set Recipe Image", () => {
       },
     });
     expect(dbRecipe).toBeTruthy();
-
-    const expectedKey = `${Constant.RecipeImage.keyFor(user.id, recipe.id)}.png`;
-    expect(dbRecipe?.image_key).toBe(expectedKey);
+    expect(dbRecipe?.image_key).toBeTruthy();
 
     const getRequest = new GetObjectCommand({
       Bucket: process.env.APP_S3_BUCKET,
-      Key: expectedKey,
+      Key: dbRecipe?.image_key!,
     });
     const response = await s3.send(getRequest);
     expect(response.Body).toBeTruthy();

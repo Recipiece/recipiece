@@ -31,7 +31,7 @@ export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction
   const castRecipe = YRecipeSchema.cast(recipe);
 
   if (recipe.image_key) {
-    castRecipe.image_url = `${Environment.S3_CDN_ENDPOINT}/${recipe.image_key}`;
+    castRecipe.image_url = `${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${recipe.image_key}`;
   }
 
   return [StatusCodes.OK, castRecipe];

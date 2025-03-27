@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import request from "supertest";
 import { s3 } from "../../../src/util/s3";
+import { Environment } from "../../../src/util/environment";
 
 describe("Get Recipe", () => {
   let user: User;
@@ -80,6 +81,17 @@ describe("Get Recipe", () => {
       Body: readFileSync(path.join(__dirname, "../../test_files/test_image.png")),
     });
     await s3.send(putRequest);
-    
+
+    await prisma.recipe.update({
+      where: { id: recipe.id },
+      data: { image_key: expectedKey },
+    });
+
+    const response = await request(server).get(`/recipe/${recipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseRecipe: RecipeSchema = response.body;
+
+    expect(responseRecipe.image_url).toBeTruthy();
+    expect(responseRecipe.image_url).toBe(`${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${expectedKey}`);
   });
 });
