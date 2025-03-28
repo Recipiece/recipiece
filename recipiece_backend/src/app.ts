@@ -22,6 +22,7 @@ import {
 import { WebsocketRequest } from "./types";
 import { ApiError } from "./util/error";
 import { Logger } from "./util/logger";
+import { Environment } from "./util/environment";
 
 const app = new WebSocketExpress();
 const logger = Logger.getLogger({
@@ -34,7 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan(":method :url :status - :response-time ms"));
 
-if (process.env.APP_ENVIRONMENT === "dev") {
+if (Environment.ENVIRONMENT === "dev") {
   // slow things down locally, cause they're too fast
   app.use((req: Request, res: Response, next: NextFunction) => {
     setTimeout(() => {
@@ -44,7 +45,7 @@ if (process.env.APP_ENVIRONMENT === "dev") {
 }
 
 app.get("/", (_, res) => {
-  res.status(StatusCodes.OK).send({ version: process.env.APP_VERSION });
+  res.status(StatusCodes.OK).send({ version: Environment.VERSION });
 });
 
 ROUTES.forEach((route) => {

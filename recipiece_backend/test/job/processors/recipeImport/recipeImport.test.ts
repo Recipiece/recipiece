@@ -9,6 +9,8 @@ import path from "path";
 import { gzipSync } from "zlib";
 import { importRecipes } from "../../../../src/job/processors";
 import { JobType, RecipeImportFiles } from "../../../../src/util/constant";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { s3 } from "../../../../src/util/s3";
 
 describe("Import Recipes", () => {
   describe("From Paprika", () => {
@@ -167,6 +169,14 @@ describe("Import Recipes", () => {
       expect(secondCreatedRecipe).toBeTruthy();
       expect(secondCreatedRecipe!.user_id).toBe(user.id);
       expect(secondCreatedRecipe!.description).toBe(rawPaprikaRecipe02.description);
+      expect(secondCreatedRecipe!.image_key).toBeTruthy();
+
+      const getObjectCommand = new GetObjectCommand({
+        Bucket: process.env.APP_S3_BUCKET,
+        Key: secondCreatedRecipe!.image_key!,
+      });
+      const response = await s3.send(getObjectCommand);
+      expect(response.Body).toBeTruthy();
     });
   });
 });

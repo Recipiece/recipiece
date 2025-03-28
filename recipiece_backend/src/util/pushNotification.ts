@@ -1,18 +1,18 @@
 import { MealPlan, prisma, ShoppingList, User, UserPushNotificationSubscription } from "@recipiece/database";
 import webpush, { PushSubscription, WebPushError } from "web-push";
+import { Environment } from "./environment";
 
-if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
-  const { APP_EMAIL_ADDRESS, APP_VAPID_PUBLIC_KEY, APP_VAPID_PRIVATE_KEY } = process.env;
-  webpush.setVapidDetails(`mailto:${APP_EMAIL_ADDRESS}`, APP_VAPID_PUBLIC_KEY!, APP_VAPID_PRIVATE_KEY!);
+if (Environment.ENABLE_PUSH_NOTIFICATIONS && Environment.VAPID_PUBLIC_KEY && Environment.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(`mailto:${Environment.EMAIL_ADDRESS}`, Environment.VAPID_PUBLIC_KEY, Environment.VAPID_PRIVATE_KEY);
 }
 
 export const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
   try {
-    if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
+    if (Environment.ENABLE_PUSH_NOTIFICATIONS) {
       await webpush.sendNotification(subscription.subscription_data as unknown as PushSubscription, JSON.stringify(payload));
       return Promise.resolve();
     } else {
-      console.log(`APP_ENABLE_PUSH_NOTIFICATIONS is set to ${process.env.APP_ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`);
+      console.log(`environment ENABLE_PUSH_NOTIFICATIONS is set to ${Environment.ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`);
       console.log("would have sent");
       console.log(payload);
       console.log(`to subscription ${subscription.subscription_data}`);

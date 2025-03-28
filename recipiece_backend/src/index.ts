@@ -1,9 +1,10 @@
 import { prisma, Redis } from "@recipiece/database";
 import app from "./app";
 import { closeWorkers } from "./job/workers";
+import { Environment } from "./util/environment";
 
-const server = app.listen(+process.env.APP_PORT!, () => {
-  console.log(`listening for connections on ${process.env.APP_PORT}`);
+const server = app.listen(Environment.PORT, () => {
+  console.log(`listening for connections on ${Environment.PORT}`);
 });
 
 const shutdown = async () => {

@@ -6,6 +6,7 @@ import { DateTime } from "luxon";
 import { ApiResponse } from "../../types";
 import { VERSION_ACCESS_LEVELS } from "../../util/constant";
 import { hashPassword } from "../../util/password";
+import { Environment } from "../../util/environment";
 
 export const createUser = async (request: Request<any, any, CreateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<UserSchema> => {
   const { username, email, password } = request.body;
@@ -62,7 +63,7 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
       },
       user_access_records: {
         create: {
-          access_levels: VERSION_ACCESS_LEVELS[process.env.APP_VERSION!] ?? ["free"],
+          access_levels: VERSION_ACCESS_LEVELS[Environment.VERSION] ?? ["free"],
           start_date: DateTime.utc().toJSDate(),
         },
       },

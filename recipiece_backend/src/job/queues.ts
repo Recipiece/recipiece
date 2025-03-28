@@ -1,8 +1,9 @@
 import { Queue } from "bullmq";
+import { Environment } from "../util/environment";
 
 export const mealPlanConfigurationQueue = new Queue("MealPlanConfigurations", {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
     enableOfflineQueue: false,
   },
   defaultJobOptions: {
@@ -12,7 +13,7 @@ export const mealPlanConfigurationQueue = new Queue("MealPlanConfigurations", {
 
 export const mealPlanNotificationsQueue = new Queue("MealPlanNotifications", {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
     enableOfflineQueue: false,
   },
   defaultJobOptions: {
@@ -22,7 +23,7 @@ export const mealPlanNotificationsQueue = new Queue("MealPlanNotifications", {
 
 export const recipeImportQueue = new Queue("RecipeImports", {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
     enableOfflineQueue: false,
   },
   defaultJobOptions: {
@@ -32,7 +33,7 @@ export const recipeImportQueue = new Queue("RecipeImports", {
 
 export const mealPlanItemQueue = new Queue("MealPlanItems", {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
     enableOfflineQueue: false,
   },
   defaultJobOptions: {

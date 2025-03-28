@@ -1,5 +1,6 @@
 import { prisma } from "@recipiece/database";
 import { Job, Worker } from "bullmq";
+import { Environment } from "../util/environment";
 import { importRecipes, processMealPlanConfigurationUpdate, processMealPlanItem, processMealPlanNotification } from "./processors";
 
 const attachLogging = (worker: Worker) => {
@@ -41,7 +42,7 @@ const jobWrapper = (fn: (job: Job) => any) => {
 
 const configsWorker = new Worker("MealPlanConfigurations", jobWrapper(processMealPlanConfigurationUpdate), {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
   },
   concurrency: 20,
 });
@@ -49,7 +50,7 @@ attachLogging(configsWorker);
 
 const mealPlanNotificationsWorker = new Worker("MealPlanNotifications", jobWrapper(processMealPlanNotification), {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
   },
   concurrency: 20,
 });
@@ -57,7 +58,7 @@ attachLogging(mealPlanNotificationsWorker);
 
 const recipeImportWorker = new Worker("RecipeImports", jobWrapper(importRecipes), {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
   },
   concurrency: 10,
 });
@@ -65,7 +66,7 @@ attachLogging(recipeImportWorker);
 
 const mealPlanItemsWorker = new Worker("MealPlanItems", jobWrapper(processMealPlanItem), {
   connection: {
-    url: process.env.REDIS_QUEUE_URL!,
+    url: Environment.REDIS_QUEUE_URL,
   },
   concurrency: 20,
 });

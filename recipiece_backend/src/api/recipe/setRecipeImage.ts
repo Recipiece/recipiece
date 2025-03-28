@@ -33,7 +33,7 @@ export const setRecipeImage = async (request: AuthenticatedRequest, tx: PrismaTr
 
   const putObjectCommand = new PutObjectCommand({
     Body: file.buffer,
-    Bucket: process.env.APP_S3_BUCKET,
+    Bucket: Environment.S3_BUCKET,
     Key: key,
     ContentType: file.mimetype,
   });

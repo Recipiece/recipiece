@@ -3,6 +3,7 @@ import { PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { s3 } from "../../util/s3";
+import { Environment } from "../../util/environment";
 
 export const deleteRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{ readonly deleted: boolean }> => {
   const recipeId = +req.params.id;
@@ -40,7 +41,7 @@ export const deleteRecipe = async (req: AuthenticatedRequest, tx: PrismaTransact
   });
   if (recipe.image_key) {
     const deleteRequest = new DeleteObjectCommand({
-      Bucket: process.env.APP_S3_BUCKET,
+      Bucket: Environment.S3_BUCKET,
       Key: recipe.image_key,
     });
     await s3.send(deleteRequest);

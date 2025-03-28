@@ -3,12 +3,13 @@ import { ParsedFromURLRecipe, ParseRecipeFromURLRequestSchema, ParseRecipeFromUR
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UnprocessableEntityError } from "../../util/error";
+import { Environment } from "../../util/environment";
 
 export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>, _: PrismaTransaction): ApiResponse<ParseRecipeFromURLResponseSchema> => {
   const recipeBody = req.body;
 
   try {
-    const url = `${process.env.APP_RECIPE_PARSER_SERVICE_URL!}/recipe/parse`;
+    const url = `${Environment.RECIPE_PARSER_SERVICE_URL}/recipe/parse`;
     const response = await fetch(url, {
       method: "POST",
       body: JSON.stringify({
