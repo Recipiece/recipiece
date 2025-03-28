@@ -1,12 +1,13 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
+import { SetRecipeImageResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { Environment } from "../../util/environment";
 import { s3 } from "../../util/s3";
 
-
-export const setRecipeImage = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
+export const setRecipeImage = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<SetRecipeImageResponseSchema> => {
   const { user } = request;
   const { recipe_id } = request.body;
 
@@ -47,5 +48,10 @@ export const setRecipeImage = async (request: AuthenticatedRequest, tx: PrismaTr
     },
   });
 
-  return [StatusCodes.OK, {}];
+  return [
+    StatusCodes.OK,
+    {
+      image_url: `${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${key}`,
+    },
+  ];
 };

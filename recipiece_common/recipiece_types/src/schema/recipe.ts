@@ -1,5 +1,5 @@
 import { Constant } from "@recipiece/constant";
-import { array, date, InferType, mixed, number, object, string } from "yup";
+import { array, date, InferType, number, object, string } from "yup";
 import { generateYListQueryResponseSchema, YListQuerySchema } from "./list";
 import { YUserTagSchema } from "./user";
 
@@ -170,3 +170,12 @@ export const YForkRecipeRequestSchema = object({
 }).noUnknown();
 
 export interface ForkRecipeRequestSchema extends InferType<typeof YForkRecipeRequestSchema> {}
+
+/**
+ * Set Recipe Image
+ */
+export const YSetRecipeImageResponseSchema = object({
+  image_url: string().required(),
+});
+
+export interface SetRecipeImageResponseSchema extends InferType<typeof YSetRecipeImageResponseSchema> {}

@@ -3,9 +3,11 @@ import {
   ListRecipesQuerySchema,
   ListRecipesResponseSchema,
   RecipeSchema,
+  SetRecipeImageResponseSchema,
   UpdateRecipeRequestSchema,
   YListRecipesResponseSchema,
   YRecipeSchema,
+  YSetRecipeImageResponseSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
@@ -294,6 +296,70 @@ export const useForkRecipeMutation = (args?: MutationArgs<RecipeSchema, { readon
           ),
         },
         oldDataCreator(data)
+      );
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
+
+export const useSetRecipeImageMutation = (args?: MutationArgs<SetRecipeImageResponseSchema, { readonly file: File; readonly recipe_id: number }>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (body: { readonly file: File; readonly recipe_id: number }) => {
+    const formData = new FormData();
+    formData.append("file", body.file);
+    formData.append("recipe_id", body.recipe_id.toString());
+
+    const response = await poster({
+      path: "/recipe/image",
+      body: formData,
+      withAuth: "access_token",
+      extraHeaders: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return YSetRecipeImageResponseSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(vars.recipe_id), (oldData: RecipeSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            image_url: data.image_url,
+          };
+        }
+      });
+
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        (oldData: ListRecipesResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: [...(oldData?.data ?? [])].map((oldRecipe) => {
+                if (oldRecipe.id === vars.recipe_id) {
+                  return {
+                    ...oldRecipe,
+                    image_url: data.image_url,
+                  };
+                } else {
+                  return { ...oldRecipe };
+                }
+              }),
+            };
+          }
+        }
       );
       onSuccess?.(data, vars, ctx);
     },

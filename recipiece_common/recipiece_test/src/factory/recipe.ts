@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { Constant } from "@recipiece/constant";
 import { Prisma, prisma, PrismaTransaction, Recipe, RecipeIngredient, RecipeStep, RecipeTagAttachment, User, UserTag } from "@recipiece/database";
 import { generateUser, generateUserTag } from "./user";
-import { createAndUploadFakeImage } from "./util";
+import { uploadAssetImage } from "./util";
 
 export const INGREDIENT_UNIT_CHOICES = ["cups", "c", "tablespoons", "tbs", "tbsp", "teaspoons", "tsp", "tsps", "grams", "g", "kilograms", "ounces", "pounds", "lbs"];
 
@@ -142,7 +142,7 @@ export const generateRecipe = async (recipe?: Partial<Omit<Recipe, "id">>, tx?: 
 
 export const generateRecipeImage = async <RcpType extends Recipe | FullRecipeOutput>(recipe: RcpType, tx?: PrismaTransaction): Promise<RcpType> => {
   const newKey = `${Constant.RecipeImage.keyFor(recipe.user_id, recipe.id)}.jpg`;
-  await createAndUploadFakeImage(newKey);
+  await uploadAssetImage(newKey);
 
   const updatedRecipe = await (tx ?? prisma).recipe.update({
     where: { id: recipe.id },
@@ -152,7 +152,7 @@ export const generateRecipeImage = async <RcpType extends Recipe | FullRecipeOut
   return {
     ...recipe,
     ...updatedRecipe,
-  }
+  };
 };
 
 export const generateRecipeTagAttachment = async (attachment?: Partial<RecipeTagAttachment>, tx?: PrismaTransaction): Promise<RecipeTagAttachment> => {

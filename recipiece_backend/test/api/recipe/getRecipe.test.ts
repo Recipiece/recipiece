@@ -7,8 +7,8 @@ import { StatusCodes } from "http-status-codes";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import request from "supertest";
-import { s3 } from "../../../src/util/s3";
 import { Environment } from "../../../src/util/environment";
+import { s3 } from "../../../src/util/s3";
 
 describe("Get Recipe", () => {
   let user: User;

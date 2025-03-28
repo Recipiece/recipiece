@@ -1,3 +1,4 @@
+import { Constant } from "@recipiece/constant";
 import { z } from "zod";
 
 export const RecipeEditFormSchema = z.object({
@@ -28,6 +29,15 @@ export const RecipeEditFormSchema = z.object({
     )
     .optional(),
   currentTag: z.string(),
+  image: z
+    .instanceof(FileList)
+    .refine((fileData) => {
+      if (fileData && fileData.item(0)) {
+        return fileData.item(0)!.size <= Constant.RecipeImage.MAX_FILE_SIZE_BYTES;
+      }
+      return true;
+    }, "File must be under 40 MB")
+    .optional(),
 });
 
 export type RecipeEditFormData = z.infer<typeof RecipeEditFormSchema>;

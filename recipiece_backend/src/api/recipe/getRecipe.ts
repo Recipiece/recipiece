@@ -1,12 +1,9 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PrismaTransaction } from "@recipiece/database";
 import { RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { s3 } from "../../util/s3";
-import { getRecipeByIdQuery } from "./query";
 import { Environment } from "../../util/environment";
+import { getRecipeByIdQuery } from "./query";
 
 /**
  * Get a recipe by id.

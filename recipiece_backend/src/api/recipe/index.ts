@@ -7,6 +7,7 @@ import {
   YParseRecipeFromURLRequestSchema,
   YParseRecipeFromURLResponseSchema,
   YRecipeSchema,
+  YSetRecipeImageResponseSchema,
   YUpdateRecipeRequestSchema,
 } from "@recipiece/types";
 import { NextFunction, Request, Response } from "express";
@@ -105,5 +106,6 @@ export const RECIPE_ROUTES: Route[] = [
     authentication: "access_token",
     function: setRecipeImage,
     preMiddleware: [setImageMulterMiddleware.single("file"), setImageSanitizeMiddleware],
+    responseSchema: YSetRecipeImageResponseSchema,
   },
 ];

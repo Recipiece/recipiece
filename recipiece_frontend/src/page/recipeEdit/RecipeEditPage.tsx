@@ -4,13 +4,14 @@ import { CreateRecipeRequestSchema, RecipeIngredientSchema, RecipeSchema, Recipe
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
-import { Button, Divider, Form, FormInput, FormTextarea, NotFound, Stack, SubmitButton, useToast } from "../../component";
+import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useSetRecipeImageMutation, useUpdateRecipeMutation } from "../../api";
+import { Button, Divider, Form, FormInput, FormTextarea, NotFound, SubmitButton, useToast } from "../../component";
 import { DialogContext } from "../../context";
 import { ParseRecipeFromURLForm } from "../../dialog";
 import { formatIngredientAmount } from "../../util";
 import { IngredientsForm } from "./IngredientsForm";
 import { RecipeEditFormData, RecipeEditFormSchema } from "./RecipeEditFormSchema";
+import { RecipeImageUploadForm } from "./RecipeImageUploadForm";
 import { StepsForm } from "./StepsForm";
 import { TagsForm } from "./TagsForm";
 
@@ -21,6 +22,7 @@ export const RecipeEditPage: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecipeGetError, setIsRecipeGetError] = useState(false);
 
   const isCreatingNewRecipe = useMemo(() => {
@@ -57,8 +59,10 @@ export const RecipeEditPage: FC = () => {
   const { mutateAsync: createRecipe } = useCreateRecipeMutation();
   const { mutateAsync: updateRecipe } = useUpdateRecipeMutation();
   const { mutateAsync: parseRecipe } = useParseRecipeFromURLMutation();
+  const { mutateAsync: setRecipeImage } = useSetRecipeImageMutation();
 
   const onSubmit = async (formData: RecipeEditFormData) => {
+    setIsSubmitting(true);
     const sanitizedFormData: CreateRecipeRequestSchema | UpdateRecipeRequestSchema = {
       id: isCreatingNewRecipe ? undefined : recipeId,
       name: formData.name,
@@ -79,21 +83,38 @@ export const RecipeEditPage: FC = () => {
       tags: (formData.tags ?? []).map((t) => t.content),
     };
 
+    let response: RecipeSchema;
     try {
-      let response: RecipeSchema;
       if (isCreatingNewRecipe) {
         response = await createRecipe(sanitizedFormData as CreateRecipeRequestSchema);
       } else {
         response = await updateRecipe(sanitizedFormData as UpdateRecipeRequestSchema);
       }
-      navigate(`/recipe/view/${response.id}`);
     } catch {
       toast({
         title: "Unable to Save Recipe",
         description: "This recipe could not be saved. Please try again later.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
+      return;
     }
+
+    if (formData.image && formData.image.item(0)) {
+      try {
+        await setRecipeImage({
+          file: formData.image.item(0)!,
+          recipe_id: response.id,
+        });
+      } catch {
+        toast({
+          title: "Error Uploading Image",
+          description: "Your image failed to upload, but the recipe was still saved.",
+          variant: "destructive",
+        });
+      }
+    }
+    navigate(`/recipe/view/${response.id}`);
   };
 
   const isLoading = useMemo(() => {
@@ -147,6 +168,7 @@ export const RecipeEditPage: FC = () => {
   }, [form, defaultFormValues]);
 
   const recipeDescription = form.watch("description");
+  const imageToUpload = form.watch("image");
 
   const onParseRecipeDialogSubmit = async (data: ParseRecipeFromURLForm) => {
     try {
@@ -185,37 +207,58 @@ export const RecipeEditPage: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  /**
+   * when the user uploads an image, set the div background appropriately
+   */
+  useEffect(() => {}, [imageToUpload]);
+
   return (
     <div className="p-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Stack>
-            <FormInput data-testid={DataTestId.RecipeEditPage.INPUT_NAME} name="name" label="Recipe Name" placeholder="What do you want to call this recipe?" />
-            <FormInput
-              data-testid={DataTestId.RecipeEditPage.INPUT_SERVINGS}
-              min={1}
-              step={1}
-              name="servings"
-              type="number"
-              label="Servings"
-              placeholder="How many servings does this recipe make?"
-            />
-            <TagsForm />
-            <FormTextarea
-              data-testid={DataTestId.RecipeEditPage.TEXTAREA_DESCRIPTION}
-              maxLength={1000}
-              name="description"
-              placeholder="What is this recipe all about?"
-              label="Description"
-              instructions={<>{(recipeDescription || "").length} / 1000</>}
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col gap-2 sm:basis-2/3">
+                <FormInput
+                  isLoading={isLoading || isSubmitting}
+                  data-testid={DataTestId.RecipeEditPage.INPUT_NAME}
+                  name="name"
+                  label="Recipe Name"
+                  placeholder="What do you want to call this recipe?"
+                />
+                <FormInput
+                  isLoading={isLoading || isSubmitting}
+                  data-testid={DataTestId.RecipeEditPage.INPUT_SERVINGS}
+                  min={1}
+                  step={1}
+                  name="servings"
+                  type="number"
+                  label="Servings"
+                  placeholder="How many servings does this recipe make?"
+                />
+                <TagsForm isLoading={isLoading || isSubmitting} />
+                <FormTextarea
+                  isLoading={isLoading || isSubmitting}
+                  data-testid={DataTestId.RecipeEditPage.TEXTAREA_DESCRIPTION}
+                  maxLength={1000}
+                  name="description"
+                  placeholder="What is this recipe all about?"
+                  label="Description"
+                  instructions={<>{(recipeDescription || "").length} / 1000</>}
+                />
+              </div>
+
+              <div className="sm:basis-1/3">
+                <RecipeImageUploadForm isLoading={isLoading || isSubmitting} recipe={recipe} />
+              </div>
+            </div>
 
             {(isCreatingNewRecipe || !!recipe) && (
               <div className="grid grid-cols-1 gap-4">
                 <Divider />
-                <IngredientsForm isLoading={isLoading} />
+                <IngredientsForm isLoading={isLoading || isSubmitting} />
                 <Divider />
-                <StepsForm isLoading={isLoading} />
+                <StepsForm isLoading={isLoading || isSubmitting} />
               </div>
             )}
 
@@ -234,7 +277,7 @@ export const RecipeEditPage: FC = () => {
                 <SubmitButton data-testid={DataTestId.RecipeEditPage.BUTTON_SAVE}>Save</SubmitButton>
               </div>
             )}
-          </Stack>
+          </div>
         </form>
       </Form>
 

@@ -70,8 +70,8 @@ describe("Delete Recipes", () => {
       },
       data: {
         image_key: expectedKey,
-      }
-    })
+      },
+    });
 
     const response = await request(server).delete(`/recipe/${recipe.id}`).set("Content-Type", "application/json").set("Authorization", `Bearer ${bearerToken}`).send();
     expect(response.statusCode).toBe(StatusCodes.OK);
