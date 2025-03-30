@@ -179,7 +179,10 @@ export const RecipieceMenubar: FC = () => {
 
   return (
     <>
-      <Menubar data-testid={DataTestId.MenuBar.NAV_DESKTOP_MENU_BAR} className="h-12 rounded-none border-0 p-2 text-white sm:h-16 sm:bg-primary sm:p-4 sm:fixed w-full z-50">
+      <Menubar
+        data-testid={DataTestId.MenuBar.NAV_DESKTOP_MENU_BAR}
+        className="h-12 rounded-none border-0 p-2 text-white sm:h-16 bg-transparent sm:bg-primary sm:p-4 sm:fixed w-full z-50"
+      >
         <RecipieceHeader className="mr-auto w-full text-start text-primary dark:text-white sm:text-center sm:text-white md:w-auto" />
         <span className="ml-auto block sm:hidden">
           <DropdownMenu>

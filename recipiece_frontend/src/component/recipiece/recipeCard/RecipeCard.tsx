@@ -4,8 +4,7 @@ import { MoreVertical } from "lucide-react";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetSelfQuery } from "../../../api";
-import { useLocalStorage } from "../../../hooks";
-import { StorageKeys } from "../../../util";
+import { useGetRecipeImageBackgroundStyle } from "../../../hooks";
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, DropdownMenu, DropdownMenuTrigger } from "../../shadcn";
 import { Shelf, ShelfSpacer } from "../Layout";
 import { MembershipAvatar } from "../MembershipAvatar";
@@ -22,34 +21,17 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
   const userKitchenMembershipId = recipe.user_kitchen_membership_id;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cardStyle, setCardStyle] = useState<React.CSSProperties>();
-  const [selectedTheme] = useLocalStorage(StorageKeys.UI_THEME, "system");
+  const { textSafeStyles, imageUrl } = useGetRecipeImageBackgroundStyle(recipe);
 
   const onView = useCallback(() => {
     navigate(`/recipe/view/${recipe.id}`);
   }, [recipe, navigate]);
 
   useEffect(() => {
-    const url = recipe.image_url ?? recipe.external_image_url;
-    if (url) {
-      let newBgcolor: string;
-      const systemWantsDark = selectedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const isDarkMode = selectedTheme === "dark" || systemWantsDark;
-
-      if (isDarkMode) {
-        newBgcolor = "rgba(0, 0, 0, 0.8)";
-      } else {
-        newBgcolor = "rgba(255,255,255,0.8)";
-      }
-
-      setCardStyle({
-        backgroundImage: `url(${url})`,
-        backgroundColor: newBgcolor,
-        backgroundBlendMode: "overlay",
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-      });
+    if (imageUrl) {
+      setCardStyle(textSafeStyles);
     }
-  }, [recipe.image_url, recipe.external_image_url, selectedTheme]);
+  }, [imageUrl, textSafeStyles]);
 
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
