@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class ParseRecipeRequest(BaseModel):
     source_url: str
+    use_wild_mode: bool
 
 
 class ParseRecipeIngredientGroup(BaseModel):

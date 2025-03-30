@@ -54,10 +54,10 @@ def parse_freetext_ingredients(ingredients: List[str]) -> List[ParsedIngredient]
     return parsed_ingredients
 
 
-def parse_recipe_from_url(source_url: str):
+def parse_recipe_from_url(source_url: str, use_wild_mode: bool):
     html = requests.get(source_url, headers={"User-Agent": "Recipiece"}).content
     try:
-        scraper = scrape_html(html, org_url=source_url)
+        scraper = scrape_html(html, org_url=source_url, wild_mode=use_wild_mode)
         recipe_json = scraper.to_json()
         parsed_recipe = dict(**recipe_json)
         parsed_recipe["parsed_ingredients"] = parse_freetext_ingredients(recipe_json.get("ingredients", []))

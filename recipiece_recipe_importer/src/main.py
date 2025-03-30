@@ -21,7 +21,8 @@ def hello_world():
 @app.post("/recipe/parse")
 def root(request: ParseRecipeRequest):
     url = request.source_url
-    return parse_recipe_from_url(url)
+    use_wild_mode = request.use_wild_mode
+    return parse_recipe_from_url(url, use_wild_mode)
 
 @app.post("/ingredients/parse")
 def parse_freetext_ingredient(request: ParseIngredientsRequest) -> ParseIngredientsResponse:

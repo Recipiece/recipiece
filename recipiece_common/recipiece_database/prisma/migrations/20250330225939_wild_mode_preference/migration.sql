@@ -1,0 +1,1 @@
+update users set preferences = preferences || '{"recipe_import_mode": "wild"}'::jsonb where true;
