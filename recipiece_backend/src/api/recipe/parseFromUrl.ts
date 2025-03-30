@@ -1,5 +1,5 @@
 import { PrismaTransaction } from "@recipiece/database";
-import { ParsedFromURLRecipe, ParseRecipeFromURLRequestSchema, ParseRecipeFromURLResponseSchema } from "@recipiece/types";
+import { ParsedFromURLRecipe, ParseRecipeFromURLRequestSchema, ParseRecipeFromURLResponseSchema, YUserPreferencesSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { Environment } from "../../util/environment";
@@ -7,6 +7,8 @@ import { UnprocessableEntityError } from "../../util/error";
 
 export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>, _: PrismaTransaction): ApiResponse<ParseRecipeFromURLResponseSchema> => {
   const recipeBody = req.body;
+  const user = req.user;
+  const userPrefs = YUserPreferencesSchema.cast(user.preferences);
 
   try {
     const url = `${Environment.RECIPE_PARSER_SERVICE_URL}/recipe/parse`;
@@ -14,6 +16,7 @@ export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFr
       method: "POST",
       body: JSON.stringify({
         ...recipeBody,
+        use_wild_mode: userPrefs.recipe_import_mode === "wild",
       }),
       headers: {
         "Content-Type": "application/json",

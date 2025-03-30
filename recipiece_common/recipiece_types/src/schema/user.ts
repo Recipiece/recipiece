@@ -12,6 +12,7 @@ export const YUserTagSchema = object({
 export const YUserPreferencesSchema = object({
   account_visibility: string().oneOf(["protected", "private"]),
   forking_image_permission: string().oneOf(["allowed", "denied"]),
+  recipe_import_mode: string().oneOf(["wild", "strict"]),
 });
 
 export const YUserSchema = object({
