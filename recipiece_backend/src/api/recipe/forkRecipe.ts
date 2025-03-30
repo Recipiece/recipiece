@@ -1,8 +1,12 @@
+import { CopyObjectCommand } from "@aws-sdk/client-s3";
+import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
 import { ForkRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { Environment } from "../../util/environment";
+import { s3 } from "../../util/s3";
 import { getRecipeByIdQuery } from "./query";
 
 export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
@@ -39,7 +43,7 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
     return restStep;
   });
 
-  const forkedRecipe = await tx.recipe.create({
+  let forkedRecipe: RecipeSchema = await tx.recipe.create({
     data: {
       ...restRecipe,
       user_id: user.id,
@@ -71,6 +75,33 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
       ingredients: true,
     },
   });
+
+  // clone the image too, if there is one
+  if (image_key) {
+    const fileExtension = image_key.split(".").pop();
+    const newKey = `${Constant.RecipeImage.keyFor(user.id, forkedRecipe.id)}.${fileExtension}`;
+
+    const copyObjectCommand = new CopyObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      CopySource: `${Environment.S3_BUCKET}/${image_key}`,
+      Key: newKey,
+    });
+
+    try {
+      await s3.send(copyObjectCommand);
+
+      const updatedRecipe = await tx.recipe.update({
+        where: { id: forkedRecipe.id },
+        data: { image_key: newKey },
+      });
+      forkedRecipe = {
+        ...forkedRecipe,
+        image_url: `${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${updatedRecipe.image_key}`,
+      };
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return [StatusCodes.CREATED, forkedRecipe];
 };

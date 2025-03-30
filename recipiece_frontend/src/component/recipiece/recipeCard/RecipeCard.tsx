@@ -29,7 +29,8 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
   }, [recipe, navigate]);
 
   useEffect(() => {
-    if (recipe.image_url) {
+    const url = recipe.image_url ?? recipe.external_image_url;
+    if (url) {
       let newBgcolor: string;
       const systemWantsDark = selectedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDarkMode = selectedTheme === "dark" || systemWantsDark;
@@ -41,21 +42,21 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
       }
 
       setCardStyle({
-        backgroundImage: `url(${recipe.image_url})`,
+        backgroundImage: `url(${url})`,
         backgroundColor: newBgcolor,
         backgroundBlendMode: "overlay",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
       });
     }
-  }, [recipe.image_url, selectedTheme]);
+  }, [recipe.image_url, recipe.external_image_url, selectedTheme]);
 
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
       <Card className="flex h-full flex-col hover:drop-shadow-md" style={cardStyle}>
         <CardHeader data-testid={DataTestId.RecipeCard.CONTAINER_CARD_HEADER(recipe.id)} onClick={onView} className="hover:cursor-pointer">
           <Shelf>
-            <CardTitle className="line-clamp-2 max-h-32 overflow-hidden" data-testid={DataTestId.RecipeCard.CARD_TITLE(recipe.id)}>
+            <CardTitle className="line-clamp-2 pb-[0.2em] max-h-32 overflow-hidden" data-testid={DataTestId.RecipeCard.CARD_TITLE(recipe.id)}>
               {recipe.name}
             </CardTitle>
             <ShelfSpacer />

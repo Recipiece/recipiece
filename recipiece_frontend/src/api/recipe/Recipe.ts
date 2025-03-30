@@ -2,10 +2,12 @@ import {
   CreateRecipeRequestSchema,
   ListRecipesQuerySchema,
   ListRecipesResponseSchema,
+  ParseRecipeFromURLResponseSchema,
   RecipeSchema,
   SetRecipeImageResponseSchema,
   UpdateRecipeRequestSchema,
   YListRecipesResponseSchema,
+  YParseRecipeFromURLResponseSchema,
   YRecipeSchema,
   YSetRecipeImageResponseSchema,
 } from "@recipiece/types";
@@ -234,18 +236,18 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<unknown, RecipeSchem
   });
 };
 
-export const useParseRecipeFromURLMutation = (args?: MutationArgs<RecipeSchema, string>) => {
+export const useParseRecipeFromURLMutation = (args?: MutationArgs<ParseRecipeFromURLResponseSchema, string>) => {
   const { poster } = usePost();
 
   const mutation = async (url: string) => {
-    const response = await poster<{ readonly source_url: string }, RecipeSchema>({
+    const response = await poster<{ readonly source_url: string }, ParseRecipeFromURLResponseSchema>({
       path: "/recipe/parse/url",
       body: {
         source_url: url,
       },
       withAuth: "access_token",
     });
-    return YRecipeSchema.cast(response.data, {
+    return YParseRecipeFromURLResponseSchema.cast(response.data, {
       assert: false,
     });
   };
@@ -362,6 +364,62 @@ export const useSetRecipeImageMutation = (args?: MutationArgs<SetRecipeImageResp
         }
       );
       onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
+
+export const useDeleteRecipeImageMutation = (args?: MutationArgs<unknown, { readonly id: number }>) => {
+  const queryClient = useQueryClient();
+  const { deleter } = useDelete();
+
+  const mutation = async ({ id }: { readonly id: number }) => {
+    const response = await deleter({
+      path: "/recipe/image",
+      id: id,
+      withAuth: "access_token",
+    });
+    return response.data;
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, { id }, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(id), (oldData: RecipeSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            image_url: null,
+          };
+        }
+      });
+
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        (oldData: ListRecipesResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: [...(oldData?.data ?? [])].map((oldRecipe) => {
+                if (oldRecipe.id === id) {
+                  return {
+                    ...oldRecipe,
+                    image_url: null,
+                  };
+                } else {
+                  return { ...oldRecipe };
+                }
+              }),
+            };
+          }
+        }
+      );
+      onSuccess?.(data, { id }, ctx);
     },
     ...restArgs,
   });

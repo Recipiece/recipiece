@@ -20,7 +20,7 @@ const checkToken = async (req: Request): ApiResponse<{}> => {
   const verifyToken = req.headers["recipiece-verify-turnstile"];
   const secretKey = Environment.TURNSTILE_SECRET_KEY;
 
-  if (Environment.TURNSTILE_SECRET_KEY) {
+  if (!Environment.TURNSTILE_SECRET_KEY) {
     console.error("missing APP_TURNSTILE_SECRET_KEY but turnstile verify was requested! check you env variables.");
     return [
       StatusCodes.INTERNAL_SERVER_ERROR,

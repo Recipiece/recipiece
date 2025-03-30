@@ -38,6 +38,8 @@ export const RecipeEditFormSchema = z.object({
       return true;
     }, "File must be under 40 MB")
     .optional(),
+  external_image_url: z.string().url().optional(),
+  image_type: z.string().default("file"),
 });
 
 export type RecipeEditFormData = z.infer<typeof RecipeEditFormSchema>;

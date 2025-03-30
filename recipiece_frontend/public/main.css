@@ -1933,6 +1933,10 @@ body {
   padding-bottom: 1rem;
 }
 
+.pb-\[0\.2em\] {
+  padding-bottom: 0.2em;
+}
+
 .pl-2 {
   padding-left: 0.5rem;
 }

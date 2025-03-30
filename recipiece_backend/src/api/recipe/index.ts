@@ -16,6 +16,7 @@ import { Route } from "../../types";
 import { BadRequestError, ContentTooLargeError } from "../../util/error";
 import { createRecipe } from "./createRecipe";
 import { deleteRecipe } from "./deleteRecipe";
+import { deleteRecipeImage } from "./deleteRecipeImage";
 import { forkRecipe } from "./forkRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
@@ -107,5 +108,11 @@ export const RECIPE_ROUTES: Route[] = [
     function: setRecipeImage,
     preMiddleware: [setImageMulterMiddleware.single("file"), setImageSanitizeMiddleware],
     responseSchema: YSetRecipeImageResponseSchema,
+  },
+  {
+    path: "/recipe/image/:id(\\d+)",
+    method: "DELETE",
+    authentication: "access_token",
+    function: deleteRecipeImage,
   },
 ];

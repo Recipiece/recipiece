@@ -16,9 +16,10 @@ interface StepFormItemProps {
   readonly onRemove: (index: number) => void;
   readonly onMove: (srcIndex: number, destIndex: number) => void;
   readonly draggable: boolean;
+  readonly isLoading: boolean;
 }
 
-const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggable }) => {
+const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggable, isLoading }) => {
   const [{ isDragging }, dragRef, draggingRef] = useDrag(() => {
     return {
       type: "edit_recipe_step",
@@ -66,11 +67,12 @@ const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggabl
           </div>
         )}
         <p className="mr-auto leading-6">Step {index + 1}</p>
-        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_STEP(index)} variant="link" onClick={() => onRemove(index)}>
+        <Button disabled={isLoading} data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_STEP(index)} variant="link" onClick={() => onRemove(index)}>
           <Minus className="text-destructive" />
         </Button>
       </div>
       <FormTextarea
+        isLoading={isLoading}
         data-testid={DataTestId.RecipeEditPage.TEXTAREA_STEP_CONTENT(index)}
         readOnly={isDragging}
         name={`steps.${index}.content`}
@@ -81,7 +83,7 @@ const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggabl
   );
 };
 
-export const StepsForm: FC<StepsFormProps> = () => {
+export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
   const form = useFormContext();
 
   const stepsFieldArray = useFieldArray({
@@ -113,7 +115,7 @@ export const StepsForm: FC<StepsFormProps> = () => {
     <div>
       <div className="mb-2 flex flex-row items-center">
         <h1 className="inline text-lg">Steps</h1>
-        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_STEP} type="button" onClick={addStep} variant="secondary" className="ml-auto">
+        <Button disabled={isLoading} data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_STEP} type="button" onClick={addStep} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Step
         </Button>
@@ -121,7 +123,7 @@ export const StepsForm: FC<StepsFormProps> = () => {
       {stepsFieldArray.fields.map((fieldArrayValue, index) => {
         return (
           <Fragment key={fieldArrayValue.id}>
-            <StepFormItem draggable={stepsFieldArray.fields.length > 1} index={index} onRemove={removeStep} onMove={moveStep} />
+            <StepFormItem isLoading={isLoading} draggable={stepsFieldArray.fields.length > 1} index={index} onRemove={removeStep} onMove={moveStep} />
           </Fragment>
         );
       })}

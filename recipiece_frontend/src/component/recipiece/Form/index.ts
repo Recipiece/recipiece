@@ -2,6 +2,7 @@ export * from "./FormCheckbox";
 export * from "./FormFile";
 export * from "./FormInput";
 export * from "./FormMultipleSelector";
+export * from "./FormRadioGroup";
 export * from "./FormSelect";
 export * from "./FormSwitch";
 export * from "./FormTextarea";

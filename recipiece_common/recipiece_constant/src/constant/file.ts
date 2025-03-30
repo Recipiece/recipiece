@@ -7,6 +7,6 @@ export class RecipeImage {
 
   public static readonly keyFor = (userId: number, recipeId: number): string => {
     const hash = v4();
-    return `user${userId}/recipes/${hash}${recipeId}`;
+    return `user${userId}/recipes/${hash}_${recipeId}`;
   }
 }

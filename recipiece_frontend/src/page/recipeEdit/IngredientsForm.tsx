@@ -22,15 +22,18 @@ interface IngredientFormItemProps {
   readonly onMove: (srcIndex: number, destIndex: number) => void;
   readonly draggable: boolean;
   readonly onKeyDown: (event: React.KeyboardEvent) => void;
+  readonly isLoading: boolean;
 }
 
 const IngredientFormNameInput: FC<{
   readonly isDragging: boolean;
   readonly index: number;
   readonly onKeyDown: (event: React.KeyboardEvent) => void;
-}> = ({ isDragging, index, onKeyDown }) => {
+  readonly isLoading: boolean;
+}> = ({ isDragging, index, onKeyDown, isLoading }) => {
   return (
     <FormInput
+      isLoading={isLoading}
       data-testid={DataTestId.RecipeEditPage.INPUT_INGREDIENT_NAME(index)}
       onKeyDown={(event) => {
         onKeyDown(event);
@@ -50,9 +53,11 @@ const IngredientFormAmountInput: FC<{
   readonly isDragging: boolean;
   readonly index: number;
   readonly onKeyDown: (event: React.KeyboardEvent) => void;
-}> = ({ isDragging, index, onKeyDown }) => {
+  readonly isLoading: boolean;
+}> = ({ isDragging, index, onKeyDown, isLoading }) => {
   return (
     <FormInput
+      isLoading={isLoading}
       data-testid={DataTestId.RecipeEditPage.INPUT_INGREDIENT_AMOUNT(index)}
       onKeyDown={(event) => {
         onKeyDown(event);
@@ -71,7 +76,8 @@ const IngredientFormUnitInput: FC<{
   readonly isDragging: boolean;
   index: number;
   onKeyDown: (event: React.KeyboardEvent) => void;
-}> = ({ isDragging, index, onKeyDown }) => {
+  isLoading: boolean;
+}> = ({ isDragging, index, onKeyDown, isLoading }) => {
   const form = useFormContext();
   const currentUnit = form.watch(`ingredients.${index}.unit`);
   const [currentAutocompleteItems, setCurrentAutocompleteItems] = useState<string[]>([]);
@@ -102,6 +108,7 @@ const IngredientFormUnitInput: FC<{
         return (
           <FormItem>
             <TypeaheadInput
+              isLoading={isLoading}
               data-testid={DataTestId.RecipeEditPage.TYPEAHEAD_INPUT_INGREDIENT_UNIT(index)}
               popoverClassName="sm:max-w-[200px]"
               autocompleteOptions={currentAutocompleteItems}
@@ -120,7 +127,7 @@ const IngredientFormUnitInput: FC<{
   );
 };
 
-const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMove, draggable, onKeyDown }) => {
+const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMove, draggable, onKeyDown, isLoading }) => {
   const [{ isDragging }, dragRef, draggingRef] = useDrag(() => {
     return {
       type: "edit_recipe_ingredient",
@@ -165,6 +172,7 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
       <div data-testid={DataTestId.RecipeEditPage.DIV_INGREDIENT_DROP_TARGET(index)} ref={dragRef} className="flex flex-row sm:block">
         {draggable && <Grip data-testid={DataTestId.RecipeEditPage.INGREDIENT_DRAG_HANDLE(index)} className="m-0 h-full flex-shrink cursor-grab p-0 text-primary" />}
         <Button
+          disabled={isLoading}
           data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_INGREDIENT(index)}
           className="m-0 ml-auto block p-0 sm:hidden"
           type="button"
@@ -174,10 +182,11 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
           <Minus className="text-destructive" />
         </Button>
       </div>
-      <IngredientFormNameInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
-      <IngredientFormAmountInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
-      <IngredientFormUnitInput onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
+      <IngredientFormNameInput isLoading={isLoading} onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
+      <IngredientFormAmountInput isLoading={isLoading} onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
+      <IngredientFormUnitInput isLoading={isLoading} onKeyDown={onKeyDown} isDragging={isDragging} index={index} />
       <Button
+        disabled={isLoading}
         data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_INGREDIENT(index)}
         className="m-0 hidden p-0 sm:block"
         type="button"
@@ -190,7 +199,7 @@ const IngredientFormItem: FC<IngredientFormItemProps> = ({ index, onRemove, onMo
   );
 };
 
-export const IngredientsForm: FC<IngredientsFormProps> = () => {
+export const IngredientsForm: FC<IngredientsFormProps> = ({ isLoading }) => {
   const form = useFormContext();
 
   const ingredientsFieldArray = useFieldArray({
@@ -234,7 +243,7 @@ export const IngredientsForm: FC<IngredientsFormProps> = () => {
     <div>
       <div className="mb-4 flex flex-row items-center">
         <h1 className="inline text-lg">Ingredients</h1>
-        <Button data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_INGREDIENT} type="button" onClick={addIngredient} variant="secondary" className="ml-auto">
+        <Button disabled={isLoading} data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_INGREDIENT} type="button" onClick={addIngredient} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Ingredient
         </Button>
@@ -242,7 +251,14 @@ export const IngredientsForm: FC<IngredientsFormProps> = () => {
       {ingredientsFieldArray.fields.map((fieldArrayValue, index) => {
         return (
           <Fragment key={fieldArrayValue.id}>
-            <IngredientFormItem onKeyDown={onKeyDown} draggable={ingredientsFieldArray.fields.length > 1} index={index} onRemove={removeIngredient} onMove={onMoveIngredient} />
+            <IngredientFormItem
+              isLoading={isLoading}
+              onKeyDown={onKeyDown}
+              draggable={ingredientsFieldArray.fields.length > 1}
+              index={index}
+              onRemove={removeIngredient}
+              onMove={onMoveIngredient}
+            />
           </Fragment>
         );
       })}
