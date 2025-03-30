@@ -11,6 +11,7 @@ export interface PrivacySectionProps {
 export const PrivacySection: FC<PrivacySectionProps> = ({ user, isLoading }) => {
   const { toast } = useToast();
   const accountVisibility = user?.preferences.account_visibility;
+  const forkingImagePermission = user?.preferences.forking_image_permission;
 
   const { mutateAsync: updateUser, isPending: isUpdatingUser } = useUpdateUserMutation();
 
@@ -37,6 +38,29 @@ export const PrivacySection: FC<PrivacySectionProps> = ({ user, isLoading }) => 
     [toast, updateUser, user]
   );
 
+  const onForkingChanged = useCallback(
+    async (newVisibility: string) => {
+      try {
+        await updateUser({
+          id: user!.id,
+          preferences: {
+            ...user!.preferences,
+            forking_image_permission: newVisibility as UserSchema["preferences"]["forking_image_permission"],
+          },
+        });
+        toast({
+          title: "Image Forking Permissions Updated",
+        });
+      } catch {
+        toast({
+          title: "Unable to Update Image Forking Permissions",
+          description: "There was an error updating your image forking permissions. Try again later.",
+        });
+      }
+    },
+    [toast, updateUser, user]
+  );
+
   return (
     <>
       <H3>Privacy</H3>
@@ -48,7 +72,7 @@ export const PrivacySection: FC<PrivacySectionProps> = ({ user, isLoading }) => 
             setting.
           </p>
         </div>
-        <div className="ml-auto sm:ml-0">
+        <div className="ml-auto sm:ml-0 pl-2">
           <LoadingGroup isLoading={isLoading}>
             <Select required disabled={isUpdatingUser} onValueChange={onVisibilityChanged} value={accountVisibility}>
               <SelectTrigger className="min-w-40">
@@ -57,6 +81,29 @@ export const PrivacySection: FC<PrivacySectionProps> = ({ user, isLoading }) => 
               <SelectContent>
                 <SelectItem value="protected">Visible</SelectItem>
                 <SelectItem value="private">Hidden</SelectItem>
+              </SelectContent>
+            </Select>
+          </LoadingGroup>
+        </div>
+      </div>
+
+      <div className="items-top flex flex-row">
+        <div className="basis-9/12 sm:basis-1/2">
+          <Label>Image Forking</Label>
+          <p className="text-xs">
+            Control whether or not other users who fork your recipes also get a copy of your recipe&apos;s image. This only applies to recipes where you have uploaded an image, and
+            does not affect recipes that have already been forked by others.
+          </p>
+        </div>
+        <div className="ml-auto sm:ml-0 pl-2">
+          <LoadingGroup isLoading={isLoading}>
+            <Select required disabled={isUpdatingUser} onValueChange={onForkingChanged} value={forkingImagePermission}>
+              <SelectTrigger className="min-w-40">
+                <SelectValue placeholder="Set Image Forking Permissions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="allowed">Allowed</SelectItem>
+                <SelectItem value="denied">Denied</SelectItem>
               </SelectContent>
             </Select>
           </LoadingGroup>

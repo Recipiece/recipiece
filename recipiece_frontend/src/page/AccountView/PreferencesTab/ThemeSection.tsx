@@ -32,7 +32,7 @@ export const ThemeSection: FC = () => {
           <Label>Use Theme</Label>
           <p className="text-xs">Select your preferred theme for this device.</p>
         </div>
-        <div className="ml-auto sm:ml-0">
+        <div className="ml-auto sm:ml-0 pl-2">
           <Select onValueChange={onThemeChanged} value={selectedTheme}>
             <SelectTrigger className="min-w-40">
               <SelectValue placeholder="Select a Theme" />

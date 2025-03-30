@@ -2,8 +2,8 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { s3 } from "../../util/s3";
 import { Environment } from "../../util/environment";
+import { s3 } from "../../util/s3";
 
 export const deleteRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{ readonly deleted: boolean }> => {
   const recipeId = +req.params.id;

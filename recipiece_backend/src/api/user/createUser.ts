@@ -5,8 +5,8 @@ import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse } from "../../types";
 import { VERSION_ACCESS_LEVELS } from "../../util/constant";
-import { hashPassword } from "../../util/password";
 import { Environment } from "../../util/environment";
+import { hashPassword } from "../../util/password";
 
 export const createUser = async (request: Request<any, any, CreateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<UserSchema> => {
   const { username, email, password } = request.body;
@@ -55,6 +55,7 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
       username: username,
       preferences: {
         account_visibility: "protected",
+        forking_image_permission: "allowed",
       },
       credentials: {
         create: {

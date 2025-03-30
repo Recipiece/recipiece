@@ -11,6 +11,7 @@ export const YUserTagSchema = object({
 
 export const YUserPreferencesSchema = object({
   account_visibility: string().oneOf(["protected", "private"]),
+  forking_image_permission: string().oneOf(["allowed", "denied"]),
 });
 
 export const YUserSchema = object({

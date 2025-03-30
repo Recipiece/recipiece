@@ -1,7 +1,7 @@
 import { CopyObjectCommand } from "@aws-sdk/client-s3";
 import { Constant } from "@recipiece/constant";
 import { PrismaTransaction } from "@recipiece/database";
-import { ForkRecipeRequestSchema, RecipeSchema } from "@recipiece/types";
+import { ForkRecipeRequestSchema, RecipeSchema, YUserPreferencesSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
@@ -28,6 +28,22 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
       StatusCodes.BAD_REQUEST,
       {
         message: "Cannot fork your own recipe",
+      },
+    ];
+  }
+
+  const originalUser = await tx.user.findFirst({
+    where: {
+      id: originalRecipe.user_id,
+    },
+  });
+
+  if (!originalUser) {
+    console.warn(`recipe ${original_recipe_id} has no user! this really should be impossible.`);
+    return [
+      StatusCodes.NOT_FOUND,
+      {
+        message: `Recipe ${original_recipe_id} not found.`,
       },
     ];
   }
@@ -76,8 +92,10 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
     },
   });
 
-  // clone the image too, if there is one
-  if (image_key) {
+  const originalUserPrefs = YUserPreferencesSchema.cast(originalUser.preferences);
+
+  // clone the image too, if there is one, and the original user allows it
+  if (image_key && originalUserPrefs.forking_image_permission === "allowed") {
     const fileExtension = image_key.split(".").pop();
     const newKey = `${Constant.RecipeImage.keyFor(user.id, forkedRecipe.id)}.${fileExtension}`;
 

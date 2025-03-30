@@ -20,9 +20,9 @@ import {
   wsTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
+import { Environment } from "./util/environment";
 import { ApiError } from "./util/error";
 import { Logger } from "./util/logger";
-import { Environment } from "./util/environment";
 
 const app = new WebSocketExpress();
 const logger = Logger.getLogger({

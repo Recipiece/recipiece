@@ -22,7 +22,7 @@ export const NotificationsSection: FC = () => {
             <p className="text-xs">You have already granted push notifications on this device. To disable push notifications, look in your system settings.</p>
           )}
         </div>
-        <div className="ml-auto sm:ml-0">
+        <div className="ml-auto sm:ml-0 pl-2">
           <Switch checked={hasGrantedPushNotifications} onCheckedChange={onChangePushNotifications} disabled={!canRequestPushNotifications || hasGrantedPushNotifications} />
         </div>
       </div>
