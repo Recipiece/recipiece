@@ -20,7 +20,7 @@ import {
   RecipeContextMenu,
   RecipieceMenuBarContext,
 } from "../../component";
-import { useLayout } from "../../hooks";
+import { useGetRecipeImageBackgroundStyle, useLayout } from "../../hooks";
 import { formatIngredientAmount } from "../../util";
 import { IngredientContextMenu } from "./IngredientContextMenu";
 
@@ -35,7 +35,8 @@ export const RecipeViewPage: FC = () => {
   });
 
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
-  const { isMobile } = useLayout();
+  const { isMobile, isTablet } = useLayout();
+  const { baseStyles, imageUrl } = useGetRecipeImageBackgroundStyle(originalRecipe);
 
   const { data: currentUser, isLoading: isLoadingCurrentUser } = useGetSelfQuery();
 
@@ -162,6 +163,7 @@ export const RecipeViewPage: FC = () => {
 
   return (
     <div>
+      {(isMobile || isTablet) && imageUrl && <div className="w-[calc(100%+16px)] h-64 mb-2 m-[-8px]" style={baseStyles} />}
       <div>
         <div className="grid gap-3">
           <LoadingGroup isLoading={isLoading} className="h-[40px] w-full">
@@ -216,29 +218,32 @@ export const RecipeViewPage: FC = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="basis-0 p-2 sm:basis-4/12 sm:p-4">
-              <CardTitle className="mb-1">Ingredients</CardTitle>
-              <CardContent>
-                <div className="flex flex-col gap-1">
-                  {(recipe?.ingredients ?? []).map((ing) => {
-                    return (
-                      <div key={ing.id} className="flex flex-row items-center gap-2">
-                        <Checkbox checked={checkedOffIngredients.includes(ing.id)} onClick={() => onIngredientChecked(ing.id)} />
-                        <span className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`} onClick={() => onIngredientChecked(ing.id)}>
-                          {(!!ing.amount || !!ing.unit) && (
-                            <span>
-                              {formatIngredientAmount(ing.amount ?? "")} {ing.unit ?? ""}{" "}
-                            </span>
-                          )}
-                          <span>{ing.name}</span>
-                        </span>
-                        <IngredientContextMenu ingredient={ing} onIngredientConverted={onIngredientConverted} onIngredientRelativeScaled={onScaleIngredients} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col gap-2 basis-0 sm:basis-4/12">
+              {imageUrl && !isMobile && !isTablet && <div style={baseStyles} className="rounded-sm w-full basis-[256px] shrink-0" />}
+              <Card className="p-2 sm:p-4 basis-full shrink">
+                <CardTitle className="mb-1">Ingredients</CardTitle>
+                <CardContent>
+                  <div className="flex flex-col gap-1">
+                    {(recipe?.ingredients ?? []).map((ing) => {
+                      return (
+                        <div key={ing.id} className="flex flex-row items-center gap-2">
+                          <Checkbox checked={checkedOffIngredients.includes(ing.id)} onClick={() => onIngredientChecked(ing.id)} />
+                          <span className={`inline cursor-pointer ${checkedOffIngredients.includes(ing.id) ? "line-through" : ""}`} onClick={() => onIngredientChecked(ing.id)}>
+                            {(!!ing.amount || !!ing.unit) && (
+                              <span>
+                                {formatIngredientAmount(ing.amount ?? "")} {ing.unit ?? ""}{" "}
+                              </span>
+                            )}
+                            <span>{ing.name}</span>
+                          </span>
+                          <IngredientContextMenu ingredient={ing} onIngredientConverted={onIngredientConverted} onIngredientRelativeScaled={onScaleIngredients} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
         {recipeError && <NotFound backNav="/" />}
