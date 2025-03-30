@@ -67,6 +67,7 @@ export const generateUser = async (user?: Partial<Omit<User, "id">>, tx?: Prisma
       validated: user?.validated ?? false,
       preferences: user?.preferences ?? {
         account_visibility: "protected",
+        forking_image_permission: "allowed",
       },
     },
   });

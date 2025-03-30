@@ -3,6 +3,7 @@ import { FC, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, InputProps } from "../../shadcn";
+import { LoadingGroup } from "../LoadingGroup";
 
 export interface FormFileProps extends InputProps {
   readonly name: string;
@@ -34,7 +35,9 @@ export const FormFile: FC<FormFileProps> = ({ isLoading, name, className, label,
           <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)} className={fullClassName}>
             {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
             <FormControl>
-              <Input type="file" {...restInputProps} {...fileRef} />
+              <LoadingGroup isLoading={!!isLoading} className="h-10">
+                <Input type="file" {...restInputProps} {...fileRef} />
+              </LoadingGroup>
             </FormControl>
             <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
             {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}

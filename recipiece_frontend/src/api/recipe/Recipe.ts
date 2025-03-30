@@ -2,10 +2,14 @@ import {
   CreateRecipeRequestSchema,
   ListRecipesQuerySchema,
   ListRecipesResponseSchema,
+  ParseRecipeFromURLResponseSchema,
   RecipeSchema,
+  SetRecipeImageResponseSchema,
   UpdateRecipeRequestSchema,
   YListRecipesResponseSchema,
+  YParseRecipeFromURLResponseSchema,
   YRecipeSchema,
+  YSetRecipeImageResponseSchema,
 } from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
@@ -232,18 +236,18 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<unknown, RecipeSchem
   });
 };
 
-export const useParseRecipeFromURLMutation = (args?: MutationArgs<RecipeSchema, string>) => {
+export const useParseRecipeFromURLMutation = (args?: MutationArgs<ParseRecipeFromURLResponseSchema, string>) => {
   const { poster } = usePost();
 
   const mutation = async (url: string) => {
-    const response = await poster<{ readonly source_url: string }, RecipeSchema>({
+    const response = await poster<{ readonly source_url: string }, ParseRecipeFromURLResponseSchema>({
       path: "/recipe/parse/url",
       body: {
         source_url: url,
       },
       withAuth: "access_token",
     });
-    return YRecipeSchema.cast(response.data, {
+    return YParseRecipeFromURLResponseSchema.cast(response.data, {
       assert: false,
     });
   };
@@ -296,6 +300,126 @@ export const useForkRecipeMutation = (args?: MutationArgs<RecipeSchema, { readon
         oldDataCreator(data)
       );
       onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
+
+export const useSetRecipeImageMutation = (args?: MutationArgs<SetRecipeImageResponseSchema, { readonly file: File; readonly recipe_id: number }>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (body: { readonly file: File; readonly recipe_id: number }) => {
+    const formData = new FormData();
+    formData.append("file", body.file);
+    formData.append("recipe_id", body.recipe_id.toString());
+
+    const response = await poster({
+      path: "/recipe/image",
+      body: formData,
+      withAuth: "access_token",
+      extraHeaders: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return YSetRecipeImageResponseSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(vars.recipe_id), (oldData: RecipeSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            image_url: data.image_url,
+          };
+        }
+      });
+
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        (oldData: ListRecipesResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: [...(oldData?.data ?? [])].map((oldRecipe) => {
+                if (oldRecipe.id === vars.recipe_id) {
+                  return {
+                    ...oldRecipe,
+                    image_url: data.image_url,
+                  };
+                } else {
+                  return { ...oldRecipe };
+                }
+              }),
+            };
+          }
+        }
+      );
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
+
+export const useDeleteRecipeImageMutation = (args?: MutationArgs<unknown, { readonly id: number }>) => {
+  const queryClient = useQueryClient();
+  const { deleter } = useDelete();
+
+  const mutation = async ({ id }: { readonly id: number }) => {
+    const response = await deleter({
+      path: "/recipe/image",
+      id: id,
+      withAuth: "access_token",
+    });
+    return response.data;
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, { id }, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(id), (oldData: RecipeSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            image_url: null,
+          };
+        }
+      });
+
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        (oldData: ListRecipesResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: [...(oldData?.data ?? [])].map((oldRecipe) => {
+                if (oldRecipe.id === id) {
+                  return {
+                    ...oldRecipe,
+                    image_url: null,
+                  };
+                } else {
+                  return { ...oldRecipe };
+                }
+              }),
+            };
+          }
+        }
+      );
+      onSuccess?.(data, { id }, ctx);
     },
     ...restArgs,
   });

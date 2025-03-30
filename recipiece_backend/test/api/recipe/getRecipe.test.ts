@@ -1,8 +1,14 @@
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { Constant } from "@recipiece/constant";
 import { prisma, User, UserKitchenMembershipStatus } from "@recipiece/database";
 import { generateRecipe, generateUserKitchenMembership } from "@recipiece/test";
 import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import request from "supertest";
+import { Environment } from "../../../src/util/environment";
+import { s3 } from "../../../src/util/s3";
 
 describe("Get Recipe", () => {
   let user: User;
@@ -63,5 +69,29 @@ describe("Get Recipe", () => {
     const response = await request(server).get(`/recipe/${otherRecipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+  });
+
+  it("should set an image url for the recipe", async () => {
+    const recipe = await generateRecipe({ user_id: user.id });
+    const expectedKey = `${Constant.RecipeImage.keyFor(user.id, recipe.id)}.png`;
+
+    const putRequest = new PutObjectCommand({
+      Bucket: process.env.APP_S3_BUCKET,
+      Key: expectedKey,
+      Body: readFileSync(path.join(__dirname, "../../test_files/test_image.png")),
+    });
+    await s3.send(putRequest);
+
+    await prisma.recipe.update({
+      where: { id: recipe.id },
+      data: { image_key: expectedKey },
+    });
+
+    const response = await request(server).get(`/recipe/${recipe.id}`).set("Authorization", `Bearer ${bearerToken}`);
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const responseRecipe: RecipeSchema = response.body;
+
+    expect(responseRecipe.image_url).toBeTruthy();
+    expect(responseRecipe.image_url).toBe(`${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${expectedKey}`);
   });
 });

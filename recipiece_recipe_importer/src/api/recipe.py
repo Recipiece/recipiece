@@ -1,5 +1,5 @@
 from typing import List
-from ..model.recipe import ParseRecipeResponse, ParsedIngredient
+from ..model.recipe import ParsedIngredient
 from http import HTTPStatus
 from fastapi import HTTPException
 from recipe_scrapers import scrape_html, WebsiteNotImplementedError
@@ -54,7 +54,7 @@ def parse_freetext_ingredients(ingredients: List[str]) -> List[ParsedIngredient]
     return parsed_ingredients
 
 
-def parse_recipe_from_url(source_url: str) -> ParseRecipeResponse:
+def parse_recipe_from_url(source_url: str):
     html = requests.get(source_url, headers={"User-Agent": "Recipiece"}).content
     try:
         scraper = scrape_html(html, org_url=source_url)

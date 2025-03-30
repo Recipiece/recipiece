@@ -7,7 +7,7 @@ import { useListUserTagsQuery } from "../../api";
 import { Badge, FormField, FormItem, FormLabel, TypeaheadInput } from "../../component";
 import { RecipeEditFormData } from "./RecipeEditFormSchema";
 
-export const TagsForm: FC = () => {
+export const TagsForm: FC<{ readonly isLoading?: boolean }> = ({ isLoading }) => {
   const [filters, setFilters] = useState<ListUserTagsQuerySchema>({
     page_number: 0,
   });
@@ -94,7 +94,7 @@ export const TagsForm: FC = () => {
                 className="flex-grow"
                 autoComplete="off"
                 placeholder="Enter a tag..."
-                isLoading={isLoadingUserTags}
+                isLoading={!!isLoading || isLoadingUserTags}
                 onKeyDown={onKeyDown}
                 {...field}
               />

@@ -5,6 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { ApiResponse } from "../../types";
 import { VERSION_ACCESS_LEVELS } from "../../util/constant";
+import { Environment } from "../../util/environment";
 import { hashPassword } from "../../util/password";
 
 export const createUser = async (request: Request<any, any, CreateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<UserSchema> => {
@@ -54,6 +55,7 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
       username: username,
       preferences: {
         account_visibility: "protected",
+        forking_image_permission: "allowed",
       },
       credentials: {
         create: {
@@ -62,7 +64,7 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
       },
       user_access_records: {
         create: {
-          access_levels: VERSION_ACCESS_LEVELS[process.env.APP_VERSION!] ?? ["free"],
+          access_levels: VERSION_ACCESS_LEVELS[Environment.VERSION] ?? ["free"],
           start_date: DateTime.utc().toJSDate(),
         },
       },

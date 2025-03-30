@@ -31,6 +31,9 @@ export const YRecipeSchema = object({
   steps: array().of(YRecipeStepSchema).notRequired(),
   tags: array().of(YUserTagSchema).notRequired(),
   user_kitchen_membership_id: number().notRequired(),
+  // this is intentionally not the image_key or the external_image_url
+  image_url: string().notRequired(),
+  external_image_url: string().notRequired(),
 }).noUnknown();
 
 export interface RecipeSchema extends InferType<typeof YRecipeSchema> {}
@@ -65,6 +68,7 @@ export const YCreateRecipeRequestSchema = object({
     )
     .notRequired(),
   tags: array(string().required()).notRequired(),
+  external_image_url: string().url().notRequired(),
 }).noUnknown();
 
 export interface CreateRecipeRequestSchema extends InferType<typeof YCreateRecipeRequestSchema> {}
@@ -81,6 +85,7 @@ export interface ParseRecipeFromURLRequestSchema extends InferType<typeof YParse
 export const YParseRecipeFromURLResponseSchema = YRecipeSchema.omit(["id", "user_id", "tags", "user_kitchen_membership_id", "created_at"]).shape({
   steps: array(YRecipeStepSchema.omit(["id", "recipe_id"])),
   ingredients: array(YRecipeIngredientSchema.omit(["id", "recipe_id"])),
+  external_image_url: string().url().notRequired(),
 });
 
 export interface ParseRecipeFromURLResponseSchema extends InferType<typeof YParseRecipeFromURLResponseSchema> {}
@@ -95,6 +100,7 @@ export interface ParsedFromURLRecipe {
   }[];
   readonly title?: string;
   readonly instructions_list?: string[];
+  readonly image?: string;
 }
 
 /**
@@ -124,6 +130,7 @@ export const YUpdateRecipeRequestSchema = object({
     )
     .notRequired(),
   tags: array(string().required()).notRequired(),
+  external_image_url: string().url().notRequired(),
 }).noUnknown();
 
 export interface UpdateRecipeRequestSchema extends InferType<typeof YUpdateRecipeRequestSchema> {}
@@ -168,3 +175,13 @@ export const YForkRecipeRequestSchema = object({
 }).noUnknown();
 
 export interface ForkRecipeRequestSchema extends InferType<typeof YForkRecipeRequestSchema> {}
+
+/**
+ * Set Recipe Image
+ * NOTE: The request for this endpoint is form data, so no schema defined here :/
+ */
+export const YSetRecipeImageResponseSchema = object({
+  image_url: string().required(),
+});
+
+export interface SetRecipeImageResponseSchema extends InferType<typeof YSetRecipeImageResponseSchema> {}

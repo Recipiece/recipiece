@@ -23,7 +23,9 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.775.0",
     "@faker-js/faker": "^9.4.0",
-    "argon2": "^0.41.1"
+    "argon2": "^0.41.1",
+    "js-image-generator": "^1.0.4"
   }
 }

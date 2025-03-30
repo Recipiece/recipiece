@@ -1,9 +1,11 @@
 import { DataTestId } from "@recipiece/constant";
 import { RecipeSchema } from "@recipiece/types";
 import { MoreVertical } from "lucide-react";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetSelfQuery } from "../../../api";
+import { useLocalStorage } from "../../../hooks";
+import { StorageKeys } from "../../../util";
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, DropdownMenu, DropdownMenuTrigger } from "../../shadcn";
 import { Shelf, ShelfSpacer } from "../Layout";
 import { MembershipAvatar } from "../MembershipAvatar";
@@ -19,17 +21,44 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
   const { data: user } = useGetSelfQuery();
   const userKitchenMembershipId = recipe.user_kitchen_membership_id;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cardStyle, setCardStyle] = useState<React.CSSProperties>();
+  const [selectedTheme] = useLocalStorage(StorageKeys.UI_THEME, "system");
 
   const onView = useCallback(() => {
     navigate(`/recipe/view/${recipe.id}`);
   }, [recipe, navigate]);
 
+  useEffect(() => {
+    const url = recipe.image_url ?? recipe.external_image_url;
+    if (url) {
+      let newBgcolor: string;
+      const systemWantsDark = selectedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const isDarkMode = selectedTheme === "dark" || systemWantsDark;
+
+      if (isDarkMode) {
+        newBgcolor = "rgba(0, 0, 0, 0.8)";
+      } else {
+        newBgcolor = "rgba(255,255,255,0.8)";
+      }
+
+      setCardStyle({
+        backgroundImage: `url(${url})`,
+        backgroundColor: newBgcolor,
+        backgroundBlendMode: "overlay",
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+      });
+    }
+  }, [recipe.image_url, recipe.external_image_url, selectedTheme]);
+
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-      <Card className="flex h-full flex-col hover:drop-shadow-md">
+      <Card className="flex h-full flex-col hover:drop-shadow-md" style={cardStyle}>
         <CardHeader data-testid={DataTestId.RecipeCard.CONTAINER_CARD_HEADER(recipe.id)} onClick={onView} className="hover:cursor-pointer">
           <Shelf>
-            <CardTitle className="line-clamp-2 max-h-32 overflow-hidden" data-testid={DataTestId.RecipeCard.CARD_TITLE(recipe.id)}>{recipe.name}</CardTitle>
+            <CardTitle className="line-clamp-2 pb-[0.2em] max-h-32 overflow-hidden" data-testid={DataTestId.RecipeCard.CARD_TITLE(recipe.id)}>
+              {recipe.name}
+            </CardTitle>
             <ShelfSpacer />
           </Shelf>
         </CardHeader>

@@ -1,8 +1,9 @@
 import { Constant } from "@recipiece/constant";
 import { KyselyCore, KyselyGenerated, PrismaTransaction } from "@recipiece/database";
-import { ListRecipesQuerySchema, ListRecipesResponseSchema, YRecipeSchema } from "@recipiece/types";
+import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { Environment } from "../../util/environment";
 import { ingredientsSubquery, stepsSubquery, tagsSubquery } from "./query";
 
 export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipesResponseSchema> => {
@@ -127,10 +128,24 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
   query = query.orderBy("all_recipes.name asc");
   query = query.offset(page_number * actualPageSize).limit(actualPageSize + 1);
 
-  const recipes = await query.execute();
+  const rawRecipes = await query.execute();
+
+  // check the recipe image key to see if we should set an image url
+  const recipes: RecipeSchema[] = rawRecipes
+    .map((rcp) => {
+      if (rcp.image_key) {
+        return {
+          ...rcp,
+          image_url: `${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${rcp.image_key}`,
+        };
+      } else {
+        return { ...rcp };
+      }
+    })
+    .map((recipe) => YRecipeSchema.cast(recipe));
 
   const hasNextPage = recipes.length > actualPageSize;
-  const resultsData = recipes.splice(0, actualPageSize).map((val) => YRecipeSchema.cast(val));
+  const resultsData = recipes.splice(0, actualPageSize);
 
   return [
     StatusCodes.OK,

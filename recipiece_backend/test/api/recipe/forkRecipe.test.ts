@@ -1,8 +1,14 @@
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Constant } from "@recipiece/constant";
 import { prisma, User } from "@recipiece/database";
 import { generateRecipe, generateRecipeWithIngredientsAndSteps, generateUserKitchenMembership } from "@recipiece/test";
 import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import request from "supertest";
+import { Environment } from "../../../src/util/environment";
+import { s3 } from "../../../src/util/s3";
 
 describe("Fork Recipe", () => {
   let user: User;
@@ -151,5 +157,119 @@ describe("Fork Recipe", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+  });
+
+  it("should copy the image to the requesting users key", async () => {
+    const filePath = path.join(__dirname, "../../test_files/test_image.png");
+    const originalRecipe = await generateRecipe({
+      user_id: otherUser.id,
+    });
+
+    const expectedKey = `${Constant.RecipeImage.keyFor(user.id, originalRecipe.id)}.png`;
+
+    await prisma.recipe.update({
+      where: { id: originalRecipe.id },
+      data: { image_key: expectedKey },
+    });
+
+    const putObjectCommand = new PutObjectCommand({
+      Body: readFileSync(filePath),
+      Bucket: Environment.S3_BUCKET,
+      Key: expectedKey,
+      ContentType: "image/png",
+    });
+    await s3.send(putObjectCommand);
+
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+
+    const response = await request(server)
+      .post("/recipe/fork")
+      .send({
+        original_recipe_id: originalRecipe.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.CREATED);
+    const responseBody: RecipeSchema = response.body;
+    expect(responseBody.image_url).toBeTruthy();
+
+    const createdRecipe = await prisma.recipe.findFirst({
+      where: { id: responseBody.id },
+    });
+    expect(createdRecipe?.image_key).toBeTruthy();
+
+    const getObjectCommand = new GetObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      Key: createdRecipe!.image_key!,
+    });
+    const getObjectResponse = await s3.send(getObjectCommand);
+    expect(getObjectResponse.Body).toBeTruthy();
+  });
+
+  it("should not copy the image when the original user does not allow that", async () => {
+    const filePath = path.join(__dirname, "../../test_files/test_image.png");
+    const originalRecipe = await generateRecipe({
+      user_id: otherUser.id,
+    });
+
+    await prisma.user.update({
+      where: {
+        id: otherUser.id,
+      },
+      data: {
+        preferences: {
+          forking_image_permission: "denied",
+        },
+      },
+    });
+
+    const expectedKey = `${Constant.RecipeImage.keyFor(user.id, originalRecipe.id)}.png`;
+
+    await prisma.recipe.update({
+      where: { id: originalRecipe.id },
+      data: { image_key: expectedKey },
+    });
+
+    const putObjectCommand = new PutObjectCommand({
+      Body: readFileSync(filePath),
+      Bucket: Environment.S3_BUCKET,
+      Key: expectedKey,
+      ContentType: "image/png",
+    });
+    await s3.send(putObjectCommand);
+
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+
+    const response = await request(server)
+      .post("/recipe/fork")
+      .send({
+        original_recipe_id: originalRecipe.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.CREATED);
+    const responseBody: RecipeSchema = response.body;
+    expect(responseBody.image_url).toBeFalsy();
+
+    const createdRecipe = await prisma.recipe.findFirst({
+      where: { id: responseBody.id },
+    });
+    expect(createdRecipe?.image_key).toBeFalsy();
+
+    const getObjectCommand = new GetObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      Key: createdRecipe!.image_key!,
+    });
+    expect(() => s3.send(getObjectCommand)).rejects.toThrow();
   });
 });

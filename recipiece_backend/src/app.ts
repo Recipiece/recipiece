@@ -20,6 +20,7 @@ import {
   wsTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
+import { Environment } from "./util/environment";
 import { ApiError } from "./util/error";
 import { Logger } from "./util/logger";
 
@@ -34,7 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan(":method :url :status - :response-time ms"));
 
-if (process.env.APP_ENVIRONMENT === "dev") {
+if (Environment.ENVIRONMENT === "dev") {
   // slow things down locally, cause they're too fast
   app.use((req: Request, res: Response, next: NextFunction) => {
     setTimeout(() => {
@@ -44,7 +45,7 @@ if (process.env.APP_ENVIRONMENT === "dev") {
 }
 
 app.get("/", (_, res) => {
-  res.status(StatusCodes.OK).send({ version: process.env.APP_VERSION });
+  res.status(StatusCodes.OK).send({ version: Environment.VERSION });
 });
 
 ROUTES.forEach((route) => {
@@ -105,11 +106,19 @@ ROUTES.forEach((route) => {
       res.status(statusCode).send(sanitizedBody);
     } catch (err) {
       console.error(err);
+
       if (err instanceof ApiError) {
+        // if we raised an api error, send it here
         res.status(err.statusCode).send({
           message: err.message,
         });
+      } else if ((err as { readonly code: string })?.code === "LIMIT_FILE_SIZE") {
+        // multer raised this because our middleware limited file size
+        res.status(StatusCodes.REQUEST_TOO_LONG).send({
+          message: "Provided file was too large",
+        });
       } else {
+        // if we raised an
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
           message: "Internal Error",
         });

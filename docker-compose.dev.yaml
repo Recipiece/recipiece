@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./local-recipiece-data:/var/lib/postgresql/data
+      - ./recipiece_local_data/postgres:/var/lib/postgresql/data
   recipiece_redis:
     image: redis
     restart: always
@@ -24,3 +24,13 @@ services:
       POSTGRES_USER: 'recipiece'
     ports:
       - "5433:5432"
+  s3mock:
+    image: adobe/s3mock:latest
+    environment:
+      - initialBuckets=recipiece_dev,recipiece_test
+      - retainFilesOnExit=true
+      - root=s3
+    ports:
+      - 9090:9090
+    volumes:
+      - ./recipiece_local_data/s3:/s3

@@ -29,6 +29,7 @@ export const createRecipe = async (req: AuthenticatedRequest<CreateRecipeRequest
           data: [...(recipeBody.steps || [])],
         },
       },
+      external_image_url: recipeBody.external_image_url,
     };
 
     const createdRecipe = await tx.recipe.create({

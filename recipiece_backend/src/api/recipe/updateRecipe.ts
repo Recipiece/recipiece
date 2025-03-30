@@ -77,6 +77,7 @@ export const updateRecipe = async (req: AuthenticatedRequest<UpdateRecipeRequest
   if (recipeBody.servings) {
     recipeUpdateData.servings = recipeBody.servings;
   }
+  recipeUpdateData.external_image_url = recipeBody.external_image_url;
 
   const updatedRecipe = await tx.recipe.update({
     data: { ...recipeUpdateData },

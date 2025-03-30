@@ -1,14 +1,19 @@
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { Constant } from "@recipiece/constant";
 import { prisma, RecipeIngredient } from "@recipiece/database";
 import { YRecipeImportJobDataSchema } from "@recipiece/types";
 import { Job } from "bullmq";
 import { createReadStream, mkdirSync, readdirSync, readFileSync, rmSync } from "fs";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
+import * as mime from "mime-types";
 import unzipper from "unzipper";
 import { gunzipSync } from "zlib";
 import { RecipeImportFiles } from "../../../util/constant";
 import { sendFinishedImportJobFailedEmail, sendFinishedImportJobSuccessEmail } from "../../../util/email";
+import { Environment } from "../../../util/environment";
 import { replaceUnicodeFractions } from "../../../util/fraction";
+import { s3 } from "../../../util/s3";
 
 const paprikaImporter = async (fileName: string, userId: number) => {
   const tmpSeed = DateTime.utc().toISO();
@@ -58,7 +63,7 @@ const paprikaImporter = async (fileName: string, userId: number) => {
         .map((ing) => ing.trim())
         .filter((ing) => !!ing);
 
-      const url = `${process.env.APP_RECIPE_PARSER_SERVICE_URL!}/ingredients/parse`;
+      const url = `${Environment.RECIPE_PARSER_SERVICE_URL}/ingredients/parse`;
       let parsedIngredients = splitIngredients.map((ing) => {
         return {
           name: ing,
@@ -120,7 +125,7 @@ const paprikaImporter = async (fileName: string, userId: number) => {
         createdAt = DateTime.utc();
       }
 
-      return prisma.recipe.create({
+      let createdRecipe = await prisma.recipe.create({
         data: {
           user_id: userId,
           name: item.name ?? `Paprika Import ${DateTime.utc().toISO()}`,
@@ -143,6 +148,46 @@ const paprikaImporter = async (fileName: string, userId: number) => {
           },
         },
       });
+
+      // there was a photo, upload it to the bucket
+      if (item.photo_data) {
+        // try and suss out the file extension, or just blindly assume its a jpg
+        let fileExtension = "jpg";
+        if (item.image_url) {
+          const extensionFromUrl = item.image_url.split(".").pop();
+          if (Constant.RecipeImage.ALLOWED_EXTENSIONS.includes(extensionFromUrl)) {
+            fileExtension = extensionFromUrl;
+          }
+        }
+
+        const key = `${Constant.RecipeImage.keyFor(userId, createdRecipe.id)}.${fileExtension}`;
+        const mimeType = mime.lookup(fileExtension) || (mime.lookup("jpg") as string);
+
+        const putObjectCommand = new PutObjectCommand({
+          Key: key,
+          Bucket: Environment.S3_BUCKET,
+          ContentType: mimeType,
+          Body: Buffer.from(item.photo_data, "base64"),
+        });
+        try {
+          await s3.send(putObjectCommand);
+          const updatedRecipe = await prisma.recipe.update({
+            where: { id: createdRecipe.id },
+            data: {
+              image_key: key,
+            },
+          });
+          createdRecipe = {
+            ...createdRecipe,
+            ...updatedRecipe,
+          };
+        } catch (err) {
+          console.log("failed to upload image");
+          console.error(err);
+        }
+      }
+
+      return createdRecipe;
     });
 
   //create the recipes

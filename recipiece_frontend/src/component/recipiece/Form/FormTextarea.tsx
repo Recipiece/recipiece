@@ -3,15 +3,17 @@ import { FC, ReactElement, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Textarea, TextareaProps } from "../../shadcn";
+import { LoadingGroup } from "../LoadingGroup";
 
 export interface FormTextareaProps extends TextareaProps {
   readonly name: string;
   readonly instructions?: ReactElement;
   readonly label?: string;
   readonly className?: string;
+  readonly isLoading?: boolean;
 }
 
-export const FormTextarea: FC<FormTextareaProps> = ({ name, instructions, label, className, ...restProps }) => {
+export const FormTextarea: FC<FormTextareaProps> = ({ isLoading, name, instructions, label, className, ...restProps }) => {
   const form = useFormContext();
   const { isSubmitting } = form.formState;
 
@@ -32,7 +34,9 @@ export const FormTextarea: FC<FormTextareaProps> = ({ name, instructions, label,
           <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)} className={fullClassName}>
             {label && <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)}>{label}</FormLabel>}
             <FormControl>
-              <Textarea {...restProps} {...field} />
+              <LoadingGroup isLoading={!!isLoading} className="h-20">
+                <Textarea {...restProps} {...field} />
+              </LoadingGroup>
             </FormControl>
             {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
             <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />

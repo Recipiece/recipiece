@@ -2,6 +2,7 @@ import { DataTestId } from "@recipiece/constant";
 import { FC, useCallback, useEffect, useState } from "react";
 import { cn } from "../../../util";
 import { Button, Input, InputProps, LoadingSpinner, Popover, PopoverContent, PopoverTrigger } from "../../shadcn";
+import { LoadingGroup } from "../LoadingGroup";
 
 export interface TypeaheadInputProps extends InputProps {
   readonly autocompleteOptions: string[];
@@ -32,18 +33,20 @@ export const TypeaheadInput: FC<TypeaheadInputProps> = ({ autocompleteOptions, p
   return (
     <Popover open={isPopoverOpen}>
       <div>
-        <Input
-          onFocus={(event) => {
-            setIsFocused(true);
-            onFocus?.(event);
-          }}
-          onBlur={(event) => {
-            setIsFocused(false);
-            onBlur?.(event);
-          }}
-          data-testid={dataTestId}
-          {...restInputProps}
-        />
+        <LoadingGroup isLoading={!!isLoading} className="h-10 w-full">
+          <Input
+            onFocus={(event) => {
+              setIsFocused(true);
+              onFocus?.(event);
+            }}
+            onBlur={(event) => {
+              setIsFocused(false);
+              onBlur?.(event);
+            }}
+            data-testid={dataTestId}
+            {...restInputProps}
+          />
+        </LoadingGroup>
         <div className="ml-4 h-0 w-0">
           <PopoverTrigger className="h-0 w-0" />
           <PopoverContent

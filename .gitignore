@@ -1,5 +1,6 @@
 .DS_Store
 local-recipiece-data
+recipiece_local_data
 
 .vscode
 coverage
