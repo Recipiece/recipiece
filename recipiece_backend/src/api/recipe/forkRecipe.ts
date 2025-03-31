@@ -8,6 +8,7 @@ import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { Environment } from "../../util/environment";
 import { s3 } from "../../util/s3";
 import { getRecipeByIdQuery } from "./query";
+import { getImageUrl } from "./util";
 
 export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequestSchema>, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const { original_recipe_id } = request.body;
@@ -108,13 +109,13 @@ export const forkRecipe = async (request: AuthenticatedRequest<ForkRecipeRequest
     try {
       await s3.send(copyObjectCommand);
 
-      const updatedRecipe = await tx.recipe.update({
+      await tx.recipe.update({
         where: { id: forkedRecipe.id },
         data: { image_key: newKey },
       });
       forkedRecipe = {
         ...forkedRecipe,
-        image_url: `${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${updatedRecipe.image_key}`,
+        image_url: getImageUrl(newKey),
       };
     } catch (err) {
       console.error(err);

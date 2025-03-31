@@ -9,6 +9,7 @@ if (Environment.S3_ACCESS_KEY_ID && Environment.S3_SECRET_KEY) {
     secretAccessKey: Environment.S3_SECRET_KEY,
   };
 } else {
+  console.warn("no access key id or secret key for s3 set!");
   credentials = {
     accessKeyId: "",
     secretAccessKey: "",
@@ -16,6 +17,8 @@ if (Environment.S3_ACCESS_KEY_ID && Environment.S3_SECRET_KEY) {
 }
 
 export const s3 = new S3Client({
+  forcePathStyle: false,
   endpoint: Environment.S3_ENDPOINT,
   credentials: { ...credentials },
+  region: Environment.S3_REGION,
 });

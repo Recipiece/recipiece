@@ -2,8 +2,8 @@ import { PrismaTransaction } from "@recipiece/database";
 import { RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { Environment } from "../../util/environment";
 import { getRecipeByIdQuery } from "./query";
+import { getImageUrl } from "./util";
 
 /**
  * Get a recipe by id.
@@ -28,7 +28,7 @@ export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction
   const castRecipe = YRecipeSchema.cast(recipe);
 
   if (recipe.image_key) {
-    castRecipe.image_url = `${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${recipe.image_key}`;
+    castRecipe.image_url = getImageUrl(recipe.image_key);
   }
 
   return [StatusCodes.OK, castRecipe];
