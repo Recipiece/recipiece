@@ -168,6 +168,7 @@ const paprikaImporter = async (fileName: string, userId: number) => {
           Bucket: Environment.S3_BUCKET,
           ContentType: mimeType,
           Body: Buffer.from(item.photo_data, "base64"),
+          ACL: "public-read",
         });
         try {
           await s3.send(putObjectCommand);
