@@ -3,8 +3,8 @@ import { KyselyCore, KyselyGenerated, PrismaTransaction } from "@recipiece/datab
 import { ListRecipesQuerySchema, ListRecipesResponseSchema, RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { Environment } from "../../util/environment";
 import { ingredientsSubquery, stepsSubquery, tagsSubquery } from "./query";
+import { getImageUrl } from "./util";
 
 export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipesQuerySchema>, tx: PrismaTransaction): ApiResponse<ListRecipesResponseSchema> => {
   const { page_number, page_size, user_kitchen_membership_ids, search, cookbook_id, cookbook_attachments_filter, ingredients, tags, ingredients_filter, tags_filter } =
@@ -136,7 +136,7 @@ export const listRecipes = async (request: AuthenticatedRequest<any, ListRecipes
       if (rcp.image_key) {
         return {
           ...rcp,
-          image_url: `${Environment.S3_CDN_ENDPOINT}/${Environment.S3_BUCKET}/${rcp.image_key}`,
+          image_url: getImageUrl(rcp.image_key),
         };
       } else {
         return { ...rcp };

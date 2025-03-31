@@ -1,11 +1,12 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { Constant } from "@recipiece/constant";
 import { prisma, User } from "@recipiece/database";
 import { generateRecipe } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
-import { unlinkSync, writeFileSync } from "node:fs";
+import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import request from "supertest";
+import { Environment } from "../../../src/util/environment";
 import { s3 } from "../../../src/util/s3";
 
 describe("Set Recipe Image", () => {
@@ -151,5 +152,52 @@ describe("Set Recipe Image", () => {
       Key: expectedKey,
     });
     expect(() => s3.send(getRequest)).rejects.toThrow();
+  });
+
+  it("should delete an existing image", async () => {
+    const recipe = await generateRecipe({ user_id: user.id });
+    const oldKey = `${Constant.RecipeImage.keyFor(user.id, recipe.id)}.png`;
+
+    await prisma.recipe.update({
+      where: { id: recipe.id },
+      data: { image_key: oldKey },
+    });
+
+    const putObjectCommand = new PutObjectCommand({
+      Body: readFileSync(filePath),
+      Bucket: Environment.S3_BUCKET,
+      Key: oldKey,
+      ContentType: "image/png",
+    });
+    await s3.send(putObjectCommand);
+
+    await request(server)
+      .post("/recipe/image")
+      .set("Authorization", `Bearer ${bearerToken}`)
+      .set("Content-Type", "multipart/form-data")
+      .field("recipe_id", recipe.id)
+      .attach("file", filePath)
+      .expect(StatusCodes.OK);
+
+    const dbRecipe = await prisma.recipe.findFirst({
+      where: {
+        id: recipe.id,
+      },
+    });
+    expect(dbRecipe).toBeTruthy();
+    expect(dbRecipe?.image_key).toBeTruthy();
+
+    const getRequest = new GetObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      Key: dbRecipe?.image_key!,
+    });
+    const response = await s3.send(getRequest);
+    expect(response.Body).toBeTruthy();
+
+    const oldGetRequest = new GetObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      Key: oldKey,
+    });
+    expect(() => s3.send(oldGetRequest)).rejects.toThrow();
   });
 });

@@ -72,7 +72,7 @@ export class Environment {
   }
 
   public static get S3_ACCESS_KEY_ID(): string | undefined {
-    return process.env.S3_ACCESS_KEY_ID;
+    return process.env.APP_S3_ACCESS_KEY_ID;
   }
 
   public static get S3_BUCKET(): string | undefined {
@@ -84,6 +84,10 @@ export class Environment {
   }
 
   public static get S3_CDN_ENDPOINT(): string | undefined {
-    return process.env.APP_S3_CDN_ENDPOINT ?? this.S3_ENDPOINT;
+    return process.env.APP_S3_CDN_ENDPOINT;
+  }
+
+  public static get S3_REGION(): string | undefined {
+    return process.env.APP_S3_REGION;
   }
 }
