@@ -1,36 +1,27 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DataTestId } from "@recipiece/constant";
+import { CreateRecipeRequestSchema, RecipeIngredientSchema, RecipeSchema, RecipeStepSchema, UpdateRecipeRequestSchema } from "@recipiece/types";
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { z } from "zod";
-import { useCreateRecipeMutation, useGetRecipeByIdQuery, useGetSelfQuery, useParseRecipeFromURLMutation, useUpdateRecipeMutation } from "../../api";
-import { Button, Form, FormInput, FormTextarea, NotFound, Stack, SubmitButton, useToast } from "../../component";
+import {
+  useCreateRecipeMutation,
+  useDeleteRecipeImageMutation,
+  useGetRecipeByIdQuery,
+  useGetSelfQuery,
+  useParseRecipeFromURLMutation,
+  useSetRecipeImageMutation,
+  useUpdateRecipeMutation,
+} from "../../api";
+import { Button, Divider, Form, FormInput, FormTextarea, NotFound, SubmitButton, useToast } from "../../component";
 import { DialogContext } from "../../context";
-import { Recipe, RecipeIngredient, RecipeStep } from "../../data";
 import { ParseRecipeFromURLForm } from "../../dialog";
-import { IngredientsForm } from "./IngredientsForm";
-import { StepsForm } from "./StepsForm";
 import { formatIngredientAmount } from "../../util";
-
-const RecipeFormSchema = z.object({
-  name: z.string().min(3).max(100),
-  description: z.string().max(1000).optional(),
-  servings: z.coerce.number().min(0).optional(),
-  steps: z.array(
-    z.object({
-      content: z.string().min(3),
-    })
-  ),
-  ingredients: z.array(
-    z.object({
-      name: z.string().min(1),
-      unit: z.string().optional().nullable(),
-      amount: z.string().optional().nullable(),
-    })
-  ),
-});
-
-type RecipeForm = z.infer<typeof RecipeFormSchema>;
+import { IngredientsForm } from "./IngredientsForm";
+import { RecipeEditFormData, RecipeEditFormSchema } from "./RecipeEditFormSchema";
+import { RecipeImageUploadForm } from "./RecipeImageUploadForm";
+import { StepsForm } from "./StepsForm";
+import { TagsForm } from "./TagsForm";
 
 export const RecipeEditPage: FC = () => {
   const { pushDialog, popDialog } = useContext(DialogContext);
@@ -39,7 +30,9 @@ export const RecipeEditPage: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecipeGetError, setIsRecipeGetError] = useState(false);
+  const [isImageMarkedForDeletion, setIsImageMarkedForDeletion] = useState(false);
 
   const isCreatingNewRecipe = useMemo(() => {
     return idFromParams === "new";
@@ -75,9 +68,12 @@ export const RecipeEditPage: FC = () => {
   const { mutateAsync: createRecipe } = useCreateRecipeMutation();
   const { mutateAsync: updateRecipe } = useUpdateRecipeMutation();
   const { mutateAsync: parseRecipe } = useParseRecipeFromURLMutation();
+  const { mutateAsync: setRecipeImage } = useSetRecipeImageMutation();
+  const { mutateAsync: deleteRecipeImage } = useDeleteRecipeImageMutation();
 
-  const onSubmit = async (formData: RecipeForm) => {
-    const sanitizedFormData: Partial<Recipe> = {
+  const onSubmit = async (formData: RecipeEditFormData) => {
+    setIsSubmitting(true);
+    const sanitizedFormData: CreateRecipeRequestSchema | UpdateRecipeRequestSchema = {
       id: isCreatingNewRecipe ? undefined : recipeId,
       name: formData.name,
       description: formData.description,
@@ -87,30 +83,63 @@ export const RecipeEditPage: FC = () => {
           ...ing,
           order: index,
         };
-      }) as RecipeIngredient[],
+      }) as RecipeIngredientSchema[],
       steps: formData.steps.map((step, index) => {
         return {
           ...step,
           order: index,
         };
-      }) as RecipeStep[],
+      }) as RecipeStepSchema[],
+      tags: (formData.tags ?? []).map((t) => t.content),
+      external_image_url: formData.image_type === "file" ? null : formData.external_image_url,
     };
 
+    let response: RecipeSchema;
     try {
-      let response: Recipe;
       if (isCreatingNewRecipe) {
-        response = await createRecipe(sanitizedFormData);
+        response = await createRecipe(sanitizedFormData as CreateRecipeRequestSchema);
       } else {
-        response = await updateRecipe(sanitizedFormData);
+        response = await updateRecipe(sanitizedFormData as UpdateRecipeRequestSchema);
       }
-      navigate(`/recipe/view/${response.id}`);
-    } catch (err) {
+    } catch {
       toast({
         title: "Unable to Save Recipe",
         description: "This recipe could not be saved. Please try again later.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
+      return;
     }
+
+    if (formData.image_type === "file" && formData.image && formData.image.item(0)) {
+      try {
+        await setRecipeImage({
+          file: formData.image.item(0)!,
+          recipe_id: response.id,
+        });
+      } catch {
+        toast({
+          title: "Error Uploading Image",
+          description: "Your image failed to upload, but the recipe was still saved.",
+          variant: "destructive",
+        });
+      }
+    } else if (recipe?.image_url && isImageMarkedForDeletion) {
+      try {
+        await deleteRecipeImage({ id: recipe.id });
+      } catch {
+        toast({
+          title: "Error Deleting Image",
+          description: "Your image failed to delete, but the recipe was still saved.",
+          variant: "destructive",
+        });
+      }
+    }
+    toast({
+      title: "Recipe Saved",
+      description: "Your recipe has been saved!",
+    });
+    navigate(`/recipe/view/${response.id}`);
   };
 
   const isLoading = useMemo(() => {
@@ -120,20 +149,28 @@ export const RecipeEditPage: FC = () => {
     return isLoadingRecipe || isLoadingCurrentUser;
   }, [isLoadingRecipe, isCreatingNewRecipe, isLoadingCurrentUser]);
 
-  const defaultFormValues = useMemo((): RecipeForm => {
+  const defaultFormValues = useMemo((): RecipeEditFormData => {
     if (recipe) {
       return {
         name: recipe.name,
-        description: recipe.description,
-        steps: recipe.steps,
+        description: recipe.description ?? "",
+        steps: recipe.steps ?? [],
         ingredients: (recipe.ingredients ?? []).map((ing) => {
           return {
             ...ing,
-            amount: !!ing.amount ? formatIngredientAmount(ing.amount) : undefined,
+            amount: ing.amount ? formatIngredientAmount(ing.amount) : undefined,
             unit: ing.unit === null ? undefined : ing.unit,
           };
         }),
-        servings: recipe.servings,
+        servings: recipe.servings ?? undefined,
+        tags: (recipe.tags ?? []).map((t) => {
+          return {
+            content: t.content,
+          };
+        }),
+        currentTag: "",
+        image_type: recipe.external_image_url ? "url" : "file",
+        external_image_url: recipe.external_image_url || undefined,
       };
     } else {
       return {
@@ -142,12 +179,16 @@ export const RecipeEditPage: FC = () => {
         servings: 1,
         steps: [],
         ingredients: [],
+        currentTag: "",
+        tags: [],
+        external_image_url: undefined,
+        image_type: "file",
       };
     }
   }, [recipe]);
 
-  const form = useForm<RecipeForm>({
-    resolver: zodResolver(RecipeFormSchema),
+  const form = useForm<RecipeEditFormData>({
+    resolver: zodResolver(RecipeEditFormSchema),
     defaultValues: defaultFormValues,
   });
 
@@ -160,19 +201,19 @@ export const RecipeEditPage: FC = () => {
   const onParseRecipeDialogSubmit = async (data: ParseRecipeFromURLForm) => {
     try {
       const response = await parseRecipe(data.url);
-      form.reset({ ...response });
-      popDialog("parseRecipeFromURL");
+      form.reset({ ...response, currentTag: "", tags: [], image_type: "url", external_image_url: response.external_image_url } as RecipeEditFormData);
       toast({
         title: "Recipe Parsed",
         description: "This recipe was successfully imported.",
       });
     } catch {
-      popDialog("parseRecipeFromURL");
       toast({
         title: "Recipe Parsing Failed",
         description: "This recipe could not be imported.",
         variant: "destructive",
       });
+    } finally {
+      popDialog("parseRecipeFromURL");
     }
   };
 
@@ -193,43 +234,83 @@ export const RecipeEditPage: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  const onClearImage = () => {
+    form.setValue("image", undefined);
+    form.setValue("external_image_url", undefined);
+    form.setValue("image_type", "file");
+    setIsImageMarkedForDeletion(true);
+  };
+
   return (
     <div className="p-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Stack>
-            <FormInput name="name" label="Recipe Name" placeholder="What do you want to call this recipe?" />
-            <FormInput min={1} step={1} name="servings" type="number" label="Servings" placeholder="How many servings does this recipe make?" />
-            <FormTextarea
-              maxLength={1000}
-              name="description"
-              placeholder="What is this recipe all about?"
-              label="Description"
-              instructions={<>{(recipeDescription || "").length} / 1000</>}
-            ></FormTextarea>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col gap-2 sm:basis-2/3">
+                <FormInput
+                  isLoading={isLoading || isSubmitting}
+                  data-testid={DataTestId.RecipeEditPage.INPUT_NAME}
+                  name="name"
+                  label="Recipe Name"
+                  placeholder="What do you want to call this recipe?"
+                />
+                <FormInput
+                  isLoading={isLoading || isSubmitting}
+                  data-testid={DataTestId.RecipeEditPage.INPUT_SERVINGS}
+                  min={1}
+                  step={1}
+                  name="servings"
+                  type="number"
+                  label="Servings"
+                  placeholder="How many servings does this recipe make?"
+                />
+                <TagsForm isLoading={isLoading || isSubmitting} />
+                <FormTextarea
+                  isLoading={isLoading || isSubmitting}
+                  data-testid={DataTestId.RecipeEditPage.TEXTAREA_DESCRIPTION}
+                  maxLength={1000}
+                  name="description"
+                  placeholder="What is this recipe all about?"
+                  label="Description"
+                  instructions={<>{(recipeDescription || "").length} / 1000</>}
+                />
+              </div>
+
+              <div className="sm:basis-1/3">
+                <RecipeImageUploadForm onClearImage={onClearImage} isImageMarkedForDeletion={isImageMarkedForDeletion} isLoading={isLoading || isSubmitting} recipe={recipe} />
+              </div>
+            </div>
 
             {(isCreatingNewRecipe || !!recipe) && (
-              <div className="grid gap-4 grid-cols-1">
-                <hr />
-                <IngredientsForm isLoading={isLoading} />
-                <hr />
-                <StepsForm isLoading={isLoading} />
+              <div className="grid grid-cols-1 gap-4">
+                <Divider />
+                <IngredientsForm isLoading={isLoading || isSubmitting} />
+                <Divider />
+                <StepsForm isLoading={isLoading || isSubmitting} />
               </div>
             )}
 
             {(isCreatingNewRecipe || !!recipe) && (
-              <div className="flex flex-row justify-end mt-2">
-                <Button disabled={form?.formState?.isSubmitting} onClick={() => navigate("/")} variant="secondary" type="button" className="mr-2">
+              <div className="mt-2 flex flex-row justify-end">
+                <Button
+                  data-testid={DataTestId.RecipeEditPage.BUTTON_CANCEL}
+                  disabled={form?.formState?.isSubmitting}
+                  onClick={() => navigate("/dashboard")}
+                  variant="secondary"
+                  type="button"
+                  className="mr-2"
+                >
                   Cancel
                 </Button>
-                <SubmitButton>Save</SubmitButton>
+                <SubmitButton data-testid={DataTestId.RecipeEditPage.BUTTON_SAVE}>Save</SubmitButton>
               </div>
             )}
-          </Stack>
+          </div>
         </form>
       </Form>
 
-      {isRecipeGetError && <NotFound backNav="/" />}
+      {isRecipeGetError && <NotFound dataTestId={DataTestId.RecipeEditPage.NOT_FOUND} backNav="/" />}
     </div>
   );
 };

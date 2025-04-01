@@ -1,18 +1,31 @@
+import {
+  CreateRecipeRequestSchema,
+  ListRecipesQuerySchema,
+  ListRecipesResponseSchema,
+  ParseRecipeFromURLResponseSchema,
+  RecipeSchema,
+  SetRecipeImageResponseSchema,
+  UpdateRecipeRequestSchema,
+  YListRecipesResponseSchema,
+  YParseRecipeFromURLResponseSchema,
+  YRecipeSchema,
+  YSetRecipeImageResponseSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListRecipeFilters, ListRecipesResponse, Recipe } from "../../data";
-import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { UserQueryKeys } from "../user";
 import { RecipeQueryKeys } from "./RecipeQueryKeys";
 
-export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<Recipe>) => {
+export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<RecipeSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const recipe = await getter<never, Recipe>({
+    const recipe = await getter<never, RecipeSchema>({
       path: `/recipe/${recipeId}`,
       withAuth: "access_token",
     });
-    return recipe.data;
+    return YRecipeSchema.cast(recipe.data);
   };
 
   return useQuery({
@@ -22,18 +35,10 @@ export const useGetRecipeByIdQuery = (recipeId: number, args?: QueryArgs<Recipe>
   });
 };
 
-export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponse>) => {
-  // const searchParams = new URLSearchParams();
-  // if (search) {
-  //   searchParams.set("search", search);
-  // }
-  // searchParams.set("cookbook_id", cookbook_id.toString());
-  // searchParams.set("cookbook_attachments", "exclude");
-  // searchParams.set("page_number", "0");
-  // searchParams.set("page_size", "5");
-  let filters: ListRecipeFilters = {
+export const useListRecipesToAddToCookbook = (search: string, cookbook_id: number, args?: QueryArgs<ListRecipesResponseSchema>) => {
+  let filters: Partial<ListRecipesQuerySchema> = {
     cookbook_id: cookbook_id,
-    cookbook_attachments: "exclude",
+    cookbook_attachments_filter: "exclude",
     page_number: 0,
     page_size: 5,
   };
@@ -46,11 +51,11 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   const { getter } = useGet();
 
   const query = async () => {
-    const recipe = await getter<never, ListRecipesResponse>({
+    const recipe = await getter<never, ListRecipesResponseSchema>({
       path: path,
       withAuth: "access_token",
     });
-    return recipe.data;
+    return YListRecipesResponseSchema.cast(recipe.data);
   };
 
   return useQuery({
@@ -60,22 +65,23 @@ export const useListRecipesToAddToCookbook = (search: string, cookbook_id: numbe
   });
 };
 
-export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?: QueryArgs<ListRecipesResponse>) => {
+export const useListRecipesForMealPlanQuery = (filters: ListRecipesQuerySchema, args?: QueryArgs<ListRecipesResponseSchema>) => {
   const { getter } = useGet();
 
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
+  searchParams.append("page_size", "5");
 
   if (filters.search) {
     searchParams.append("search", filters.search);
   }
 
   const query = async () => {
-    const recipes = await getter<never, ListRecipesResponse>({
+    const recipes = await getter<never, ListRecipesResponseSchema>({
       path: `/recipe/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return recipes.data;
+    return YListRecipesResponseSchema.cast(recipes.data);
   };
 
   return useQuery({
@@ -85,35 +91,17 @@ export const useListRecipesForMealPlanQuery = (filters: ListRecipeFilters, args?
   });
 };
 
-export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs<ListRecipesResponse>) => {
+export const useListRecipesQuery = (filters: ListRecipesQuerySchema, args?: QueryArgs<ListRecipesResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
-
-  const searchParams = new URLSearchParams();
-  searchParams.append("page_number", filters.page_number.toString());
-
-  if (filters.cookbook_id) {
-    searchParams.append("cookbook_id", filters.cookbook_id.toString());
-  }
-
-  if (filters.cookbook_attachments) {
-    searchParams.append("cookbook_attachments", filters.cookbook_attachments);
-  }
-
-  if (filters.shared_recipes) {
-    searchParams.append("shared_recipes", filters.shared_recipes);
-  }
-
-  if (filters.search) {
-    searchParams.append("search", filters.search);
-  }
+  const searchParams = filtersToSearchParams(filters);
 
   const query = async () => {
-    const recipes = await getter<never, ListRecipesResponse>({
+    const recipes = await getter<never, ListRecipesResponseSchema>({
       path: `/recipe/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return recipes.data;
+    return YListRecipesResponseSchema.cast(recipes.data);
   };
 
   return useQuery({
@@ -129,17 +117,17 @@ export const useListRecipesQuery = (filters: ListRecipeFilters, args?: QueryArgs
   });
 };
 
-export const useCreateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Recipe>>) => {
+export const useCreateRecipeMutation = (args?: MutationArgs<RecipeSchema, CreateRecipeRequestSchema>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: Partial<Recipe>) => {
-    const response = await poster<Partial<Recipe>, Recipe>({
+  const mutation = async (data: CreateRecipeRequestSchema) => {
+    const response = await poster({
       path: "/recipe",
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YRecipeSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -147,25 +135,50 @@ export const useCreateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Reci
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, variables, context) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataCreator(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["ALL"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["USER"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_TAGS(),
+        predicate: generatePartialMatchPredicate(UserQueryKeys.LIST_USER_TAGS()),
+      });
       onSuccess?.(data, variables, context);
     },
     ...restArgs,
   });
 };
 
-export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Recipe>>) => {
+export const useUpdateRecipeMutation = (args?: MutationArgs<RecipeSchema, UpdateRecipeRequestSchema>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
-  const mutation = async (data: Partial<Recipe>) => {
-    const response = await putter<Partial<Recipe>, Recipe>({
+  const mutation = async (data: UpdateRecipeRequestSchema) => {
+    const response = await putter({
       path: `/recipe`,
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YRecipeSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -173,19 +186,29 @@ export const useUpdateRecipeMutation = (args?: MutationArgs<Recipe, Partial<Reci
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataUpdater(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        oldDataUpdater(data)
+      );
       queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      queryClient.invalidateQueries({
+        queryKey: UserQueryKeys.LIST_USER_TAGS(),
+        predicate: generatePartialMatchPredicate(UserQueryKeys.LIST_USER_TAGS()),
+      });
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,
   });
 };
 
-export const useDeleteRecipeMutation = (args?: MutationArgs<{}, Recipe>) => {
+export const useDeleteRecipeMutation = (args?: MutationArgs<unknown, RecipeSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (recipe: Recipe) => {
+  const mutation = async (recipe: RecipeSchema) => {
     const response = await deleter({
       path: "/recipe",
       id: recipe.id,
@@ -199,7 +222,13 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<{}, Recipe>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, recipe, ctx) => {
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataDeleter({ id: recipe.id }));
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        oldDataDeleter(recipe)
+      );
       queryClient.invalidateQueries({ queryKey: RecipeQueryKeys.GET_RECIPE(recipe.id) });
       onSuccess?.(data, recipe, ctx);
     },
@@ -207,18 +236,20 @@ export const useDeleteRecipeMutation = (args?: MutationArgs<{}, Recipe>) => {
   });
 };
 
-export const useParseRecipeFromURLMutation = (args?: MutationArgs<Recipe, string>) => {
+export const useParseRecipeFromURLMutation = (args?: MutationArgs<ParseRecipeFromURLResponseSchema, string>) => {
   const { poster } = usePost();
 
   const mutation = async (url: string) => {
-    const response = await poster<{ readonly source_url: string }, Recipe>({
+    const response = await poster<{ readonly source_url: string }, ParseRecipeFromURLResponseSchema>({
       path: "/recipe/parse/url",
       body: {
         source_url: url,
       },
       withAuth: "access_token",
     });
-    return response.data;
+    return YParseRecipeFromURLResponseSchema.cast(response.data, {
+      assert: false,
+    });
   };
 
   return useMutation({
@@ -227,14 +258,125 @@ export const useParseRecipeFromURLMutation = (args?: MutationArgs<Recipe, string
   });
 };
 
-export const useForkRecipeMutation = (args?: MutationArgs<Recipe, { readonly original_recipe_id: number }>) => {
+export const useForkRecipeMutation = (args?: MutationArgs<RecipeSchema, { readonly original_recipe_id: number }>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
   const mutation = async (body: { readonly original_recipe_id: number }) => {
-    const response = await poster<typeof body, Recipe>({
+    const response = await poster<typeof body, RecipeSchema>({
       path: "/recipe/fork",
       body: { ...body },
+      withAuth: "access_token",
+    });
+    return YRecipeSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["ALL"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(
+            RecipeQueryKeys.LIST_RECIPES({
+              user_kitchen_membership_ids: ["USER"],
+            })
+          ),
+        },
+        oldDataCreator(data)
+      );
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
+
+export const useSetRecipeImageMutation = (args?: MutationArgs<SetRecipeImageResponseSchema, { readonly file: File; readonly recipe_id: number }>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (body: { readonly file: File; readonly recipe_id: number }) => {
+    const formData = new FormData();
+    formData.append("file", body.file);
+    formData.append("recipe_id", body.recipe_id.toString());
+
+    const response = await poster({
+      path: "/recipe/image",
+      body: formData,
+      withAuth: "access_token",
+      extraHeaders: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return YSetRecipeImageResponseSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(vars.recipe_id), (oldData: RecipeSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            image_url: data.image_url,
+          };
+        }
+      });
+
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        (oldData: ListRecipesResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: [...(oldData?.data ?? [])].map((oldRecipe) => {
+                if (oldRecipe.id === vars.recipe_id) {
+                  return {
+                    ...oldRecipe,
+                    image_url: data.image_url,
+                  };
+                } else {
+                  return { ...oldRecipe };
+                }
+              }),
+            };
+          }
+        }
+      );
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
+
+export const useDeleteRecipeImageMutation = (args?: MutationArgs<unknown, { readonly id: number }>) => {
+  const queryClient = useQueryClient();
+  const { deleter } = useDelete();
+
+  const mutation = async ({ id }: { readonly id: number }) => {
+    const response = await deleter({
+      path: "/recipe/image",
+      id: id,
       withAuth: "access_token",
     });
     return response.data;
@@ -244,10 +386,40 @@ export const useForkRecipeMutation = (args?: MutationArgs<Recipe, { readonly ori
 
   return useMutation({
     mutationFn: mutation,
-    onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(data.id), data);
-      queryClient.setQueryData(RecipeQueryKeys.LIST_RECIPES(), oldDataCreator(data));
-      onSuccess?.(data, vars, ctx);
+    onSuccess: (data, { id }, ctx) => {
+      queryClient.setQueryData(RecipeQueryKeys.GET_RECIPE(id), (oldData: RecipeSchema | undefined) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            image_url: null,
+          };
+        }
+      });
+
+      queryClient.setQueriesData(
+        {
+          queryKey: RecipeQueryKeys.LIST_RECIPES(),
+          predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
+        },
+        (oldData: ListRecipesResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: [...(oldData?.data ?? [])].map((oldRecipe) => {
+                if (oldRecipe.id === id) {
+                  return {
+                    ...oldRecipe,
+                    image_url: null,
+                  };
+                } else {
+                  return { ...oldRecipe };
+                }
+              }),
+            };
+          }
+        }
+      );
+      onSuccess?.(data, { id }, ctx);
     },
     ...restArgs,
   });

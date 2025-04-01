@@ -1,7 +1,6 @@
-import { User } from "@prisma/client";
+import { prisma, User } from "@recipiece/database";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../database";
 import { ApiResponse } from "../types";
 import { verifyPassword } from "../util/password";
 

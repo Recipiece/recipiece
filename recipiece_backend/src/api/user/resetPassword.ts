@@ -1,19 +1,19 @@
+import { Constant } from "@recipiece/constant";
+import { PrismaTransaction } from "@recipiece/database";
+import { ResetPasswordRequestSchema } from "@recipiece/types";
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
-import { ResetPasswordRequestSchema } from "../../schema";
 import { ApiResponse } from "../../types";
-import { UserValidationTokenTypes } from "../../util/constant";
 import { hashPassword } from "../../util/password";
 
-export const resetPassword = async (request: Request<any, any, ResetPasswordRequestSchema>): ApiResponse<{}> => {
+export const resetPassword = async (request: Request<any, any, ResetPasswordRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const { password, token } = request.body;
 
-  const accountToken = await prisma.userValidationToken.findUnique({
+  const accountToken = await tx.userValidationToken.findUnique({
     where: {
       id: token,
-      purpose: UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
+      purpose: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.purpose,
     },
   });
 
@@ -29,12 +29,12 @@ export const resetPassword = async (request: Request<any, any, ResetPasswordRequ
 
   const now = DateTime.utc();
   const tokenExpiry = DateTime.fromJSDate(accountToken.created_at).plus({
-    milliseconds: UserValidationTokenTypes.FORGOT_PASSWORD.duration_ms,
+    milliseconds: Constant.UserValidationTokenTypes.FORGOT_PASSWORD.duration_ms,
   });
 
   if (now > tokenExpiry) {
     console.log(`${token} was expired!`);
-    await prisma.userValidationToken.delete({
+    await tx.userValidationToken.delete({
       where: {
         id: token,
       },
@@ -58,41 +58,29 @@ export const resetPassword = async (request: Request<any, any, ResetPasswordRequ
     ];
   }
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      // update the users credentials
-      await tx.userCredentials.update({
-        where: {
-          user_id: accountToken.user_id,
-        },
-        data: {
-          password_hash: hashedPassword,
-        },
-      });
+  // update the users credentials
+  await tx.userCredentials.update({
+    where: {
+      user_id: accountToken.user_id,
+    },
+    data: {
+      password_hash: hashedPassword,
+    },
+  });
 
-      // delete any sessions belonging to the user
-      await tx.userSession.deleteMany({
-        where: {
-          user_id: accountToken.user_id,
-        },
-      });
+  // delete any sessions belonging to the user
+  await tx.userSession.deleteMany({
+    where: {
+      user_id: accountToken.user_id,
+    },
+  });
 
-      // remove the token
-      await tx.userValidationToken.delete({
-        where: {
-          id: token,
-        },
-      });
-    });
+  // remove the token
+  await tx.userValidationToken.delete({
+    where: {
+      id: token,
+    },
+  });
 
-    return [StatusCodes.OK, {}];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Unable to reset password",
-      },
-    ];
-  }
+  return [StatusCodes.OK, {}];
 };

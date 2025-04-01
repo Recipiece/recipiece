@@ -2,7 +2,6 @@
 
 // Inspired by react-hot-toast library
 import * as React from "react";
-
 import type { ToastActionElement, ToastProps } from "./Toast";
 
 const TOAST_LIMIT = 5;
@@ -13,6 +12,7 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  dataTestId?: string;
 };
 
 const actionTypes = {
@@ -82,9 +82,7 @@ export const reducer = (state: State, action: Action): State => {
     case "UPDATE_TOAST":
       return {
         ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
-        ),
+        toasts: state.toasts.map((t) => (t.id === action.toast.id ? { ...t, ...action.toast } : t)),
       };
 
     case "DISMISS_TOAST": {
@@ -141,7 +139,7 @@ type Toast = Omit<ToasterToast, "id">;
 
 function toast({ ...props }: Toast) {
   const id = genId();
-  const { duration, ...restProps} = props;
+  const { duration, ...restProps } = props;
 
   const update = (props: ToasterToast) =>
     dispatch({

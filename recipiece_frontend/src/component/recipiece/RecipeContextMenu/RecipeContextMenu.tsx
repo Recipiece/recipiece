@@ -1,21 +1,10 @@
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Book,
-  BookMinus,
-  Edit,
-  RefreshCw,
-  Scaling,
-  Share,
-  ShoppingBasket,
-  Trash,
-  Utensils
-} from "lucide-react";
+import { DataTestId } from "@recipiece/constant";
+import { CookbookSchema, RecipeSchema, ShoppingListSchema } from "@recipiece/types";
+import { ArrowDownLeft, ArrowUpRight, Book, BookMinus, Edit, RefreshCw, Scaling, ShoppingBasket, Trash, Utensils } from "lucide-react";
 import { FC, Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useAttachRecipeToCookbookMutation,
-  useCreateRecipeShareMutation,
   useForkRecipeMutation,
   useGetCookbookByIdQuery,
   useListCookbooksQuery,
@@ -23,7 +12,6 @@ import {
   useRemoveRecipeFromCookbookMutation,
 } from "../../../api";
 import { DialogContext } from "../../../context";
-import { Cookbook, Recipe, ShoppingList, UserKitchenMembership } from "../../../data";
 import { ScaleRecipeSubmit, useAddRecipeToShoppingListDialog, useDeleteRecipeDialog } from "../../../dialog";
 import { useLayout } from "../../../hooks";
 import {
@@ -42,7 +30,6 @@ export interface RecipeContextMenuProps {
   readonly canAddToCookbook?: boolean;
   readonly canAddToShoppingList?: boolean;
   readonly canFork?: boolean;
-  readonly canShare?: boolean;
   readonly canEdit?: boolean;
   readonly canDelete?: boolean;
   readonly canRemoveFromCookbook?: boolean;
@@ -50,15 +37,15 @@ export interface RecipeContextMenuProps {
   readonly onScale?: (scaleFactor: number) => void;
   readonly canReset?: boolean;
   readonly onReset?: () => void;
-  readonly recipe: Recipe;
+  readonly recipe: RecipeSchema;
   readonly cookbookId?: number;
+  readonly dataTestId?: string;
 }
 
 export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   canAddToCookbook,
   canAddToShoppingList,
   canFork,
-  canShare,
   canDelete,
   canEdit,
   canRemoveFromCookbook,
@@ -68,6 +55,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   onReset,
   recipe,
   cookbookId,
+  dataTestId,
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -92,7 +80,8 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const { data: cookbooks, isLoading: isLoadingCookbook } = useListCookbooksQuery(
     {
       page_number: 0,
-      exclude_containing_recipe_id: recipe.id,
+      recipe_id: recipe.id,
+      recipe_id_filter: "exclude",
     },
     {
       enabled: canAddToCookbook && isCookbookListContextMenuOpen,
@@ -103,7 +92,6 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     enabled: !!cookbookId,
   });
 
-  const { mutateAsync: shareRecipe } = useCreateRecipeShareMutation();
   const { mutateAsync: forkRecipe } = useForkRecipeMutation();
   const { mutateAsync: removeRecipeFromCookbook } = useRemoveRecipeFromCookbookMutation();
   const { mutateAsync: addRecipeToCookbook } = useAttachRecipeToCookbookMutation();
@@ -114,7 +102,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   const mobileOnAddToShoppingList = useCallback(() => {
     pushDialog("mobileShoppingLists", {
       onClose: () => popDialog("mobileShoppingLists"),
-      onSubmit: (shoppingList: ShoppingList) => {
+      onSubmit: (shoppingList: ShoppingListSchema) => {
         popDialog("mobileShoppingLists");
         onAddToShoppingList(shoppingList.id);
       },
@@ -125,7 +113,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     pushDialog("mobileCookbooks", {
       excludeContainingRecipeId: recipe.id,
       onClose: () => popDialog("mobileCookbooks"),
-      onSubmit: async (cookbook: Cookbook) => {
+      onSubmit: async (cookbook: CookbookSchema) => {
         try {
           await addRecipeToCookbook({
             recipe: recipe,
@@ -149,7 +137,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   }, [pushDialog, recipe, popDialog, addRecipeToCookbook, toast]);
 
   const onAddToCookbook = useCallback(
-    async (cookbook: Cookbook) => {
+    async (cookbook: CookbookSchema) => {
       try {
         await addRecipeToCookbook({
           recipe: recipe,
@@ -189,35 +177,6 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     }
   }, [removeRecipeFromCookbook, recipe, cookbook, toast]);
 
-  const onShareRecipe = useCallback(async () => {
-    pushDialog("share", {
-      displayName: recipe.name,
-      entity_id: recipe.id,
-      entity_type: "recipe",
-      onClose: () => popDialog("share"),
-      onSubmit: async (membership: UserKitchenMembership) => {
-        try {
-          await shareRecipe({
-            user_kitchen_membership_id: membership.id,
-            recipe_id: recipe.id,
-          });
-          toast({
-            title: "Recipe Shared",
-            description: `Your recipe has been sent to ${membership.destination_user.username}`,
-          });
-        } catch {
-          toast({
-            title: "Unable to Share Recipe",
-            description: `Your recipe could not be shared with ${membership.destination_user.username}. Try again later.`,
-            variant: "destructive",
-          });
-        } finally {
-          popDialog("share");
-        }
-      },
-    });
-  }, [popDialog, pushDialog, recipe, shareRecipe, toast]);
-
   const onForkRecipe = useCallback(async () => {
     try {
       const forkedRecipe = await forkRecipe({ original_recipe_id: recipe!.id });
@@ -250,32 +209,32 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
     if (canReset) {
       items.push(
-        <DropdownMenuItem onClick={() => onReset?.()}>
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_RESET_CHANGES(dataTestId)} onClick={() => onReset?.()}>
           <RefreshCw /> Reset Changes
         </DropdownMenuItem>
       );
     }
 
     return items;
-  }, [canReset, onReset]);
+  }, [canReset, onReset, dataTestId]);
 
   const scalingOptions = useMemo(() => {
     const items = [];
     if (canScale) {
       items.push(
-        <DropdownMenuItem onClick={() => onScale?.(0.5)}>
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_HALF_RECIPE(dataTestId)} onClick={() => onScale?.(0.5)}>
           <ArrowDownLeft />
           1/2 Recipe
         </DropdownMenuItem>
       );
       items.push(
-        <DropdownMenuItem onClick={() => onScale?.(2)}>
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_DOUBLE_RECIPE(dataTestId)} onClick={() => onScale?.(2)}>
           <ArrowUpRight />
           2x Recipe
         </DropdownMenuItem>
       );
       items.push(
-        <DropdownMenuItem onClick={onCustomScaleRecipe}>
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_SCALE_CUSTOM(dataTestId)} onClick={onCustomScaleRecipe}>
           <Scaling />
           Scale Custom
         </DropdownMenuItem>
@@ -283,7 +242,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     }
 
     return items;
-  }, [canScale, onCustomScaleRecipe, onScale]);
+  }, [canScale, onCustomScaleRecipe, onScale, dataTestId]);
 
   const addToOptions = useMemo(() => {
     const items = [];
@@ -291,7 +250,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     if (canAddToCookbook) {
       if (isMobile) {
         items.push(
-          <DropdownMenuItem onClick={mobileOnAddToCookbook}>
+          <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_COOKBOOK(dataTestId)} onClick={mobileOnAddToCookbook}>
             <Book />
             Add to Cookbook
           </DropdownMenuItem>
@@ -299,16 +258,20 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
       } else {
         items.push(
           <DropdownMenuSub onOpenChange={(open) => setIsCookbookContextMenuOpen(open)}>
-            <DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_COOKBOOK(dataTestId)}>
               <Book />
               Add to Cookbook
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
-                <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingCookbook}>
+                <LoadingGroup variant="spinner" className="h-7 w-7" isLoading={isLoadingCookbook}>
                   {(cookbooks?.data || []).map((cookbook) => {
                     return (
-                      <DropdownMenuItem onClick={() => onAddToCookbook(cookbook)} key={cookbook.id}>
+                      <DropdownMenuItem
+                        data-testid={`${DataTestId.RecipeContextMenu.BUTTON_AVAILABLE_COOKBOOK(dataTestId)}-${cookbook.id}`}
+                        onClick={() => onAddToCookbook(cookbook)}
+                        key={cookbook.id}
+                      >
                         {cookbook.name}
                       </DropdownMenuItem>
                     );
@@ -324,23 +287,27 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     if (canAddToShoppingList) {
       if (isMobile) {
         items.push(
-          <DropdownMenuItem onClick={mobileOnAddToShoppingList}>
+          <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_SHOPPING_LIST(dataTestId)} onClick={mobileOnAddToShoppingList}>
             <ShoppingBasket /> Add to Shopping List
           </DropdownMenuItem>
         );
       } else {
         items.push(
           <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
-            <DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger data-testid={DataTestId.RecipeContextMenu.BUTTON_ADD_TO_SHOPPING_LIST(dataTestId)}>
               <ShoppingBasket />
               Add to Shopping List
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
-                <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
+                <LoadingGroup variant="spinner" className="h-7 w-7" isLoading={isLoadingShoppingLists}>
                   {(shoppingLists?.data || []).map((list) => {
                     return (
-                      <DropdownMenuItem key={list.id} onClick={() => onAddToShoppingList(list.id)}>
+                      <DropdownMenuItem
+                        data-testid={`${DataTestId.RecipeContextMenu.BUTTON_AVAILABLE_SHOPPING_LIST(dataTestId)}-${list.id}`}
+                        key={list.id}
+                        onClick={() => onAddToShoppingList(list.id)}
+                      >
                         {list.name}
                       </DropdownMenuItem>
                     );
@@ -366,13 +333,14 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
     onAddToCookbook,
     onAddToShoppingList,
     shoppingLists,
+    dataTestId,
   ]);
 
   const editOptions = useMemo(() => {
     const items = [];
     if (canFork) {
       items.push(
-        <DropdownMenuItem onClick={onForkRecipe}>
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_FORK_RECIPE(dataTestId)} onClick={onForkRecipe}>
           <Utensils /> Fork This Recipe
         </DropdownMenuItem>
       );
@@ -380,28 +348,20 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
     if (canEdit) {
       items.push(
-        <DropdownMenuItem onClick={() => navigate(`/recipe/edit/${recipe!.id}`)}>
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_EDIT_RECIPE(dataTestId)} onClick={() => navigate(`/recipe/edit/${recipe!.id}`)}>
           <Edit /> Edit This Recipe
         </DropdownMenuItem>
       );
     }
 
-    if (canShare) {
-      items.push(
-        <DropdownMenuItem onClick={onShareRecipe}>
-          <Share /> Share Recipe
-        </DropdownMenuItem>
-      );
-    }
-
     return items;
-  }, [canEdit, canFork, canShare, navigate, onForkRecipe, onShareRecipe, recipe]);
+  }, [dataTestId, canEdit, canFork, navigate, onForkRecipe, recipe]);
 
   const removeItems = useMemo(() => {
     const items = [];
     if (canRemoveFromCookbook) {
       items.push(
-        <DropdownMenuItem onClick={onRemoveRecipeFromCookbook} className="text-destructive">
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_REMOVE_FROM_COOKBOOK(dataTestId)} onClick={onRemoveRecipeFromCookbook} className="text-destructive">
           <BookMinus /> Remove from Cookbook
         </DropdownMenuItem>
       );
@@ -409,14 +369,14 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
 
     if (canDelete) {
       items.push(
-        <DropdownMenuItem onClick={onDeleteRecipe} className="text-destructive">
+        <DropdownMenuItem data-testid={DataTestId.RecipeContextMenu.BUTTON_DELETE_RECIPE(dataTestId)} onClick={onDeleteRecipe} className="text-destructive">
           <Trash /> Delete Recipe
         </DropdownMenuItem>
       );
     }
 
     return items;
-  }, [canDelete, canRemoveFromCookbook, onDeleteRecipe, onRemoveRecipeFromCookbook]);
+  }, [dataTestId, canDelete, canRemoveFromCookbook, onDeleteRecipe, onRemoveRecipeFromCookbook]);
 
   const allItems = useMemo(() => {
     const items = [];
@@ -456,7 +416,7 @@ export const RecipeContextMenu: FC<RecipeContextMenuProps> = ({
   }, [addToOptions, editOptions, removeItems, resetOptions, scalingOptions]);
 
   return (
-    <DropdownMenuContent>
+    <DropdownMenuContent data-testid={DataTestId.RecipeContextMenu.DROPDOWN_MENU(dataTestId)}>
       {allItems.map((opt, idx) => {
         return <Fragment key={idx}>{opt}</Fragment>;
       })}

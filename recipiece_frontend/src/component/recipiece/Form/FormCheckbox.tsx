@@ -1,3 +1,4 @@
+import { DataTestId } from "@recipiece/constant";
 import { FC, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "../../../util";
@@ -19,6 +20,9 @@ export const FormCheckbox: FC<FormCheckboxProps> = ({ isLoading, name, className
     return cn(className ?? "", "flex flex-row");
   }, [className]);
 
+  // @ts-expect-error data test id is not type on the props
+  const dataTestId = restInputProps?.["data-testid"];
+
   return (
     <FormField
       control={form.control}
@@ -26,18 +30,18 @@ export const FormCheckbox: FC<FormCheckboxProps> = ({ isLoading, name, className
       disabled={isSubmitting}
       render={({ field }) => {
         return (
-          <FormItem className={fullClassName}>
+          <FormItem data-testid={DataTestId.Form.CONTAINER(dataTestId)} className={fullClassName}>
             <FormControl>
               <Checkbox checked={field.value} onCheckedChange={field.onChange} {...restInputProps} {...field} />
             </FormControl>
             {/* Something is overriding the usual mt-0 class that i'd use here, so set the style directly */}
             {label && (
-              <FormLabel className="inline ml-2" style={{ marginTop: "0" }}>
+              <FormLabel data-testid={DataTestId.Form.LABEL(dataTestId)} className="ml-2 inline" style={{ marginTop: "0" }}>
                 {label}
               </FormLabel>
             )}
-            <FormMessage />
-            {instructions && <FormDescription>{instructions}</FormDescription>}
+            <FormMessage data-testid={DataTestId.Form.MESSAGE(dataTestId)} />
+            {instructions && <FormDescription data-testid={DataTestId.Form.DESCRIPTION(dataTestId)}>{instructions}</FormDescription>}
           </FormItem>
         );
       }}

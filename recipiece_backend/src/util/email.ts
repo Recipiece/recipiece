@@ -1,15 +1,16 @@
-import { User, UserValidationToken } from "@prisma/client";
+import { User, UserValidationToken } from "@recipiece/database";
 import { createTransport, SendMailOptions } from "nodemailer";
+import { Environment } from "./environment";
 
 export const sendEmail = async (options: SendMailOptions) => {
-  if (process.env.APP_SEND_EMAIL === "Y") {
+  if (Environment.SEND_EMAIL) {
     const transporter = createTransport({
-      host: process.env.APP_EMAIL_HOST,
+      host: Environment.EMAIL_HOST,
       port: 465,
       secure: true,
       auth: {
-        user: process.env.APP_EMAIL_ADDRESS,
-        pass: process.env.APP_EMAIL_PASSWORD,
+        user: Environment.EMAIL_ADDRESS,
+        pass: Environment.EMAIL_PASSWORD,
       },
     });
 
@@ -25,17 +26,16 @@ export const sendEmail = async (options: SendMailOptions) => {
 
     await sendMailPromise;
   } else {
-    console.log(`APP_SEND_EMAIL is set to "${process.env.APP_SEND_EMAIL}", not sending email`);
-    console.log("Would have sent the following:");
+    console.log(`environment SEND_EMAIL is set to "${Environment.SEND_EMAIL}", not sending email`);
+    console.log("would have sent the following:");
     console.log(options);
     await Promise.resolve();
   }
 };
 
-export const sendFinishedImportJobSuccessEmail = async (user: User, jobId: string) => {
+export const sendFinishedImportJobSuccessEmail = async (user: User) => {
   const textEmail = `
 Recipiece has finished importing your file! Your recipes should now be available within Recipiece. Happy Cooking!.
-For troubleshooting and reference, the import is associated with the job id ${jobId}.
   `;
 
   const htmlEmail = `
@@ -68,15 +68,13 @@ For troubleshooting and reference, the import is associated with the job id ${jo
         </div>
         <div class="content">
             Recipiece has finished importing your file! Your recipes should now be available within Recipiece. Happy Cooking!
-            <br />
-            For troubleshooting and reference, the import is associated with the job id ${jobId}.
         </div>
     </body>
 </html>
   `;
 
   await sendEmail({
-    from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
+    from: `"Recipiece" <${Environment.EMAIL_ADDRESS}>`,
     to: user.email,
     subject: "Recipiece - Recipe Import",
     text: textEmail,
@@ -84,10 +82,9 @@ For troubleshooting and reference, the import is associated with the job id ${jo
   });
 };
 
-export const sendFinishedImportJobFailedEmail = async (user: User, jobId: string) => {
+export const sendFinishedImportJobFailedEmail = async (user: User) => {
   const textEmail = `
 Recipiece was unable to import your recipes from your recent file upload.
-For troubleshooting and reference, the import was associated with the job id ${jobId}.
   `;
 
   const htmlEmail = `
@@ -120,15 +117,13 @@ For troubleshooting and reference, the import was associated with the job id ${j
         </div>
         <div class="content">
             Recipiece was unable to import your recipes from your recent file upload.
-            <br/>
-            For troubleshooting and reference, the import was associated with the job id ${jobId}.
         </div>
     </body>
 </html>
   `;
 
   await sendEmail({
-    from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
+    from: `"Recipiece" <${Environment.EMAIL_ADDRESS}>`,
     to: user.email,
     subject: "Recipiece - Recipe Import",
     text: textEmail,
@@ -181,7 +176,7 @@ This token will expire in one hour.
   `;
 
   await sendEmail({
-    from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
+    from: `"Recipiece" <${Environment.EMAIL_ADDRESS}>`,
     to: user.email,
     subject: "Recipiece - Account Verification",
     text: textEmail,
@@ -240,7 +235,7 @@ This token will expire in one hour.
   `;
 
   await sendEmail({
-    from: `"Recipiece" <${process.env.APP_EMAIL_ADDRESS}>`,
+    from: `"Recipiece" <${Environment.EMAIL_ADDRESS}>`,
     to: user.email,
     subject: "Recipiece - Reset Password",
     text: textEmail,

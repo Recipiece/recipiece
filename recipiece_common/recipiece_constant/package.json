@@ -1,0 +1,29 @@
+{
+  "name": "recipiece_constant",
+  "version": "1.0.0",
+  "description": "constants shared across projects",
+  "main": "index.js",
+  "author": "sjyn",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build:dev": "NODE_ENV=development webpack",
+    "build:prod": "NODE_ENV=production webpack",
+    "lint": "prettier . --write"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.10.18",
+    "@swc/register": "^0.1.10",
+    "@types/node": "^22.13.5",
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "uuid": "^11.1.0"
+  }
+}

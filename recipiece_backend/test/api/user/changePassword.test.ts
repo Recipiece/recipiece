@@ -1,7 +1,6 @@
-import { User } from "@prisma/client";
+import { prisma, User } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Change Password", () => {
   let user: User;
@@ -22,7 +21,7 @@ describe("Change Password", () => {
     const priorCredentials = await prisma.userCredentials.findFirst({
       where: {
         user_id: user.id,
-      }
+      },
     });
     expect(priorCredentials).toBeTruthy();
 
@@ -30,11 +29,11 @@ describe("Change Password", () => {
       new_password: "1234test!",
     });
     expect(response.statusCode).toBe(StatusCodes.OK);
-    
+
     const newCredentials = await prisma.userCredentials.findFirst({
       where: {
         user_id: user.id,
-      }
+      },
     });
     expect(newCredentials).toBeTruthy();
     expect(newCredentials!.password_hash).not.toEqual(priorCredentials!.password_hash);
@@ -44,7 +43,7 @@ describe("Change Password", () => {
     const priorSessions = await prisma.userSession.findMany({
       where: {
         user_id: user.id,
-      }
+      },
     });
     expect(priorSessions.length).toBe(1);
 
@@ -56,7 +55,7 @@ describe("Change Password", () => {
     const afterSessions = await prisma.userSession.findMany({
       where: {
         user_id: user.id,
-      }
+      },
     });
     expect(afterSessions.length).toBe(0);
   });

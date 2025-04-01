@@ -1,18 +1,90 @@
+import {
+  BulkSetMealPlanItemsRequestSchema,
+  BulkSetMealPlanItemsResponseSchema,
+  ListItemsForMealPlanQuerySchema,
+  ListItemsForMealPlanResponseSchema,
+  ListMealPlansQuerySchema,
+  ListMealPlansResponseSchema,
+  MealPlanConfigurationSchema,
+  MealPlanItemSchema,
+  MealPlanSchema,
+  YBulkSetMealPlanItemsRequestSchema,
+  YBulkSetMealPlanItemsResponseSchema,
+  YListItemsForMealPlanResponseSchema,
+  YListMealPlansResponseSchema,
+  YMealPlanConfigurationSchema,
+  YMealPlanItemSchema,
+  YMealPlanSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListMealPlanFilters, ListMealPlanItemsFilters, ListMealPlanItemsResponse, ListMealPlanResponse, MealPlan, MealPlanItem } from "../../data";
-import { oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
+import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater } from "../QueryKeys";
 import { filtersToSearchParams, MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { MealPlanQueryKeys } from "./MealPlanQueryKeys";
 
-export const useGetMealPlanByIdQuery = (listId: number, args?: QueryArgs<MealPlan>) => {
+export const useSetMealPlanConfigurationMutation = (
+  args?: MutationArgs<MealPlanConfigurationSchema, { readonly mealPlanId: number; readonly configuration: MealPlanConfigurationSchema }>
+) => {
+  const { putter } = usePut();
+  const queryClient = useQueryClient();
+
+  const mutation = async (body: { mealPlanId: number; configuration: MealPlanConfigurationSchema }) => {
+    const response = await putter({
+      path: `/meal-plan/${body.mealPlanId}/configuration`,
+      withAuth: "access_token",
+      body: { ...body.configuration },
+    });
+    return YMealPlanConfigurationSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, vars, ctx) => {
+      queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(vars.mealPlanId), (oldData: MealPlanSchema) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            configuration: { ...data },
+          };
+        }
+        return undefined;
+      });
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+        },
+        (oldData: ListMealPlansResponseSchema | undefined) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              data: (oldData.data ?? []).map((mealPlan) => {
+                if (mealPlan.id === vars.mealPlanId) {
+                  return { ...mealPlan, configuration: { ...data } };
+                }
+                return { ...mealPlan };
+              }),
+            };
+          }
+          return undefined;
+        }
+      );
+      onSuccess?.(data, vars, ctx);
+    },
+    ...restArgs,
+  });
+};
+
+export const useGetMealPlanByIdQuery = (listId: number, args?: QueryArgs<MealPlanSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const mealPlan = await getter<never, MealPlan>({
+    const mealPlan = await getter<never, MealPlanSchema>({
       path: `/meal-plan/${listId}`,
       withAuth: "access_token",
     });
-    return mealPlan.data;
+    return YMealPlanSchema.cast(mealPlan.data);
   };
 
   return useQuery({
@@ -22,23 +94,19 @@ export const useGetMealPlanByIdQuery = (listId: number, args?: QueryArgs<MealPla
   });
 };
 
-export const useListMealPlansQuery = (filters: ListMealPlanFilters, args?: QueryArgs<ListMealPlanResponse>) => {
+export const useListMealPlansQuery = (filters: ListMealPlansQuerySchema, args?: QueryArgs<ListMealPlansResponseSchema>) => {
   const queryClient = useQueryClient();
   const { getter } = useGet();
 
   const searchParams = new URLSearchParams();
   searchParams.append("page_number", filters.page_number.toString());
 
-  if (filters.search) {
-    searchParams.append("search", filters.search);
-  }
-
   const query = async () => {
-    const mealPlans = await getter<never, ListMealPlanResponse>({
+    const mealPlans = await getter<never, ListMealPlansResponseSchema>({
       path: `/meal-plan/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return mealPlans.data;
+    return YListMealPlansResponseSchema.cast(mealPlans.data);
   };
 
   return useQuery({
@@ -54,17 +122,17 @@ export const useListMealPlansQuery = (filters: ListMealPlanFilters, args?: Query
   });
 };
 
-export const useCreateMealPlanMutation = (args?: MutationArgs<MealPlan, Partial<MealPlan>>) => {
+export const useCreateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Partial<MealPlanSchema>>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: Partial<MealPlan>) => {
-    const response = await poster<Partial<MealPlan>, MealPlan>({
+  const mutation = async (data: Partial<MealPlanSchema>) => {
+    const response = await poster<Partial<MealPlanSchema>, MealPlanSchema>({
       path: "/meal-plan",
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YMealPlanSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -72,7 +140,12 @@ export const useCreateMealPlanMutation = (args?: MutationArgs<MealPlan, Partial<
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataCreator(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+        },
+        oldDataCreator(data)
+      );
       queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(data.id), data);
       onSuccess?.(data, vars, ctx);
     },
@@ -80,17 +153,17 @@ export const useCreateMealPlanMutation = (args?: MutationArgs<MealPlan, Partial<
   });
 };
 
-export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlan, Partial<MealPlan>>) => {
+export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlanSchema, Partial<MealPlanSchema>>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
-  const mutation = async (data: Partial<MealPlan>) => {
-    const response = await putter<Partial<MealPlan>, MealPlan>({
+  const mutation = async (data: Partial<MealPlanSchema>) => {
+    const response = await putter<Partial<MealPlanSchema>, MealPlanSchema>({
       path: `/meal-plan`,
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YMealPlanSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -98,7 +171,12 @@ export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlan, Partial<
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataUpdater(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+        },
+        oldDataUpdater(data)
+      );
       queryClient.setQueryData(MealPlanQueryKeys.GET_MEAL_PLAN(data.id), data);
       onSuccess?.(data, vars, ctx);
     },
@@ -106,11 +184,11 @@ export const useUpdateMealPlanMutation = (args?: MutationArgs<MealPlan, Partial<
   });
 };
 
-export const useDeleteMealPlanMutation = (args?: MutationArgs<{}, MealPlan>) => {
+export const useDeleteMealPlanMutation = (args?: MutationArgs<unknown, MealPlanSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (mealPlan: MealPlan) => {
+  const mutation = async (mealPlan: MealPlanSchema) => {
     return await deleter({
       path: "/meal-plan",
       id: mealPlan.id,
@@ -125,31 +203,36 @@ export const useDeleteMealPlanMutation = (args?: MutationArgs<{}, MealPlan>) => 
     onSuccess: (data, mealPlan, ctx) => {
       queryClient.invalidateQueries({ queryKey: MealPlanQueryKeys.GET_MEAL_PLAN(mealPlan.id) });
       queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLANS(), oldDataDeleter({ id: mealPlan.id }));
+      (mealPlan.shares ?? []).forEach((mealPlanShare) => {
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(
+            MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES({
+              user_kitchen_membership_id: mealPlanShare.user_kitchen_membership_id,
+            })
+          ),
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.GET_MEAL_PLAN_SHARE(mealPlanShare.id),
+        });
+      });
+
       onSuccess?.(data, mealPlan, ctx);
     },
     ...restArgs,
   });
 };
 
-export const useListItemsForMealPlanQuery = (mealPlanId: number, filters: ListMealPlanItemsFilters, args?: QueryArgs<ListMealPlanItemsResponse>) => {
+export const useListMealPlanItemsQuery = (mealPlanId: number, filters: ListItemsForMealPlanQuerySchema, args?: QueryArgs<ListItemsForMealPlanResponseSchema>) => {
   const { getter } = useGet();
   const searchParams = filtersToSearchParams(filters);
-  // const searchParams = new URLSearchParams();
-
-  // if (filters.start_date) {
-  //   searchParams.append("start_date", filters.start_date);
-  // }
-
-  // if (filters.end_date) {
-  //   searchParams.append("end_date", filters.end_date);
-  // }
 
   const query = async () => {
-    const mealPlans = await getter<never, ListMealPlanItemsResponse>({
+    const mealPlans = await getter<never, ListItemsForMealPlanResponseSchema>({
       path: `/meal-plan/${mealPlanId}/item/list?${searchParams.toString()}`,
       withAuth: "access_token",
     });
-    return mealPlans.data;
+    return YListItemsForMealPlanResponseSchema.cast(mealPlans.data);
   };
 
   return useQuery({
@@ -159,17 +242,73 @@ export const useListItemsForMealPlanQuery = (mealPlanId: number, filters: ListMe
   });
 };
 
-export const useCreateMealPlanItemMutation = (args?: MutationArgs<MealPlanItem, Partial<MealPlanItem>>) => {
+export const useBulkSetMealPlanItemsMutation = (args?: MutationArgs<BulkSetMealPlanItemsResponseSchema, { mealPlanId: number } & BulkSetMealPlanItemsRequestSchema>) => {
   const queryClient = useQueryClient();
   const { poster } = usePost();
 
-  const mutation = async (data: Partial<MealPlanItem>) => {
-    const response = await poster<Partial<MealPlanItem>, MealPlanItem>({
+  const mutation = async (data: { mealPlanId: number } & BulkSetMealPlanItemsRequestSchema) => {
+    const { mealPlanId, ...restRequest } = data;
+    const response = await poster<BulkSetMealPlanItemsRequestSchema, BulkSetMealPlanItemsResponseSchema>({
+      path: `/meal-plan/${mealPlanId}/item/bulk-set`,
+      withAuth: "access_token",
+      body: YBulkSetMealPlanItemsRequestSchema.cast({ ...restRequest }),
+    });
+    return YBulkSetMealPlanItemsResponseSchema.cast(response.data);
+  };
+
+  const { onSuccess, ...restArgs } = args ?? {};
+
+  return useMutation({
+    mutationFn: mutation,
+    onSuccess: (data, variables, context) => {
+      const { created, updated } = data;
+      const { delete: deleted, mealPlanId } = variables;
+
+      deleted.forEach((deletedItem) => {
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId)),
+          },
+          oldDataDeleter(deletedItem)
+        );
+      });
+      updated.forEach((updatedItem) => {
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId)),
+          },
+          oldDataUpdater(updatedItem)
+        );
+      });
+      created.forEach((createdItem) => {
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(mealPlanId)),
+          },
+          oldDataCreator(createdItem)
+        );
+      });
+
+      onSuccess?.(data, variables, context);
+    },
+    ...restArgs,
+  });
+};
+
+export const useCreateMealPlanItemMutation = (args?: MutationArgs<MealPlanItemSchema, Partial<MealPlanItemSchema>>) => {
+  const queryClient = useQueryClient();
+  const { poster } = usePost();
+
+  const mutation = async (data: Partial<MealPlanItemSchema>) => {
+    const response = await poster<Partial<MealPlanItemSchema>, MealPlanItemSchema>({
       path: `/meal-plan/${data.meal_plan_id}/item`,
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YMealPlanItemSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -184,17 +323,17 @@ export const useCreateMealPlanItemMutation = (args?: MutationArgs<MealPlanItem, 
   });
 };
 
-export const useUpdateMealPlanItemMutation = (args?: MutationArgs<MealPlanItem, Partial<MealPlanItem>>) => {
+export const useUpdateMealPlanItemMutation = (args?: MutationArgs<MealPlanItemSchema, Partial<MealPlanItemSchema>>) => {
   const queryClient = useQueryClient();
   const { putter } = usePut();
 
-  const mutation = async (data: Partial<MealPlanItem>) => {
-    const response = await putter<Partial<MealPlanItem>, MealPlanItem>({
+  const mutation = async (data: Partial<MealPlanItemSchema>) => {
+    const response = await putter<Partial<MealPlanItemSchema>, MealPlanItemSchema>({
       path: `/meal-plan/${data.meal_plan_id}/item`,
       body: data,
       withAuth: "access_token",
     });
-    return response.data;
+    return YMealPlanItemSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -209,11 +348,11 @@ export const useUpdateMealPlanItemMutation = (args?: MutationArgs<MealPlanItem, 
   });
 };
 
-export const useDeleteMealPlanItemMutation = (args?: MutationArgs<{}, MealPlanItem>) => {
+export const useDeleteMealPlanItemMutation = (args?: MutationArgs<unknown, MealPlanItemSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
 
-  const mutation = async (body: MealPlanItem) => {
+  const mutation = async (body: MealPlanItemSchema) => {
     return await deleter({
       path: `/meal-plan/${body.meal_plan_id}/item`,
       id: body.id,

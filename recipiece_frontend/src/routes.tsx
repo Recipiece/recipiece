@@ -3,10 +3,12 @@ import {
   CreateAccountPage,
   DashboardPage,
   ForgotPasswordPage,
-  KitchenMembershipPage,
-  KitchenPage,
   LoginPage,
+  MealPlanConfigurationPage,
   MealPlanViewPage,
+  MembershipsPage,
+  MembershipViewPage,
+  NotFoundPage,
   RecipeEditPage,
   RecipeViewPage,
   RegisterPage,
@@ -35,15 +37,27 @@ export const unauthenticatedRoutes = [
     path: "/reset-password",
     element: ResetPasswordPage,
   },
+  {
+    path: "/out-404",
+    element: NotFoundPage,
+  },
 ];
 
 export const authenticatedRoutes = [
+  {
+    path: "/dashboard/all",
+    element: DashboardPage,
+  },
   {
     path: "/dashboard",
     element: DashboardPage,
   },
   {
     path: "/cookbook/:cookbookId",
+    element: DashboardPage,
+  },
+  {
+    path: "/kitchen/:membershipId",
     element: DashboardPage,
   },
   {
@@ -67,13 +81,25 @@ export const authenticatedRoutes = [
     element: MealPlanViewPage,
   },
   {
-    path: "/kitchen",
-    element: KitchenPage,
+    path: "/meal-plan/view/:id/configuration",
+    element: MealPlanConfigurationPage,
   },
   {
-    path: "/kitchen/:kitchenMembershipId",
-    element: KitchenMembershipPage,
+    path: "/memberships/:membershipId",
+    element: MembershipViewPage,
   },
+  {
+    path: "/memberships",
+    element: MembershipsPage,
+  },
+  {
+    path: "/in-404",
+    element: NotFoundPage,
+  },
+  // {
+  //   path: "/notifications",
+  //   element: NotificationsViewPage,
+  // },
 ];
 
 export const unauthenticatedPaths = unauthenticatedRoutes.map((r) => r.path);

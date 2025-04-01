@@ -1,17 +1,14 @@
+import { PrismaTransaction } from "@recipiece/database";
+import { RemoveRecipeFromCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { RemoveRecipeFromCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { getCookbookByIdQuery } from "./query";
 
-export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>): ApiResponse<{}> => {
+export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveRecipeFromCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<{}> => {
   const removeBody = req.body;
   const user = req.user;
 
-  const cookbook = await prisma.cookbook.findFirst({
-    where: {
-      id: removeBody.cookbook_id,
-    },
-  });
+  const cookbook = await getCookbookByIdQuery(tx, user, removeBody.cookbook_id).executeTakeFirst();
 
   if (!cookbook) {
     return [
@@ -22,37 +19,14 @@ export const removeRecipeFromCookbook = async (req: AuthenticatedRequest<RemoveR
     ];
   }
 
-  /**
-   * You cannot remove recipes from cookbooks you do not own
-   */
-  if (cookbook.user_id !== user.id) {
-    console.warn(`User ${user.id} attempted to remove recipe ${removeBody.recipe_id} from cookbook ${cookbook.id}. They do not own the cookbook.`);
-    return [
-      StatusCodes.NOT_FOUND,
-      {
-        message: "Cookbook does not exist",
+  await tx.recipeCookbookAttachment.delete({
+    where: {
+      id: {
+        recipe_id: removeBody.recipe_id,
+        cookbook_id: removeBody.cookbook_id,
       },
-    ];
-  }
+    },
+  });
 
-  try {
-    await prisma.recipeCookbookAttachment.delete({
-      where: {
-        id: {
-          recipe_id: removeBody.recipe_id,
-          cookbook_id: removeBody.cookbook_id,
-        },
-      },
-    });
-
-    return [StatusCodes.OK, {}];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Unable to create recipe",
-      },
-    ];
-  }
+  return [StatusCodes.OK, {}];
 };

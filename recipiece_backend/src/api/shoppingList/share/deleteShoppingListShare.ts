@@ -1,15 +1,15 @@
+import { PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
 
-export const deleteShoppingListShare = async (request: AuthenticatedRequest): ApiResponse<{}> => {
+export const deleteShoppingListShare = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{}> => {
   const shareId = +request.params.id;
 
-  const share = await prisma.shoppingListShare.findFirst({
+  const share = await tx.shoppingListShare.findFirst({
     where: {
       id: shareId,
       user_kitchen_membership: {
-        source_user_id: request.user.id,
+        OR: [{ source_user_id: request.user.id }, { destination_user_id: request.user.id }],
       },
       shopping_list: {
         user_id: request.user.id,
@@ -21,25 +21,15 @@ export const deleteShoppingListShare = async (request: AuthenticatedRequest): Ap
     return [
       StatusCodes.NOT_FOUND,
       {
-        message: `Shopping List share ${shareId} not found`,
+        message: `Shopping list share ${shareId} not found`,
       },
     ];
   }
 
-  try {
-    await prisma.shoppingListShare.delete({
-      where: {
-        id: share.id,
-      },
-    });
-    return [StatusCodes.OK, {}];
-  } catch (err) {
-    console.error(err);
-    return [
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      {
-        message: "Internal server error",
-      },
-    ];
-  }
+  await tx.shoppingListShare.delete({
+    where: {
+      id: share.id,
+    },
+  });
+  return [StatusCodes.OK, {}];
 };

@@ -1,17 +1,17 @@
+import { ShoppingListItemSchema } from "@recipiece/types";
 import { Grip } from "lucide-react";
 import mergeRefs from "merge-refs";
 import { ChangeEvent, FC, useMemo, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { Checkbox, Input } from "../../component";
-import { ShoppingListItem } from "../../data";
 import { useLayout } from "../../hooks";
 import { cn } from "../../util";
 
 export interface CheckableShoppingListItemInputProps {
-  readonly onCheck: (item: ShoppingListItem) => void;
-  readonly shoppingListItem: ShoppingListItem;
+  readonly onCheck: (item: ShoppingListItemSchema) => void;
+  readonly shoppingListItem: ShoppingListItemSchema;
   readonly isDraggable?: boolean;
-  readonly onItemDropped?: (item: ShoppingListItem, intoSpot: number) => void;
+  readonly onItemDropped?: (item: ShoppingListItemSchema, intoSpot: number) => void;
   readonly disabled?: boolean;
   readonly className?: string;
   readonly readOnly?: boolean;
@@ -72,7 +72,7 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
     return {
       accept: "shopping_list_item",
       drop: (droppedItem) => {
-        onItemDropped?.(droppedItem as ShoppingListItem, shoppingListItem.order);
+        onItemDropped?.(droppedItem as ShoppingListItemSchema, shoppingListItem.order);
       },
       collect: (monitor) => {
         return {
@@ -114,11 +114,11 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
   }, [isDraggable, isMobile, dragRef]);
 
   const nonDraggingView = (
-    // @ts-ignore
+    // @ts-expect-error mergeRefs has slightly off type
     <div className={wrapperClassName} ref={outerRef}>
       {isDraggable && <Grip ref={innerRef} />}
       <Checkbox disabled={disabled} checked={shoppingListItem.completed} onClick={() => onCheck(shoppingListItem)} />
-      <div className="border-y-0 border-b-[1px] border-l-[1px] border-r-0 w-full p-1 rounded-bl-md">
+      <div className="w-full rounded-bl-md border-y-0 border-b-[1px] border-l-[1px] border-r-0 p-1">
         <Input
           type="text"
           placeholder="what do you need to get?"
@@ -148,7 +148,7 @@ export const CheckableShoppingListItemInput: FC<CheckableShoppingListItemInputPr
           placeholder="anything to note?"
           className={cn(...SHOPPING_LIST_ITEM_INPUT_CLASSES, "text-xs")}
           disabled={disabled}
-          value={shoppingListItem.notes}
+          value={shoppingListItem.notes ?? ""}
           onChange={(event) => {
             setIsNotesDirty(true);
             onNotesChanged?.(event);

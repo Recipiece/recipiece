@@ -1,11 +1,10 @@
-import { Prisma, User } from "@prisma/client";
-import { Response } from "express";
+import { Prisma, PrismaTransaction } from "@recipiece/database";
+import { CookbookSchema, CreateCookbookRequestSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { CookbookSchema, CreateCookbookRequestSchema, YCreateCookbookRequestSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { ConflictError } from "../../util/error";
 
-export const createCookbook = async (req: AuthenticatedRequest<CreateCookbookRequestSchema>): ApiResponse<CookbookSchema> => {
+export const createCookbook = async (req: AuthenticatedRequest<CreateCookbookRequestSchema>, tx: PrismaTransaction): ApiResponse<CookbookSchema> => {
   const cookbookBody = req.body;
   const user = req.user;
 
@@ -20,7 +19,7 @@ export const createCookbook = async (req: AuthenticatedRequest<CreateCookbookReq
       },
     };
 
-    const cookbook = await prisma.cookbook.create({
+    const cookbook = await tx.cookbook.create({
       data: {
         ...createInput,
       },
@@ -28,20 +27,8 @@ export const createCookbook = async (req: AuthenticatedRequest<CreateCookbookReq
     return [StatusCodes.OK, cookbook];
   } catch (err) {
     if ((err as { code: string })?.code === "P2002") {
-      return [
-        StatusCodes.CONFLICT,
-        {
-          message: "You already have a cook book with this name",
-        },
-      ];
-    } else {
-      console.error(err);
-      return [
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        {
-          message: "Unable to create recipe",
-        },
-      ];
+      throw new ConflictError("You already have a cook book with this name");
     }
+    throw err;
   }
 };

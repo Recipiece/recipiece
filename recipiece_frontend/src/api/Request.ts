@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { TokenManager } from "./TokenManager";
 
 export const getUrl = (): string => {
-  return process.env.REACT_APP_API_URL!;
+  return process.env.RECIPIECE_API_URL!;
 };
 
 export const getWebsocketUrl = (): string => {
-  return process.env.REACT_APP_WEBSOCKET_URL!;
+  return process.env.RECIPIECE_WEBSOCKET_URL!;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const filtersToSearchParams = (filters: Record<string, any>) => {
   const searchParams = new URLSearchParams();
   Object.keys(filters).forEach((filterKey) => {
@@ -55,8 +56,33 @@ export interface GetRequest<T> {
   readonly query?: T;
 }
 
+const useResolveTokens = () => {
+  const navigate = useNavigate();
+
+  const resolveAccessToken = async () => {
+    const tokenResolver = TokenManager.getInstance();
+    try {
+      const tokens = await tokenResolver.resolveTokens();
+      if (tokens.access_token) {
+        return tokens.access_token;
+      } else {
+        tokenResolver.clear();
+        navigate("/login");
+        return Promise.reject();
+      }
+    } catch {
+      tokenResolver.clear();
+      navigate("/login");
+      return Promise.reject();
+    }
+  };
+
+  return { resolveAccessToken };
+};
+
 export const usePut = (args?: HookArgs) => {
   const tokenResolver = TokenManager.getInstance();
+  const { resolveAccessToken } = useResolveTokens();
   const navigate = useNavigate();
 
   const autoLogoutStatusCodes = useMemo(() => {
@@ -71,12 +97,7 @@ export const usePut = (args?: HookArgs) => {
     const headers = new AxiosHeaders();
     headers.set("Content-Type", "application/json");
     if (putRequest.withAuth === "access_token") {
-      const tokens = await tokenResolver.resolveTokens();
-      if (tokens.access_token) {
-        headers.set("Authorization", `Bearer ${tokens.access_token}`);
-      } else {
-        return Promise.reject();
-      }
+      headers.set("Authorization", `Bearer ${await resolveAccessToken()}`);
     }
 
     try {
@@ -109,6 +130,7 @@ export const usePut = (args?: HookArgs) => {
 export const usePost = (args?: HookArgs) => {
   const tokenResolver = TokenManager.getInstance();
   const navigate = useNavigate();
+  const { resolveAccessToken } = useResolveTokens();
 
   const autoLogoutStatusCodes = useMemo(() => {
     if (args?.autoLogoutOnCodes !== undefined) {
@@ -122,12 +144,7 @@ export const usePost = (args?: HookArgs) => {
     const headers = new AxiosHeaders();
     headers.set("Content-Type", "application/json");
     if (postRequest.withAuth === "access_token") {
-      const tokens = await tokenResolver.resolveTokens();
-      if (tokens.access_token) {
-        headers.set("Authorization", `Bearer ${tokens.access_token}`);
-      } else {
-        return Promise.reject();
-      }
+      headers.set("Authorization", `Bearer ${await resolveAccessToken()}`);
     }
 
     if (postRequest.extraHeaders) {
@@ -166,6 +183,7 @@ export const usePost = (args?: HookArgs) => {
 export const useGet = (args?: HookArgs) => {
   const tokenResolver = TokenManager.getInstance();
   const navigate = useNavigate();
+  const { resolveAccessToken } = useResolveTokens();
 
   const autoLogoutStatusCodes = useMemo(() => {
     if (args?.autoLogoutOnCodes !== undefined) {
@@ -179,12 +197,7 @@ export const useGet = (args?: HookArgs) => {
     const headers = new AxiosHeaders();
     headers.set("Content-Type", "application/json");
     if (getRequest.withAuth === "access_token") {
-      const tokens = await tokenResolver.resolveTokens();
-      if (tokens.access_token) {
-        headers.set("Authorization", `Bearer ${tokens.access_token}`);
-      } else {
-        return Promise.reject();
-      }
+      headers.set("Authorization", `Bearer ${await resolveAccessToken()}`);
     }
 
     const queryString = getRequest.query ? new URLSearchParams(getRequest.query).toString() : "";
@@ -223,6 +236,7 @@ export const useGet = (args?: HookArgs) => {
 export const useDelete = (args?: HookArgs) => {
   const tokenResolver = TokenManager.getInstance();
   const navigate = useNavigate();
+  const { resolveAccessToken } = useResolveTokens();
 
   const autoLogoutStatusCodes = useMemo(() => {
     if (args?.autoLogoutOnCodes !== undefined) {
@@ -236,12 +250,7 @@ export const useDelete = (args?: HookArgs) => {
     const headers = new AxiosHeaders();
     headers.set("Content-Type", "application/json");
     if (deleteRequest.withAuth === "access_token") {
-      const tokens = await tokenResolver.resolveTokens();
-      if (tokens.access_token) {
-        headers.set("Authorization", `Bearer ${tokens.access_token}`);
-      } else {
-        return Promise.reject();
-      }
+      headers.set("Authorization", `Bearer ${await resolveAccessToken()}`);
     }
 
     try {
@@ -258,7 +267,7 @@ export const useDelete = (args?: HookArgs) => {
         navigate("/login");
         return Promise.reject();
       } else {
-        return response as AxiosResponse<{}>;
+        return response as AxiosResponse<unknown>;
       }
     } catch (error) {
       const statusCode = (error as AxiosError)?.status;

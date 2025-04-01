@@ -1,12 +1,15 @@
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { PrismaTransaction } from "@recipiece/database";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { Environment } from "../../util/environment";
+import { s3 } from "../../util/s3";
 
-export const deleteRecipe = async (req: AuthenticatedRequest): ApiResponse<{ readonly deleted: boolean }> => {
+export const deleteRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<{ readonly deleted: boolean }> => {
   const recipeId = +req.params.id;
   const user = req.user;
 
-  const recipe = await prisma.recipe.findUnique({
+  const recipe = await tx.recipe.findUnique({
     where: {
       id: recipeId,
     },
@@ -31,15 +34,18 @@ export const deleteRecipe = async (req: AuthenticatedRequest): ApiResponse<{ rea
     ];
   }
 
-  try {
-    await prisma.recipe.delete({
-      where: {
-        id: recipeId,
-      },
+  await tx.recipe.delete({
+    where: {
+      id: recipeId,
+    },
+  });
+  if (recipe.image_key) {
+    const deleteRequest = new DeleteObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      Key: recipe.image_key,
     });
-    return [StatusCodes.OK, { deleted: true }];
-  } catch (error) {
-    console.error(error);
-    return [StatusCodes.BAD_REQUEST, { deleted: false }];
+    await s3.send(deleteRequest);
   }
+
+  return [StatusCodes.OK, { deleted: true }];
 };

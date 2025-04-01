@@ -1,12 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ListRecipesResponse,
-  ListShoppingListResponse,
-  ListUserKitchenMembershipFilters,
-  ListUserKitchenMembershipsResponse,
-  UserKitchenMembership,
-  UserKitchenMembershipStatus
-} from "../../data";
+  ListCookbooksResponseSchema,
+  ListMealPlansResponseSchema,
+  ListRecipesResponseSchema,
+  ListShoppingListsResponseSchema,
+  ListUserKitchenMembershipsQuerySchema,
+  ListUserKitchenMembershipsResponseSchema,
+  UpdateUserKitchenMembershipRequestSchema,
+  UserKitchenMembershipSchema,
+  YListUserKitchenMembershipsResponseSchema,
+  YUserKitchenMembershipSchema,
+} from "@recipiece/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CookbookQueryKeys } from "../cookbook";
+import { MealPlanQueryKeys } from "../mealPlan";
 import { generatePartialMatchPredicate, oldDataCreator, oldDataDeleter, oldDataUpdater, RcpQueryKey } from "../QueryKeys";
 import { RecipeQueryKeys } from "../recipe";
 import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
@@ -40,9 +46,9 @@ const usePurgeSharedQueries = () => {
   const queryClient = useQueryClient();
 
   const purgeParentEntityList = <OldDataType extends ShareableEntityListData>(
-    membership: UserKitchenMembership,
-    queryKey: RcpQueryKey,
-    enforceMembershipUser?: "source_user" | "destination_user"
+    membership: UserKitchenMembershipSchema,
+    queryKey: RcpQueryKey
+    // enforceMembershipUser?: "source_user" | "destination_user"
   ) => {
     queryClient.setQueriesData(
       {
@@ -54,12 +60,12 @@ const usePurgeSharedQueries = () => {
             ...oldData,
             data: (oldData.data ?? [])
               .map((entry) => {
-                if (enforceMembershipUser === "source_user" && entry.user_id !== membership.source_user.id) {
-                  return undefined;
-                }
-                if (enforceMembershipUser === "destination_user" && entry.user_id !== membership.destination_user.id) {
-                  return undefined;
-                }
+                // if (enforceMembershipUser === "source_user" && entry.user_id !== membership.source_user.id) {
+                //   return undefined;
+                // }
+                // if (enforceMembershipUser === "destination_user" && entry.user_id !== membership.destination_user.id) {
+                //   return undefined;
+                // }
                 if (entry.shares) {
                   return {
                     ...entry,
@@ -77,7 +83,7 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShareEntitiesList = <OldDataType extends ShareEntityListData>(membership: UserKitchenMembership, queryKey: RcpQueryKey) => {
+  const purgeShareEntitiesList = <OldDataType extends ShareEntityListData>(membership: UserKitchenMembershipSchema, queryKey: RcpQueryKey) => {
     queryClient.setQueriesData(
       {
         queryKey: queryKey,
@@ -95,9 +101,9 @@ const usePurgeSharedQueries = () => {
   };
 
   const purgeParentEntity = <OldDataType extends ShareableEntityData>(
-    membership: UserKitchenMembership,
-    queryKey: RcpQueryKey,
-    enforceMembershipUser?: "source_user" | "destination_user"
+    membership: UserKitchenMembershipSchema,
+    queryKey: RcpQueryKey
+    // enforceMembershipUser?: "source_user" | "destination_user"
   ) => {
     queryClient.setQueriesData(
       {
@@ -105,12 +111,12 @@ const usePurgeSharedQueries = () => {
       },
       (oldData: OldDataType | undefined) => {
         if (oldData) {
-          if (enforceMembershipUser === "source_user" && oldData.user_id !== membership.source_user.id) {
-            return undefined;
-          }
-          if (enforceMembershipUser === "destination_user" && oldData.user_id !== membership.destination_user.id) {
-            return undefined;
-          }
+          // if (enforceMembershipUser === "source_user" && oldData.user_id !== membership.source_user.id) {
+          //   return undefined;
+          // }
+          // if (enforceMembershipUser === "destination_user" && oldData.user_id !== membership.destination_user.id) {
+          //   return undefined;
+          // }
           return {
             ...oldData,
             shares: (oldData.shares ?? []).filter((share) => share.user_kitchen_membership_id !== membership.id),
@@ -121,7 +127,7 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShareEntity = <OldDataType extends ShareEntityData>(membership: UserKitchenMembership, queryKey: RcpQueryKey) => {
+  const purgeShareEntity = <OldDataType extends ShareEntityData>(membership: UserKitchenMembershipSchema, queryKey: RcpQueryKey) => {
     queryClient.setQueriesData(
       {
         queryKey: queryKey,
@@ -137,61 +143,116 @@ const usePurgeSharedQueries = () => {
     );
   };
 
-  const purgeShoppingLists = (membership: UserKitchenMembership, enforceMembershipUser?: "source_user" | "destination_user") => {
-    purgeParentEntityList(membership, ShoppingListQueryKeys.LIST_SHOPPING_LISTS(), enforceMembershipUser);
-    purgeParentEntity(membership, ShoppingListQueryKeys.GET_SHOPPING_LIST(), enforceMembershipUser);
+  const purgeShoppingLists = (
+    membership: UserKitchenMembershipSchema
+    // enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
+    purgeParentEntityList(
+      membership,
+      ShoppingListQueryKeys.LIST_SHOPPING_LISTS()
+      // enforceMembershipUser
+    );
+    purgeParentEntity(
+      membership,
+      ShoppingListQueryKeys.GET_SHOPPING_LIST()
+      // enforceMembershipUser
+    );
     purgeShareEntitiesList(membership, ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES());
     purgeShareEntity(membership, ShoppingListQueryKeys.GET_SHOPPING_LIST_SHARE());
   };
 
-  const purgeRecipes = (membership: UserKitchenMembership, enforceMembershipUser?: "source_user" | "destination_user") => {
-    purgeParentEntityList(membership, RecipeQueryKeys.LIST_RECIPES(), enforceMembershipUser);
-    purgeParentEntity(membership, RecipeQueryKeys.GET_RECIPE(), enforceMembershipUser);
-    purgeShareEntitiesList(membership, RecipeQueryKeys.LIST_RECIPE_SHARES());
-    purgeShareEntity(membership, RecipeQueryKeys.GET_RECIPE_SHARE());
+  const purgeRecipes = (
+    membership: UserKitchenMembershipSchema
+    // enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
+    purgeParentEntityList(
+      membership,
+      RecipeQueryKeys.LIST_RECIPES()
+      // enforceMembershipUser
+    );
+    purgeParentEntity(
+      membership,
+      RecipeQueryKeys.GET_RECIPE()
+      // enforceMembershipUser
+    );
   };
 
-  return { purgeRecipes, purgeShoppingLists };
+  const purgeMealPlans = (
+    membership: UserKitchenMembershipSchema
+    // enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
+    purgeParentEntityList(
+      membership,
+      MealPlanQueryKeys.LIST_MEAL_PLANS()
+      // enforceMembershipUser
+    );
+    purgeParentEntity(
+      membership,
+      MealPlanQueryKeys.GET_MEAL_PLAN()
+      // enforceMembershipUser
+    );
+    purgeShareEntitiesList(membership, MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES());
+    purgeShareEntity(membership, MealPlanQueryKeys.GET_MEAL_PLAN_SHARE());
+  };
+
+  const purgeCookbooks = (
+    membership: UserKitchenMembershipSchema
+    // enforceMembershipUser?: "source_user" | "destination_user"
+  ) => {
+    purgeParentEntityList(
+      membership,
+      CookbookQueryKeys.LIST_COOKBOOKS()
+      // enforceMembershipUser
+    );
+    purgeParentEntity(
+      membership,
+      CookbookQueryKeys.GET_COOKBOOK()
+      // enforceMembershipUser
+    );
+  };
+
+  return { purgeRecipes, purgeShoppingLists, purgeMealPlans, purgeCookbooks };
 };
 
-export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipFilters, args?: QueryArgs<ListUserKitchenMembershipsResponse>) => {
+export const useListUserKitchenMembershipsQuery = (filters?: ListUserKitchenMembershipsQuerySchema, args?: QueryArgs<ListUserKitchenMembershipsResponseSchema>) => {
   const { getter } = useGet();
   const queryClient = useQueryClient();
 
   const query = async () => {
-    return await getter<ListUserKitchenMembershipFilters, ListUserKitchenMembershipsResponse>({
-      path: "/user/kitchen/membership/list",
+    const data = await getter<ListUserKitchenMembershipsQuerySchema, ListUserKitchenMembershipsResponseSchema>({
+      path: "/user-kitchen-membership/list",
       withAuth: "access_token",
       query: {
-        ...(filters ?? { page_number: 0 }),
+        ...(filters ?? { page_number: 0, page_size: 100 }),
       },
     });
+    return YListUserKitchenMembershipsResponseSchema.cast(data.data);
   };
 
   return useQuery({
     queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(filters),
     queryFn: async () => {
       const results = await query();
-      results.data.data.forEach((membership) => {
+      results.data.forEach((membership) => {
         queryClient.setQueryData(UserQueryKeys.GET_USER_KITCHEN_MEMBERSHIP(membership.id), membership);
       });
-      return results.data;
+      return results;
     },
     ...(args ?? {}),
   });
 };
 
-export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembership, { readonly username: string }>) => {
+export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, { readonly username: string }>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
   const mutation = async (body: { readonly username: string }) => {
-    const response = await poster<typeof body, UserKitchenMembership>({
+    const response = await poster<typeof body, UserKitchenMembershipSchema>({
       withAuth: "access_token",
-      path: "/user/kitchen/membership",
+      path: "/user-kitchen-membership",
       body: { ...body },
     });
-    return response.data;
+    return YUserKitchenMembershipSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -206,6 +267,7 @@ export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitch
           predicate: generatePartialMatchPredicate(
             UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
               from_self: true,
+              status: ["pending"],
             })
           ),
         },
@@ -217,31 +279,33 @@ export const useCreateKitchenMembershipMutation = (args?: MutationArgs<UserKitch
   });
 };
 
-export const useUpdatePendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembership, { readonly id: number; readonly status: UserKitchenMembershipStatus }>
-) => {
+export const useUpdatePendingUserKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>) => {
   const queryClient = useQueryClient();
   const { onSuccess, ...restArgs } = args ?? {};
 
   const mutation = useUpdateKitchenMembershipMutation({
     onSuccess: (data, vars, ctx) => {
-      queryClient.invalidateQueries({
-        queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
-        predicate: generatePartialMatchPredicate(
-          UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
-            targeting_self: true,
-            status: ["pending"],
-          })
-        ),
-      });
-
+      // purge the query from the pending queriers that are targeting the user
       queryClient.setQueriesData(
         {
           queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
           predicate: generatePartialMatchPredicate(
             UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
               targeting_self: true,
-              status: ["accepted", "denied"],
+              status: ["pending"],
+            })
+          ),
+        },
+        oldDataDeleter(data)
+      );
+
+      // set the query into the appropriate cache
+      queryClient.setQueriesData(
+        {
+          queryKey: UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS(),
+          predicate: generatePartialMatchPredicate(
+            UserQueryKeys.LIST_USER_KITCHEN_MEMBERSHIPS({
+              status: [data.status],
             })
           ),
         },
@@ -254,16 +318,30 @@ export const useUpdatePendingUserKitchenMembershipMutation = (
           predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
           refetchType: "inactive",
         });
-        queryClient.invalidateQueries({
-          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
-          refetchType: "inactive",
-        });
+
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LISTS()),
           refetchType: "inactive",
         });
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
+          predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOKS()),
           refetchType: "inactive",
         });
       }
@@ -276,9 +354,7 @@ export const useUpdatePendingUserKitchenMembershipMutation = (
   return mutation;
 };
 
-export const useUpdatedNonPendingUserKitchenMembershipMutation = (
-  args?: MutationArgs<UserKitchenMembership, { readonly id: number; readonly status: UserKitchenMembershipStatus }>
-) => {
+export const useUpdatedNonPendingUserKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>) => {
   const queryClient = useQueryClient();
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -304,7 +380,7 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
             queryKey: RecipeQueryKeys.LIST_RECIPES(),
             predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
           },
-          (oldData: ListRecipesResponse | undefined) => {
+          (oldData: ListRecipesResponseSchema | undefined) => {
             if (oldData) {
               return {
                 ...oldData,
@@ -314,17 +390,13 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
             return undefined;
           }
         );
-        queryClient.invalidateQueries({
-          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
-          refetchType: "inactive",
-        });
 
         queryClient.setQueriesData(
           {
             queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
             predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LISTS()),
           },
-          (oldData: ListShoppingListResponse | undefined) => {
+          (oldData: ListShoppingListsResponseSchema | undefined) => {
             if (oldData) {
               return {
                 ...oldData,
@@ -335,25 +407,79 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
           }
         );
         queryClient.invalidateQueries({
-          queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
           refetchType: "inactive",
         });
+
+        queryClient.setQueriesData(
+          {
+            queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+            predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+          },
+          (oldData: ListMealPlansResponseSchema | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: (oldData.data ?? []).filter((r) => r.user_id === data.destination_user.id),
+              };
+            }
+            return undefined;
+          }
+        );
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
+          refetchType: "inactive",
+        });
+
+        queryClient.setQueriesData(
+          {
+            queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
+            predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOKS()),
+          },
+          (oldData: ListCookbooksResponseSchema | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: (oldData.data ?? []).filter((r) => r.user_id === data.destination_user.id),
+              };
+            }
+            return undefined;
+          }
+        );
       } else {
         queryClient.invalidateQueries({
           queryKey: RecipeQueryKeys.LIST_RECIPES(),
           predicate: generatePartialMatchPredicate(RecipeQueryKeys.LIST_RECIPES()),
           refetchType: "inactive",
         });
-        queryClient.invalidateQueries({
-          queryKey: RecipeQueryKeys.LIST_RECIPE_SHARES(),
-          refetchType: "inactive",
-        });
+
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LISTS(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LISTS()),
           refetchType: "inactive",
         });
         queryClient.invalidateQueries({
           queryKey: ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES(),
+          predicate: generatePartialMatchPredicate(ShoppingListQueryKeys.LIST_SHOPPING_LIST_SHARES()),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLANS(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLANS()),
+          refetchType: "inactive",
+        });
+        queryClient.invalidateQueries({
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES(),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_SHARES()),
+          refetchType: "inactive",
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: CookbookQueryKeys.LIST_COOKBOOKS(),
+          predicate: generatePartialMatchPredicate(CookbookQueryKeys.LIST_COOKBOOKS()),
           refetchType: "inactive",
         });
       }
@@ -366,20 +492,20 @@ export const useUpdatedNonPendingUserKitchenMembershipMutation = (
   return mutation;
 };
 
-const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembership, { readonly id: number; readonly status: UserKitchenMembershipStatus }>) => {
+export const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembershipSchema, UpdateUserKitchenMembershipRequestSchema>) => {
   const { putter } = usePut();
 
   const queryClient = useQueryClient();
 
-  const mutation = async (body: { readonly id: number; readonly status: UserKitchenMembershipStatus }) => {
-    const response = await putter<typeof body, UserKitchenMembership>({
-      path: "/user/kitchen/membership",
+  const mutation = async (body: UpdateUserKitchenMembershipRequestSchema) => {
+    const response = await putter<typeof body, UserKitchenMembershipSchema>({
+      path: "/user-kitchen-membership",
       body: {
         ...body,
       },
       withAuth: "access_token",
     });
-    return response.data;
+    return YUserKitchenMembershipSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -394,15 +520,15 @@ const useUpdateKitchenMembershipMutation = (args?: MutationArgs<UserKitchenMembe
   });
 };
 
-export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<UserKitchenMembership>) => {
+export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<UserKitchenMembershipSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const response = await getter<never, UserKitchenMembership>({
-      path: `/user/kitchen/membership/${id}`,
+    const response = await getter<never, UserKitchenMembershipSchema>({
+      path: `/user-kitchen-membership/${id}`,
       withAuth: "access_token",
     });
-    return response.data;
+    return YUserKitchenMembershipSchema.cast(response.data);
   };
 
   return useQuery({
@@ -412,14 +538,14 @@ export const useGetUserKitchenMembershipQuery = (id: number, args?: QueryArgs<Us
   });
 };
 
-export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_user" | "destination_user", args?: MutationArgs<any, UserKitchenMembership>) => {
+export const useDeleteUserKitchenMembershipMutation = (args?: MutationArgs<unknown, UserKitchenMembershipSchema>) => {
   const queryClient = useQueryClient();
   const { deleter } = useDelete();
-  const { purgeRecipes, purgeShoppingLists } = usePurgeSharedQueries();
+  const { purgeRecipes, purgeShoppingLists, purgeMealPlans, purgeCookbooks } = usePurgeSharedQueries();
 
-  const mutation = async (membership: UserKitchenMembership) => {
+  const mutation = async (membership: UserKitchenMembershipSchema) => {
     return await deleter({
-      path: "/user/kitchen/membership",
+      path: "/user-kitchen-membership",
       id: membership.id,
       withAuth: "access_token",
     });
@@ -440,8 +566,10 @@ export const useDeleteUserKitchenMembershipMutation = (deletionContext: "source_
       queryClient.invalidateQueries({
         queryKey: UserQueryKeys.GET_USER_KITCHEN_MEMBERSHIP(params.id),
       });
-      purgeRecipes(params, deletionContext);
-      purgeShoppingLists(params, deletionContext);
+      purgeRecipes(params);
+      purgeShoppingLists(params);
+      purgeMealPlans(params);
+      purgeCookbooks(params);
       onSuccess?.(data, params, ctx);
     },
     ...restArgs,

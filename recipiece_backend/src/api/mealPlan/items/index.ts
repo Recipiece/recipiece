@@ -1,3 +1,4 @@
+export * from "./bulkSetMealPlanItems";
 export * from "./createItemForMealPlan";
 export * from "./deleteItemForMealPlan";
 export * from "./listItemsForMealPlan";

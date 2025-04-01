@@ -1,18 +1,14 @@
+import { PrismaTransaction } from "@recipiece/database";
+import { CookbookSchema, YCookbookSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { CookbookSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { getCookbookByIdQuery } from "./query";
 
-export const getCookbook = async (req: AuthenticatedRequest): ApiResponse<CookbookSchema> => {
+export const getCookbook = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<CookbookSchema> => {
   const user = req.user;
   const cookbookId = +req.params.id;
 
-  const cookbook = await prisma.cookbook.findFirst({
-    where: {
-      id: cookbookId,
-      user_id: user.id,
-    },
-  });
+  const cookbook = await getCookbookByIdQuery(tx, user, cookbookId).executeTakeFirst();
 
   if (!cookbook) {
     return [
@@ -23,5 +19,5 @@ export const getCookbook = async (req: AuthenticatedRequest): ApiResponse<Cookbo
     ];
   }
 
-  return [StatusCodes.OK, cookbook];
+  return [StatusCodes.OK, YCookbookSchema.cast(cookbook)];
 };

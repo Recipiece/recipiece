@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { Environment } from "./environment";
 
 export interface LoggerOpts {
   readonly name: string;
@@ -25,21 +26,21 @@ export class Logger {
   }
 
   public log(message?: any, ...optionalParams: any[]) {
-    if(this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
+    if (this.disabledEnvs.find((v) => v === Environment.ENVIRONMENT)) {
       return;
     }
     console.log(message, ...optionalParams);
   }
 
   public error(message?: any, ...optionalParams: any[]) {
-    if(this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
+    if (this.disabledEnvs.find((v) => v === Environment.ENVIRONMENT)) {
       return;
     }
     console.error(message, ...optionalParams);
   }
 
   public warn(message?: any, ...optionalParams: any[]) {
-    if(this.disabledEnvs.find((v) => v === process.env.APP_ENVIRONMENT)) {
+    if (this.disabledEnvs.find((v) => v === Environment.ENVIRONMENT)) {
       return;
     }
     console.warn(message, ...optionalParams);

@@ -1,16 +1,16 @@
+import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useListRecipesQuery } from "../../api";
-import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
-import { ListRecipeFilters, Recipe } from "../../data";
+import { Button, Input, LoadingGroup, MembershipAvatar, Shelf, ShelfSpacer, Stack } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export const SearchRecipesDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSubmit }) => {
+export const SearchRecipesDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const [filters, setFilters] = useState<ListRecipeFilters>({
+  const [filters, setFilters] = useState<ListRecipesQuerySchema>({
     page_number: 0,
     search: "",
   });
@@ -19,7 +19,7 @@ export const SearchRecipesDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSu
     data: recipeData,
     isLoading: isLoadingRecipes,
     isFetching: isFetchingRecipes,
-  } = useListRecipesQuery({ search: filters.search!, page_number: 0 }, { enabled: (filters.search || "").length >= 2 });
+  } = useListRecipesQuery({ search: filters.search!, page_number: 0, page_size: 5 }, { enabled: (filters.search || "").length >= 2 });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -38,11 +38,10 @@ export const SearchRecipesDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSu
   }, [searchTerm]);
 
   const onRecipeSelected = useCallback(
-    async (recipe: Recipe) => {
+    async (recipe: RecipeSchema) => {
       setIsDisabled(true);
       try {
         await Promise.resolve(onSubmit?.(recipe));
-      } catch {
       } finally {
         setIsDisabled(false);
       }
@@ -58,11 +57,12 @@ export const SearchRecipesDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSu
       </ResponsiveHeader>
       <Stack>
         <Input type="text" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
-        <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="w-6 h-6">
+        <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="h-6 w-6">
           {(recipeData?.data || []).map((recipe) => {
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>
-                {recipe.name}
+                <MembershipAvatar entity={recipe} membershipId={recipe.user_kitchen_membership_id} size="small" />
+                <span className="ml-2">{recipe.name}</span>
               </Button>
             );
           })}

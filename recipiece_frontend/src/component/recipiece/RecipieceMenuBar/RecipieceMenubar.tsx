@@ -1,18 +1,11 @@
-import { Book, CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
+import { DataTestId } from "@recipiece/constant";
+import { CookbookSchema, ShoppingListSchema } from "@recipiece/types";
+import { CirclePlus, CircleUserRound, GanttChart, Home, Plus, ShoppingBasket } from "lucide-react";
 import { createContext, createRef, FC, PropsWithChildren, RefObject, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useCreateCookbookMutation,
-  useCreateMealPlanMutation,
-  useCreateShoppingListMutation,
-  useListCookbooksQuery,
-  useListMealPlansQuery,
-  useListShoppingListsQuery,
-  useLogoutUserMutation
-} from "../../../api";
+import { useCreateMealPlanMutation, useCreateShoppingListMutation, useListMealPlansQuery, useListShoppingListsQuery, useLogoutUserMutation } from "../../../api";
 import { DialogContext } from "../../../context";
-import { Cookbook, ShoppingList } from "../../../data";
-import { CreateCookbookForm, CreateShoppingListForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
+import { CreateShoppingListForm, MobileCreateMenuDialogOption, ModifyMealPlanForm } from "../../../dialog";
 import {
   Button,
   DropdownMenu,
@@ -31,6 +24,7 @@ import {
 } from "../../shadcn";
 import { LoadingGroup } from "../LoadingGroup";
 import { RecipieceHeader } from "../Typography";
+import { MealPlanMenuItem } from "./MealPlanMenuItem";
 import { ShoppingListMenuItem } from "./ShoppingListMenuItem";
 
 export const RecipieceMenuBarContext = createContext<{
@@ -42,7 +36,7 @@ export const RecipieceMenuBarContext = createContext<{
 export const RecipieceMenuBarContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const mobileMenuPortalRef = createRef<HTMLSpanElement>();
 
-  return <RecipieceMenuBarContext.Provider value={{ mobileMenuPortalRef: mobileMenuPortalRef }}>{children}</RecipieceMenuBarContext.Provider>;
+  return <RecipieceMenuBarContext.Provider value={{ mobileMenuPortalRef }}>{children}</RecipieceMenuBarContext.Provider>;
 };
 
 /**
@@ -55,12 +49,10 @@ export const RecipieceMenuBarContextProvider: FC<PropsWithChildren> = ({ childre
  */
 export const RecipieceMenubar: FC = () => {
   const navigate = useNavigate();
-  
+
   const { toast } = useToast();
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
   const { pushDialog, popDialog } = useContext(DialogContext);
-  // const { activeTimers, createTimer } = useContext(TimerContext);
-  const [cookbooksPage, setCookbooksPage] = useState(0);
   const [shoppingListsPage, setShoppingListsPage] = useState(0);
   const [mealPlansPage, setMealPlansPage] = useState(0);
 
@@ -72,16 +64,11 @@ export const RecipieceMenubar: FC = () => {
     page_number: shoppingListsPage,
   });
 
-  const { data: cookbooks, isLoading: isLoadingCookbooks } = useListCookbooksQuery({
-    page_number: cookbooksPage,
-  });
-
   const { data: mealPlans, isLoading: isLoadingMealPlans } = useListMealPlansQuery({
     page_number: mealPlansPage,
   });
 
   const { mutateAsync: createMealPlan } = useCreateMealPlanMutation();
-  const { mutateAsync: createCookbook } = useCreateCookbookMutation();
   const { mutateAsync: createShoppingList } = useCreateShoppingListMutation();
   const { mutateAsync: logoutUser } = useLogoutUserMutation();
 
@@ -90,34 +77,10 @@ export const RecipieceMenubar: FC = () => {
       await logoutUser();
     } catch {
       // noop
-    } finally { 
+    } finally {
       navigate("/login");
     }
   }, [logoutUser, navigate]);
-
-  const onStartCreateCookbook = useCallback(() => {
-    pushDialog("createCookbook", {
-      onSubmit: async (data: CreateCookbookForm) => {
-        try {
-          const createdCookbook = await createCookbook({ ...data });
-          toast({
-            title: "Cookbook Created",
-            description: "Your cookbook has been successfully created!",
-          });
-          navigate(`/cookbook/${createdCookbook.id}`);
-        } catch {
-          toast({
-            title: "Could not Create Cookbook",
-            description: "This cookbook couldn't be created. Try again later.",
-            variant: "destructive",
-          });
-        } finally {
-          popDialog("createCookbook");
-        }
-      },
-      onClose: () => popDialog("createCookbook"),
-    });
-  }, [pushDialog, popDialog, createCookbook, toast, navigate]);
 
   const onStartCreateShoppingList = useCallback(() => {
     pushDialog("createShoppingList", {
@@ -144,34 +107,6 @@ export const RecipieceMenubar: FC = () => {
       },
     });
   }, [pushDialog, popDialog, createShoppingList, navigate, toast]);
-
-  // const onStartCreateTimer = useCallback(() => {
-  //   pushDialog("createTimer", {
-  //     onSubmit: async (timerData: CreateTimerForm) => {
-  //       const hoursMs = timerData.hours * 60 * 60 * 1000;
-  //       const minutesMs = timerData.minutes * 60 * 1000;
-  //       const secondsMs = timerData.seconds * 1000;
-  //       try {
-  //         await createTimer({
-  //           duration_ms: hoursMs + minutesMs + secondsMs,
-  //         });
-  //         toast({
-  //           title: "Timer Created",
-  //           description: "Your timer has been created",
-  //         });
-  //       } catch {
-  //         toast({
-  //           title: "Could Not Create Timer",
-  //           description: "This timer couldn't be created. Try again later.",
-  //           variant: "destructive",
-  //         });
-  //       } finally {
-  //         popDialog("createTimer");
-  //       }
-  //     },
-  //     onClose: () => popDialog("createTimer"),
-  //   });
-  // }, [createTimer, popDialog, pushDialog, toast]);
 
   const onStartCreateMealPlan = useCallback(() => {
     pushDialog("modifyMealPlan", {
@@ -205,9 +140,6 @@ export const RecipieceMenubar: FC = () => {
       onSubmit: (createType: MobileCreateMenuDialogOption) => {
         popDialog("mobileCreateMenu");
         switch (createType) {
-          case "cookbook":
-            onStartCreateCookbook();
-            break;
           case "recipe_from_url":
             navigate("/recipe/edit/new?source=url");
             break;
@@ -217,33 +149,20 @@ export const RecipieceMenubar: FC = () => {
           case "shopping_list":
             onStartCreateShoppingList();
             break;
-          // case "timer":
-          //   onStartCreateTimer();
-          //   break;
           case "meal_plan":
             onStartCreateMealPlan();
             break;
         }
       },
     });
-  }, [pushDialog, popDialog, navigate, onStartCreateCookbook, onStartCreateMealPlan, onStartCreateShoppingList]);
+  }, [pushDialog, popDialog, navigate, onStartCreateMealPlan, onStartCreateShoppingList]);
 
   const onMobileViewShoppingLists = useCallback(() => {
     pushDialog("mobileShoppingLists", {
       onClose: () => popDialog("mobileShoppingLists"),
-      onSubmit: (shoppingList: ShoppingList) => {
+      onSubmit: (shoppingList: ShoppingListSchema) => {
         popDialog("mobileShoppingLists");
         navigate(`/shopping-list/${shoppingList.id}`);
-      },
-    });
-  }, [navigate, popDialog, pushDialog]);
-
-  const onMobileViewCookbooks = useCallback(() => {
-    pushDialog("mobileCookbooks", {
-      onClose: () => popDialog("mobileCookbooks"),
-      onSubmit: (cookbook: Cookbook) => {
-        popDialog("mobileCookbooks");
-        navigate(`/cookbook/${cookbook.id}`);
       },
     });
   }, [navigate, popDialog, pushDialog]);
@@ -251,7 +170,7 @@ export const RecipieceMenubar: FC = () => {
   const onMobileViewMealPlans = useCallback(() => {
     pushDialog("mobileMealPlans", {
       onClose: () => popDialog("mobileMealPlans"),
-      onSubmit: (cookbook: Cookbook) => {
+      onSubmit: (cookbook: CookbookSchema) => {
         popDialog("mobileMealPlans");
         navigate(`/meal-plan/view/${cookbook.id}`);
       },
@@ -260,59 +179,74 @@ export const RecipieceMenubar: FC = () => {
 
   return (
     <>
-      <Menubar className="rounded-none border-0 p-2 sm:p-4 h-12 sm:h-16 bg-white sm:bg-primary text-white">
-        <RecipieceHeader className="text-start sm:text-center w-full md:w-auto mr-auto text-primary sm:text-white" />
+      <Menubar
+        data-testid={DataTestId.MenuBar.NAV_DESKTOP_MENU_BAR}
+        className="h-12 rounded-none border-0 p-2 text-white sm:h-16 bg-transparent sm:bg-primary sm:p-4 sm:fixed w-full z-50"
+      >
+        <RecipieceHeader className="mr-auto w-full text-start text-primary dark:text-white sm:text-center sm:text-white md:w-auto" />
         <span className="ml-auto block sm:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="link" className="text-primary">
+              <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT_MOBILE} variant="link" className="text-primary dark:text-white">
                 <CircleUserRound />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => navigate("/kitchen")}>
-                My Kitchen
+            <DropdownMenuContent data-testid={DataTestId.MenuBar.DROPDOWN_MENU_ACCOUNT_MOBILE}>
+              <DropdownMenuItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_MEMBERSHIPS} onClick={() => navigate("/memberships")}>
+                Kitchens
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/account")}>
-                My Account
+              <DropdownMenuItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_ACCOUNT} onClick={() => navigate("/account")}>
+                Settings
               </DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => navigate("/notifications")}>Notifications</DropdownMenuItem> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onLogout}>Sign Out</DropdownMenuItem>
+              <DropdownMenuItem data-testid={DataTestId.MenuBar.MENU_ITEM_SIGN_OUT} onClick={onLogout}>
+                Sign Out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </span>
         <span className="ml-auto block sm:hidden" ref={mobileMenuPortalRef} />
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger onClick={onGoHome}>Home</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_ITEM_HOME_DESKTOP} onClick={onGoHome}>
+              Home
+            </MenubarTrigger>
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Recipes</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_CREATE}>Create</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={() => navigate("/recipe/edit/new?source=url")}>Recipe From URL</MenubarItem>
-              <MenubarItem onClick={() => navigate("/recipe/edit/new")}>Recipe From Scratch</MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_RECIPE_FROM_URL} onClick={() => navigate("/recipe/edit/new?source=url")}>
+                Recipe From URL
+              </MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_RECIPE_FROM_SCRATCH} onClick={() => navigate("/recipe/edit/new")}>
+                Recipe From Scratch
+              </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Meal Plans</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_MEAL_PLAN}>Meal Plans</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={onStartCreateMealPlan}>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_CREATE_MEAL_PLAN} onClick={onStartCreateMealPlan}>
                 <Plus size={16} className="mr-2" />
                 New Meal Plan
               </MenubarItem>
-              <LoadingGroup isLoading={isLoadingMealPlans} className="w-full h-10">
+              <LoadingGroup isLoading={isLoadingMealPlans} className="h-10 w-full">
                 {!!mealPlans?.data?.length && <Separator />}
                 {(mealPlans?.data || []).map((mealPlan) => {
                   return (
-                    <MenubarItem onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)} key={mealPlan.id}>
-                      {mealPlan.name}
-                    </MenubarItem>
+                    <MealPlanMenuItem
+                      data-testid={DataTestId.MenuBar.MENU_ITEM_MEAL_PLAN(mealPlan.id)}
+                      onClick={() => navigate(`/meal-plan/view/${mealPlan.id}`)}
+                      key={mealPlan.id}
+                      mealPlan={mealPlan}
+                    />
                   );
                 })}
               </LoadingGroup>
@@ -320,43 +254,23 @@ export const RecipieceMenubar: FC = () => {
           </MenubarMenu>
         </span>
 
-        <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Cookbooks</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_SHOPPING_LIST}>Shopping Lists</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={onStartCreateCookbook}>
-                <Plus size={16} className="mr-2" /> New Cookbook
-              </MenubarItem>
-              <LoadingGroup isLoading={isLoadingCookbooks} className="w-full h-10">
-                {!!cookbooks?.data?.length && <Separator />}
-                {(cookbooks?.data || []).map((cookbook) => {
-                  return (
-                    <MenubarItem onClick={() => navigate(`/cookbook/${cookbook.id}`)} key={cookbook.id}>
-                      {cookbook.name}
-                    </MenubarItem>
-                  );
-                })}
-                {/* {cookbooks?.data && <Pager shortForm={true} page={cookbooksPage} onPage={setCookbooksPage} hasNextPage={cookbooks?.hasNextPage} />} */}
-              </LoadingGroup>
-            </MenubarContent>
-          </MenubarMenu>
-        </span>
-
-        <span className="hidden w-0 sm:w-auto sm:block">
-          <MenubarMenu>
-            <MenubarTrigger>Shopping Lists</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem onClick={onStartCreateShoppingList}>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_CREATE_SHOPPING_LIST} onClick={onStartCreateShoppingList}>
                 <Plus size={16} className="mr-2" /> New Shopping List
               </MenubarItem>
-              <LoadingGroup isLoading={isLoadingShoppingLists} className="w-full h-10">
+              <LoadingGroup isLoading={isLoadingShoppingLists} className="h-10 w-full">
                 {!!shoppingLists?.data?.length && <Separator />}
                 {(shoppingLists?.data || []).map((shoppingList) => {
                   return (
-                    <ShoppingListMenuItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)} shoppingList={shoppingList} />
-                    // <MenubarItem key={shoppingList.id} onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}>
-                    //   {shoppingList.name}
-                    // </MenubarItem>
+                    <ShoppingListMenuItem
+                      data-testid={DataTestId.MenuBar.MENU_ITEM_SHOPPING_LIST(shoppingList.id)}
+                      key={shoppingList.id}
+                      onClick={() => navigate(`/shopping-list/${shoppingList.id}`)}
+                      shoppingList={shoppingList}
+                    />
                   );
                 })}
                 {/* {shoppingLists?.data && <Pager shortForm={true} page={shoppingListsPage} onPage={setShoppingListsPage} hasNextPage={shoppingLists?.has_next_page} />} */}
@@ -365,58 +279,41 @@ export const RecipieceMenubar: FC = () => {
           </MenubarMenu>
         </span>
 
-        {/* <span className="hidden w-0 sm:w-auto sm:block">
+        <span className="hidden w-0 sm:block sm:w-auto">
           <MenubarMenu>
-            <MenubarTrigger>Timers</MenubarTrigger>
+            <MenubarTrigger data-testid={DataTestId.MenuBar.MENU_TRIGGER_ACCOUNT_DESKTOP}>Account</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem onClick={onStartCreateTimer}>
-                <Plus size={16} className="mr-2" />
-                New Timer
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_MEMBERSHIPS} onClick={() => navigate("/memberships")}>
+                Kitchens
               </MenubarItem>
-              {activeTimers.length > 0 && <Separator />}
-              {activeTimers.map((activeTimer) => {
-                return (
-                  <Fragment key={activeTimer.id}>
-                    <TimerMenuItem timer={activeTimer} />
-                  </Fragment>
-                );
-              })}
-            </MenubarContent>
-          </MenubarMenu>
-        </span> */}
-
-        <span className="hidden w-0 sm:w-auto sm:block">
-          <MenubarMenu>
-            <MenubarTrigger>Account</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem onClick={() => navigate("/kitchen")}>My Kitchen</MenubarItem>
-              <MenubarItem onClick={() => navigate("/account")}>My Account</MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_GOTO_ACCOUNT} onClick={() => navigate("/account")}>
+                Settings
+              </MenubarItem>
+              {/* <MenubarItem onClick={() => navigate("/notifications")}>Notifications</MenubarItem> */}
               <MenubarSeparator />
-              <MenubarItem onClick={onLogout}>Sign Out</MenubarItem>
+              <MenubarItem data-testid={DataTestId.MenuBar.MENU_ITEM_SIGN_OUT} onClick={onLogout}>
+                Sign Out
+              </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
         </span>
       </Menubar>
 
-      <footer className="visible sm:invisible w-full fixed bottom-0 left-0 h-16 bg-primary text-white">
-        <div className="h-full flex flex-row justify-center items-center">
-          <Button onClick={() => navigate("/")} variant="link" className="text-white grow">
-            <Home />
-          </Button>
-
-          <Button className="text-white grow" onClick={onMobileViewCookbooks}>
-            <Book />
-          </Button>
-
-          <Button onClick={onCreatePressed} variant="link" className="text-white grow">
+      <footer data-testid={DataTestId.MenuBar.FOOTER_MOBILE_MENU_BAR} className="visible fixed bottom-0 left-0 z-50 h-16 w-full bg-primary pb-4 text-white sm:invisible">
+        <div className="flex h-full flex-row items-center justify-center">
+          <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_CREATE} onClick={onCreatePressed} variant="link" className="grow text-white">
             <CirclePlus />
           </Button>
 
-          <Button onClick={onMobileViewShoppingLists} className="text-white grow">
+          <Button data-testid={DataTestId.MenuBar.MENU_ITEM_HOME_MOBILE} onClick={() => navigate("/dashboard")} variant="link" className="grow text-white">
+            <Home />
+          </Button>
+
+          <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_SHOPPING_LIST} onClick={onMobileViewShoppingLists} className="grow text-white">
             <ShoppingBasket />
           </Button>
 
-          <Button onClick={onMobileViewMealPlans} className="text-white grow">
+          <Button data-testid={DataTestId.MenuBar.MENU_TRIGGER_MEAL_PLAN} onClick={onMobileViewMealPlans} className="grow text-white">
             <GanttChart />
           </Button>
         </div>

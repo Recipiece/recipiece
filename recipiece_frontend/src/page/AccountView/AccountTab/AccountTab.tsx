@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useGetSelfQuery } from "../../../api";
-import { H2, LoadingGroup, Stack } from "../../../component";
+import { Divider, H2, LoadingGroup, Stack } from "../../../component";
 import { ChangePasswordSection } from "./ChangePasswordSection";
 import { ChangeUsernameSection } from "./ChangeUsernameSection";
 import { DeleteAccountSection } from "./DeleteAccountSection";
@@ -11,16 +11,16 @@ export const AccountTab: FC = () => {
 
   return (
     <Stack>
-      <LoadingGroup isLoading={isLoadingUser} className="w-5 h-5">
+      <LoadingGroup isLoading={isLoadingUser} className="h-5 w-5">
         {user && (
           <>
             <H2>Your Account</H2>
             <VerifyAccountSection />
-            <hr />
+            <Divider />
             <ChangeUsernameSection />
-            <hr />
+            <Divider />
             <ChangePasswordSection />
-            <hr />
+            <Divider />
             <DeleteAccountSection />
           </>
         )}
@@ -28,4 +28,3 @@ export const AccountTab: FC = () => {
     </Stack>
   );
 };
-

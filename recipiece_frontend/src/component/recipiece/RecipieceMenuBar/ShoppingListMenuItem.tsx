@@ -1,15 +1,15 @@
+import { ShoppingListSchema } from "@recipiece/types";
 import { ComponentProps, FC } from "react";
-import { ShoppingList } from "../../../data";
 import { MenubarItem } from "../../shadcn";
-import { SharedAvatar } from "../SharedAvatar";
+import { MembershipAvatar } from "../MembershipAvatar";
 
-export const ShoppingListMenuItem: FC<{ readonly shoppingList: ShoppingList } & ComponentProps<typeof MenubarItem>> = ({ shoppingList, ...restProps }) => {
+export const ShoppingListMenuItem: FC<{ readonly shoppingList: ShoppingListSchema } & ComponentProps<typeof MenubarItem>> = ({ shoppingList, ...restProps }) => {
   const membershipId = shoppingList.shares?.[0]?.user_kitchen_membership_id;
 
   return (
     <MenubarItem {...restProps}>
-      <div className="flex flex-row gap-2 items-center">
-        {membershipId && <SharedAvatar size="small" userKitchenMembershipId={membershipId}></SharedAvatar>}
+      <div className="flex flex-row items-center gap-2">
+        {membershipId && <MembershipAvatar entity={shoppingList} size="small" membershipId={membershipId} />}
         {shoppingList.name}
       </div>
     </MenubarItem>

@@ -1,17 +1,17 @@
+import { ListKnownIngredientsResponseSchema, YListKnownIngredientsResponseSchema } from "@recipiece/types";
 import { useQuery } from "@tanstack/react-query";
-import { ListKnownIngredientsResponse } from "../../data";
 import { QueryArgs, useGet } from "../Request";
 import { KnownIngredientQueryKeys } from "./KnownIngredientQueryKeys";
 
-export const useListKnownIngredientsQuery = (args?: QueryArgs<ListKnownIngredientsResponse>) => {
+export const useListKnownIngredientsQuery = (args?: QueryArgs<ListKnownIngredientsResponseSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const response = await getter<never, ListKnownIngredientsResponse>({
+    const response = await getter<never, ListKnownIngredientsResponseSchema>({
       path: "/known-ingredient/list",
       withAuth: "access_token",
     });
-    return response.data;
+    return YListKnownIngredientsResponseSchema.cast(response.data);
   };
 
   return useQuery({

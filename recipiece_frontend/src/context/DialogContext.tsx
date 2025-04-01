@@ -1,4 +1,4 @@
-import { ComponentProps, FC, FunctionComponent, PropsWithChildren, createContext, useCallback, useMemo, useState } from "react";
+import { ComponentProps, createContext, FC, FunctionComponent, PropsWithChildren, useCallback, useMemo, useState } from "react";
 import { Dialog, Drawer } from "../component";
 import { Dialogs } from "../dialog";
 import { useLayout } from "../hooks";
@@ -6,7 +6,7 @@ import { useLayout } from "../hooks";
 type DrawerDirection = "bottom" | "left" | "top" | "right" | undefined;
 
 export const DialogContext = createContext<{
-  readonly pushDialog: (dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]> & {readonly direction?: DrawerDirection}) => void;
+  readonly pushDialog: (dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]> & { readonly direction?: DrawerDirection }) => void;
   readonly popDialog: (dialogId?: keyof typeof Dialogs) => void;
 }>({
   popDialog: () => {},
@@ -25,22 +25,25 @@ export const DialogContextProvider: FC<PropsWithChildren> = ({ children }) => {
     }[]
   >([]);
 
-  const pushDialog = useCallback((dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]> & {readonly direction?: DrawerDirection}) => {
-    if(props.direction) {
-      setDirection(props.direction);
-    }
-    // @ts-ignore
-    setDialogStack((prev) => {
-      return [
-        {
-          dialogId: dialogId,
-          component: Dialogs[dialogId].component,
-          props: props,
-        },
-        ...prev,
-      ];
-    });
-  }, []);
+  const pushDialog = useCallback(
+    (dialogId: keyof typeof Dialogs, props: ComponentProps<(typeof Dialogs)[typeof dialogId]["component"]> & { readonly direction?: DrawerDirection }) => {
+      if (props.direction) {
+        setDirection(props.direction);
+      }
+      // @ts-ignore
+      setDialogStack((prev) => {
+        return [
+          {
+            dialogId: dialogId,
+            component: Dialogs[dialogId].component,
+            props: props,
+          },
+          ...prev,
+        ];
+      });
+    },
+    []
+  );
 
   const popDialog = useCallback((dialogId?: keyof typeof Dialogs) => {
     if (dialogId) {

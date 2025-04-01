@@ -1,25 +1,25 @@
+import { PrismaTransaction } from "@recipiece/database";
+import { LoginResponseSchema } from "@recipiece/types";
 import { randomUUID } from "crypto";
-import { prisma } from "../../database";
-import { LoginResponseSchema } from "../../schema";
+import { StatusCodes } from "http-status-codes";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
 import { UserSessions } from "../../util/constant";
-import { StatusCodes } from "http-status-codes";
 import { generateToken } from "../../util/token";
 
 /**
  * Login the user who has authenticated through basic auth.
- * 
+ *
  * This will generate an access token and a refresh token. The refresh token is really
  * a session for the user. When we authenticate later on against an access token, we will attempt to
  * find a valid session for the user for that token.
- * 
+ *
  * When the user logs out, we will kill the session, which will effectively invalidate any access token issued
  * for that session.
  */
-export const loginUser = async (request: AuthenticatedRequest): ApiResponse<LoginResponseSchema> => {
+export const loginUser = async (request: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<LoginResponseSchema> => {
   const userId = request.user.id;
 
-  const session = await prisma.userSession.create({
+  const session = await tx.userSession.create({
     data: {
       user_id: userId,
       scope: UserSessions.REFRESH_TOKEN_SCOPE,

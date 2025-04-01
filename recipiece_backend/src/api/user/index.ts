@@ -1,4 +1,3 @@
-import { recipeImportUploader } from "../../middleware";
 import {
   YChangePasswordRequestSchema,
   YCreatePushNotificationRequestSchema,
@@ -12,7 +11,8 @@ import {
   YUserSchema,
   YValidateUserRequestSchema,
   YValidateUserResponseSchema,
-} from "../../schema";
+} from "@recipiece/types";
+import { recipeImportUploader, turnstileMiddleware } from "../../middleware";
 import { Route } from "../../types";
 import { changePassword } from "./changePassword";
 import { createPushNotificationSubscription } from "./createPushNotificationSubscription";
@@ -21,7 +21,6 @@ import { deleteSelf } from "./deleteSelf";
 import { getUserByToken } from "./getUserByToken";
 import { issueEmailVerificationToken } from "./issueEmailVerificationToken";
 import { issueForgotPasswordToken } from "./issueForgotPasswordToken";
-import { USER_KITCHEN_MEMBERSHIP_ROUTES } from "./kitchenMembership";
 import { loginUser } from "./loginUser";
 import { logoutUser } from "./logoutUser";
 import { refreshToken } from "./refreshToken";
@@ -37,6 +36,7 @@ export const LOGIN_ROUTES: Route[] = [
     function: loginUser,
     authentication: "basic",
     responseSchema: YLoginResponseSchema,
+    preMiddleware: [turnstileMiddleware],
   },
   {
     path: "/user/logout",
@@ -72,6 +72,7 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "none",
     requestSchema: YCreateUserRequestSchema,
     responseSchema: YCreateUserResponseSchema,
+    preMiddleware: [turnstileMiddleware],
   },
   {
     path: "/user/verify-email",
@@ -93,6 +94,7 @@ export const LOGIN_ROUTES: Route[] = [
     function: issueForgotPasswordToken,
     authentication: "none",
     requestSchema: YIssueForgotPasswordTokenRequestSchema,
+    preMiddleware: [turnstileMiddleware],
   },
   {
     path: "/user/reset-password",
@@ -129,5 +131,4 @@ export const LOGIN_ROUTES: Route[] = [
     authentication: "access_token",
     requestSchema: YCreatePushNotificationRequestSchema,
   },
-  ...USER_KITCHEN_MEMBERSHIP_ROUTES,
 ];

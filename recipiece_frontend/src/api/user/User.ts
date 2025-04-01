@@ -1,20 +1,30 @@
+import {
+  CreatePushNotificationRequestSchema,
+  CreateUserRequestSchema,
+  CreateUserResponseSchema,
+  IssueForgotPasswordTokenRequestSchema,
+  UpdateUserRequestSchema,
+  UserSchema,
+  YCreateUserResponseSchema,
+  YLoginResponseSchema,
+  YUserSchema,
+} from "@recipiece/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Buffer } from "buffer";
-import { UserAccount } from "../../data";
-import { MutationArgs, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
+import { MutationArgs, PostRequest, QueryArgs, useDelete, useGet, usePost, usePut } from "../Request";
 import { TokenManager } from "../TokenManager";
 import { UserQueryKeys } from "./UserQueryKeys";
 
-export const useGetSelfQuery = (args?: QueryArgs<UserAccount>) => {
+export const useGetSelfQuery = (args?: QueryArgs<UserSchema>) => {
   const { getter } = useGet();
 
   const query = async () => {
-    const data = await getter<never, UserAccount>({
+    const data = await getter<never, UserSchema>({
       path: "/user/self",
       withAuth: "access_token",
     });
-    return data.data;
+    return YUserSchema.cast(data.data);
   };
 
   return useQuery({
@@ -27,19 +37,32 @@ export const useGetSelfQuery = (args?: QueryArgs<UserAccount>) => {
   });
 };
 
-export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }, any>) => {
+export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token: string; readonly refresh_token: string }, unknown>) => {
   const { poster } = usePost();
 
-  const mutation = async (data: { readonly username: string; readonly password: string }) => {
-    const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
-    const response = await poster<{}, { readonly access_token: string; readonly refresh_token: string }>({
+  const mutation = async (data: { readonly username: string; readonly password: string; readonly turnstileToken?: string }) => {
+    const turnstileSiteKey = process.env.RECIPIECE_TURNSTILE_SITE_KEY;
+    const { username, password, turnstileToken } = data;
+
+    const encoded = Buffer.from(`${username}:${password}`).toString("base64");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let headers: any = {
+      Authorization: `Basic ${encoded}`,
+    };
+
+    if (turnstileSiteKey) {
+      headers = {
+        ...headers,
+        "recipiece-verify-turnstile": turnstileToken,
+      };
+    }
+
+    const response = await poster<unknown, { readonly access_token: string; readonly refresh_token: string }>({
       path: "/user/login",
       body: {},
-      extraHeaders: {
-        Authorization: `Basic ${encoded}`,
-      },
+      extraHeaders: { ...headers },
     });
-    return response.data;
+    return YLoginResponseSchema.cast(response.data);
   };
 
   return useMutation({
@@ -48,14 +71,14 @@ export const useLoginUserMutation = (args?: MutationArgs<{ readonly access_token
   });
 };
 
-export const useChangePasswordMutation = (args?: MutationArgs<void, any>) => {
+export const useChangePasswordMutation = (args?: MutationArgs<void, unknown>) => {
   const { poster } = usePost({
     autoLogoutOnCodes: [],
   });
 
   const mutation = async (data: { readonly username: string; readonly password: string; readonly new_password: string }) => {
     const encoded = Buffer.from(`${data.username}:${data.password}`).toString("base64");
-    const response = await poster<{}, never>({
+    const response = await poster<unknown, never>({
       path: "/user/change-password",
       body: { new_password: data.new_password },
       extraHeaders: {
@@ -77,7 +100,7 @@ export const useLogoutUserMutation = (args?: MutationArgs<void, void>) => {
   const queryClient = useQueryClient();
 
   const mutation = async () => {
-    const response = await poster<{}, never>({
+    const response = await poster<unknown, never>({
       path: "/user/logout",
       body: {},
       withAuth: "access_token",
@@ -103,15 +126,27 @@ export const useLogoutUserMutation = (args?: MutationArgs<void, void>) => {
   });
 };
 
-export const useCreateUserMutation = (args?: MutationArgs<void, any>) => {
+export const useCreateUserMutation = (args?: MutationArgs<CreateUserResponseSchema, CreateUserRequestSchema>) => {
   const { poster } = usePost();
 
-  const mutation = async (args: { readonly username: string; readonly password: string; readonly email: string }) => {
-    const response = await poster<typeof args, never>({
+  const mutation = async (args: CreateUserRequestSchema & { readonly turnstileToken?: string }) => {
+    const { turnstileToken, ...restArgs } = args;
+    let requestSetup: PostRequest<typeof restArgs> = {
       path: "/user",
-      body: args,
-    });
-    return response.data;
+      body: { ...restArgs },
+    };
+
+    if (turnstileToken) {
+      requestSetup = {
+        ...requestSetup,
+        extraHeaders: {
+          "recipiece-verify-turnstile": turnstileToken,
+        },
+      };
+    }
+
+    const response = await poster({ ...requestSetup });
+    return YCreateUserResponseSchema.cast(response.data);
   };
 
   return useMutation({
@@ -120,17 +155,17 @@ export const useCreateUserMutation = (args?: MutationArgs<void, any>) => {
   });
 };
 
-export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, { readonly id: number; readonly username?: string; readonly email?: string }>) => {
+export const useUpdateUserMutation = (args?: MutationArgs<UserSchema, UpdateUserRequestSchema>) => {
   const { putter } = usePut();
   const queryClient = useQueryClient();
 
-  const mutation = async (args: { readonly id: number; readonly username?: string; readonly email?: string }) => {
-    const response = await putter<typeof args, UserAccount>({
+  const mutation = async (args: UpdateUserRequestSchema) => {
+    const response = await putter({
       path: "/user",
       body: args,
       withAuth: "access_token",
     });
-    return response.data;
+    return YUserSchema.cast(response.data);
   };
 
   const { onSuccess, ...restArgs } = args ?? {};
@@ -138,9 +173,9 @@ export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, { readonl
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
+      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserSchema) => {
         if (old) {
-          return { ...old, username: data.username, email: data.email };
+          return { ...old, username: data.username, email: data.email, preferences: { ...data.preferences } };
         }
         return undefined;
       });
@@ -150,7 +185,7 @@ export const useUpdateUserMutation = (args?: MutationArgs<UserAccount, { readonl
   });
 };
 
-export const useVerifyAccountMutation = (args?: MutationArgs<{}, {}>) => {
+export const useVerifyAccountMutation = (args?: MutationArgs<unknown, unknown>) => {
   const { poster } = usePost();
   const queryClient = useQueryClient();
 
@@ -167,7 +202,7 @@ export const useVerifyAccountMutation = (args?: MutationArgs<{}, {}>) => {
   return useMutation({
     mutationFn: mutation,
     onSuccess: (_, __, ctx) => {
-      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserAccount) => {
+      queryClient.setQueryData([UserQueryKeys.CURRENT_USER], (old: UserSchema) => {
         if (old) {
           return { ...old, validated: true };
         }
@@ -191,22 +226,30 @@ export const useRequestVerifyAccountMutation = (args?: MutationArgs) => {
     return response.data;
   };
 
-  const { onSuccess, ...restArgs } = args ?? {};
-
   return useMutation({
     mutationFn: mutation,
-    ...restArgs,
+    ...(args ?? {}),
   });
 };
 
-export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, any>) => {
+export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, IssueForgotPasswordTokenRequestSchema>) => {
   const { poster } = usePost();
 
-  const mutation = async (body: { readonly username: string }) => {
-    const response = await poster<typeof body, never>({
+  const mutation = async (body: IssueForgotPasswordTokenRequestSchema & { readonly turnstileToken?: string }) => {
+    const { turnstileToken, ...restArgs } = body;
+    let requestSetup: PostRequest<typeof restArgs> = {
       path: "/user/request-token/forgot-password",
-      body: { ...body },
-    });
+      body: { ...restArgs },
+    };
+    if (turnstileToken) {
+      requestSetup = {
+        ...requestSetup,
+        extraHeaders: {
+          "recipiece-verify-turnstile": turnstileToken,
+        },
+      };
+    }
+    const response = await poster<typeof restArgs, never>({ ...requestSetup });
     return response.data;
   };
 
@@ -216,7 +259,7 @@ export const useRequestForgotPasswordMutation = (args?: MutationArgs<void, any>)
   });
 };
 
-export const useResetPasswordMutation = (args?: MutationArgs<void, any>) => {
+export const useResetPasswordMutation = (args?: MutationArgs<void, unknown>) => {
   const { poster } = usePost();
 
   const mutation = async (body: { readonly token: string; readonly password: string }) => {
@@ -241,7 +284,7 @@ export const useRequestRecipeImportMutation = (args?: MutationArgs<unknown, { re
     formData.append("file", body.file);
     formData.append("source", body.source);
 
-    return await poster<FormData, never>({
+    return await poster({
       path: "/user/import-recipes",
       body: formData,
       withAuth: "access_token",
@@ -262,11 +305,11 @@ export const useRequestRecipeImportMutation = (args?: MutationArgs<unknown, { re
   });
 };
 
-export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<unknown, { readonly subscription_data: PushSubscriptionJSON; readonly device_id: string }>) => {
+export const useOptIntoPushNotificationsMutation = (args?: MutationArgs<unknown, CreatePushNotificationRequestSchema>) => {
   const { poster } = usePost();
 
-  const mutation = async (body: { readonly subscription_data: PushSubscriptionJSON; readonly device_id: string }) => {
-    return await poster<typeof body, never>({
+  const mutation = async (body: CreatePushNotificationRequestSchema) => {
+    return await poster({
       path: "/user/push-notifications/opt-in",
       body: { ...body },
       withAuth: "access_token",

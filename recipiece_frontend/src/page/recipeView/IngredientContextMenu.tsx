@@ -1,25 +1,26 @@
+import { RecipeIngredientSchema } from "@recipiece/types";
 import Fraction from "fraction.js";
 import { MoreVertical, PencilRuler, Scale } from "lucide-react";
-import { FC, useCallback, useContext, useMemo } from "react";
+import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../component";
 import { DialogContext } from "../../context";
-import { RecipeIngredient } from "../../data";
-import { RelativeScaleIngredientSubmit } from "../../dialog";
+import { ConvertIngredientDialogSubmit, RelativeScaleIngredientSubmit } from "../../dialog";
 
 export interface IngredientContextMenuProps {
-  readonly ingredient: RecipeIngredient;
-  readonly onIngredientConverted: (ingredient: RecipeIngredient, newAmount: string, newUnit: string) => void;
+  readonly ingredient: RecipeIngredientSchema;
+  readonly onIngredientConverted: (ingredient: RecipeIngredientSchema, newAmount: string, newUnit: string) => void;
   readonly onIngredientRelativeScaled: (scaleFactor: number) => void;
 }
 
 export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredient, onIngredientConverted, onIngredientRelativeScaled }) => {
   const { pushDialog, popDialog } = useContext(DialogContext);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   /**
    * If we cannot treat the value as a fraction, we can't convert or scale it.
    */
   const isNumericIngredientAmount = useMemo(() => {
-    if(!ingredient.amount) {
+    if (!ingredient.amount) {
       return false;
     }
 
@@ -35,7 +36,6 @@ export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredie
     pushDialog("convertIngredient", {
       ingredient: ingredient,
       onClose: () => popDialog("convertIngredient"),
-      // @ts-ignore
       onSubmit: (value: ConvertIngredientDialogSubmit) => {
         popDialog("convertIngredient");
         onIngredientConverted(ingredient, value.amount.toString(), value.unit.toString());
@@ -45,7 +45,7 @@ export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredie
 
   const onRelativeScaleIngredient = useCallback(() => {
     pushDialog("relativeScaleIngredient", {
-      ingredient: ingredient as RecipeIngredient & { amount: string },
+      ingredient: ingredient as RecipeIngredientSchema & { amount: string },
       onClose: () => popDialog("relativeScaleIngredient"),
       onSubmit: (data: RelativeScaleIngredientSubmit) => {
         popDialog("relativeScaleIngredient");
@@ -55,9 +55,9 @@ export const IngredientContextMenu: FC<IngredientContextMenuProps> = ({ ingredie
   }, [ingredient, onIngredientRelativeScaled, popDialog, pushDialog]);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="ml-auto text-primary">
+        <Button variant="ghost" className="ml-auto text-primary" onClick={() => setIsMenuOpen(!isMenuOpen)}>
           <MoreVertical size={12} />
         </Button>
       </DropdownMenuTrigger>

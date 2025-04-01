@@ -1,21 +1,51 @@
+import { Constant } from "@recipiece/constant";
 import {
   YCreateRecipeRequestSchema,
   YForkRecipeRequestSchema,
-  YListCookbooksResponseSchema,
   YListRecipesQuerySchema,
+  YListRecipesResponseSchema,
   YParseRecipeFromURLRequestSchema,
+  YParseRecipeFromURLResponseSchema,
   YRecipeSchema,
-  YUpdateRecipeRequestSchema
-} from "../../schema";
+  YSetRecipeImageResponseSchema,
+  YUpdateRecipeRequestSchema,
+} from "@recipiece/types";
+import { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { Route } from "../../types";
+import { BadRequestError, ContentTooLargeError } from "../../util/error";
 import { createRecipe } from "./createRecipe";
 import { deleteRecipe } from "./deleteRecipe";
+import { deleteRecipeImage } from "./deleteRecipeImage";
 import { forkRecipe } from "./forkRecipe";
 import { getRecipe } from "./getRecipe";
 import { listRecipes } from "./listRecipes";
 import { parseRecipeFromUrl } from "./parseFromUrl";
-import { RECIPE_SHARE_ROUTES } from "./share";
+import { setRecipeImage } from "./setRecipeImage";
 import { updateRecipe } from "./updateRecipe";
+
+const setImageMulterMiddleware = multer({
+  storage: multer.memoryStorage(),
+});
+
+const setImageSanitizeMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const file: Express.Multer.File | undefined = req.file;
+
+  if (!file) {
+    throw new BadRequestError("Must supply a file");
+  }
+
+  if (file.size > Constant.RecipeImage.MAX_FILE_SIZE_BYTES) {
+    throw new ContentTooLargeError(`File exceeds max size limit of ${Constant.RecipeImage.MAX_FILE_SIZE_BYTES} bytes`);
+  }
+
+  const fileExtension = file.originalname.split(".").pop();
+  if (!fileExtension || !Constant.RecipeImage.ALLOWED_EXTENSIONS.includes(fileExtension)) {
+    throw new BadRequestError(`Unsupported extension ${fileExtension}`);
+  }
+
+  next();
+};
 
 export const RECIPE_ROUTES: Route[] = [
   {
@@ -40,7 +70,7 @@ export const RECIPE_ROUTES: Route[] = [
     method: "POST",
     function: parseRecipeFromUrl,
     requestSchema: YParseRecipeFromURLRequestSchema,
-    responseSchema: YRecipeSchema,
+    responseSchema: YParseRecipeFromURLResponseSchema,
   },
   {
     path: "/recipe/list",
@@ -48,7 +78,7 @@ export const RECIPE_ROUTES: Route[] = [
     method: "GET",
     function: listRecipes,
     requestSchema: YListRecipesQuerySchema,
-    responseSchema: YListCookbooksResponseSchema,
+    responseSchema: YListRecipesResponseSchema,
   },
   {
     path: "/recipe/:id(\\d+)",
@@ -71,5 +101,18 @@ export const RECIPE_ROUTES: Route[] = [
     requestSchema: YForkRecipeRequestSchema,
     responseSchema: YRecipeSchema,
   },
-  ...RECIPE_SHARE_ROUTES,
+  {
+    path: "/recipe/image",
+    method: "POST",
+    authentication: "access_token",
+    function: setRecipeImage,
+    preMiddleware: [setImageMulterMiddleware.single("file"), setImageSanitizeMiddleware],
+    responseSchema: YSetRecipeImageResponseSchema,
+  },
+  {
+    path: "/recipe/image/:id(\\d+)",
+    method: "DELETE",
+    authentication: "access_token",
+    function: deleteRecipeImage,
+  },
 ];

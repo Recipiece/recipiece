@@ -8,23 +8,20 @@
  * the actual api calls that are being made.
  */
 
-import { User } from "@prisma/client";
+import { prisma, User } from "@recipiece/database";
+import { generateUser, generateUserCredentials } from "@recipiece/test";
 import { randomUUID } from "crypto";
 import { enableFetchMocks } from "jest-fetch-mock";
 import app from "./src/app";
-import { prisma } from "./src/database";
 import { UserSessions } from "./src/util/constant";
 import { hashPassword } from "./src/util/password";
 import { generateToken } from "./src/util/token";
 
-interface CreateUserAndTokenArgs {
-  readonly email?: string;
-  readonly username?: string;
+interface CreateUserAndTokenArgs extends Partial<Omit<User, "id">> {
   readonly password?: string;
 }
 
 declare global {
-  // var testPrisma: typeof jestPrisma.client;
   var server: ReturnType<typeof app.listen>;
   var fixtures: {
     createUserAndToken: (opts?: CreateUserAndTokenArgs) => Promise<[User, string, string]>;
@@ -45,28 +42,14 @@ globalThis.fixtures = {
       return text;
     }
 
-    const email = opts?.email ?? `${stringGen(15)}@${stringGen(5)}.${stringGen(3)}`;
-    const username = opts?.username ?? stringGen(10);
-    const password = opts?.password ?? stringGen(10);
-    const hashedPassword = await hashPassword(password);
+    const { password, ...restOpts } = opts ?? {};
+    const passwordToUse = password ?? stringGen(10);
+    const hashedPassword = await hashPassword(passwordToUse);
 
-    // create a user
-    const user = await prisma.user.create({
-      data: {
-        email: email,
-        username: username,
-        credentials: {
-          create: {
-            password_hash: hashedPassword!,
-          },
-        },
-        // user_access_records: {
-        //   create: {
-        //     access_levels: accessLevels,
-        //     start_date: DateTime.utc().toJSDate(),
-        //   },
-        // },
-      },
+    const user = await generateUser({ ...restOpts });
+    await generateUserCredentials({
+      user_id: user.id,
+      password_hash: hashedPassword,
     });
 
     // create a session and a token
@@ -98,21 +81,13 @@ globalThis.fixtures = {
   },
 };
 
-jest.mock("bullmq", () => {
-  return {
-    Queue: jest.fn().mockImplementation(() => {
-      return {
-        add: jest.fn(),
-      };
-    }),
-    Worker: jest.fn().mockImplementation(),
-  };
-});
+// mock bullmq so that we don't actually enqueue anything
+jest.mock("bullmq");
 
 // just in case there's any extra users hanging around.
-beforeEach(async () => {
-  await prisma.user.deleteMany();
-});
+// afterAll(async () => {
+//   await prisma.user.deleteMany();
+// });
 
 // enable the fetch mocks
 beforeAll(() => {
@@ -121,7 +96,7 @@ beforeAll(() => {
 
 // setup the server object before each test, and tear it down after each test
 beforeAll((done) => {
-  globalThis.server = app.listen(0, "localhost", done);
+  globalThis.server = app.listen(0, "127.0.0.1", done);
 });
 
 afterAll((done) => {

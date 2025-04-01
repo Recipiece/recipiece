@@ -1,23 +1,21 @@
-import { Prisma } from "@prisma/client";
+import { Constant } from "@recipiece/constant";
+import { Prisma, PrismaTransaction } from "@recipiece/database";
+import { ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../../database";
-import { ListItemsForMealPlanQuerySchema, ListItemsForMealPlanResponseSchema } from "../../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../../types";
+import { getMealPlanByIdQuery } from "../query";
 
 export const listItemsForMealPlan = async (
-  request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>
+  request: AuthenticatedRequest<any, ListItemsForMealPlanQuerySchema>,
+  tx: PrismaTransaction
 ): ApiResponse<ListItemsForMealPlanResponseSchema> => {
-  const { start_date, end_date } = request.query;
+  const { start_date, end_date, page_number, page_size } = request.query;
+  const pageSize = page_size ?? Constant.DEFAULT_PAGE_SIZE;
   const mealPlanId = +request.params.id;
-  const { id: userId } = request.user;
+  const user = request.user;
 
-  const mealPlan = await prisma.mealPlan.findFirst({
-    where: {
-      user_id: userId,
-      id: mealPlanId,
-    },
-  });
+  const mealPlan = await getMealPlanByIdQuery(tx, user, mealPlanId).executeTakeFirst();
 
   if (!mealPlan) {
     return [
@@ -34,7 +32,7 @@ export const listItemsForMealPlan = async (
     safeStartDate = DateTime.utc().minus({ days: 7 });
   } else {
     // if they did provide a start date, clamp it to the min of the meal plan's created_at and whatever they gave
-    safeStartDate = DateTime.max(DateTime.fromISO(start_date), DateTime.fromJSDate(mealPlan.created_at).minus({days: 1}));
+    safeStartDate = DateTime.max(DateTime.fromISO(start_date), DateTime.fromJSDate(mealPlan.created_at).minus({ days: 1 }));
   }
 
   let safeEndDate;
@@ -54,11 +52,15 @@ export const listItemsForMealPlan = async (
     },
   };
 
-  const items = await prisma.mealPlanItem.findMany({
+  const offset = page_number * pageSize;
+
+  const items = await tx.mealPlanItem.findMany({
     where: filters,
     orderBy: {
       created_at: "asc",
     },
+    skip: offset,
+    take: pageSize + 1,
     include: {
       recipe: {
         include: {
@@ -69,10 +71,15 @@ export const listItemsForMealPlan = async (
     },
   });
 
+  const hasNextPage = items.length > pageSize;
+  const resultsData = items.splice(0, pageSize);
+
   return [
     StatusCodes.OK,
     {
-      meal_plan_items: items,
+      data: resultsData,
+      has_next_page: hasNextPage,
+      page: page_number,
     },
   ];
 };

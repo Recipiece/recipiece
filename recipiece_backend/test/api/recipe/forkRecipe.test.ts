@@ -1,8 +1,14 @@
-import { User } from "@prisma/client";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Constant } from "@recipiece/constant";
+import { prisma, User } from "@recipiece/database";
+import { generateRecipe, generateRecipeWithIngredientsAndSteps, generateUserKitchenMembership } from "@recipiece/test";
+import { RecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import request from "supertest";
-import { RecipeSchema } from "../../../src/schema";
-import { prisma } from "../../../src/database";
+import { Environment } from "../../../src/util/environment";
+import { s3 } from "../../../src/util/s3";
 
 describe("Fork Recipe", () => {
   let user: User;
@@ -14,67 +20,14 @@ describe("Fork Recipe", () => {
     [otherUser] = await fixtures.createUserAndToken();
   });
 
-  it("should clone the entire recipe", async () => {
-    const originalRecipe = await prisma.recipe.create({
-      data: {
-        user_id: otherUser.id,
-        name: "test recipe",
-        description: "here is a really cool recipe",
-        duration_ms: 50000,
-        servings: 24,
-        metadata: {
-          some: "nonsense",
-        },
-        ingredients: {
-          createMany: {
-            data: [
-              {
-                name: "Ing 01",
-                order: 0,
-              },
-              {
-                name: "Ing 02",
-                amount: "75 1/3",
-                unit: "cups of coffee",
-                order: 1,
-              },
-            ],
-          },
-        },
-        steps: {
-          createMany: {
-            data: [
-              {
-                content: "asdfqwer1",
-                order: 0,
-              },
-              {
-                content: "zxcvqwer2",
-                order: 1,
-              },
-            ],
-          },
-        },
-      },
-      include: {
-        steps: true,
-        ingredients: true,
-      },
+  it("should clone the recipe with ingredients and steps", async () => {
+    const originalRecipe = await generateRecipeWithIngredientsAndSteps({
+      user_id: otherUser.id,
     });
-
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-      },
-    });
-
-    const share = await prisma.recipeShare.create({
-      data: {
-        recipe_id: originalRecipe.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
     });
 
     const response = await request(server)
@@ -93,30 +46,33 @@ describe("Fork Recipe", () => {
     expect(createdRecipe.duration_ms).toEqual(originalRecipe.duration_ms);
     expect(createdRecipe.servings).toEqual(originalRecipe.servings);
 
-    expect(createdRecipe.ingredients?.length).toBe(2);
+    expect(createdRecipe.ingredients?.length).toBe(originalRecipe.ingredients.length);
+    expect(createdRecipe.steps?.length).toBe(originalRecipe.steps.length);
+
     const createdOrderedIngredients = createdRecipe.ingredients!.sort((a, b) => a.order - b.order);
     const originalOrderedIngredients = originalRecipe.ingredients.sort((a, b) => a.order - b.order);
-    expect(createdOrderedIngredients[0].name).toEqual(originalOrderedIngredients[0].name);
+    for (let i = 0; i < createdOrderedIngredients.length; i++) {
+      expect(createdOrderedIngredients[i].name).toEqual(originalOrderedIngredients[i].name);
+      expect(createdOrderedIngredients[i].amount).toEqual(originalOrderedIngredients[i].amount);
+      expect(createdOrderedIngredients[i].unit).toEqual(originalOrderedIngredients[i].unit);
+    }
 
-    expect(createdOrderedIngredients[1].name).toEqual(originalOrderedIngredients[1].name);
-    expect(createdOrderedIngredients[1].amount).toEqual(originalOrderedIngredients[1].amount);
-    expect(createdOrderedIngredients[1].unit).toEqual(originalOrderedIngredients[1].unit);
-
-    expect(createdRecipe.steps?.length).toBe(2);
+    const createdOrderedSteps = createdRecipe.steps!.sort((a, b) => a.order - b.order);
+    const originalOrderedSteps = originalRecipe.steps.sort((a, b) => a.order - b.order);
+    for (let i = 0; i < createdOrderedSteps.length; i++) {
+      expect(createdOrderedSteps[i].content).toEqual(originalOrderedSteps[i].content);
+    }
   });
 
   it("should not allow you to fork another users unshared recipe", async () => {
-    const originalRecipe = await prisma.recipe.create({
-      data: {
-        user_id: otherUser.id,
-        name: "test recipe",
-      },
+    const recipe = await generateRecipe({
+      user_id: otherUser.id,
     });
 
     const response = await request(server)
       .post("/recipe/fork")
       .send({
-        original_recipe_id: originalRecipe.id,
+        original_recipe_id: recipe.id,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -125,26 +81,13 @@ describe("Fork Recipe", () => {
   });
 
   it("should allow you to fork a recipe that has been shared with you", async () => {
-    const recipe = await prisma.recipe.create({
-      data: {
-        user_id: otherUser.id,
-        name: "test recipe",
-      },
+    const recipe = await generateRecipe({
+      user_id: otherUser.id,
     });
-
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "accepted",
-      },
-    });
-
-    const share = await prisma.recipeShare.create({
-      data: {
-        recipe_id: recipe.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
     });
 
     const response = await request(server)
@@ -168,26 +111,13 @@ describe("Fork Recipe", () => {
   });
 
   it("should not allow you to fork a recipe from a non-accepted membership", async () => {
-    const recipe = await prisma.recipe.create({
-      data: {
-        user_id: otherUser.id,
-        name: "test recipe",
-      },
+    const recipe = await generateRecipe({
+      user_id: otherUser.id,
     });
-
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: otherUser.id,
-        destination_user_id: user.id,
-        status: "denied",
-      },
-    });
-
-    const share = await prisma.recipeShare.create({
-      data: {
-        recipe_id: recipe.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "pending",
     });
 
     const response = await request(server)
@@ -214,51 +144,46 @@ describe("Fork Recipe", () => {
   });
 
   it("should not allow a user to fork their own recipe", async () => {
-    const originalRecipe = await prisma.recipe.create({
-      data: {
-        user_id: user.id,
-        name: "test recipe",
-        description: "here is a really cool recipe",
-        duration_ms: 50000,
-        servings: 24,
-        metadata: {
-          some: "nonsense",
-        },
-        ingredients: {
-          createMany: {
-            data: [
-              {
-                name: "Ing 01",
-                order: 0,
-              },
-              {
-                name: "Ing 02",
-                amount: "75 1/3",
-                unit: "cups of coffee",
-                order: 1,
-              },
-            ],
-          },
-        },
-        steps: {
-          createMany: {
-            data: [
-              {
-                content: "asdfqwer1",
-                order: 0,
-              },
-              {
-                content: "zxcvqwer2",
-                order: 1,
-              },
-            ],
-          },
-        },
-      },
-      include: {
-        steps: true,
-        ingredients: true,
-      },
+    const recipe = await generateRecipe({
+      user_id: user.id,
+    });
+
+    const response = await request(server)
+      .post("/recipe/fork")
+      .send({
+        original_recipe_id: recipe.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+  });
+
+  it("should copy the image to the requesting users key", async () => {
+    const filePath = path.join(__dirname, "../../test_files/test_image.png");
+    const originalRecipe = await generateRecipe({
+      user_id: otherUser.id,
+    });
+
+    const expectedKey = `${Constant.RecipeImage.keyFor(user.id, originalRecipe.id)}.png`;
+
+    await prisma.recipe.update({
+      where: { id: originalRecipe.id },
+      data: { image_key: expectedKey },
+    });
+
+    const putObjectCommand = new PutObjectCommand({
+      Body: readFileSync(filePath),
+      Bucket: Environment.S3_BUCKET,
+      Key: expectedKey,
+      ContentType: "image/png",
+    });
+    await s3.send(putObjectCommand);
+
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
     });
 
     const response = await request(server)
@@ -269,6 +194,82 @@ describe("Fork Recipe", () => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+    expect(response.statusCode).toBe(StatusCodes.CREATED);
+    const responseBody: RecipeSchema = response.body;
+    expect(responseBody.image_url).toBeTruthy();
+
+    const createdRecipe = await prisma.recipe.findFirst({
+      where: { id: responseBody.id },
+    });
+    expect(createdRecipe?.image_key).toBeTruthy();
+
+    const getObjectCommand = new GetObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      Key: createdRecipe!.image_key!,
+    });
+    const getObjectResponse = await s3.send(getObjectCommand);
+    expect(getObjectResponse.Body).toBeTruthy();
+  });
+
+  it("should not copy the image when the original user does not allow that", async () => {
+    const filePath = path.join(__dirname, "../../test_files/test_image.png");
+    const originalRecipe = await generateRecipe({
+      user_id: otherUser.id,
+    });
+
+    await prisma.user.update({
+      where: {
+        id: otherUser.id,
+      },
+      data: {
+        preferences: {
+          forking_image_permission: "denied",
+        },
+      },
+    });
+
+    const expectedKey = `${Constant.RecipeImage.keyFor(user.id, originalRecipe.id)}.png`;
+
+    await prisma.recipe.update({
+      where: { id: originalRecipe.id },
+      data: { image_key: expectedKey },
+    });
+
+    const putObjectCommand = new PutObjectCommand({
+      Body: readFileSync(filePath),
+      Bucket: Environment.S3_BUCKET,
+      Key: expectedKey,
+      ContentType: "image/png",
+    });
+    await s3.send(putObjectCommand);
+
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+
+    const response = await request(server)
+      .post("/recipe/fork")
+      .send({
+        original_recipe_id: originalRecipe.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.CREATED);
+    const responseBody: RecipeSchema = response.body;
+    expect(responseBody.image_url).toBeFalsy();
+
+    const createdRecipe = await prisma.recipe.findFirst({
+      where: { id: responseBody.id },
+    });
+    expect(createdRecipe?.image_key).toBeFalsy();
+
+    const getObjectCommand = new GetObjectCommand({
+      Bucket: Environment.S3_BUCKET,
+      Key: createdRecipe!.image_key!,
+    });
+    expect(() => s3.send(getObjectCommand)).rejects.toThrow();
   });
 });

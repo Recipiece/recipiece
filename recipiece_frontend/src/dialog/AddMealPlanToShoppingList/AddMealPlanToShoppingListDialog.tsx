@@ -1,22 +1,25 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MealPlanSchema, ShoppingListSchema } from "@recipiece/types";
 import { DateTime } from "luxon";
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button, Form, FormCheckbox, ScrollArea, SubmitButton } from "../../component";
-import { MealPlan, MealPlanItem } from "../../data";
+import { useListMealPlanItemsQuery } from "../../api";
+import { Button, Calendar, Form, FormCheckbox, LoadingGroup, ScrollArea, SubmitButton } from "../../component";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
 export interface AddMealPlanToShoppingListDialogProps extends BaseDialogProps<AddMealPlanToShoppingListForm> {
-  readonly mealPlan: MealPlan;
-  readonly mealPlanItems: MealPlanItem[];
+  readonly mealPlan: MealPlanSchema;
+  readonly shoppingList: ShoppingListSchema;
 }
 
 const AddMealPlanToShoppingListFormSchema = z.object({
   items: z.array(
     z.object({
       name: z.string(),
+      recipeName: z.string(),
       notes: z.string(),
       selected: z.boolean(),
     })
@@ -25,47 +28,89 @@ const AddMealPlanToShoppingListFormSchema = z.object({
 
 export type AddMealPlanToShoppingListForm = z.infer<typeof AddMealPlanToShoppingListFormSchema>;
 
-export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialogProps> = ({ onSubmit, onClose, mealPlan, mealPlanItems }) => {
+export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialogProps> = ({ onSubmit, mealPlan }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
+  const [page, setPage] = useState<"date_select" | "items_select">("date_select");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: DateTime.utc().toLocal().toJSDate(),
+    to: DateTime.utc().plus({ days: 1 }).toLocal().toJSDate(),
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const dataStartDate = useMemo(() => {
+    const dateFrom = dateRange?.from;
+    if (dateFrom) {
+      return DateTime.fromJSDate(dateFrom).toUTC();
+    }
+    return DateTime.utc();
+  }, [dateRange]);
+
+  const dataEndDate = useMemo(() => {
+    const dateFrom = dateRange?.to ?? dateRange?.from;
+    if (dateFrom) {
+      return DateTime.fromJSDate(dateFrom).toUTC();
+    }
+    return DateTime.utc();
+  }, [dateRange]);
+
+  const { data: mealPlanItems, isLoading: isLoadingMealPlanItems } = useListMealPlanItemsQuery(
+    mealPlan.id,
+    {
+      page_number: 0,
+      start_date: dataStartDate.toISO(),
+      end_date: dataEndDate.toISO(),
+    },
+    {
+      enabled: page === "items_select",
+    }
+  );
 
   const defaultValues: AddMealPlanToShoppingListForm = useMemo(() => {
-    const items = mealPlanItems
-      .filter((item) => !!item.recipe?.ingredients)
-      .map((item) => {
-        let notesString = item.label ? `${item.label} - ` : "";
-        notesString += DateTime.fromISO(item.start_date).toFormat("EEE, MMM dd");
-        notesString += ` - ${item.recipe!.name}`;
-        return item.recipe!.ingredients.map((ing) => {
-          return {
-            name: ing.name,
-            selected: true,
-            notes: notesString.trim(),
-          };
-        });
-      })
-      .flat();
-
-    return { items: [...items] };
+    if (mealPlanItems) {
+      const itemsWithRecipes = mealPlanItems.data
+        .filter((item) => !!item.recipe)
+        .map((item) => {
+          return (item.recipe!.ingredients ?? []).map((ing) => {
+            let notesString = `${item.recipe!.name} - `;
+            if (ing.amount) {
+              notesString += `${ing.amount} `;
+            }
+            if (ing.unit) {
+              notesString += `${ing.unit} `;
+            }
+            return {
+              name: ing.name,
+              recipeName: item.recipe!.name,
+              notes: notesString.trim(),
+              selected: true,
+            };
+          });
+        })
+        .flat();
+      return {
+        items: itemsWithRecipes,
+      };
+    } else {
+      return {
+        items: [],
+      };
+    }
   }, [mealPlanItems]);
 
   const form = useForm<AddMealPlanToShoppingListForm>({
     resolver: zodResolver(AddMealPlanToShoppingListFormSchema),
-    defaultValues: {
-      ...defaultValues,
-    },
+    defaultValues: { ...defaultValues },
   });
 
-  const itemsFieldArray = useFieldArray({
+  const { fields } = useFieldArray({
     control: form.control,
     name: "items",
   });
 
-  const onAddToShoppingList = useCallback(
-    async (formData: AddMealPlanToShoppingListForm) => {
-      onSubmit?.(formData);
-    },
-    [onSubmit]
-  );
+  useEffect(() => {
+    form.reset({ ...defaultValues });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValues]);
 
   const onSelectAll = useCallback(() => {
     form.reset({
@@ -87,39 +132,92 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
     });
   }, [form, defaultValues]);
 
+  const onAddToShoppingList = useCallback(
+    async (formData: AddMealPlanToShoppingListForm) => {
+      setIsSubmitting(true);
+      try {
+        await onSubmit?.(formData);
+      } catch {
+        // noop
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [onSubmit]
+  );
+
   return (
-    <ResponsiveContent className="p-6">
+    <ResponsiveContent className="h-full p-6 sm:h-[480px]">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onAddToShoppingList)}>
+        <form className="flex h-full flex-col" onSubmit={form.handleSubmit(onAddToShoppingList)}>
           <ResponsiveHeader className="mb-4">
             <ResponsiveTitle>Add {mealPlan.name} to your shopping list</ResponsiveTitle>
-            <ResponsiveDescription>Add the ingredients from the recipes in {mealPlan.name} to your shopping list.</ResponsiveDescription>
+            <ResponsiveDescription>
+              {page === "date_select" && "Select a date range of meal plans to add."}
+              {page === "items_select" && "Select the items to add to your shopping list."}
+            </ResponsiveDescription>
           </ResponsiveHeader>
 
-          <div>
-            <Button variant="link" onClick={onDeselectAll}>
-              Deselect All
-            </Button>
-            <Button variant="link" onClick={onSelectAll}>
-              Select All
-            </Button>
-          </div>
-          <ScrollArea className="mt-2 h-40 sm:h-[250px] p-2 border-primary rounded-sm border-solid border-[1px]">
-            {itemsFieldArray.fields.map((fieldArrayValue, index) => {
-              return (
-                <div key={fieldArrayValue.id} className="pb-3">
-                  <FormCheckbox name={`items.${index}.selected`} label={fieldArrayValue.name} />
-                  <p className="text-sm">{fieldArrayValue.notes}</p>
-                </div>
-              );
-            })}
-          </ScrollArea>
+          {page === "date_select" && (
+            <div className="flex flex-row justify-center">
+              <Calendar
+                disabled={(date) => DateTime.fromJSDate(date) < DateTime.fromJSDate(mealPlan.created_at)}
+                min={2}
+                max={60}
+                mode="range"
+                selected={dateRange}
+                onSelect={setDateRange}
+              />
+            </div>
+          )}
 
-          <ResponsiveFooter className="mt-4 flex-col-reverse">
-            <Button type="button" variant="outline" onClick={() => onClose?.()}>
-              Cancel
-            </Button>
-            <SubmitButton>Add Ingredients</SubmitButton>
+          {page === "items_select" && (
+            <LoadingGroup isLoading={isLoadingMealPlanItems} variant="spinner" className="h-6 w-6">
+              {fields.length > 0 && (
+                <>
+                  <div className="flex-grow-0">
+                    <Button variant="link" onClick={onDeselectAll}>
+                      Deselect All
+                    </Button>
+                    <Button variant="link" onClick={onSelectAll}>
+                      Select All
+                    </Button>
+                  </div>
+
+                  <ScrollArea className="rounded-sm border-[1px] border-solid border-primary p-2 sm:h-[250px]">
+                    {fields.map((fieldArrayValue, index) => {
+                      return (
+                        <div key={fieldArrayValue.id} className="pb-3">
+                          <FormCheckbox name={`items.${index}.selected`} label={fieldArrayValue.name} />
+                          <span className="p-2 text-xs text-muted">{fieldArrayValue.recipeName}</span>
+                        </div>
+                      );
+                    })}
+                  </ScrollArea>
+                </>
+              )}
+              {fields.length === 0 && (
+                <p className="text-center text-sm">
+                  There are no recipes with ingredients between {dataStartDate.toFormat("MMM. dd")} and {dataEndDate.toFormat("MMM. dd")}. Select a different date range.
+                </p>
+              )}
+            </LoadingGroup>
+          )}
+
+          <ResponsiveFooter className="mt-auto flex-col">
+            {page === "date_select" && (
+              <Button disabled={!dateRange?.from || !dateRange?.to} type="button" variant="outline" onClick={() => setPage("items_select")}>
+                Next
+              </Button>
+            )}
+            {page === "items_select" && (
+              <>
+                <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => setPage("date_select")}>
+                  Back
+                </Button>
+                <SubmitButton disabled={fields.length === 0 || isSubmitting}>Add Items</SubmitButton>
+              </>
+            )}
           </ResponsiveFooter>
         </form>
       </Form>

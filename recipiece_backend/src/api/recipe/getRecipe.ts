@@ -1,8 +1,9 @@
+import { PrismaTransaction } from "@recipiece/database";
+import { RecipeSchema, YRecipeSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
-import { ingredientsSubquery, sharesSubquery, sharesWithMemberships, stepsSubquery } from "./util";
-import { RecipeSchema } from "../../schema";
+import { getRecipeByIdQuery } from "./query";
+import { getImageUrl } from "./util";
 
 /**
  * Get a recipe by id.
@@ -10,31 +11,10 @@ import { RecipeSchema } from "../../schema";
  * This endpoint will return a recipe that you either own or has been shared to you.
  * If neither of those conditions are met, the endpoint will 404.
  */
-export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSchema> => {
+export const getRecipe = async (req: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<RecipeSchema> => {
   const recipeId = +req.params.id;
   const user = req.user;
-
-  const query = prisma.$kysely
-    .selectFrom("recipes")
-    .selectAll("recipes")
-    .select((eb) => {
-      return [
-        stepsSubquery(eb).as("steps"),
-        ingredientsSubquery(eb).as("ingredients"),
-        sharesSubquery(eb, user.id).as("shares"),
-      ];
-    })
-    .where((eb) => {
-      return eb.and([
-        eb("recipes.id", "=", recipeId),
-        eb.or([
-          eb("recipes.user_id", "=", user.id),
-          eb.exists(sharesWithMemberships(eb, user.id).select("recipe_shares.id").limit(1)),
-        ]),
-      ]);
-    });
-
-  const recipe = await query.executeTakeFirst();
+  const recipe = await getRecipeByIdQuery(tx, user, recipeId).executeTakeFirst();
 
   if (!recipe) {
     return [
@@ -45,5 +25,11 @@ export const getRecipe = async (req: AuthenticatedRequest): ApiResponse<RecipeSc
     ];
   }
 
-  return [StatusCodes.OK, recipe];
+  const castRecipe = YRecipeSchema.cast(recipe);
+
+  if (recipe.image_key) {
+    castRecipe.image_url = getImageUrl(recipe.image_key);
+  }
+
+  return [StatusCodes.OK, castRecipe];
 };

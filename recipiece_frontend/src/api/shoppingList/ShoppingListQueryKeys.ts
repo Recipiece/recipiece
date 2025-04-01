@@ -1,4 +1,4 @@
-import { ListShoppingListFilters, ListShoppingListSharesFilters } from "../../data";
+import { ListShoppingListSharesQuerySchema, ListShoppingListsQuerySchema } from "@recipiece/types";
 import { RcpQueryKey } from "../QueryKeys";
 
 export class ShoppingListQueryKeys {
@@ -12,16 +12,13 @@ export class ShoppingListQueryKeys {
     return base;
   };
 
-  public static readonly LIST_SHOPPING_LISTS = (filters?: ListShoppingListFilters): RcpQueryKey => {
+  public static readonly LIST_SHOPPING_LISTS = (filters?: Partial<ListShoppingListsQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listShoppingLists"];
 
     if (filters) {
-      const { page_number, search } = filters;
+      const { page_number } = filters;
       if (page_number !== undefined) {
         base.push({ page_number });
-      }
-      if (search) {
-        base.push({ search });
       }
     }
 
@@ -32,7 +29,7 @@ export class ShoppingListQueryKeys {
     return ["shoppingListSession", { id: listId }];
   };
 
-  public static readonly LIST_SHOPPING_LIST_SHARES = (filters?: ListShoppingListSharesFilters): RcpQueryKey => {
+  public static readonly LIST_SHOPPING_LIST_SHARES = (filters?: Partial<ListShoppingListSharesQuerySchema>): RcpQueryKey => {
     const base: RcpQueryKey = ["listShoppingListShares"];
 
     const { targeting_self, from_self, page_number, user_kitchen_membership_id } = filters ?? {};

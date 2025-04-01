@@ -1,16 +1,22 @@
+import { PrismaTransaction } from "@recipiece/database";
+import { ParsedFromURLRecipe, ParseRecipeFromURLRequestSchema, ParseRecipeFromURLResponseSchema, YUserPreferencesSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { ParseRecipeFromURLRequestSchema, ParsedFromURLRecipe, RecipeSchema } from "../../schema";
 import { ApiResponse, AuthenticatedRequest } from "../../types";
+import { Environment } from "../../util/environment";
+import { UnprocessableEntityError } from "../../util/error";
 
-export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>): ApiResponse<RecipeSchema> => {
+export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFromURLRequestSchema>, _: PrismaTransaction): ApiResponse<ParseRecipeFromURLResponseSchema> => {
   const recipeBody = req.body;
+  const user = req.user;
+  const userPrefs = YUserPreferencesSchema.cast(user.preferences);
 
   try {
-    const url = `${process.env.APP_RECIPE_PARSER_SERVICE_URL!}/recipe/parse`;
+    const url = `${Environment.RECIPE_PARSER_SERVICE_URL}/recipe/parse`;
     const response = await fetch(url, {
       method: "POST",
       body: JSON.stringify({
         ...recipeBody,
+        use_wild_mode: userPrefs.recipe_import_mode === "wild",
       }),
       headers: {
         "Content-Type": "application/json",
@@ -18,16 +24,17 @@ export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFr
     });
 
     const responseBody = (await response.json()) as ParsedFromURLRecipe;
+    const { parsed_ingredients, ...restParsedRecipe } = responseBody;
 
     if (response.ok) {
-      const steps = (responseBody.instructions_list || []).map((content, index) => {
+      const steps = (restParsedRecipe.instructions_list || []).map((content, index) => {
         return {
           content: content,
           order: index,
         };
       });
 
-      const ingredients = (responseBody.parsed_ingredients || []).map((parsedIng, index) => {
+      const ingredients = (parsed_ingredients || []).map((parsedIng, index) => {
         return {
           ...parsedIng,
           order: index,
@@ -36,29 +43,20 @@ export const parseRecipeFromUrl = async (req: AuthenticatedRequest<ParseRecipeFr
 
       return [
         StatusCodes.OK,
-        <RecipeSchema>{
-          name: responseBody.title,
+        {
+          name: responseBody.title!,
           description: responseBody.description,
           ingredients: [...ingredients],
           steps: [...steps],
+          external_image_url: restParsedRecipe.image,
         },
       ];
     } else {
       console.error("failed to parse recipe", responseBody);
-      return [
-        StatusCodes.UNPROCESSABLE_ENTITY,
-        {
-          message: "Unable to parse recipe",
-        },
-      ];
+      throw new UnprocessableEntityError("Unable to parse recipe");
     }
   } catch (err) {
     console.error(err);
-    return [
-      StatusCodes.UNPROCESSABLE_ENTITY,
-      {
-        message: "Unable to parse recipe",
-      },
-    ];
+    throw new UnprocessableEntityError("Unable to parse recipe");
   }
 };

@@ -1,356 +1,395 @@
-import { ChartNoAxesGantt, CircleArrowDown, CircleArrowUp, Edit, ListCheck, MoreVertical, RefreshCcw, ShoppingBasket, Trash } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleCheck, CircleX, GanttChart, Home } from "lucide-react";
 import { DateTime } from "luxon";
-import { FC, useCallback, useContext, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  useAppendShoppingListItemsMutation,
-  useDeleteMealPlanMutation,
-  useGetMealPlanByIdQuery,
-  useListItemsForMealPlanQuery,
-  useListShoppingListsQuery,
-  useUpdateMealPlanMutation,
-} from "../../api";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-  LoadingGroup,
-  RecipieceMenuBarContext,
-  Stack,
-  useToast,
-} from "../../component";
-import { DialogContext } from "../../context";
-import { MealPlan, MealPlanItem, ShoppingList, ShoppingListItem } from "../../data";
-import { floorDateToDay } from "../../util";
-import { MealPlanItemsCard } from "./MealPlanItemCard";
-import { useLayout } from "../../hooks";
-import { AddMealPlanToShoppingListForm } from "../../dialog";
+import { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
+import { useBulkSetMealPlanItemsMutation, useGetMealPlanByIdQuery, useListMealPlanItemsQuery } from "../../api";
+import { Button, Form, H2, LoadingGroup, RecipieceMenuBarContext, SubmitButton } from "../../component";
+import { useLayout } from "../../hooks";
+import { ceilDateToDay, floorDateToDay } from "../../util";
+import { MealPlanContextMenu } from "./MealPlanContextMenu";
+import { FormyMealPlanItem, MealPlanItemsForm } from "./MealPlanForm";
+import { MealPlanItemCard } from "./MealPlanItemCard";
 
-/**
- * This is a rather tricky form, and we're not even really using a form for this.
- * When we first load in, we will show only the current week, starting at monday.
- *
- * The user will be able to press an up button if the current week's start date is >= the meal plans created at date
- * This will load in the prior min(7, days between start of previous week and created at) days
- *
- * The user will also be able to press a down arrow that pops in more days below.
- *
- * The backend simply returns to us a list of all meal plan items on the meal plan for the given time period
- * We will organize that output into a form that looks like
- * {
- *   "<representation_date>": <meal_plan_items>[]
- * }
- * which is really just the meal plan items chunked into days.
- *
- * When the user presses the up/down, we'll expand the date range over which we want to look for items
- * and refetch that from the backend, re-reduce, and move along
- */
+const mealPlanItemSorter = (a: FormyMealPlanItem, b: FormyMealPlanItem) => {
+  let stringyA = "";
+  if (a.recipe) {
+    stringyA = a.recipe.name;
+  } else if (a.freeform_content) {
+    stringyA = a.freeform_content;
+  }
 
-type MealPlanItemsFormType = { readonly [key: string]: Partial<MealPlanItem>[] };
+  let stringyB = "";
+  if (b.recipe) {
+    stringyB = b.recipe.name;
+  } else if (b.freeform_content) {
+    stringyB = b.freeform_content;
+  }
+
+  if (stringyA && stringyB) {
+    return stringyA.localeCompare(stringyB);
+  } else if (stringyA && !stringyB) {
+    return 1;
+  } else if (!stringyA && stringyB) {
+    return -1;
+  } else {
+    return 0;
+  }
+};
 
 export const MealPlanViewPage: FC = () => {
-  const { id } = useParams();
-  const mealPlanId = +id!;
+  const params = useParams();
+  const mealPlanId = +params.id!;
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [observer, setObserver] = useState<IntersectionObserver | undefined>(undefined);
+  const [inViewId, setInViewId] = useState(0);
+  const [debouncedInViewId, setDebouncedInViewId] = useState(0);
+  const [viewStartDate, setViewStartDate] = useState<DateTime>(DateTime.utc().minus({ days: 2 }));
+  const [viewEndDate, setViewEndDate] = useState<DateTime>(DateTime.utc().plus({ days: 2 }));
+  const [dataArray, setDataArray] = useState<MealPlanItemsForm["mealPlanItems"] | undefined>(undefined);
+
+  const dataStartDate = useMemo(() => viewStartDate.plus({ days: inViewId - 4 }), [viewStartDate, inViewId]);
+  const dataEndDate = useMemo(() => viewStartDate.plus({ days: inViewId + 4 }), [viewStartDate, inViewId]);
+
+  const daysSpan = useMemo(() => {
+    return viewEndDate && viewStartDate ? Math.ceil(viewEndDate.diff(viewStartDate, "days").days) : 0;
+  }, [viewEndDate, viewStartDate]);
+
+  const dummyArray = useMemo(() => {
+    return new Array(daysSpan).fill(undefined);
+  }, [daysSpan]);
 
   const { mobileMenuPortalRef } = useContext(RecipieceMenuBarContext);
-  const { pushDialog, popDialog } = useContext(DialogContext);
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const { isMobile } = useLayout();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isShoppingListContextMenuOpen, setIsShoppingListContextMenuOpen] = useState(false);
-
   const { data: mealPlan, isLoading: isLoadingMealPlan } = useGetMealPlanByIdQuery(mealPlanId);
-  const { mutateAsync: updateMealPlan } = useUpdateMealPlanMutation();
-  const { mutateAsync: deleteMealPlan } = useDeleteMealPlanMutation();
+  const { data: mealPlanItems, isLoading: isLoadingMealPlanItems } = useListMealPlanItemsQuery(mealPlanId, {
+    start_date: floorDateToDay(dataStartDate).toISO(),
+    end_date: ceilDateToDay(dataEndDate).toISO(),
+    page_number: 0,
+  });
+  const { mutateAsync: batchSetMealPlanItems } = useBulkSetMealPlanItemsMutation();
 
-  const todayDate = useMemo(() => floorDateToDay(DateTime.now()), []);
-
-  const [currentStartDate, setCurrentStartDate] = useState<DateTime>(todayDate);
-  const [currentEndDate, setCurrentEndDate] = useState<DateTime>(todayDate.plus({ days: 5 }));
-
-  const daysBetweenBounds: DateTime[] = useMemo(() => {
-    const duration = currentEndDate.toLocal().diff(currentStartDate.toLocal(), ["days"]);
-    const datesArray = [];
-    for (let i = 0; i < duration.days; i++) {
-      datesArray[i] = currentStartDate.plus({ days: i });
-    }
-    return datesArray;
-  }, [currentStartDate, currentEndDate]);
-
-  const { data: mealPlanItems } = useListItemsForMealPlanQuery(
-    mealPlan?.id!,
-    {
-      start_date: currentStartDate.toUTC().toISO()!,
-      end_date: currentEndDate.toUTC().toISO()!,
+  const form = useForm<MealPlanItemsForm>({
+    defaultValues: {
+      mealPlanItems: [],
     },
-    {
-      enabled: !!mealPlan,
+  });
+
+  /**
+   * Debounce the view id change so as to not fire off 100000 requests on scroll
+   */
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setInViewId(debouncedInViewId);
+    }, 200);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [debouncedInViewId]);
+
+  /**
+   * when the days span changes, set the data window
+   * when the meal plan items change, populate in the data window
+   */
+  useEffect(() => {
+    const baseArray = new Array(daysSpan).fill(undefined);
+    if (mealPlanItems) {
+      setDataArray((prev) => {
+        const items = mealPlanItems.data ?? [];
+        const backfilled = baseArray.map((_, idx) => {
+          const offsetStart = viewStartDate.plus({ days: idx });
+          if (offsetStart >= dataStartDate && offsetStart <= dataEndDate) {
+            const bucketStartDate = floorDateToDay(offsetStart);
+            const bucketEndDate = floorDateToDay(offsetStart).plus({ days: 1 });
+            const itemsInBucket = items.filter((item) => {
+              const itemStartDate = DateTime.fromJSDate(item.start_date);
+              return bucketStartDate <= itemStartDate && itemStartDate <= bucketEndDate;
+            });
+
+            const morningItems = itemsInBucket.filter((item) => {
+              const itemStartDate = DateTime.fromJSDate(item.start_date);
+              return itemStartDate.hour < 12;
+            });
+            const middayItems = itemsInBucket.filter((item) => {
+              const itemStartDate = DateTime.fromJSDate(item.start_date);
+              return 12 <= itemStartDate.hour && itemStartDate.hour < 18;
+            });
+            const eveningItems = itemsInBucket.filter((item) => {
+              const itemStartDate = DateTime.fromJSDate(item.start_date);
+              return itemStartDate.hour >= 18;
+            });
+
+            return {
+              morningItems: [...morningItems].sort(mealPlanItemSorter),
+              middayItems: [...middayItems].sort(mealPlanItemSorter),
+              eveningItems: [...eveningItems].sort(mealPlanItemSorter),
+            };
+          }
+          return prev?.[idx] ?? undefined;
+        });
+        return backfilled;
+      });
+    } else if (dataArray === undefined || !isLoadingMealPlanItems) {
+      setDataArray(baseArray);
     }
-  );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daysSpan, mealPlanItems]);
 
-  const { data: shoppingLists, isLoading: isLoadingShoppingLists } = useListShoppingListsQuery(
-    {
-      page_number: 0,
-    },
-    {
-      enabled: !!isShoppingListContextMenuOpen,
+  /**
+   * Reset the form but keep whatever is currently being edited when we get new values
+   */
+  useEffect(() => {
+    form.reset(
+      {
+        mealPlanItems: [...(dataArray ?? [])],
+      },
+      {
+        keepDirtyValues: isEditing,
+        keepValues: isEditing,
+      }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataArray]);
+
+  /**
+   * Reset the mapped values when we change meal plan ids
+   */
+  useEffect(() => {
+    setDataArray(undefined);
+  }, [mealPlanId]);
+
+  const onNextDay = useCallback(() => {
+    const element = document.getElementById(`entry:${inViewId + 1}`);
+    element?.scrollIntoView({ behavior: "smooth" });
+  }, [inViewId]);
+
+  const onPreviousDay = useCallback(() => {
+    const element = document.getElementById(`entry:${inViewId - 1}`);
+    element?.scrollIntoView({ behavior: "smooth" });
+  }, [inViewId]);
+
+  const onHomeDay = useCallback(() => {
+    if (viewStartDate) {
+      const homeElementNumber = Math.round(DateTime.utc().diff(viewStartDate, "days").days);
+      const element = document.getElementById(`entry:${homeElementNumber}`);
+      element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
-  );
+  }, [viewStartDate]);
 
-  const { mutateAsync: appendItemsToShoppingList } = useAppendShoppingListItemsMutation();
-
-  const mealPlanCreatedAt = useMemo(() => {
-    return DateTime.fromISO(mealPlan?.created_at!);
+  /**
+   * Setup the view start and end dates, which are 3 months in either direct from today.
+   * Bound the start of the view to the min of (three months ago, meal plan start date)
+   */
+  useEffect(() => {
+    if (mealPlan) {
+      const mealPlanCreatedAt = DateTime.fromJSDate(mealPlan.created_at).toUTC();
+      const threeMonthsAgo = DateTime.utc().minus({ months: 3 });
+      const startDate = mealPlanCreatedAt < threeMonthsAgo ? threeMonthsAgo : mealPlanCreatedAt;
+      const endDate = DateTime.utc().plus({ months: 3 });
+      setViewStartDate(startDate);
+      setViewEndDate(endDate);
+    }
   }, [mealPlan]);
 
-  const canAddToShoppingList = useMemo(() => {
-    return !!(mealPlanItems?.meal_plan_items ?? []).find((item) => !!item.recipe);
-  }, [mealPlanItems]);
-
-  const defaultValues: MealPlanItemsFormType = useMemo(() => {
-    if (mealPlanItems) {
-      const reduced = mealPlanItems.meal_plan_items.reduce((accum: { [key: string]: MealPlanItem[] }, curr) => {
-        const flooredIsoStartDate = floorDateToDay(DateTime.fromISO(curr.start_date)).toISO()!;
-        const existingArrayForStartDate = accum[flooredIsoStartDate] ?? [];
-        return {
-          ...accum,
-          [flooredIsoStartDate]: [
-            ...existingArrayForStartDate,
-            {
-              ...curr,
-              notes: curr.notes ?? "",
-            },
-          ],
-        };
-      }, {});
-      return reduced;
-    } else {
-      return {};
+  /**
+   * When we setup the start date, scroll the "right" item into view
+   */
+  useEffect(() => {
+    if (viewStartDate) {
+      const homeElementNumber = Math.round(DateTime.utc().diff(viewStartDate, "days").days);
+      const element = document.getElementById(`entry:${homeElementNumber}`);
+      element?.scrollIntoView({ behavior: "instant", block: "nearest" } as unknown as ScrollOptions);
     }
-  }, [mealPlanItems]);
+  }, [viewStartDate]);
 
-  const onLoadMoreAbove = useCallback(() => {
-    const shifted = currentStartDate.minus({ days: 1 });
-    const mealPlanCreatedAt = DateTime.fromISO(mealPlan!.created_at);
-    const newVal = DateTime.max(shifted, mealPlanCreatedAt);
-    setCurrentStartDate(newVal);
-  }, [currentStartDate, mealPlan]);
-
-  const onLoadMoreBelow = useCallback(() => {
-    const shifted = currentEndDate.plus({ days: 1 });
-    setCurrentEndDate(shifted);
-  }, [currentEndDate]);
-
-  const onResetDateBounds = useCallback(() => {
-    setCurrentStartDate(todayDate);
-    setCurrentEndDate(todayDate.plus({ days: 5 }));
-  }, [todayDate]);
-
-  const onEditMealPlan = useCallback(() => {
-    pushDialog("modifyMealPlan", {
-      mealPlan: mealPlan,
-      onClose: () => popDialog("modifyMealPlan"),
-      onSubmit: async (modifiedMealPlan: MealPlan) => {
-        try {
-          await updateMealPlan({ ...modifiedMealPlan, id: mealPlan?.id! });
-          toast({
-            title: "Meal Plan Updated",
-            description: "Your meal plan was updated.",
-          });
-        } catch {
-          toast({
-            title: "Unable to Update Meal Plan",
-            description: "We were unable to update your meal plan. Try again later",
-            variant: "destructive",
-          });
-        } finally {
-          popDialog("modifyMealPlan");
-        }
-      },
-    });
-  }, [pushDialog, mealPlan, popDialog, updateMealPlan, toast]);
-
-  const onDeleteMealPlan = useCallback(async () => {
-    pushDialog("deleteMealPlan", {
-      mealPlan: mealPlan,
-      onClose: () => popDialog("deleteMealPlan"),
-      onSubmit: async (mealPlanToDelete: MealPlan) => {
-        popDialog("deleteMealPlan");
-        try {
-          await deleteMealPlan(mealPlanToDelete);
-          navigate("/");
-          toast({
-            title: "Meal Plan Deleted",
-            description: "Your meal plan has been deleted",
-          });
-        } catch {
-          toast({
-            title: "Unable to Delete Meal Plan",
-            description: "Your meal plan could not be deleted. Try again later.",
-            variant: "destructive",
-          });
-        }
-      },
-    });
-  }, [deleteMealPlan, mealPlan, navigate, popDialog, pushDialog, toast]);
-
-  const onAddMealPlanToShoppingList = useCallback(
-    (shoppingList: ShoppingList) => {
-      pushDialog("addMealPlanToShoppingList", {
-        mealPlan: mealPlan!,
-        mealPlanItems: mealPlanItems!.meal_plan_items,
-        onClose: () => popDialog("addMealPlanToShoppingList"),
-        onSubmit: async (managedItems: AddMealPlanToShoppingListForm) => {
-          try {
-            const selectedItems: Partial<ShoppingListItem>[] = managedItems.items
-              .filter((item) => item.selected)
-              .map((item) => {
-                return {
-                  content: item.name,
-                  notes: item.notes,
-                };
-              });
-
-            if (selectedItems.length > 0) {
-              await appendItemsToShoppingList({
-                shopping_list_id: shoppingList.id,
-                items: selectedItems,
-              });
-              toast({
-                title: "Items Added",
-                description: "The items have been added to your shopping list!",
-              });
-            }
-          } catch {
-            toast({
-              title: "Error Adding Items",
-              description: "There was an error adding the items to your shopping list. Try again later.",
-              variant: "destructive",
-            });
-          } finally {
-            popDialog("addMealPlanToShoppingList");
+  /**
+   * Set up the observer when we are done loading the meal plan
+   */
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const cb = (entries: IntersectionObserverEntry[]) => {
+        const intersectingEntries = entries.filter((e) => e.isIntersecting && e.intersectionRatio === 1.0);
+        if (intersectingEntries.length > 0) {
+          const currentEntry = intersectingEntries[0];
+          if (currentEntry) {
+            const splitId = currentEntry.target.id.split(":")[1];
+            const entryNumber = Number.parseInt(splitId);
+            setDebouncedInViewId(entryNumber);
           }
-        },
+        }
+      };
+
+      const observer = new IntersectionObserver(cb, {
+        root: scrollContainerRef.current,
+        rootMargin: "0px",
+        threshold: 1.0,
       });
-    },
-    [appendItemsToShoppingList, mealPlan, mealPlanItems, popDialog, pushDialog, toast]
-  );
+      setObserver(observer);
+    }
 
-  const mobileOnAddToShoppingList = useCallback(() => {
-    pushDialog("mobileShoppingLists", {
-      onClose: () => popDialog("mobileShoppingLists"),
-      onSubmit: (shoppingList: ShoppingList) => {
-        popDialog("mobileShoppingLists");
-        onAddMealPlanToShoppingList(shoppingList);
-      },
+    return () => {
+      observer?.disconnect?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoadingMealPlan]);
+
+  /**
+   * Subscribe the elements in the element window to the observer
+   */
+  useEffect(() => {
+    if (dataArray && dataArray.length > 0) {
+      dataArray
+        .map((_, windowId) => {
+          return document.getElementById(`entry:${windowId}`);
+        })
+        .forEach((val) => {
+          if (val) {
+            observer?.observe?.(val);
+          }
+        });
+
+      return () => {
+        dataArray
+          .map((_, windowId) => {
+            return document.getElementById(`entry:${windowId}`);
+          })
+          .forEach((val) => {
+            if (val) {
+              observer?.unobserve?.(val);
+            }
+          });
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataArray]);
+
+  const onSubmit = async (formData: MealPlanItemsForm) => {
+    const flatFormData: FormyMealPlanItem[] = [];
+    formData.mealPlanItems
+      .filter((entry) => !!entry)
+      .forEach((entry) => {
+        flatFormData.push(...(entry?.morningItems ?? []));
+        flatFormData.push(...(entry?.middayItems ?? []));
+        flatFormData.push(...(entry?.eveningItems ?? []));
+      });
+
+    const flatDataArrayData: FormyMealPlanItem[] = [];
+    (dataArray ?? [])
+      .filter((entry) => !!entry)
+      .forEach((entry) => {
+        flatDataArrayData.push(...(entry?.morningItems ?? []));
+        flatDataArrayData.push(...(entry?.middayItems ?? []));
+        flatDataArrayData.push(...(entry?.eveningItems ?? []));
+      });
+
+    const itemsToCreate = flatFormData.filter((item) => !item.id);
+    const itemsToUpdate = flatFormData.filter((item) => {
+      const matchingDataArrayItem = flatDataArrayData.find((val) => !!val.id && val.id === item.id);
+      if (matchingDataArrayItem) {
+        return matchingDataArrayItem["notes"] !== item["notes"] || matchingDataArrayItem["freeform_content"] !== item["freeform_content"];
+      }
+      return false;
     });
-  }, [pushDialog, popDialog, onAddMealPlanToShoppingList]);
+    const itemsToDelete = flatDataArrayData.filter((item) => {
+      return !flatFormData.find((formItem) => formItem.id === item.id);
+    });
 
-  const contextMenu = useMemo(() => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="sm:ml-auto text-primary">
-            <MoreVertical />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {!isEditing && (
-            <DropdownMenuItem onClick={() => setIsEditing(true)}>
-              <ChartNoAxesGantt /> Manage Meals
-            </DropdownMenuItem>
-          )}
-          {isEditing && (
-            <DropdownMenuItem onClick={() => setIsEditing(false)}>
-              <ListCheck /> Save Meals
-            </DropdownMenuItem>
-          )}
-          {!isMobile && (
-            <DropdownMenuSub onOpenChange={(open) => setIsShoppingListContextMenuOpen(open)}>
-              <DropdownMenuSubTrigger disabled={!canAddToShoppingList}>
-                <ShoppingBasket />
-                Add to Shopping List
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  <LoadingGroup variant="spinner" className="w-7 h-7" isLoading={isLoadingShoppingLists}>
-                    {(shoppingLists?.data || []).map((list) => {
-                      return (
-                        <DropdownMenuItem onClick={() => onAddMealPlanToShoppingList(list)} key={list.id}>
-                          {list.name}
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </LoadingGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          )}
-          {isMobile && (
-            <DropdownMenuItem disabled={!canAddToShoppingList} onClick={mobileOnAddToShoppingList}>
-              <ShoppingBasket /> Add to Shopping List
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onResetDateBounds}>
-            <RefreshCcw /> Reset View
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onEditMealPlan}>
-            <Edit /> Edit Meal Plan
-          </DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive" onClick={onDeleteMealPlan}>
-            <Trash /> Delete Meal Plan
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  }, [canAddToShoppingList, isEditing, isLoadingShoppingLists, isMobile, mobileOnAddToShoppingList, onAddMealPlanToShoppingList, onDeleteMealPlan, onEditMealPlan, onResetDateBounds, shoppingLists?.data]);
+    await batchSetMealPlanItems({
+      mealPlanId: mealPlanId,
+      create: itemsToCreate,
+      // @ts-expect-error update items always have an id on them
+      update: itemsToUpdate,
+      // @ts-expect-error delete items always have an id on them
+      delete: itemsToDelete,
+    });
+
+    setIsEditing(false);
+  };
+
+  const onCancelEditing = useCallback(() => {
+    setIsEditing(false);
+    form.reset({ mealPlanItems: [...(dataArray ?? [])] });
+  }, [dataArray, form]);
 
   return (
-    <Stack>
-      <LoadingGroup isLoading={isLoadingMealPlan} className="h-8 w-52">
-        <div className="flex flex-col sm:flex-row">
-          <h1 className="text-2xl">{mealPlan?.name}</h1>
-          {(isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current) && createPortal(contextMenu, mobileMenuPortalRef?.current)}
-          {!isMobile && <>{contextMenu}</>}
-        </div>
-      </LoadingGroup>
-      {mealPlan && (
-        <div className="flex flex-col gap-4">
-          <div className="text-center">
-            <Button variant="ghost" onClick={onLoadMoreAbove} disabled={currentStartDate <= mealPlanCreatedAt}>
-              <CircleArrowUp />
-            </Button>
+    <LoadingGroup isLoading={isLoadingMealPlan} variant="skeleton" className="h-11 w-full sm:w-[300px]">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <H2 className="flex-grow">{mealPlan?.name}</H2>
+
+              {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(<MealPlanContextMenu mealPlan={mealPlan} />, mobileMenuPortalRef.current)}
+              {!isMobile && <>{<MealPlanContextMenu mealPlan={mealPlan} />}</>}
+            </div>
+
+            <div className="flex flex-row gap-2">
+              <Button variant="outline" onClick={onPreviousDay} disabled={inViewId === 0}>
+                <ArrowLeft />
+              </Button>
+
+              <Button variant="outline" onClick={onHomeDay}>
+                <Home />
+              </Button>
+
+              <Button variant="outline" onClick={onNextDay} disabled={inViewId === (dataArray ?? []).length - 1}>
+                <ArrowRight />
+              </Button>
+
+              <span className="mr-auto" />
+
+              {!isEditing && (
+                <Button onClick={() => setIsEditing(true)}>
+                  <GanttChart />
+                  <span className="ml-2 hidden sm:inline-block">Manage Meals</span>
+                </Button>
+              )}
+              {isEditing && (
+                <Button variant="outline" onClick={onCancelEditing}>
+                  <CircleX />
+                  <span className="ml-2 hidden sm:inline-block">Cancel</span>
+                </Button>
+              )}
+              {isEditing && (
+                <SubmitButton>
+                  <CircleCheck />
+                  <span className="ml-2 hidden sm:inline-block">Save</span>
+                </SubmitButton>
+              )}
+            </div>
+
+            <div
+              ref={scrollContainerRef}
+              className="relative flex snap-x snap-mandatory flex-row gap-2 overflow-x-scroll whitespace-nowrap"
+              style={{
+                scrollbarWidth: "none",
+              }}
+            >
+              {dummyArray.map((_, dist) => {
+                const matchingDataArrayItem = dataArray?.[dist];
+                const displayDate = viewStartDate!.plus({ days: dist });
+                return (
+                  <div
+                    id={`entry:${dist}`}
+                    key={dist.toString()}
+                    className="inline-block flex-shrink-0 flex-grow-0 basis-full snap-start sm:basis-[calc(50%-4px)] lg:basis-[calc(33%-0.5px)]"
+                  >
+                    {/* Do this so that we don't flash the far left end of the view window. It's jank but like... */}
+                    {daysSpan > 3 && (
+                      <MealPlanItemCard dayId={dist} isEditing={isEditing} isLoading={matchingDataArrayItem === undefined} mealPlan={mealPlan!} date={displayDate} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          {daysBetweenBounds.map((day) => {
-            return (
-              <MealPlanItemsCard
-                key={day.toMillis()}
-                isEditing={isEditing}
-                startDate={floorDateToDay(day)}
-                mealPlan={mealPlan}
-                initialMealPlanItems={defaultValues[floorDateToDay(day).toISO()!]}
-              />
-            );
-          })}
-          <div className="text-center mt-2">
-            <Button variant="ghost" onClick={onLoadMoreBelow} disabled={currentEndDate.diff(currentStartDate, ["months"]).months > 6}>
-              <CircleArrowDown />
-            </Button>
-          </div>
-        </div>
-      )}
-    </Stack>
+        </form>
+      </Form>
+    </LoadingGroup>
   );
 };

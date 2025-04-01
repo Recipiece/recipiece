@@ -1,11 +1,11 @@
+import { ShoppingListSchema } from "@recipiece/types";
 import { FC, useState } from "react";
 import { Button } from "../../component";
-import { ShoppingList } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface DeleteShoppingListDialogProps extends BaseDialogProps<ShoppingList> {
-  readonly shoppingList: ShoppingList;
+export interface DeleteShoppingListDialogProps extends BaseDialogProps<ShoppingListSchema> {
+  readonly shoppingList: ShoppingListSchema;
 }
 
 export const DeleteShoppingListDialog: FC<DeleteShoppingListDialogProps> = ({ shoppingList, onClose, onSubmit }) => {

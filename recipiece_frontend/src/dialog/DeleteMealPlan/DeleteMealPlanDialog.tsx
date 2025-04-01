@@ -1,11 +1,11 @@
+import { MealPlanSchema } from "@recipiece/types";
 import { FC } from "react";
 import { Button } from "../../component";
-import { MealPlan } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export interface DeleteMealPlanDialogProps extends BaseDialogProps<MealPlan> {
-  readonly mealPlan: MealPlan;
+export interface DeleteMealPlanDialogProps extends BaseDialogProps<MealPlanSchema> {
+  readonly mealPlan: MealPlanSchema;
 }
 
 export const DeleteMealPlanDialog: FC<DeleteMealPlanDialogProps> = ({ mealPlan, onClose, onSubmit }) => {

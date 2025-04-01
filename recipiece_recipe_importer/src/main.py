@@ -1,7 +1,13 @@
-from fastapi import FastAPI
-from .model.recipe import ParseRecipeRequest, ParseRecipeResponse, ParseIngredientsRequest, ParseIngredientsResponse
-from .api.recipe import parse_recipe_from_url, parse_freetext_ingredients
 import logging
+
+from fastapi import FastAPI
+
+from .api.recipe import parse_freetext_ingredients, parse_recipe_from_url
+from .model.recipe import (
+    ParseIngredientsRequest,
+    ParseIngredientsResponse,
+    ParseRecipeRequest,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -13,9 +19,10 @@ def hello_world():
     return "hello world"
 
 @app.post("/recipe/parse")
-def root(request: ParseRecipeRequest) -> ParseRecipeResponse:
+def root(request: ParseRecipeRequest):
     url = request.source_url
-    return parse_recipe_from_url(url)
+    use_wild_mode = request.use_wild_mode
+    return parse_recipe_from_url(url, use_wild_mode)
 
 @app.post("/ingredients/parse")
 def parse_freetext_ingredient(request: ParseIngredientsRequest) -> ParseIngredientsResponse:

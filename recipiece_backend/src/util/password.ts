@@ -1,8 +1,6 @@
 import argon2 from "argon2";
 
-export const hashPassword = async (
-  plainPassword: string
-): Promise<string | undefined> => {
+export const hashPassword = async (plainPassword: string): Promise<string | undefined> => {
   try {
     const hash = await argon2.hash(plainPassword, {
       type: argon2.argon2id, // Argon2id variant is the most secure
@@ -17,10 +15,7 @@ export const hashPassword = async (
   }
 };
 
-export const verifyPassword = async (
-  plainPassword: string,
-  hashedPassword: string
-): Promise<boolean> => {
+export const verifyPassword = async (plainPassword: string, hashedPassword: string): Promise<boolean> => {
   try {
     // Verifies if the provided password matches the hashed one
     return await argon2.verify(hashedPassword, plainPassword);

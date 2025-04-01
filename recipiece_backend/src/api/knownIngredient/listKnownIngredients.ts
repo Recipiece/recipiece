@@ -1,10 +1,10 @@
+import { PrismaTransaction } from "@recipiece/database";
+import { ListKnownIngredientsResponseSchema } from "@recipiece/types";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../database";
-import { ListKnownIngredientsResponseSchema } from "../../schema";
-import { ApiResponse } from "../../types";
+import { ApiResponse, AuthenticatedRequest } from "../../types";
 
-export const listKnownIngredients = async (): ApiResponse<ListKnownIngredientsResponseSchema> => {
-  const ingredients = await prisma.knownIngredient.findMany({
+export const listKnownIngredients = async (_: AuthenticatedRequest, tx: PrismaTransaction): ApiResponse<ListKnownIngredientsResponseSchema> => {
+  const ingredients = await tx.knownIngredient.findMany({
     orderBy: {
       ingredient_name: "asc",
     },

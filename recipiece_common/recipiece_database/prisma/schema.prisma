@@ -1,0 +1,400 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+generator kysely {
+  provider = "prisma-kysely"
+  output = "../src/prisma/generated/kysely"
+  fileName = "index.ts"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+model User {
+  @@map("users")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  validated Boolean @default(false)
+  username String @unique
+  email String @unique
+  preferences Json @default("{}")
+
+  recipes Recipe[]
+  cookbooks Cookbook[]
+  shopping_lists ShoppingList[]
+  validation_tokens UserValidationToken[]
+  credentials UserCredentials?
+  user_access_records UserAccessRecord[]
+  user_sessions UserSession[]
+  meal_plans MealPlan[]
+  user_push_notification_subscriptions UserPushNotificationSubscription[]
+  source_user_kitchen_memberships UserKitchenMembership[] @relation(name: "source_user")
+  destination_user_kitchen_memberships UserKitchenMembership[] @relation(name: "destination_user")
+  side_jobs SideJob[]
+  user_tags UserTag[]
+  notifications Notification[] @relation(name: "user")
+  read_by_notifications Notification[] @relation("read_by_user")
+}
+
+model UserTag {
+  @@map("user_tags")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  user_id Int
+  content String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  recipe_tag_attachments RecipeTagAttachment[]
+
+  @@unique([user_id, content])
+}
+
+enum UserKitchenMembershipStatus {
+  accepted
+  denied
+  pending
+}
+
+model UserKitchenMembership {
+  @@map("user_kitchen_memberships")
+  
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  source_user_id Int
+  destination_user_id Int
+  status UserKitchenMembershipStatus
+
+  destination_user User @relation(name: "destination_user", fields: [destination_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  source_user User @relation(name: "source_user", fields: [source_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  shopping_list_shares ShoppingListShare[]
+  meal_plan_shares MealPlanShare[]
+  user_kitchen_membership_notification_attachments UserKitchenMembershipNotificationAttachment[]
+
+  @@index([status, destination_user_id])
+  @@index([status, source_user_id])
+
+  @@unique([source_user_id, destination_user_id])
+}
+
+model UserAccessRecord {
+  @@map("user_access_records")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  access_levels String[]
+  start_date DateTime
+  end_date DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+}
+
+model UserSession {
+  @@map("user_sessions")
+
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  scope String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+}
+
+model UserPushNotificationSubscription {
+  @@map("user_push_notification_subscriptions")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  subscription_data Json
+  device_id String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+
+  @@unique([user_id, device_id])
+}
+
+model UserCredentials {
+  @@map("user_credentials")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  password_hash String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int @unique
+}
+
+model UserValidationToken {
+  @@map("user_validation_tokens")
+
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  purpose String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+}
+
+enum NotificationStatus {
+  read
+  unread
+}
+
+model Notification {
+  @@map("notifications")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  user_id Int
+  title String
+  type String
+  status NotificationStatus @default(unread)
+  content String
+  read_at DateTime?
+  read_by_user_id Int?
+
+  user_kitchen_membership_notification_attachments UserKitchenMembershipNotificationAttachment[]
+
+  user User @relation(name: "user", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  read_by_user User? @relation(name: "read_by_user", fields: [read_by_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+}
+
+model UserKitchenMembershipNotificationAttachment {
+  @@map("user_kitchen_membership_notification_attachments")
+  @@id([user_kitchen_membership_id, notification_id])
+
+  created_at DateTime @default(now())
+  user_kitchen_membership_id Int
+  notification_id Int
+
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Recipe {
+  @@map("recipes")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  name String
+  description String?
+  duration_ms Int?
+  servings Int?
+  metadata Json?
+
+  external_image_url String?
+  image_key String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+
+  ingredients RecipeIngredient[]
+  steps RecipeStep[]
+  recipe_cookbook_attachments RecipeCookbookAttachment[]
+  meal_plan_items MealPlanItem[]
+  recipe_tag_attachments RecipeTagAttachment[]
+
+  @@index([user_id, name])
+}
+
+model RecipeIngredient {
+  @@map("recipe_ingredients")
+
+  id Int @id @default(autoincrement())
+  name String
+  unit String?
+  amount String?
+  order Int
+
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipe_id Int
+}
+
+model RecipeStep {
+  @@map("recipe_steps")
+
+  id Int @id @default(autoincrement())
+  content String
+  order Int
+  duration_ms Int?
+
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipe_id Int
+}
+
+model RecipeTagAttachment {
+  @@map("recipe_tag_attachments")
+
+  recipe_id Int
+  user_tag_id Int
+  
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_tag UserTag @relation(fields: [user_tag_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id(name: "id", [recipe_id, user_tag_id])
+}
+
+model Cookbook {
+  @@map("cookbooks")
+
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+
+  name String
+  description String?
+  created_at DateTime @default(now())
+
+  recipe_cookbook_attachments RecipeCookbookAttachment[]
+
+  @@index([user_id, name])
+}
+
+model RecipeCookbookAttachment {
+  @@map("recipe_cookbook_attachments")
+
+  recipe_id Int
+  cookbook_id Int
+  
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cookbook Cookbook @relation(fields: [cookbook_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id(name: "id", [recipe_id, cookbook_id])
+}
+
+model ShoppingList {
+  @@map("shopping_lists")
+
+  id Int @id @default(autoincrement())
+  name String
+  created_at DateTime @default(now())
+  user_id Int
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  shopping_list_items ShoppingListItem[]
+  shopping_list_shares ShoppingListShare[]
+
+  @@index([user_id, name])
+}
+
+model ShoppingListShare {
+  @@map("shopping_list_shares")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  shopping_list_id Int
+  shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([shopping_list_id, user_kitchen_membership_id])
+}
+
+model ShoppingListItem {
+  @@map("shopping_list_items")
+
+  id Int @id @default(autoincrement())
+  shopping_list_id Int
+  completed Boolean @default(false)
+  order Int
+  content String
+  notes String?
+
+  shopping_list ShoppingList @relation(fields: [shopping_list_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+
+model KnownIngredient {
+  @@map("known_ingredients")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  ingredient_name String @unique
+  // base weight
+  grams Float
+  // base volume
+  us_cups Float
+  // for unknown
+  unitless_amount Float?
+  preferred_measure String?
+}
+
+model MealPlan {
+  @@map("meal_plans")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  name String
+  configuration Json @default("{}")
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int
+
+  meal_plan_items MealPlanItem[]
+  meal_plan_shares MealPlanShare[]
+}
+
+model MealPlanShare {
+  @@map("meal_plan_shares")
+
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  meal_plan_id Int
+  meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_kitchen_membership_id Int
+  user_kitchen_membership UserKitchenMembership @relation(fields: [user_kitchen_membership_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([meal_plan_id, user_kitchen_membership_id])
+}
+
+model MealPlanItem {
+  @@map("meal_plan_items")
+  id Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  meal_plan_id Int
+  start_date DateTime
+  freeform_content String?
+  notes String?
+  recipe_id Int?
+  leftover_of_meal_plan_item_id Int? @unique
+
+  meal_plan MealPlan @relation(fields: [meal_plan_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipe Recipe? @relation(fields: [recipe_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  leftover_of_meal_plan_item MealPlanItem? @relation("leftover_of_meal_plan_item", fields: [leftover_of_meal_plan_item_id], references: [id],  onDelete: Cascade, onUpdate: Cascade)
+  leftover MealPlanItem? @relation("leftover_of_meal_plan_item")
+}
+
+model SideJob {
+  @@map("side_jobs")
+
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  type String
+  user_id Int
+  job_data Json
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([type])
+}

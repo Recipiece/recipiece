@@ -1,10 +1,10 @@
+import { RecipeSchema } from "@recipiece/types";
 import { useCallback, useContext } from "react";
-import { Recipe } from "../../data";
-import { DialogContext } from "../../context";
 import { useDeleteRecipeMutation } from "../../api";
 import { useToast } from "../../component";
+import { DialogContext } from "../../context";
 
-export const useDeleteRecipeDialog = (recipe: Recipe) => {
+export const useDeleteRecipeDialog = (recipe: RecipeSchema) => {
   const { toast } = useToast();
   const { pushDialog, popDialog } = useContext(DialogContext);
 
@@ -12,7 +12,7 @@ export const useDeleteRecipeDialog = (recipe: Recipe) => {
 
   const onDeleteRecipe = useCallback(async () => {
     pushDialog("deleteRecipe", {
-      onSubmit: async (recipe: Recipe) => {
+      onSubmit: async (recipe: RecipeSchema) => {
         try {
           await deleteRecipe(recipe);
           toast({

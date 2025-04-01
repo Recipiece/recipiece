@@ -1,12 +1,11 @@
 import { FC } from "react";
-import { Button, Form, FormInput, Stack } from "../../component";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button, Form, FormInput, Stack } from "../../component";
 
-const VerifyAccountFormSchema = z
-  .object({
-    token: z.string().uuid("Invalid token"),
-  });
+const VerifyAccountFormSchema = z.object({
+  token: z.string().uuid("Invalid token"),
+});
 
 type VerifyAccountForm = z.infer<typeof VerifyAccountFormSchema>;
 
@@ -14,12 +13,10 @@ export const VerifyAccountPage: FC = () => {
   const form = useForm<VerifyAccountForm>({
     defaultValues: {
       token: "",
-    }
+    },
   });
 
-  const onSubmit = async (formData: VerifyAccountForm) => {
-    
-  }
+  const onSubmit = async (formData: VerifyAccountForm) => {};
 
   return (
     <Form {...form}>

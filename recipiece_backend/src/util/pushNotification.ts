@@ -1,24 +1,18 @@
-import { Recipe, ShoppingList, Timer, User, UserPushNotificationSubscription } from "@prisma/client";
+import { MealPlan, prisma, ShoppingList, User, UserPushNotificationSubscription } from "@recipiece/database";
 import webpush, { PushSubscription, WebPushError } from "web-push";
-import { prisma } from "../database";
+import { Environment } from "./environment";
 
-if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
-  const { APP_EMAIL_ADDRESS, APP_VAPID_PUBLIC_KEY, APP_VAPID_PRIVATE_KEY } = process.env;
-  webpush.setVapidDetails(`mailto:${APP_EMAIL_ADDRESS}`, APP_VAPID_PUBLIC_KEY!, APP_VAPID_PRIVATE_KEY!);
+if (Environment.ENABLE_PUSH_NOTIFICATIONS && Environment.VAPID_PUBLIC_KEY && Environment.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(`mailto:${Environment.EMAIL_ADDRESS}`, Environment.VAPID_PUBLIC_KEY, Environment.VAPID_PRIVATE_KEY);
 }
 
-const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
+export const sendPushNotification = async (subscription: UserPushNotificationSubscription, payload: any) => {
   try {
-    if (process.env.APP_ENABLE_PUSH_NOTIFICATIONS === "Y") {
-      await webpush.sendNotification(
-        subscription.subscription_data as unknown as PushSubscription,
-        JSON.stringify(payload)
-      );
+    if (Environment.ENABLE_PUSH_NOTIFICATIONS) {
+      await webpush.sendNotification(subscription.subscription_data as unknown as PushSubscription, JSON.stringify(payload));
       return Promise.resolve();
     } else {
-      console.log(
-        `APP_ENABLE_PUSH_NOTIFICATIONS is set to ${process.env.APP_ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`
-      );
+      console.log(`environment ENABLE_PUSH_NOTIFICATIONS is set to ${Environment.ENABLE_PUSH_NOTIFICATIONS}, not sending push notification`);
       console.log("would have sent");
       console.log(payload);
       console.log(`to subscription ${subscription.subscription_data}`);
@@ -38,11 +32,7 @@ const sendPushNotification = async (subscription: UserPushNotificationSubscripti
   }
 };
 
-export const sendShoppingListSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  shoppingList: ShoppingList,
-) => {
+export const sendShoppingListSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, shoppingList: ShoppingList) => {
   const message = {
     title: "Shopping List Shared",
     body: `${sourceUser.username} shared their shopping list ${shoppingList.name} with you`,
@@ -52,36 +42,16 @@ export const sendShoppingListSharedPushNotification = async (
     tag: `shoppingListShare${shoppingList.id}`,
   };
   await sendPushNotification(subscription, message);
-}
+};
 
-export const sendRecipeSharedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  sourceUser: User,
-  recipe: Recipe,
-) => {
+export const sendMealPlanSharedPushNotification = async (subscription: UserPushNotificationSubscription, sourceUser: User, mealPlan: MealPlan) => {
   const message = {
-    title: "Recipe Shared",
-    body: `${sourceUser.username} shared their recipe ${recipe.name} with you`,
-    type: "recipeShare",
-    data: { ...recipe },
+    title: "Meal Plan Shared",
+    body: `${sourceUser.username} shared their meal plan ${mealPlan.name} with you`,
+    type: "mealPlanShare",
+    data: { ...mealPlan },
     requiresInteraction: true,
-    tag: `recipeShare${recipe.id}`,
-  };
-  await sendPushNotification(subscription, message);
-}
-
-export const sendTimerFinishedPushNotification = async (
-  subscription: UserPushNotificationSubscription,
-  timer: Timer
-) => {
-  const message = {
-    title: "Time's Up!",
-    body: "Your timer is done!",
-    type: "timer",
-    data: { ...timer },
-    requiresInteraction: true,
-    tag: `timer${timer.id}`,
-    vibrate: [200, 100, 200, 100, 200, 100, 200],
+    tag: `mealPlanShare${mealPlan.id}`,
   };
   await sendPushNotification(subscription, message);
 };

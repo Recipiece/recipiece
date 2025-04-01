@@ -1,16 +1,16 @@
+import { ListRecipesQuerySchema, RecipeSchema } from "@recipiece/types";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useListRecipesForMealPlanQuery } from "../../api";
 import { Button, Input, LoadingGroup, Shelf, ShelfSpacer, Stack } from "../../component";
-import { ListRecipeFilters, Recipe } from "../../data";
 import { useResponsiveDialogComponents } from "../../hooks";
 import { BaseDialogProps } from "../BaseDialogProps";
 
-export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<Recipe>> = ({ onClose, onSubmit }) => {
+export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<RecipeSchema>> = ({ onClose, onSubmit }) => {
   const { ResponsiveContent, ResponsiveHeader, ResponsiveDescription, ResponsiveTitle, ResponsiveFooter } = useResponsiveDialogComponents();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const [filters, setFilters] = useState<ListRecipeFilters>({
+  const [filters, setFilters] = useState<ListRecipesQuerySchema>({
     page_number: 0,
     search: "",
   });
@@ -38,7 +38,7 @@ export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<Recipe>> = ({ on
   }, [searchTerm]);
 
   const onRecipeSelected = useCallback(
-    async (recipe: Recipe) => {
+    async (recipe: RecipeSchema) => {
       setIsDisabled(true);
       try {
         await Promise.resolve(onSubmit?.(recipe));
@@ -58,7 +58,7 @@ export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<Recipe>> = ({ on
       </ResponsiveHeader>
       <Stack>
         <Input type="text" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} />
-        <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="w-6 h-6">
+        <LoadingGroup isLoading={isFetchingRecipes || isLoadingRecipes} variant="spinner" className="h-6 w-6">
           {(recipeData?.data || []).map((recipe) => {
             return (
               <Button disabled={isDisabled} key={recipe.id} variant="outline" onClick={() => onRecipeSelected(recipe)}>

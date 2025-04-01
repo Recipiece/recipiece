@@ -1,3 +1,4 @@
+import { ShoppingListItemSchema, ShoppingListSchema, UserKitchenMembershipSchema } from "@recipiece/types";
 import { Edit, Eraser, Minus, MoreVertical, Share, Trash } from "lucide-react";
 import React, { createRef, FC, KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -5,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useCreateShoppingListShareMutation, useDeleteShoppingListMutation, useGetSelfQuery, useGetShoppingListByIdQuery, useShoppingListItemsSubscription } from "../../api";
 import {
   Button,
+  Divider,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,18 +15,15 @@ import {
   H2,
   Input,
   LoadingGroup,
+  LoadingSpinner,
   Popover,
   PopoverContent,
   PopoverTrigger,
   RecipieceMenuBarContext,
-  SharedAvatar,
-  Shelf,
-  ShelfSpacer,
   Stack,
   useToast,
 } from "../../component";
 import { DialogContext } from "../../context";
-import { ShoppingList, ShoppingListItem, UserKitchenMembership } from "../../data";
 import { useLayout } from "../../hooks";
 import { CheckableShoppingListItemInput } from "./ShoppingListItemInput";
 
@@ -52,14 +51,12 @@ export const ShoppingListViewPage: FC = () => {
     setItemNotes,
   } = useShoppingListItemsSubscription(+shoppingListId!);
 
-  const sharedMembershipId = shoppingList?.shares?.[0]?.user_kitchen_membership_id;
-
   const { mutateAsync: deleteShoppingList } = useDeleteShoppingListMutation();
   const { mutateAsync: createShoppingListShare } = useCreateShoppingListShareMutation();
 
   const [newestShoppingListItem, setNewestShoppingListItem] = useState("");
   const [isAutoCompleteOpen, setIsAutoCompleteOpen] = useState(false);
-  const [incompleteItems, setIncompleteItems] = useState<{ readonly [key: number]: ShoppingListItem }>({});
+  const [incompleteItems, setIncompleteItems] = useState<{ readonly [key: number]: ShoppingListItemSchema }>({});
   const newItemRef = createRef<HTMLInputElement>();
 
   useEffect(() => {
@@ -80,7 +77,7 @@ export const ShoppingListViewPage: FC = () => {
   }, [incompleteItems]);
 
   const onChangeItemContent = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       setItemContent({
         ...item,
       });
@@ -89,7 +86,7 @@ export const ShoppingListViewPage: FC = () => {
   );
 
   const onChangeItemContentKeyDown = useCallback(
-    (event: KeyboardEvent, item: ShoppingListItem) => {
+    (event: KeyboardEvent, item: ShoppingListItemSchema) => {
       if (event.key === "Enter") {
         onChangeItemContent(item);
       }
@@ -107,7 +104,7 @@ export const ShoppingListViewPage: FC = () => {
   }, []);
 
   const onChangeItemNotes = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       setItemNotes({
         ...item,
       });
@@ -116,7 +113,7 @@ export const ShoppingListViewPage: FC = () => {
   );
 
   const onChangeItemNotesKeyDown = useCallback(
-    (event: KeyboardEvent, item: ShoppingListItem) => {
+    (event: KeyboardEvent, item: ShoppingListItemSchema) => {
       if (event.key === "Enter") {
         onChangeItemNotes(item);
       }
@@ -161,7 +158,7 @@ export const ShoppingListViewPage: FC = () => {
   }, [shoppingListItems]);
 
   const onShoppingListItemDropped = useCallback(
-    (item: ShoppingListItem, intoSpot: number) => {
+    (item: ShoppingListItemSchema, intoSpot: number) => {
       setItemOrder({
         ...item,
         order: intoSpot,
@@ -171,7 +168,7 @@ export const ShoppingListViewPage: FC = () => {
   );
 
   const onSelectAutocompleteItem = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       markItemIncomplete(item);
       setNewestShoppingListItem("");
     },
@@ -183,7 +180,7 @@ export const ShoppingListViewPage: FC = () => {
   }, []);
 
   const onDeleteItem = useCallback(
-    (item: ShoppingListItem) => {
+    (item: ShoppingListItemSchema) => {
       deleteItem({ ...item });
     },
     [deleteItem]
@@ -213,14 +210,14 @@ export const ShoppingListViewPage: FC = () => {
   const onRequestShoppingListDelete = useCallback(() => {
     pushDialog("deleteShoppingList", {
       onClose: () => popDialog("deleteShoppingList"),
-      onSubmit: async (list: ShoppingList) => {
+      onSubmit: async (list: ShoppingListSchema) => {
         try {
           await deleteShoppingList(list);
           toast({
             title: "Shopping List Deleted",
             description: "Your shopping list has been deleted.",
           });
-          navigate("/");
+          navigate("/dashboard");
         } catch {
           toast({
             title: "Error Deleting Shopping List",
@@ -241,15 +238,16 @@ export const ShoppingListViewPage: FC = () => {
       entity_id: shoppingList!.id,
       entity_type: "shopping_list",
       onClose: () => popDialog("share"),
-      onSubmit: async (membership: UserKitchenMembership) => {
+      onSubmit: async (membership: UserKitchenMembershipSchema) => {
         try {
           await createShoppingListShare({
             shopping_list_id: shoppingList!.id,
             user_kitchen_membership_id: membership.id,
           });
+          const username = membership.source_user.id === user!.id ? membership.destination_user.username : membership.source_user.username;
           toast({
             title: "Shopping List Shared",
-            description: `Your shopping list has been shared with ${membership.destination_user.username}`,
+            description: `Your shopping list has been shared with ${username}`,
           });
         } catch {
           toast({
@@ -261,7 +259,7 @@ export const ShoppingListViewPage: FC = () => {
         }
       },
     });
-  }, [createShoppingListShare, popDialog, pushDialog, shoppingList, toast]);
+  }, [createShoppingListShare, popDialog, pushDialog, shoppingList, toast, user]);
 
   const contextMenu = useMemo(() => {
     return (
@@ -299,106 +297,105 @@ export const ShoppingListViewPage: FC = () => {
   return (
     <Popover open={isAutoCompleteOpen}>
       <Stack>
-        <LoadingGroup isLoading={isLoadingShoppingList} className="w-[200px] h-6">
-          <Shelf>
-            <div className="flex flex-row items-center gap-2">
-              <H2>{shoppingList?.name}</H2>
-              {sharedMembershipId && <SharedAvatar userKitchenMembershipId={sharedMembershipId} />}
-            </div>
-            <ShelfSpacer />
+        <LoadingGroup isLoading={isLoadingShoppingList} className="h-6 w-[200px]">
+          <div className="flex flex-row gap-2">
+            <H2 className="flex-grow">{shoppingList?.name}</H2>
             {shoppingList && (
               <>
                 {isMobile && mobileMenuPortalRef && mobileMenuPortalRef.current && createPortal(contextMenu, mobileMenuPortalRef.current)}
                 {!isMobile && <>{contextMenu}</>}
               </>
             )}
-          </Shelf>
+          </div>
         </LoadingGroup>
-        <LoadingGroup variant="spinner" isLoading={isLoadingShoppingList || isLoadingShoppingListItems || isLoadingShoppingListItems} className="w-9 h-9">
-          <div className="p-2">
-            <Stack>
-              <div className="flex-col">
-                <div className="w-full inline-flex flex-row gap-4">
-                  <Input
-                    ref={newItemRef}
-                    disabled={isPerformingAction}
-                    className="border-y-0 border-b-[1px] border-l-[1px] border-r-0 w-full p-1 rounded-none ring-0 outline-none focus-visible:ring-0 focus-visible:outline-none rounded-bl-md"
-                    placeholder="Add an item..."
-                    value={newestShoppingListItem}
-                    onChange={onNewestItemTextChange}
-                    onKeyDown={onNewItemKeyDown}
-                    onBlur={() => setIsAutoCompleteOpen(false)}
-                    onFocus={() => setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)}
-                  />
-                  <Button variant="outline" onClick={onAddItem}>
-                    Add Item
-                  </Button>
-                </div>
-                <div className="ml-4 h-0 w-0">
-                  <PopoverTrigger className="h-0 w-0" />
-                  <PopoverContent
-                    alignOffset={-16}
-                    align="start"
-                    className="p-1 min-w-[200px]"
-                    side="bottom"
-                    sideOffset={-14}
-                    onOpenAutoFocus={(event) => event.preventDefault()}
-                    onCloseAutoFocus={(event) => event.preventDefault()}
-                    avoidCollisions={false}
-                  >
-                    <div className="grid grid-cols-1">
-                      {autocompleteSuggestions.map((item) => {
-                        return (
-                          <Button className="justify-start p-1 h-auto" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
-                            {item.content}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </PopoverContent>
-                </div>
+        <div className="p-2">
+          <Stack>
+            <div className="flex-col">
+              <div className="inline-flex w-full flex-row gap-4">
+                <Input
+                  ref={newItemRef}
+                  disabled={isPerformingAction}
+                  className="w-full rounded-none rounded-bl-md border-y-0 border-b-[1px] border-l-[1px] border-r-0 p-1 outline-none ring-0 focus-visible:outline-none focus-visible:ring-0"
+                  placeholder="Add an item..."
+                  value={newestShoppingListItem}
+                  onChange={onNewestItemTextChange}
+                  onKeyDown={onNewItemKeyDown}
+                  onBlur={() => setIsAutoCompleteOpen(false)}
+                  onFocus={() => setIsAutoCompleteOpen(autocompleteSuggestions.length > 0 && newestShoppingListItem.length > 1)}
+                />
+                <Button variant="outline" onClick={onAddItem}>
+                  Add Item
+                </Button>
               </div>
-              <div className="grid grid-cols-1 gap-4">
-                {sortedIncompleteItems.map((item) => {
-                  return (
-                    <div className="inline-flex flex-row gap-2 w-full items-center" key={item.id}>
-                      <CheckableShoppingListItemInput
-                        className="flex-grow"
-                        isDraggable
-                        shoppingListItem={item}
-                        disabled={isPerformingAction}
-                        onCheck={markItemComplete}
-                        onContentBlurred={() => onChangeItemContent(item)}
-                        onContentKeyDown={(event) => onChangeItemContentKeyDown(event, item)}
-                        onContentChanged={(event) => onChangeItemValue(event, item.id)}
-                        onItemDropped={onShoppingListItemDropped}
-                        onNotesBlurred={() => onChangeItemNotes(item)}
-                        onNotesChanged={(event) => onChangeNotesValue(event, item.id)}
-                        onNotesKeyDown={(event) => onChangeItemNotesKeyDown(event, item)}
-                      />
-                      <Button onClick={() => onDeleteItem(item)} variant="ghost">
-                        <Minus className="text-destructive" />
-                      </Button>
-                    </div>
-                  );
-                })}
+              <div className="ml-4 h-0 w-0">
+                <PopoverTrigger className="h-0 w-0" />
+                <PopoverContent
+                  alignOffset={-16}
+                  align="start"
+                  className="min-w-[200px] p-1"
+                  side="bottom"
+                  sideOffset={-14}
+                  onOpenAutoFocus={(event) => event.preventDefault()}
+                  onCloseAutoFocus={(event) => event.preventDefault()}
+                  avoidCollisions={false}
+                >
+                  <div className="grid grid-cols-1">
+                    {autocompleteSuggestions.map((item) => {
+                      return (
+                        <Button className="h-auto justify-start p-1" variant="ghost" key={item.id} onClick={() => onSelectAutocompleteItem(item)}>
+                          {item.content}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
               </div>
-
-              {completeShoppingListItems.length > 0 && <hr />}
-
-              {completeShoppingListItems.map((item) => {
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {sortedIncompleteItems.map((item) => {
                 return (
-                  <div key={item.id} className="flex flex-row gap-2 opacity-70 items-center">
-                    <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} readOnly />
+                  <div className="inline-flex w-full flex-row items-center gap-2" key={item.id}>
+                    <CheckableShoppingListItemInput
+                      className="flex-grow"
+                      isDraggable
+                      shoppingListItem={item}
+                      disabled={isPerformingAction}
+                      onCheck={markItemComplete}
+                      onContentBlurred={() => onChangeItemContent(item)}
+                      onContentKeyDown={(event) => onChangeItemContentKeyDown(event, item)}
+                      onContentChanged={(event) => onChangeItemValue(event, item.id)}
+                      onItemDropped={onShoppingListItemDropped}
+                      onNotesBlurred={() => onChangeItemNotes(item)}
+                      onNotesChanged={(event) => onChangeNotesValue(event, item.id)}
+                      onNotesKeyDown={(event) => onChangeItemNotesKeyDown(event, item)}
+                    />
                     <Button onClick={() => onDeleteItem(item)} variant="ghost">
                       <Minus className="text-destructive" />
                     </Button>
                   </div>
                 );
               })}
-            </Stack>
+            </div>
+
+            {completeShoppingListItems.length > 0 && <Divider />}
+
+            {completeShoppingListItems.map((item) => {
+              return (
+                <div key={item.id} className="flex flex-row items-center gap-2 opacity-70">
+                  <CheckableShoppingListItemInput disabled={isPerformingAction} shoppingListItem={item} onCheck={markItemIncomplete} readOnly />
+                  <Button onClick={() => onDeleteItem(item)} variant="ghost">
+                    <Minus className="text-destructive" />
+                  </Button>
+                </div>
+              );
+            })}
+          </Stack>
+        </div>
+        {isLoadingShoppingListItems && (
+          <div className="fixed bottom-16 right-0 p-2 sm:bottom-0">
+            <LoadingSpinner width={40} height={40} />
           </div>
-        </LoadingGroup>
+        )}
       </Stack>
     </Popover>
   );

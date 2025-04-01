@@ -1,13 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useState } from "react";
+import { DataTestId } from "@recipiece/constant";
+import { FC, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../component";
 import { useRequestForgotPasswordMutation } from "../../api";
+import { Button, Form, FormInput, Stack, SubmitButton, useToast } from "../../component";
+import { TurnstileContext } from "../../context";
 
 const ForgotPasswordFormSchema = z.object({
-  username: z.string().email("Enter your email address."),
+  username_or_email: z.string().email("Enter your email address."),
 });
 
 type ForgotPasswordForm = z.infer<typeof ForgotPasswordFormSchema>;
@@ -17,17 +19,27 @@ export const ForgotPasswordPage: FC = () => {
   const { toast } = useToast();
   const [hasRequested, setHasRequested] = useState(false);
   const { mutateAsync: requestForgotPasswordToken } = useRequestForgotPasswordMutation();
+  const { getTurnstileToken, isTurnstileEnabled } = useContext(TurnstileContext);
 
   const form = useForm<ForgotPasswordForm>({
     resolver: zodResolver(ForgotPasswordFormSchema),
     defaultValues: {
-      username: "",
+      username_or_email: "",
     },
   });
 
   const onSubmit = async (formData: ForgotPasswordForm) => {
+    let turnstileToken: string | undefined;
     try {
-      await requestForgotPasswordToken({ ...formData });
+      if (isTurnstileEnabled) {
+        turnstileToken = await getTurnstileToken();
+      }
+    } catch {
+      turnstileToken = undefined;
+    }
+
+    try {
+      await requestForgotPasswordToken({ ...formData, turnstileToken: turnstileToken });
       setHasRequested(true);
     } catch {
       toast({
@@ -41,10 +53,14 @@ export const ForgotPasswordPage: FC = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Stack>
-          <FormInput readOnly={hasRequested} type="email" name="username" label="Email Address" />
-          {!hasRequested && <SubmitButton>Reset Password</SubmitButton>}
-          {hasRequested && <p>If this email address is registered to an active account, a link was sent with instruction on how to reset your password.</p>}
-          <Button type="button" variant="link" onClick={() => navigate("/login")}>
+          <FormInput data-testid={DataTestId.ForgotPasswordPage.INPUT_EMAIL} readOnly={hasRequested} type="text" name="username_or_email" label="Email Address" />
+          {!hasRequested && <SubmitButton data-testid={DataTestId.ForgotPasswordPage.BUTTON_FORGOT_PASSWORD}>Reset Password</SubmitButton>}
+          {hasRequested && (
+            <p data-testid={DataTestId.ForgotPasswordPage.PARAGRAPH_SENT}>
+              If this email address is registered to an active account, a link was sent with instruction on how to reset your password.
+            </p>
+          )}
+          <Button data-testid={DataTestId.ForgotPasswordPage.BUTTON_LOGIN} type="button" variant="link" onClick={() => navigate("/login")}>
             Back to Login
           </Button>
         </Stack>

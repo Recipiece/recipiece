@@ -1,224 +1,174 @@
-import { Lightbulb, Minus, SquareArrowOutUpRight, UtensilsCrossed } from "lucide-react";
+import { MealPlanSchema, RecipeSchema } from "@recipiece/types";
+import { Minus } from "lucide-react";
 import { DateTime } from "luxon";
-import { FC, useCallback, useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useCreateMealPlanItemMutation, useDeleteMealPlanItemMutation, useUpdateMealPlanItemMutation } from "../../api";
-import { Button, Card, Input } from "../../component";
+import { FC, useCallback, useContext, useMemo } from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import { Button, Card, CardContent, CardTitle, FormInput, FormTextarea, H3, H4, Separator, Skeleton } from "../../component";
 import { DialogContext } from "../../context";
-import { MealPlan, MealPlanItem, Recipe } from "../../data";
+import { MealPlanItemsForm } from "./MealPlanForm";
 
-export interface MealPlanItemsCardProps {
-  readonly mealPlan: MealPlan;
-  readonly startDate: DateTime;
-  readonly initialMealPlanItems: Partial<MealPlanItem>[];
+export interface MealPlanItemCardProps {
+  readonly mealPlan: MealPlanSchema;
+  readonly date: DateTime;
+  readonly isLoading: boolean;
   readonly isEditing: boolean;
+  readonly dayId: number;
 }
 
-export const MealPlanItemsCard: FC<MealPlanItemsCardProps> = ({ mealPlan, startDate, initialMealPlanItems, isEditing }) => {
+export interface MealPlanSectionProps {
+  readonly mealPlan: MealPlanSchema;
+  readonly baseDate: DateTime;
+  readonly target: "morningItems" | "middayItems" | "eveningItems";
+  readonly isEditing: boolean;
+  readonly dayId: number;
+}
+
+const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate, isEditing, dayId }) => {
   const { pushDialog, popDialog } = useContext(DialogContext);
-  const [currentValues, setCurrentValues] = useState([...(initialMealPlanItems ?? [])]);
 
-  const { mutateAsync: createMealPlanItem } = useCreateMealPlanItemMutation();
-  const { mutateAsync: updateMealPlanItem } = useUpdateMealPlanItemMutation();
-  const { mutateAsync: deleteMealPlanItem } = useDeleteMealPlanItemMutation();
+  const newItemStartDate = useMemo(() => {
+    if (target === "morningItems") {
+      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: 1 });
+    } else if (target === "middayItems") {
+      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: 13 });
+    } else {
+      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: 18 });
+    }
+  }, [target, baseDate]);
 
-  useEffect(() => {
-    setCurrentValues([...(initialMealPlanItems ?? [])]);
-  }, [initialMealPlanItems]);
+  const form = useFormContext<MealPlanItemsForm>();
 
-  const onAddRecipe = useCallback(() => {
-    pushDialog("searchRecipesForMealPlan", {
-      onClose: () => popDialog("searchRecipesForMealPlan"),
-      onSubmit: async (recipe: Recipe) => {
-        const createdItem = await createMealPlanItem({
-          recipe_id: recipe.id,
+  const { append, remove, fields } = useFieldArray({
+    control: form.control,
+    name: `mealPlanItems.${dayId}.${target}`,
+  });
+
+  const onAppendIdea = useCallback(() => {
+    append({
+      meal_plan_id: mealPlan.id,
+      freeform_content: "",
+      notes: "",
+      start_date: newItemStartDate.toJSDate(),
+    });
+  }, [append, newItemStartDate, mealPlan]);
+
+  const onAppendRecipe = useCallback(() => {
+    pushDialog("searchRecipes", {
+      onClose: () => popDialog("searchRecipes"),
+      onSubmit: (recipe: RecipeSchema) => {
+        append({
           meal_plan_id: mealPlan.id,
-          start_date: startDate.toUTC().toISO()!,
+          recipe_id: recipe.id,
+          recipe: { ...recipe },
+          start_date: newItemStartDate.toJSDate(),
           notes: "",
-          label: `Meal ${currentValues.length + 1}`,
         });
-        setCurrentValues((prev) => [...prev, { ...createdItem }]);
-        popDialog("searchRecipesForMealPlan");
+        popDialog("searchRecipes");
       },
     });
-  }, [pushDialog, popDialog, createMealPlanItem, mealPlan.id, startDate, currentValues]);
-
-  const onAddContent = useCallback(async () => {
-    const createdItem = await createMealPlanItem({
-      freeform_content: "",
-      meal_plan_id: mealPlan.id,
-      start_date: startDate.toUTC().toISO()!,
-      notes: "",
-      label: `Meal ${currentValues.length + 1}`,
-    });
-    setCurrentValues((prev) => [...prev, { ...createdItem }]);
-  }, [createMealPlanItem, mealPlan.id, startDate, currentValues]);
+  }, [append, pushDialog, popDialog, newItemStartDate, mealPlan]);
 
   const onRemoveItem = useCallback(
-    async (mealPlanItem: MealPlanItem) => {
-      await deleteMealPlanItem(mealPlanItem);
-      setCurrentValues((prev) => [...prev.filter((cv) => cv.id !== mealPlanItem.id)]);
+    (index: number) => {
+      remove(index);
     },
-    [deleteMealPlanItem]
-  );
-
-  const onUpdateNotes = useCallback(
-    (mealPlanItemId: number, notes: string) => {
-      updateMealPlanItem({
-        id: mealPlanItemId,
-        meal_plan_id: mealPlan.id,
-        notes: notes,
-      });
-    },
-    [mealPlan.id, updateMealPlanItem]
-  );
-
-  const onChangeNotes = useCallback((index: number, notes: string) => {
-    setCurrentValues((prev) => {
-      return prev.map((val, idx) => {
-        if (index === idx) {
-          return { ...val, notes: notes };
-        } else {
-          return { ...val };
-        }
-      });
-    });
-  }, []);
-
-  const onChangeFreeformContent = useCallback((index: number, content: string) => {
-    setCurrentValues((prev) => {
-      return prev.map((val, idx) => {
-        if (index === idx) {
-          return { ...val, freeform_content: content };
-        } else {
-          return { ...val };
-        }
-      });
-    });
-  }, []);
-
-  const onUpdateFreeformContent = useCallback(
-    async (mealPlanItemId: number, content: string) => {
-      updateMealPlanItem({
-        id: mealPlanItemId,
-        meal_plan_id: mealPlan.id,
-        freeform_content: content,
-      });
-    },
-    [mealPlan.id, updateMealPlanItem]
-  );
-
-  const onChangeLabel = useCallback((index: number, content: string) => {
-    setCurrentValues((prev) => {
-      return prev.map((val, idx) => {
-        if (index === idx) {
-          return { ...val, label: content };
-        } else {
-          return { ...val };
-        }
-      });
-    });
-  }, []);
-
-  const onUpdateLabel = useCallback(
-    async (mealPlanItemId: number, content: string) => {
-      updateMealPlanItem({
-        id: mealPlanItemId,
-        meal_plan_id: mealPlan.id,
-        label: content,
-      });
-    },
-    [mealPlan.id, updateMealPlanItem]
+    [remove]
   );
 
   return (
-    <Card className="p-2">
-      <div>
-        <div className="flex flex-row items-center">
-          <h1 className="text-lg font-bold">{startDate.toFormat("EEEE, LLLL dd")}</h1>
-          {isEditing && (
-            <div className="ml-auto flex flex-row gap-2">
-              <Button variant="secondary" onClick={onAddRecipe}>
-                <UtensilsCrossed size={16} /> <span className="hidden sm:inline ml-2">Add a Recipe</span>
-              </Button>
-              <Button variant="secondary" onClick={onAddContent}>
-                <Lightbulb size={16} /> <span className="hidden sm:inline ml-2">Add an Idea</span>
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-      <div>
-        {currentValues.length === 0 && <p className="text-center text-sm pt-4 pb-4">Nothing to make here!</p>}
-        {currentValues.map((value, index) => {
-          const { id, recipe, freeform_content, notes, label } = value;
-          let component;
-
-          if (!!recipe) {
-            component = (
-              <div>
-                <Link to={`/recipe/view/${recipe.id}`} target="_blank" rel="noopener noreferrer">
-                  <div className="inline-flex flex-row items-center gap-2">
-                    <h1 className="text-lg underline">{recipe.name}</h1>
-                    <SquareArrowOutUpRight className="hidden sm:block" />
-                  </div>
-                </Link>
-
-                {recipe.description && <p>{recipe.description}</p>}
-              </div>
-            );
-          } else {
-            if (isEditing) {
-              component = (
-                <Input
-                  placeholder="What do you want to make?"
-                  value={freeform_content}
-                  onChange={(event) => onChangeFreeformContent(index, event.target.value)}
-                  onBlur={(event) => onUpdateFreeformContent(id!, event.target.value)}
-                />
-              );
-            } else {
-              component = <p>{freeform_content}</p>;
-            }
-          }
-
-          return (
-            <div key={id} className="grid gap-2 items-center mt-4 p-4">
-              <div className="col-span-12 sm:col-span-3">
-                {isEditing && (
-                  <Input
-                    placeholder="What is this meal for?"
-                    value={label}
-                    onChange={(event) => onChangeLabel(index, event.target.value)}
-                    onBlur={(event) => onUpdateLabel(id!, event.target.value)}
-                  />
-                )}
-                {!isEditing && !!label && <h1 className="text-xl">{label}</h1>}
-              </div>
-              <div className="col-span-12">{component}</div>
-              <div className="col-span-12">
-                {isEditing && (
-                  <Input
-                    placeholder="Anything to note?"
-                    value={notes}
-                    onBlur={(event) => onUpdateNotes(id!, event.target.value)}
-                    onChange={(event) => onChangeNotes(index, event.target.value)}
-                  />
-                )}
-                {!isEditing && !!notes && <p className="text-sm">{notes}</p>}
-              </div>
-              {isEditing && (
-                <div className="col-span-12 flex flex-row">
-                  <Button variant="ghost" onClick={() => onRemoveItem(value as MealPlanItem)} className="text-destructive ml-auto">
-                    <Minus />
-                  </Button>
-                </div>
-              )}
-              {currentValues.length > 1 && index < currentValues.length - 1 && <hr className="col-span-12" />}
+    <>
+      {target === "morningItems" && <H3>Morning</H3>}
+      {target === "middayItems" && <H3>Midday</H3>}
+      {target === "eveningItems" && <H3>Evening</H3>}
+      {fields.length === 0 && <p className="text-center text-sm">Nothing here yet!</p>}
+      {fields.map((item, index) => {
+        let component = undefined;
+        if (item.recipe) {
+          component = (
+            <div>
+              <H4 className="underline">
+                <a target="_blank" rel="noreferrer" href={`/recipe/view/${item.recipe.id}`}>
+                  {item.recipe.name}
+                </a>
+              </H4>
+              {item.recipe.description && <p className="text-sm">{item.recipe.description}</p>}
             </div>
           );
-        })}
-      </div>
+        } else if (item.freeform_content !== null && item.freeform_content !== undefined) {
+          if (!isEditing) {
+            component = <p className="text-sm">{item.freeform_content}</p>;
+          } else {
+            component = <FormTextarea required name={`mealPlanItems.${dayId}.${target}.${index}.freeform_content`} label="Meal" placeholder="What are you thinking about?" />;
+          }
+        }
+
+        let notesComponent = undefined;
+        if (isEditing) {
+          notesComponent = <FormInput name={`mealPlanItems.${dayId}.${target}.${index}.notes`} placeholder="Anything to note?" label="Notes" />;
+        } else {
+          notesComponent = <p className="text-xs">{item.notes ?? ""}</p>;
+        }
+
+        return (
+          <div key={item.id} className="flex flex-col gap-2">
+            {component && (
+              <div className="flex flex-col gap-2 pl-2 sm:pl-4">
+                {component}
+                {notesComponent}
+              </div>
+            )}
+            {isEditing && (
+              <div className="flex flex-row justify-end">
+                <Button variant="ghost" onClick={() => onRemoveItem(index)}>
+                  <Minus className="text-destructive" />
+                </Button>
+              </div>
+            )}
+            {(index !== fields.length - 1 || isEditing) && <Separator />}
+          </div>
+        );
+      })}
+      {isEditing && (
+        <div className="flex flex-row items-center justify-center gap-2">
+          <Button onClick={onAppendRecipe} variant="outline">
+            Add Recipe
+          </Button>
+          <span>or</span>
+          <Button onClick={onAppendIdea} variant="outline">
+            Add Idea
+          </Button>
+        </div>
+      )}
+    </>
+  );
+};
+
+export const MealPlanItemCard: FC<MealPlanItemCardProps> = ({ isLoading, isEditing, mealPlan, date, dayId }) => {
+  return (
+    <Card className="p-6">
+      <CardTitle className="mb-4">
+        <div className="flex flex-row items-center gap-2">
+          <span className="mr-auto">{date.toLocal().toFormat("EEEE, MMM dd")}</span>
+        </div>
+      </CardTitle>
+      <CardContent>
+        <div className="flex flex-col gap-4 whitespace-normal">
+          {isLoading && (
+            <>
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </>
+          )}
+          {!isLoading && (
+            <>
+              <MealPlanSection dayId={dayId} mealPlan={mealPlan} baseDate={date} target="morningItems" isEditing={isEditing} />
+              <MealPlanSection dayId={dayId} mealPlan={mealPlan} baseDate={date} target="middayItems" isEditing={isEditing} />
+              <MealPlanSection dayId={dayId} mealPlan={mealPlan} baseDate={date} target="eveningItems" isEditing={isEditing} />
+            </>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };

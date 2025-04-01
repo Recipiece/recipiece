@@ -1,6 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
 const { fontFamily } = require("tailwindcss/defaultTheme");
 
 /** @type {import('tailwindcss').Config} */
+// eslint-disable-next-line no-undef
 module.exports = {
   darkMode: ["class"],
   content: ["src/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
@@ -20,7 +22,7 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "var(--primary)",
+          DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -82,5 +84,6 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/line-clamp")],
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
+  plugins: [require("tailwindcss-animate")],
 };

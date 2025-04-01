@@ -1,17 +1,17 @@
-import { User } from "@prisma/client";
+import { PrismaTransaction } from "@recipiece/database";
+import { CreateUserRequestSchema, UserPreferencesSchema, UserSchema } from "@recipiece/types";
 import { Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
-import { prisma } from "../../database";
-import { CreateUserRequestSchema } from "../../schema";
 import { ApiResponse } from "../../types";
 import { VERSION_ACCESS_LEVELS } from "../../util/constant";
+import { Environment } from "../../util/environment";
 import { hashPassword } from "../../util/password";
 
-export const createUser = async (request: Request<any, any, CreateUserRequestSchema>): ApiResponse<User> => {
+export const createUser = async (request: Request<any, any, CreateUserRequestSchema>, tx: PrismaTransaction): ApiResponse<UserSchema> => {
   const { username, email, password } = request.body;
 
-  const existingUser = await prisma.user.findFirst({
+  const existingUser = await tx.user.findFirst({
     where: {
       OR: [
         {
@@ -39,47 +39,43 @@ export const createUser = async (request: Request<any, any, CreateUserRequestSch
     ];
   }
 
-  try {
-    const hashedPassword = await hashPassword(password);
-    if (!hashedPassword) {
-      return [
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        {
-          message: "Unable to create account",
-        },
-      ];
-    }
-
-    const insertedUser = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email: email,
-          username: username,
-          credentials: {
-            create: {
-              password_hash: hashedPassword!,
-            },
-          },
-          user_access_records: {
-            create: {
-              access_levels: VERSION_ACCESS_LEVELS[process.env.APP_VERSION!] ?? ["free"],
-              start_date: DateTime.utc().toJSDate(),
-            },
-          },
-        },
-      });
-
-      return user;
-    });
-
-    return [StatusCodes.CREATED, insertedUser];
-  } catch (err) {
-    console.error(err);
+  const hashedPassword = await hashPassword(password);
+  if (!hashedPassword) {
     return [
-      StatusCodes.BAD_REQUEST,
+      StatusCodes.INTERNAL_SERVER_ERROR,
       {
         message: "Unable to create account",
       },
     ];
   }
+
+  const user = await tx.user.create({
+    data: {
+      email: email,
+      username: username,
+      preferences: {
+        account_visibility: "protected",
+        forking_image_permission: "allowed",
+      },
+      credentials: {
+        create: {
+          password_hash: hashedPassword!,
+        },
+      },
+      user_access_records: {
+        create: {
+          access_levels: VERSION_ACCESS_LEVELS[Environment.VERSION] ?? ["free"],
+          start_date: DateTime.utc().toJSDate(),
+        },
+      },
+    },
+  });
+
+  return [
+    StatusCodes.CREATED,
+    {
+      ...user,
+      preferences: user.preferences as UserPreferencesSchema,
+    },
+  ];
 };

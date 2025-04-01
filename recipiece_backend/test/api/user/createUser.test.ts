@@ -1,11 +1,12 @@
+import { prisma } from "@recipiece/database";
+import { emailGenerator, generateUser, usernameGenerator } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Create User", () => {
   it("should create a user, their credentials, and their access level", async () => {
-    const email = "newuser@recipiece.org";
-    const username = "testuser";
+    const email = emailGenerator.next()!.value;
+    const username = usernameGenerator.next()!.value;
     const password = "reallyCoolP@ss1234!";
 
     const response = await request(server)
@@ -36,12 +37,7 @@ describe("Create User", () => {
   });
 
   it("should not allow an existing email to be used", async () => {
-    const existingUser = await prisma.user.create({
-      data: {
-        email: "existing@recipiece.org",
-        username: "uniqueusername",
-      },
-    });
+    const existingUser = await generateUser();
 
     const response = await request(server)
       .post("/user")
@@ -56,12 +52,7 @@ describe("Create User", () => {
   });
 
   it("should not allow an existing username to be used, case insensitive", async () => {
-    const existingUser = await prisma.user.create({
-      data: {
-        email: "existing@recipiece.org",
-        username: "uniqueusername",
-      },
-    });
+    const existingUser = await generateUser();
 
     const response = await request(server)
       .post("/user")

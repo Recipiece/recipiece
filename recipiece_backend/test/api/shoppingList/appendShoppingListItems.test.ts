@@ -1,26 +1,19 @@
-import { ShoppingListItem, User } from "@prisma/client";
+import { prisma, ShoppingListItem, User } from "@recipiece/database";
+import { generateShoppingList, generateShoppingListItem, generateShoppingListShare, generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
 
 describe("Append Shopping List Items", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should not allow another user to append items", async () => {
     const [_, otherBearerToken] = await fixtures.createUserAndToken();
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test List",
-        user_id: user.id,
-      },
-    });
+    const shoppingList = await generateShoppingList({ user_id: user.id });
 
     const appendedItem: Partial<ShoppingListItem> = {
       content: "appended",
@@ -44,26 +37,17 @@ describe("Append Shopping List Items", () => {
     expect(listItems.length).toBe(0);
   });
 
-  it("should allow a shared user to append items", async () => {
+  it("should allow a shared user to append items to a shared meal plan", async () => {
     const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test List",
-        user_id: user.id,
-      },
+    const shoppingList = await generateShoppingList({ user_id: user.id });
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "accepted",
-      },
-    });
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     const appendedItem: Partial<ShoppingListItem> = {
@@ -91,24 +75,15 @@ describe("Append Shopping List Items", () => {
 
   it("should not allow a shared user to append items when the membership is not accepted", async () => {
     const [otherUser, otherBearerToken] = await fixtures.createUserAndToken();
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test List",
-        user_id: user.id,
-      },
+    const shoppingList = await generateShoppingList({ user_id: user.id });
+    const membership = await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "denied",
     });
-    const membership = await prisma.userKitchenMembership.create({
-      data: {
-        source_user_id: user.id,
-        destination_user_id: otherUser.id,
-        status: "denied",
-      },
-    });
-    const share = await prisma.shoppingListShare.create({
-      data: {
-        shopping_list_id: shoppingList.id,
-        user_kitchen_membership_id: membership.id,
-      },
+    const share = await generateShoppingListShare({
+      shopping_list_id: shoppingList.id,
+      user_kitchen_membership_id: membership.id,
     });
 
     const appendedItem: Partial<ShoppingListItem> = {
@@ -133,22 +108,13 @@ describe("Append Shopping List Items", () => {
   });
 
   it("should append the items to the end of the incomplete items", async () => {
-    const shoppingList = await prisma.shoppingList.create({
-      data: {
-        name: "Test List",
-        user_id: user.id,
-      },
-    });
+    const shoppingList = await generateShoppingList({ user_id: user.id });
 
     const items: ShoppingListItem[] = [];
     for (let i = 0; i < 10; i++) {
-      const item = await prisma.shoppingListItem.create({
-        data: {
-          content: `item ${i}`,
-          order: (i % 5) + 1,
-          completed: i >= 5,
-          shopping_list_id: shoppingList.id,
-        },
+      const item = await generateShoppingListItem({
+        completed: i >= 5,
+        shopping_list_id: shoppingList.id,
       });
       items.push(item);
     }

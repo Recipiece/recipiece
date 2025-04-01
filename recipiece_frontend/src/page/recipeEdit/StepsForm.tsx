@@ -1,10 +1,11 @@
+import { DataTestId } from "@recipiece/constant";
 import { Grip, Minus, PlusIcon } from "lucide-react";
+import mergeRefs from "merge-refs";
 import { FC, Fragment, useCallback, useMemo } from "react";
+import { useDrag, useDrop } from "react-dnd";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button, FormTextarea } from "../../component";
-import { useDrag, useDrop } from "react-dnd";
 import { cn } from "../../util";
-import mergeRefs from "merge-refs";
 
 export interface StepsFormProps {
   readonly isLoading: boolean;
@@ -15,9 +16,10 @@ interface StepFormItemProps {
   readonly onRemove: (index: number) => void;
   readonly onMove: (srcIndex: number, destIndex: number) => void;
   readonly draggable: boolean;
+  readonly isLoading: boolean;
 }
 
-const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggable }) => {
+const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggable, isLoading }) => {
   const [{ isDragging }, dragRef, draggingRef] = useDrag(() => {
     return {
       type: "edit_recipe_step",
@@ -56,20 +58,27 @@ const StepFormItem: FC<StepFormItemProps> = ({ index, onRemove, onMove, draggabl
   }, [isDragging, isOver]);
 
   return (
-    // @ts-ignore
+    // @ts-expect-error mergeRefs has slightly off type definition
     <div className={wrapperClassName} ref={mergeRefs(dropRef, draggingRef)}>
       <div className="flex flex-row items-center gap-2">
         {draggable && (
-          <div ref={dragRef}>
-            <Grip className="text-primary cursor-grab" />
+          <div data-testid={DataTestId.RecipeEditPage.DIV_STEP_DROP_TARGET(index)} ref={dragRef}>
+            <Grip data-testid={DataTestId.RecipeEditPage.STEP_DRAG_HANDLE(index)} className="cursor-grab text-primary" />
           </div>
         )}
         <p className="mr-auto leading-6">Step {index + 1}</p>
-        <Button variant="link" onClick={() => onRemove(index)}>
+        <Button disabled={isLoading} data-testid={DataTestId.RecipeEditPage.BUTTON_REMOVE_STEP(index)} variant="link" onClick={() => onRemove(index)}>
           <Minus className="text-destructive" />
         </Button>
       </div>
-      <FormTextarea readOnly={isDragging} name={`steps.${index}.content`} placeholder="What should you do?" required />
+      <FormTextarea
+        isLoading={isLoading}
+        data-testid={DataTestId.RecipeEditPage.TEXTAREA_STEP_CONTENT(index)}
+        readOnly={isDragging}
+        name={`steps.${index}.content`}
+        placeholder="What should you do?"
+        required
+      />
     </div>
   );
 };
@@ -104,9 +113,9 @@ export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
 
   return (
     <div>
-      <div className="flex flex-row items-center mb-2">
+      <div className="mb-2 flex flex-row items-center">
         <h1 className="inline text-lg">Steps</h1>
-        <Button type="button" onClick={addStep} variant="secondary" className="ml-auto">
+        <Button disabled={isLoading} data-testid={DataTestId.RecipeEditPage.BUTTON_ADD_STEP} type="button" onClick={addStep} variant="secondary" className="ml-auto">
           <PlusIcon />
           Add Step
         </Button>
@@ -114,7 +123,7 @@ export const StepsForm: FC<StepsFormProps> = ({ isLoading }) => {
       {stepsFieldArray.fields.map((fieldArrayValue, index) => {
         return (
           <Fragment key={fieldArrayValue.id}>
-            <StepFormItem draggable={stepsFieldArray.fields.length > 1} index={index} onRemove={removeStep} onMove={moveStep} />
+            <StepFormItem isLoading={isLoading} draggable={stepsFieldArray.fields.length > 1} index={index} onRemove={removeStep} onMove={moveStep} />
           </Fragment>
         );
       })}

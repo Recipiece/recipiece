@@ -1,0 +1,1 @@
+update users set preferences = preferences || '{"forking_image_permission": "allowed"}'::jsonb where true;

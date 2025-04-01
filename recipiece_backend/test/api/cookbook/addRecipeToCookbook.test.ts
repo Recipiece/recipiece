@@ -1,32 +1,20 @@
-import { User } from "@prisma/client";
+import { prisma, User } from "@recipiece/database";
+import { generateCookbook, generateRecipe, generateUser, generateUserKitchenMembership } from "@recipiece/test";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { prisma } from "../../../src/database";
+import { generateCookbookWithRecipe } from "./fixtures";
 
 describe("Add Recipe to Cookbook", () => {
   let user: User;
   let bearerToken: string;
 
   beforeEach(async () => {
-    const userAndToken = await fixtures.createUserAndToken();
-    user = userAndToken[0];
-    bearerToken = userAndToken[1];
+    [user, bearerToken] = await fixtures.createUserAndToken();
   });
 
   it("should allow a recipe to be attached to a cookbook", async () => {
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
-    });
-
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        name: "test cookbook",
-        user_id: user.id,
-      },
-    });
+    const recipe = await generateRecipe({ user_id: user.id });
+    const cookbook = await generateCookbook({ user_id: user.id });
 
     const response = await request(server)
       .post("/cookbook/recipe/add")
@@ -49,27 +37,52 @@ describe("Add Recipe to Cookbook", () => {
     expect(attachments.length).toEqual(1);
   });
 
-  it("should not allow another users recipe to be attached to a cookbook", async () => {
-    const [otherUser] = await fixtures.createUserAndToken({email: "otheruser@recipiece.org"});
-    const otherRecipe = await prisma.recipe.create({
-      data: {
-        name: "other users recipe",
-        user_id: otherUser.id,
-      },
+  it("should allow a shared user to attach a recipe", async () => {
+    const otherUser = await generateUser();
+    const otherCookbook = await generateCookbook({ user_id: otherUser.id });
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+    await generateUserKitchenMembership({
+      source_user_id: user.id,
+      destination_user_id: otherUser.id,
+      status: "accepted",
     });
 
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        name: "test cookbook",
-        user_id: user.id,
-      },
-    });
-
+    const userRecipe = await generateRecipe({ user_id: user.id });
     const response = await request(server)
       .post("/cookbook/recipe/add")
       .send({
-        recipe_id: otherRecipe.id,
-        cookbook_id: cookbook.id,
+        recipe_id: userRecipe.id,
+        cookbook_id: otherCookbook.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toEqual(StatusCodes.CREATED);
+
+    const attachments = await prisma.recipeCookbookAttachment.findMany({
+      where: {
+        recipe_id: userRecipe.id,
+        cookbook_id: otherCookbook.id,
+      },
+    });
+
+    expect(attachments.length).toEqual(1);
+  });
+
+  it("should not allow a non-shared user to attach a recipe", async () => {
+    const otherUser = await generateUser();
+    const otherCookbook = await generateCookbook({ user_id: otherUser.id });
+
+    const userRecipe = await generateRecipe({ user_id: user.id });
+    const response = await request(server)
+      .post("/cookbook/recipe/add")
+      .send({
+        recipe_id: userRecipe.id,
+        cookbook_id: otherCookbook.id,
       })
       .set("Content-Type", "application/json")
       .set("Authorization", `Bearer ${bearerToken}`);
@@ -78,8 +91,39 @@ describe("Add Recipe to Cookbook", () => {
 
     const attachments = await prisma.recipeCookbookAttachment.findMany({
       where: {
-        recipe_id: otherRecipe.id,
-        cookbook_id: cookbook.id,
+        recipe_id: userRecipe.id,
+        cookbook_id: otherCookbook.id,
+      },
+    });
+
+    expect(attachments.length).toEqual(0);
+  });
+
+  it("should not allow a denied membership to attach a recipe", async () => {
+    const otherUser = await generateUser();
+    const otherCookbook = await generateCookbook({ user_id: otherUser.id });
+    await generateUserKitchenMembership({
+      source_user_id: otherUser.id,
+      destination_user_id: user.id,
+      status: "denied",
+    });
+
+    const userRecipe = await generateRecipe({ user_id: user.id });
+    const response = await request(server)
+      .post("/cookbook/recipe/add")
+      .send({
+        recipe_id: userRecipe.id,
+        cookbook_id: otherCookbook.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toEqual(StatusCodes.NOT_FOUND);
+
+    const attachments = await prisma.recipeCookbookAttachment.findMany({
+      where: {
+        recipe_id: userRecipe.id,
+        cookbook_id: otherCookbook.id,
       },
     });
 
@@ -87,26 +131,7 @@ describe("Add Recipe to Cookbook", () => {
   });
 
   it("should not allow duplicate attachments in the same cookbook", async () => {
-    const recipe = await prisma.recipe.create({
-      data: {
-        name: "test recipe",
-        user_id: user.id,
-      },
-    });
-
-    const cookbook = await prisma.cookbook.create({
-      data: {
-        name: "test cookbook",
-        user_id: user.id,
-      },
-    });
-
-    await prisma.recipeCookbookAttachment.create({
-      data: {
-        recipe_id: recipe.id,
-        cookbook_id: cookbook.id,
-      },
-    });
+    const [cookbook, recipe] = await generateCookbookWithRecipe(user.id);
 
     const response = await request(server)
       .post("/cookbook/recipe/add")
@@ -118,5 +143,40 @@ describe("Add Recipe to Cookbook", () => {
       .set("Authorization", `Bearer ${bearerToken}`);
 
     expect(response.statusCode).toEqual(StatusCodes.CONFLICT);
+  });
+
+  it("should not allow a shared user to attach a recipe that the source user cannot access", async () => {
+    const bToUserMembership = await generateUserKitchenMembership({
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+    const cToUserMembership = await generateUserKitchenMembership({
+      destination_user_id: user.id,
+      status: "accepted",
+    });
+
+    const bRecipe = await generateRecipe({ user_id: bToUserMembership.source_user_id });
+    const cRecipe = await generateRecipe({ user_id: cToUserMembership.source_user_id });
+
+    const cCookbook = await generateCookbook({ user_id: cToUserMembership.source_user_id });
+
+    const response = await request(server)
+      .post("/cookbook/recipe/add")
+      .send({
+        recipe_id: bRecipe.id,
+        cookbook_id: cCookbook.id,
+      })
+      .set("Content-Type", "application/json")
+      .set("Authorization", `Bearer ${bearerToken}`);
+
+    expect(response.statusCode).toEqual(StatusCodes.PRECONDITION_FAILED);
+
+    const attachment = await prisma.recipeCookbookAttachment.findFirst({
+      where: {
+        recipe_id: bRecipe.id,
+        cookbook_id: cCookbook.id,
+      },
+    });
+    expect(attachment).toBeFalsy();
   });
 });

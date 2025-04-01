@@ -1,3 +1,5 @@
+import { prisma } from "@recipiece/database";
+import { YEmptySchema, YErrorSchema } from "@recipiece/types";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { NextFunction, Request, Response } from "express";
@@ -7,20 +9,20 @@ import { WebSocketExpress, WSResponse } from "websocket-express";
 import { ValidationError } from "yup";
 import { ROUTES, WEBSOCKET_ROUTES } from "./api";
 import {
+  accessTokenAuthMiddleware,
   basicAuthMiddleware,
   broadcastMessageViaWebsocketToken,
   closeConnection,
+  refreshTokenAuthMiddleware,
   storeWebsocket,
-  accessTokenAuthMiddleware,
   validateRequestBodySchema,
   validateRequestQuerySchema,
-  validateResponseSchema,
   wsTokenAuthMiddleware,
-  refreshTokenAuthMiddleware,
 } from "./middleware";
 import { WebsocketRequest } from "./types";
+import { Environment } from "./util/environment";
+import { ApiError } from "./util/error";
 import { Logger } from "./util/logger";
-import { YEmptySchema } from "./schema";
 
 const app = new WebSocketExpress();
 const logger = Logger.getLogger({
@@ -33,7 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan(":method :url :status - :response-time ms"));
 
-if (process.env.APP_ENVIRONMENT === "dev") {
+if (Environment.ENVIRONMENT === "dev") {
   // slow things down locally, cause they're too fast
   app.use((req: Request, res: Response, next: NextFunction) => {
     setTimeout(() => {
@@ -43,7 +45,7 @@ if (process.env.APP_ENVIRONMENT === "dev") {
 }
 
 app.get("/", (_, res) => {
-  res.status(StatusCodes.OK).send({ version: process.env.APP_VERSION });
+  res.status(StatusCodes.OK).send({ version: Environment.VERSION });
 });
 
 ROUTES.forEach((route) => {
@@ -87,21 +89,47 @@ ROUTES.forEach((route) => {
   }
 
   routeHandlers.push(async (req: Request, res: Response) => {
-    // @ts-ignore
-    const [statusCode, responseBody] = await route.function(req);
-    res.status(statusCode).send(responseBody);
+    try {
+      const [statusCode, responseBody] = await prisma.$transaction(async (tx) => {
+        // @ts-expect-error AuthenticatedRequest is hard to type match against
+        return await route.function(req, tx);
+      });
+      let sanitizedBody;
+
+      if (statusCode <= 299) {
+        const responseSchema = route.responseSchema ?? YEmptySchema;
+        sanitizedBody = responseSchema.cast(responseBody, { stripUnknown: true });
+      } else {
+        sanitizedBody = YErrorSchema.cast(responseBody, { stripUnknown: true });
+      }
+
+      res.status(statusCode).send(sanitizedBody);
+    } catch (err) {
+      console.error(err);
+
+      if (err instanceof ApiError) {
+        // if we raised an api error, send it here
+        res.status(err.statusCode).send({
+          message: err.message,
+        });
+      } else if ((err as { readonly code: string })?.code === "LIMIT_FILE_SIZE") {
+        // multer raised this because our middleware limited file size
+        res.status(StatusCodes.REQUEST_TOO_LONG).send({
+          message: "Provided file was too large",
+        });
+      } else {
+        // if we raised an
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+          message: "Internal Error",
+        });
+      }
+    }
   });
 
   if (route.postMiddleware) {
     logger.log(`  installing extra post-middleware for ${route.path}`);
     routeHandlers.push(...route.postMiddleware);
   }
-
-  /**
-   * setup the response schema validation.
-   */
-  const responseSchema = route.responseSchema ?? YEmptySchema;
-  routeHandlers.push(validateResponseSchema(responseSchema));
 
   switch (route.method) {
     case "POST":
