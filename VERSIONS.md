@@ -1,22 +1,21 @@
-# slotted_spatula (TBD)
+# tea_kettle (In Progress)
+Waiting until we hear the whistle
+
+
+# slotted_spatula (March 2025)
 Flipping it over when its ready
 
+* Recipe Images
+* Testing and Code Cleanup
+* Sharing
+  * Share recipes and cookbooks by default
+  * Selectively share shopping lists and meal plans
 * User Preferences
-  * Override/add new known ingredients
-  * Opt in/out of notifications
-* Payment integration
-  * Implement user access levels
-  * Integrate with a payment vendor
-  * Set limits on certain entities based on access level per-user
-* Self Hosted Setup
 * Meal Plan Enhancements
-  * Meal plan auto-generation
   * Meal plan configurations
   * Schedule reminders
     * Meat-thawing timer
-    * Start reminders
 * Playwrite tests
-* CI/CD
 
 # stand_mixer (January 2025)
 Whipping those egg whites up to stiff peaks
