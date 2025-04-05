@@ -316,7 +316,13 @@ export const useCreateMealPlanItemMutation = (args?: MutationArgs<MealPlanItemSc
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(data.meal_plan_id), oldDataCreator(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(data.meal_plan_id),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(data.meal_plan_id)),
+        },
+        oldDataCreator(data)
+      );
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,
@@ -341,7 +347,13 @@ export const useUpdateMealPlanItemMutation = (args?: MutationArgs<MealPlanItemSc
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(data.meal_plan_id), oldDataUpdater(data));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(data.meal_plan_id),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(data.meal_plan_id)),
+        },
+        oldDataUpdater(data)
+      );
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,
@@ -365,7 +377,13 @@ export const useDeleteMealPlanItemMutation = (args?: MutationArgs<unknown, MealP
   return useMutation({
     mutationFn: mutation,
     onSuccess: (data, vars, ctx) => {
-      queryClient.setQueryData(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(vars.meal_plan_id), oldDataDeleter({ id: vars.id }));
+      queryClient.setQueriesData(
+        {
+          queryKey: MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(vars.meal_plan_id),
+          predicate: generatePartialMatchPredicate(MealPlanQueryKeys.LIST_MEAL_PLAN_ITEMS(vars.meal_plan_id)),
+        },
+        oldDataDeleter({ id: vars.id })
+      );
       onSuccess?.(data, vars, ctx);
     },
     ...restArgs,

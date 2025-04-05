@@ -66,6 +66,7 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe, cookbookId }) => {
               canEdit={recipe.user_id === user?.id}
               canFork={recipe.user_id !== user?.id}
               canAddToCookbook={recipe.user_id === user?.id}
+              canAddToMealPlan
               canAddToShoppingList
             />
           </div>

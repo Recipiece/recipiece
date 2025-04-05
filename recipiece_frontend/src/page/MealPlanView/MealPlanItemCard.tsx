@@ -6,6 +6,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button, Card, CardContent, CardTitle, FormInput, FormTextarea, H3, H4, Separator, Skeleton } from "../../component";
 import { DialogContext } from "../../context";
 import { MealPlanItemsForm } from "./MealPlanForm";
+import { Constant } from "@recipiece/constant";
 
 export interface MealPlanItemCardProps {
   readonly mealPlan: MealPlanSchema;
@@ -28,11 +29,11 @@ const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate,
 
   const newItemStartDate = useMemo(() => {
     if (target === "morningItems") {
-      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: 1 });
+      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: Constant.MealPlan.HOUR_OFFSET_MORNING });
     } else if (target === "middayItems") {
-      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: 13 });
+      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: Constant.MealPlan.HOUR_OFFSET_MIDDAY });
     } else {
-      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: 18 });
+      return DateTime.fromObject({ year: baseDate.year, month: baseDate.month, day: baseDate.day, hour: Constant.MealPlan.HOUR_OFFSET_EVENING });
     }
   }, [target, baseDate]);
 
@@ -91,7 +92,7 @@ const MealPlanSection: FC<MealPlanSectionProps> = ({ mealPlan, target, baseDate,
                   {item.recipe.name}
                 </a>
               </H4>
-              {item.recipe.description && <p className="text-sm">{item.recipe.description}</p>}
+              {item.recipe.description && <p className="text-sm line-clamp-6">{item.recipe.description}</p>}
             </div>
           );
         } else if (item.freeform_content !== null && item.freeform_content !== undefined) {
