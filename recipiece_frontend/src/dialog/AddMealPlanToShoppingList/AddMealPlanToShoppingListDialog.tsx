@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MealPlanSchema, ShoppingListSchema } from "@recipiece/types";
+import { ArrowLeft } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
@@ -151,7 +152,15 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
       <Form {...form}>
         <form className="flex h-full flex-col" onSubmit={form.handleSubmit(onAddToShoppingList)}>
           <ResponsiveHeader className="mb-4">
-            <ResponsiveTitle>Add {mealPlan.name} to your shopping list</ResponsiveTitle>
+            <ResponsiveTitle className="flex flex-row items-center justify-center gap-2 mb-2">
+              {page === "date_select" && <span>Select Days</span>}
+              {page === "items_select" && (
+                <Button variant="ghost" className="absolute left-4" onClick={() => setPage("date_select")}>
+                  <ArrowLeft />
+                </Button>
+              )}
+              {page === "items_select" && <span>Select Items</span>}
+            </ResponsiveTitle>
             <ResponsiveDescription>
               {page === "date_select" && "Select a date range of meal plans to add."}
               {page === "items_select" && "Select the items to add to your shopping list."}
@@ -212,9 +221,6 @@ export const AddMealPlanToShoppingListDialog: FC<AddMealPlanToShoppingListDialog
             )}
             {page === "items_select" && (
               <>
-                <Button disabled={isSubmitting} type="button" variant="outline" onClick={() => setPage("date_select")}>
-                  Back
-                </Button>
                 <SubmitButton disabled={fields.length === 0 || isSubmitting}>Add Items</SubmitButton>
               </>
             )}

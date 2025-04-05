@@ -42,7 +42,6 @@ export const SearchRecipesForMealPlanDialog: FC<BaseDialogProps<RecipeSchema>> =
       setIsDisabled(true);
       try {
         await Promise.resolve(onSubmit?.(recipe));
-      } catch {
       } finally {
         setIsDisabled(false);
       }

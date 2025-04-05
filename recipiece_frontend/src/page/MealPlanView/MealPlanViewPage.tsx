@@ -1,3 +1,4 @@
+import { Constant } from "@recipiece/constant";
 import { ArrowLeft, ArrowRight, CircleCheck, CircleX, GanttChart, Home } from "lucide-react";
 import { DateTime } from "luxon";
 import { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -107,21 +108,21 @@ export const MealPlanViewPage: FC = () => {
             const bucketStartDate = floorDateToDay(offsetStart);
             const bucketEndDate = floorDateToDay(offsetStart).plus({ days: 1 });
             const itemsInBucket = items.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date);
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
               return bucketStartDate <= itemStartDate && itemStartDate <= bucketEndDate;
             });
 
             const morningItems = itemsInBucket.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date);
-              return itemStartDate.hour < 12;
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
+              return itemStartDate.hour < Constant.MealPlan.HOUR_OFFSET_MIDDAY;
             });
             const middayItems = itemsInBucket.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date);
-              return 12 <= itemStartDate.hour && itemStartDate.hour < 18;
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
+              return Constant.MealPlan.HOUR_OFFSET_MIDDAY <= itemStartDate.hour && itemStartDate.hour < Constant.MealPlan.HOUR_OFFSET_EVENING;
             });
             const eveningItems = itemsInBucket.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date);
-              return itemStartDate.hour >= 18;
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
+              return itemStartDate.hour >= Constant.MealPlan.HOUR_OFFSET_EVENING;
             });
 
             return {

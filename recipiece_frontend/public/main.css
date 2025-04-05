@@ -724,6 +724,10 @@ body {
   left: 0.5rem;
 }
 
+.left-4 {
+  left: 1rem;
+}
+
 .left-\[50\%\] {
   left: 50%;
 }
@@ -806,6 +810,10 @@ body {
 
 .m-\[-8px\] {
   margin: -8px;
+}
+
+.m-auto {
+  margin: auto;
 }
 
 .-mx-1 {
@@ -942,6 +950,13 @@ body {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.line-clamp-6 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
 }
 
 .block {
@@ -3341,6 +3356,10 @@ body {
 
   .sm\:h-\[480px\] {
     height: 480px;
+  }
+
+  .sm\:h-auto {
+    height: auto;
   }
 
   .sm\:h-full {

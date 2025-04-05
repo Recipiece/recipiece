@@ -35,6 +35,14 @@ export class RecipeContextMenu {
     return `button-available-shopping-list-${base}`;
   }
 
+  public static readonly BUTTON_ADD_TO_MEAL_PLAN = (base?: string): string => {
+    return `button-add-to-meal-plan-${base}`;
+  }
+
+  public static readonly BUTTON_AVAILABLE_MEAL_PLAN = (base?: string): string => {
+    return `button-available-meal-plan-${base}`;
+  }
+
   public static readonly BUTTON_FORK_RECIPE = (base?: string): string => {
     return `button-fork-recipe-${base}`;
   }

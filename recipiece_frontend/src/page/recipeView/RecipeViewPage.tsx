@@ -154,6 +154,7 @@ export const RecipeViewPage: FC = () => {
               onScale={onScaleIngredients}
               canReset
               onReset={onResetChanges}
+              canAddToMealPlan
             />
           </DropdownMenu>
         )}

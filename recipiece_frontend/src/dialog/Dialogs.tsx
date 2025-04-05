@@ -22,6 +22,7 @@ import { ScaleRecipeDialog } from "./ScaleRecipe";
 import { SearchRecipesDialog } from "./SearchRecipes";
 import { SearchRecipesForCookbookDialog } from "./SearchRecipesForCookbook";
 import { SearchRecipesForMealPlanDialog } from "./SearchRecipesForMealPlan";
+import { SelectMealPlanTimeDialog } from "./SelectMealPlanTime";
 import { ShareDialog } from "./Share";
 
 export const Dialogs = {
@@ -99,5 +100,8 @@ export const Dialogs = {
   },
   deleteCookbook: {
     component: DeleteCookbookDialog,
+  },
+  selectMealPlanTime: {
+    component: SelectMealPlanTimeDialog,
   },
 };
