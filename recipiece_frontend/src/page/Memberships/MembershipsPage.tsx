@@ -96,7 +96,7 @@ export const MembershipsPage: FC = () => {
                   {membership.source_user.id === user!.id ? membership.destination_user.username : membership.source_user.username}
                 </div>
                 <span data-testid={DataTestId.MembershipsPage.PENDING_MEMBERSHIP_SENT_AT(membership.id)} className="text-xs">
-                  Sent on {DateTime.fromJSDate(membership.created_at, {zone: "UTC"}).toLocaleString(DateTime.DATE_MED)}
+                  Sent on {DateTime.fromJSDate(membership.created_at, { zone: "UTC" }).toLocaleString(DateTime.DATE_MED)}
                 </span>
               </div>
               <Button

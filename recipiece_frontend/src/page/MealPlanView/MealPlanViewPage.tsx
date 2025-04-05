@@ -108,20 +108,20 @@ export const MealPlanViewPage: FC = () => {
             const bucketStartDate = floorDateToDay(offsetStart);
             const bucketEndDate = floorDateToDay(offsetStart).plus({ days: 1 });
             const itemsInBucket = items.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date, {zone: "UTC"});
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
               return bucketStartDate <= itemStartDate && itemStartDate <= bucketEndDate;
             });
 
             const morningItems = itemsInBucket.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date, {zone: "UTC"});
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
               return itemStartDate.hour < Constant.MealPlan.HOUR_OFFSET_MIDDAY;
             });
             const middayItems = itemsInBucket.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date, {zone: "UTC"});
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
               return Constant.MealPlan.HOUR_OFFSET_MIDDAY <= itemStartDate.hour && itemStartDate.hour < Constant.MealPlan.HOUR_OFFSET_EVENING;
             });
             const eveningItems = itemsInBucket.filter((item) => {
-              const itemStartDate = DateTime.fromJSDate(item.start_date, {zone: "UTC"});
+              const itemStartDate = DateTime.fromJSDate(item.start_date, { zone: "UTC" });
               return itemStartDate.hour >= Constant.MealPlan.HOUR_OFFSET_EVENING;
             });
 
